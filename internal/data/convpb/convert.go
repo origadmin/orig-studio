@@ -11,8 +11,8 @@ package convpb
 // but case and type can be ignored,
 // and if it encounters something that cannot be automatically converted,
 // a conversion function will be generated
-//go:abgen:package:path=origadmin/application/origcms/internal/data/entity,alias=entity
-//go:abgen:package:path=origadmin/application/origcms/api/gen/v1/types,alias=types
+//go:abgen:package:path=origadmin/application/origstudio/internal/data/entity,alias=entity
+//go:abgen:package:path=origadmin/application/origstudio/api/gen/v1/types,alias=types
 //go:abgen:pair:packages="entity,types"
 //go:abgen:convert:direction="both"
 //go:abgen:convert:source:suffix=""

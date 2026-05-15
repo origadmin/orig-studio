@@ -1,6 +1,6 @@
 version: 2
 
-project_name: orig-cms
+project_name: orig-studio
 
 before:
   hooks:
@@ -21,7 +21,7 @@ changelog:
 builds:
   - id: "server"
     main: ./cmd/server/
-    binary: origcms-server
+    binary: origstudio-server
     env:
       - CGO_ENABLED=0
     goos:
@@ -47,7 +47,7 @@ builds:
       - -X github.com/origadmin/toolkits/version.gitTreeState=clean
 
 archives:
-  - id: orig-cms
+  - id: orig-studio
     name_template: >-
       {{ .ProjectName }}_
       {{- .Version }}_
@@ -76,9 +76,9 @@ release:
     name: orig-studio
   draft: false
   prerelease: auto
-  name_template: 'OrigCMS CE {{ .Version }}'
+  name_template: 'OrigStudio CE {{ .Version }}'
   header: |
-    ## OrigCMS Community Edition
+    ## OrigStudio Community Edition
 
     Full-featured content management system with media transcoding.
   footer: |
@@ -86,5 +86,5 @@ release:
 
     ```bash
     # Download from assets below, then:
-    ./origcms-server -conf bootstrap.yaml
+    ./origstudio-server -conf bootstrap.yaml
     ```

@@ -94,8 +94,8 @@ export class HistorySyncManager {
         // Check if user is logged in by looking for a valid (non-expired) auth token.
         // Must match the same logic as AuthProvider to avoid sending requests
         // with expired tokens (which would 401 and fail silently).
-        const token = localStorage.getItem('origcms_token') ||
-                      sessionStorage.getItem('origcms_token');
+        const token = localStorage.getItem('origstudio_token') ||
+                      sessionStorage.getItem('origstudio_token');
         if (!token) return false;
         // isTokenExpired() parses the JWT exp claim and returns true if expired
         return !isTokenExpired();

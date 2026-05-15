@@ -11,7 +11,7 @@ name: "CodeQL"
 
 jobs:
   analyze:
-    if: github.repository != 'origadmin/orig-cms'
+    if: github.repository != 'origadmin/orig-studio'
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
@@ -50,7 +50,7 @@ jobs:
           category: "/language:${{matrix.language}}/repo:${{ github.repository }}@${{ github.sha }}"
 
   gosec:
-    if: github.repository != 'origadmin/orig-cms'
+    if: github.repository != 'origadmin/orig-studio'
     name: Run GoSec
     runs-on: ubuntu-latest
     steps:

@@ -4,7 +4,7 @@ package encodingtask
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/category"
-	"origadmin/application/origcms/internal/data/entity/tag"
-	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/category"
+	"origadmin/application/origstudio/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
 type categoryRepo struct {

@@ -15,7 +15,7 @@ import (
 	storageiface "github.com/origadmin/runtime/contracts/storage"
 	"github.com/origadmin/runtime/helpers/comp"
 
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 // ProviderSet is the wire provider set for data layer in monolith mode
@@ -38,7 +38,7 @@ var MicroserviceProviderSet = wire.NewSet(
 // It mirrors the pattern used in backend/data/provider.go (NewEnt + NewDatabase).
 func NewEntClient(app *runtime.App) (*entity.Client, func(), error) {
 	// Extract the raw infrastructure database from the runtime container.
-	dbInst, err := comp.Get[storageiface.Database](app.Context(), app.Container().In(runtime.CategoryDatabase))
+	dbInst, err := comp.Get[storageiface.Database](app.Context(), app.Container().In(runtime.CategoryDatabase), "")
 	if err != nil {
 		return nil, nil, fmt.Errorf("NewEntClient: failed to get database from container: %w", err)
 	}

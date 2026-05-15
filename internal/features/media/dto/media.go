@@ -8,10 +8,10 @@ import (
 	"context"
 	"time"
 
-	"origadmin/application/origcms/api/gen/v1/media"
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origstudio/api/gen/v1/media"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/helpers/repo"
 )
 
 // MediaRepo is a Media repository interface.

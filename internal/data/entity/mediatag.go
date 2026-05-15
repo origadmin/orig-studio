@@ -4,7 +4,7 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/mediatag"
+	"origadmin/application/origstudio/internal/data/entity/mediatag"
 	"strings"
 
 	"entgo.io/ent"

@@ -5,7 +5,7 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 	"strings"
 	"time"
 

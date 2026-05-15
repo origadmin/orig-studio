@@ -59,4 +59,4 @@ formatters:
     goimports:
       # Group local imports separately. This is a best practice.
       local-prefixes:
-        - github.com/origadmin/orig-cms
+        - github.com/origadmin/orig-studio

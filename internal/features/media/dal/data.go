@@ -15,7 +15,7 @@ import (
 	storageiface "github.com/origadmin/runtime/contracts/storage"
 	"github.com/origadmin/runtime/helpers/comp"
 
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 // ProviderSet is data providers for monolith mode (without NewEntClient, which is
@@ -44,7 +44,7 @@ var MicroserviceProviderSet = wire.NewSet(
 
 // NewEntClient creates a new *entity.Client for svc-media.
 func NewEntClient(app *runtime.App) (*entity.Client, func(), error) {
-	dbInst, err := comp.Get[storageiface.Database](app.Context(), app.Container().In(runtime.CategoryDatabase))
+	dbInst, err := comp.Get[storageiface.Database](app.Context(), app.Container().In(runtime.CategoryDatabase), "")
 	if err != nil {
 		return nil, nil, fmt.Errorf("NewEntClient: failed to get database: %w", err)
 	}

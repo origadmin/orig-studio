@@ -13,13 +13,13 @@ import (
 
 	kratosLog "github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/helpers/repo"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/features/user/dto"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/features/user/dto"
 )
 
 // UserUseCase is a User use case.

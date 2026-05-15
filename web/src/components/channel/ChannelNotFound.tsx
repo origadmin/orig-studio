@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
 import {Button} from '@/components/ui/button';

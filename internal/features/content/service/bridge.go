@@ -5,8 +5,8 @@ package service
 import (
 	"net/http"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	"origadmin/application/origcms/internal/server"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // httpToHandlerFunc wraps a standard http.HandlerFunc into an http2.HandlerFunc.

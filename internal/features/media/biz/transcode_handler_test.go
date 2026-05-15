@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 func TestMediaEncodeRequest_Unmarshal(t *testing.T) {

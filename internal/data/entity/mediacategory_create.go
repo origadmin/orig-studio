@@ -5,9 +5,9 @@ package entity
 import (
 	"context"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/category"
-	"origadmin/application/origcms/internal/data/entity/media"
-	"origadmin/application/origcms/internal/data/entity/mediacategory"
+	"origadmin/application/origstudio/internal/data/entity/category"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/mediacategory"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

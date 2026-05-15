@@ -3,7 +3,7 @@ package dal
 import (
 	"context"
 
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 // TagRepository defines the repository interface for tags

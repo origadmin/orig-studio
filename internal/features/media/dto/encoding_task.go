@@ -5,7 +5,7 @@
 package dto
 
 import (
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // EncodingTask represents a transcoding sub-task for a specific media and profile.

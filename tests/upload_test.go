@@ -18,12 +18,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	pb "origadmin/application/origcms/api/gen/v1/upload"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/features/media/dal"
-	"origadmin/application/origcms/internal/features/media/service"
+	pb "origadmin/application/origstudio/api/gen/v1/upload"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/features/media/dal"
+	"origadmin/application/origstudio/internal/features/media/service"
 )
 
 // MockStorage implements Storage interface for testing

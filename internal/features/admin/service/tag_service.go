@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/features/admin/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/features/admin/biz"
 )
 
 // TagService handles tag service operations

@@ -5,15 +5,15 @@ import (
 	"regexp"
 	"strconv"
 
-	"origadmin/application/origcms/internal/data/entity"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/helpers/hashtag"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origstudio/internal/data/entity"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/infra/auth"
 
 	"github.com/gin-gonic/gin"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origstudio/internal/server"
 )
 
 var hexColorRegex = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)

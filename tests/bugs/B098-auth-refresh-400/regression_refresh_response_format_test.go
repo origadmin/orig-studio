@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origcms/tests/integration"
+	"origadmin/application/origstudio/tests/integration"
 )
 
 // TestB096_AuthEndpointsUseUnifiedResponseFormat verifies that ALL auth

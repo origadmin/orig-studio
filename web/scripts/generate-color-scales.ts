@@ -1,5 +1,5 @@
 /**
- * Color Scale Generator for OrigCMS Dynamic Theme System.
+ * Color Scale Generator for OrigStudio Dynamic Theme System.
  *
  * Generates 11-level color scales (50-950) for 6 color families
  * (primary, brand, success, warning, info, destructive) using

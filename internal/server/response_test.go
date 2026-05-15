@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	media "origadmin/application/origcms/api/gen/v1/media"
-	types "origadmin/application/origcms/api/gen/v1/types"
+	media "origadmin/application/origstudio/api/gen/v1/media"
+	types "origadmin/application/origstudio/api/gen/v1/types"
 )
 
 func init() {

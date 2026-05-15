@@ -3,7 +3,7 @@
 package portalnavitem
 
 import (
-	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
 
 	"entgo.io/ent/dialect/sql"
 )

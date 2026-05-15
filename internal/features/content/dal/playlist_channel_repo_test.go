@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/channel"
-	"origadmin/application/origcms/internal/data/entity/playlist"
-	"origadmin/application/origcms/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/channel"
+	"origadmin/application/origstudio/internal/data/entity/playlist"
+	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
 func TestMapChannel_MapsShortToken(t *testing.T) {

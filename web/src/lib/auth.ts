@@ -35,7 +35,7 @@ export async function signOut() {
 
 // 刷新 Token
 export async function refreshToken(): Promise<Token> {
-    const refresh_token = localStorage.getItem('origcms_refresh_token');
+    const refresh_token = localStorage.getItem('origstudio_refresh_token');
     if (!refresh_token) {
         throw new Error("No refresh token");
     }

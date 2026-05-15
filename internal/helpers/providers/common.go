@@ -16,7 +16,7 @@ import (
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	hashtypes "github.com/origadmin/toolkits/crypto/hash/types"
-	"origadmin/application/origcms/internal/infra/auth"
+	"origadmin/application/origstudio/internal/infra/auth"
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 
 const (
 	// DefaultJWTSecret is the default JWT secret for development.
-	DefaultJWTSecret = "origcms-secret-key-change-in-production"
+	DefaultJWTSecret = "origstudio-secret-key-change-in-production"
 	// DefaultJWTTL is the default JWT token TTL (24 hours).
 	DefaultJWTTL = 24 * time.Hour
 )
@@ -53,7 +53,7 @@ func ProvideHasher() (hash.Crypto, error) {
 // ProvidePublisher provides the Watermill publisher from the runtime container.
 // Returns nil if not configured (graceful degradation for M1 - events won't be published).
 func ProvidePublisher(app *runtime.App) (message.Publisher, error) {
-	pub, err := comp.Get[message.Publisher](app.Context(), app.Container().In(CategoryPublisher))
+	pub, err := comp.Get[message.Publisher](app.Context(), app.Container().In(CategoryPublisher), "")
 	if err != nil {
 		// M1: publisher may not be configured; return nil for graceful degradation
 		return nil, nil

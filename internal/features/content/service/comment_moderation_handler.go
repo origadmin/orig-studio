@@ -8,12 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"origadmin/application/origcms/internal/infra/auth"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/helpers/repo"
-	contentbiz "origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origstudio/internal/infra/auth"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/server"
 )
 
 type CommentModerationHandler struct {

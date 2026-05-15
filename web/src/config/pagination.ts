@@ -1,5 +1,5 @@
 /**
- * Centralized pagination configuration for OrigCMS.
+ * Centralized pagination configuration for OrigStudio.
  *
  * These values MUST align with the backend PaginationConfig:
  *   - default_page_size: 20

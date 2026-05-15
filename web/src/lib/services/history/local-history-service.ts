@@ -4,7 +4,7 @@
 import type {HistoryItem, ContentType} from '@/lib/api/history';
 import type {HistoryListParams, HistoryListResult, IHistoryService} from './types';
 
-const STORAGE_KEY = 'origcms_watch_history';
+const STORAGE_KEY = 'origstudio_watch_history';
 const MAX_ITEMS = 500;
 const CAPACITY_BYTES = 4 * 1024 * 1024; // 4MB safety limit
 

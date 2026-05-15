@@ -3217,7 +3217,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\x14CONTENT_TYPE_ARTICLE\x10\x02\x12\x16\n" +
 	"\x12CONTENT_TYPE_AUDIO\x10\x03B\xd5\x01\n" +
 	"\x19com.api.v1.services.typesB\n" +
-	"MediaProtoP\x01Z4origadmin/application/origcms/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
+	"MediaProtoP\x01Z4origadmin/application/origstudio/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
 var (
 	file_v1_types_media_proto_rawDescOnce sync.Once

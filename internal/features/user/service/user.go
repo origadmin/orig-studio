@@ -14,12 +14,12 @@ import (
 	"github.com/origadmin/runtime/errors"
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
-	"origadmin/application/origcms/api/gen/v1/types"
-	userv1 "origadmin/application/origcms/api/gen/v1/user"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/features/user/biz"
-	"origadmin/application/origcms/internal/features/user/dto"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	userv1 "origadmin/application/origstudio/api/gen/v1/user"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/features/user/biz"
+	"origadmin/application/origstudio/internal/features/user/dto"
 )
 
 // UserService implements the user gRPC service.

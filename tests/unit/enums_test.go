@@ -3,7 +3,7 @@ package unit
 import (
 	"testing"
 
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // TestEncodingTaskStatus tests the EncodingTaskStatus enum

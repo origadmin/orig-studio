@@ -4,11 +4,11 @@ package api.v1.services.types;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "origadmin/application/origcms/api/gen/v1/types;types";
+option go_package = "origadmin/application/origstudio/api/gen/v1/types;types";
 option java_multiple_files = true;
-option java_outer_classname = "OrigCMSServiceTypeArticleProto";
-option java_package = "com.origcms.api.v1.services.types";
-option objc_class_prefix = "OrigCMS";
+option java_outer_classname = "OrigStudioServiceTypeArticleProto";
+option java_package = "com.origstudio.api.v1.services.types";
+option objc_class_prefix = "OrigStudio";
 
 // ArticleState defines the publication state of an Article.
 enum ArticleState {

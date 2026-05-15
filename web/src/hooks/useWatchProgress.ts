@@ -82,7 +82,7 @@ export function useWatchProgress({
                 short_token: shortToken || '',
             };
 
-            const token = localStorage.getItem('origcms_token');
+            const token = localStorage.getItem('origstudio_token');
             const headers: Record<string, string> = {
                 'Content-Type': 'application/json',
             };

@@ -8,11 +8,11 @@ import "google/protobuf/field_mask.proto";
 import "v1/types/media.proto";
 import "v1/types/user.proto";
 
-option go_package = "origadmin/application/origcms/api/gen/v1/media;media";
+option go_package = "origadmin/application/origstudio/api/gen/v1/media;media";
 option java_multiple_files = true;
-option java_outer_classname = "OrigCMSServiceMediaProto";
-option java_package = "com.origcms.api.v1.services.media";
-option objc_class_prefix = "OrigCMSMedia";
+option java_outer_classname = "OrigStudioServiceMediaProto";
+option java_package = "com.origstudio.api.v1.services.media";
+option objc_class_prefix = "OrigStudioMedia";
 
 // The media service definition.
 service MediaService {

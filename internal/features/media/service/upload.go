@@ -9,12 +9,12 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/metadata"
 
-	pb "origadmin/application/origcms/api/gen/v1/upload"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/helpers/hashtag"
-	"origadmin/application/origcms/internal/helpers/repo"
+	pb "origadmin/application/origstudio/api/gen/v1/upload"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/helpers/repo"
 )
 
 type UploadService struct {

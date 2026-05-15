@@ -1,3 +1,3 @@
-# Issue Templates for orig-cms
+﻿# Issue Templates for orig-studio
 
-This directory contains issue templates for the orig-cms project.
+This directory contains issue templates for the orig-studio project.
