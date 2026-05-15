@@ -408,6 +408,8 @@ github.com/origadmin/contrib v1.4.0 h1:eSgJNiiWcQ2wwMQlKJ5gM42vcNbWfUII6rQrA0fwm
 github.com/origadmin/contrib v1.4.0/go.mod h1:Jm2hCdMR4hTMRHAuSWS63e40bVnE6P7hzkFcFf4eHYg=
 github.com/origadmin/runtime v0.2.19 h1:K3QN041nOWift5G1a4uNmbHh9zrtJTNNaRazjvcHhs8=
 github.com/origadmin/runtime v0.2.19/go.mod h1:9vy7TJoAfKY0gYEAUsyT4mwZLrwdKeyd1LORj0kKFWs=
+github.com/origadmin/runtime v0.2.20 h1:FldT8AzFadHDLdHofaCXX+0pcDhRUc7rR8zp6Pk80u8=
+github.com/origadmin/runtime v0.2.20/go.mod h1:cs5uyieIak/68RfbiMkGZ1/dwJXVuEG9fCDXLxRh1tU=
 github.com/origadmin/slog-kratos v1.0.5 h1:yDLxVaN8A8MMmIny3xy65uT1wLKl3S9tVZVijn+1Vhc=
 github.com/origadmin/slog-kratos v1.0.5/go.mod h1:zuOf6B1cMjPwwMJ2or2sPbzNAdx/fMn/6MekdG30Xh4=
 github.com/origadmin/toolkits v1.4.0 h1:N4veRNW8rNjScXWD7T66zCHmwb3lPZRnkUSaDclezoE=

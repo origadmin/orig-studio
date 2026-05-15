@@ -23,7 +23,7 @@ builds:
     main: ./cmd/server/
     binary: origcms-server
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0
     goos:
       - linux
       - darwin
@@ -34,18 +34,9 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
-      - goos: darwin
-        goarch: amd64
-    overrides:
-      - goos: linux
-        goarch: arm64
-        env:
-          - CC=aarch64-linux-gnu-gcc
-          - CGO_ENABLED=1
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
-      - -tags=dev
     ldflags:
       - -s -w
       - -X github.com/origadmin/toolkits/version.version={{.Version}}
