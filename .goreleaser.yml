@@ -36,6 +36,12 @@ builds:
         goarch: arm64
       - goos: darwin
         goarch: amd64
+    overrides:
+      - goos: linux
+        goarch: arm64
+        env:
+          - CC=aarch64-linux-gnu-gcc
+          - CGO_ENABLED=1
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
