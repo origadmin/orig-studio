@@ -9,7 +9,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0
-	github.com/origadmin/runtime v0.2.19
+	github.com/origadmin/runtime v0.2.20
 	github.com/origadmin/toolkits/crypto v1.4.0
 	github.com/origadmin/toolkits/errors v1.4.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260223185530-2f722ef697dc
