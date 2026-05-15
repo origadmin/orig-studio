@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
 )
 
 func TestGetSystemInfo(t *testing.T) {

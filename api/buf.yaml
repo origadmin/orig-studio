@@ -1,7 +1,7 @@
 version: v2
 modules:
   - path: proto
-    name: buf.build/origadmin/origcms
+    name: buf.build/origadmin/origstudio
 deps:
   - buf.build/googleapis/googleapis
   - buf.build/envoyproxy/protoc-gen-validate

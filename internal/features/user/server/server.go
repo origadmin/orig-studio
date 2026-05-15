@@ -21,8 +21,8 @@ import (
 	"github.com/origadmin/runtime/service/transport/grpc"
 	"github.com/origadmin/runtime/service/transport/http"
 
-	userv1 "origadmin/application/origcms/api/gen/v1/user"
-	"origadmin/application/origcms/internal/features/user/service"
+	userv1 "origadmin/application/origstudio/api/gen/v1/user"
+	"origadmin/application/origstudio/internal/features/user/service"
 )
 
 // ProviderSet is the wire provider set for the server package.

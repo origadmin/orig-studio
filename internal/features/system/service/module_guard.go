@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	"origadmin/application/origcms/internal/infra/auth"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	"origadmin/application/origstudio/internal/infra/auth"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 )
 
 var moduleDefaults = map[string]bool{

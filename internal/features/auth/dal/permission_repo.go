@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/groupmember"
-	"origadmin/application/origcms/internal/data/entity/permissiongroup"
-	"origadmin/application/origcms/internal/features/auth/biz"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/groupmember"
+	"origadmin/application/origstudio/internal/data/entity/permissiongroup"
+	"origadmin/application/origstudio/internal/features/auth/biz"
 )
 
 type Data struct {

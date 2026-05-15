@@ -1,5 +1,5 @@
 /**
- * useTheme - Custom hook to access the OrigCMS theme context.
+ * useTheme - Custom hook to access the OrigStudio theme context.
  *
  * Must be used within a ThemeProvider.
  * Provides theme ID, color mode, switching functions, and theme list.

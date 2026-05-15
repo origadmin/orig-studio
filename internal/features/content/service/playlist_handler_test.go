@@ -12,10 +12,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/infra/auth"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/server"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/infra/auth"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // ---------------------------------------------------------------------------

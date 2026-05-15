@@ -18,12 +18,12 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
-	"origadmin/application/origcms/internal/infra/pubsub"
-	"origadmin/application/origcms/internal/features/media/dto"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/infra/pubsub"
+	"origadmin/application/origstudio/internal/features/media/dto"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 )
 
 // Upload status constants

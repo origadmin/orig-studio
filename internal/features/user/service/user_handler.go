@@ -13,14 +13,14 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "origadmin/application/origcms/api/gen/v1/user"
-	"origadmin/application/origcms/api/gen/v1/types"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/features/user/biz"
-	"origadmin/application/origcms/internal/features/user/dto"
-	"origadmin/application/origcms/internal/server"
+	pb "origadmin/application/origstudio/api/gen/v1/user"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/features/user/biz"
+	"origadmin/application/origstudio/internal/features/user/dto"
+	"origadmin/application/origstudio/internal/server"
 )
 
 type UserHandler struct {

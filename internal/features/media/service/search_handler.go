@@ -5,13 +5,13 @@ import (
 	"strconv"
 	"strings"
 
-	pb "origadmin/application/origcms/api/gen/v1/media"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/features/media/biz"
-	"origadmin/application/origcms/internal/features/media/dto"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/server"
+	pb "origadmin/application/origstudio/api/gen/v1/media"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // SearchHandler handles search-related routes.

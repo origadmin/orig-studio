@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/setting"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/setting"
 )
 
 type SettingRepo struct {

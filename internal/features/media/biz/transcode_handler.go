@@ -18,11 +18,11 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/helpers/ffmpeg"
-	"origadmin/application/origcms/internal/infra/pubsub"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/infra/pubsub"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 // MediaEncodeRequest is the payload for media.encode.request messages.

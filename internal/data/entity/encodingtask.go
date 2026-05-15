@@ -4,8 +4,8 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/encodingtask"
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/data/entity/encodingtask"
+	"origadmin/application/origstudio/internal/data/enums"
 	"strings"
 	"time"
 

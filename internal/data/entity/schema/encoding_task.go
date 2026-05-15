@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/helpers/idutil"
 )
 
 // EncodingTask holds the schema definition for the EncodingTask entity.

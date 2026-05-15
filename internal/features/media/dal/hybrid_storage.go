@@ -15,8 +15,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/data/enums"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // syncTask represents a file that needs to be synced to S3.

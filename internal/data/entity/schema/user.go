@@ -6,7 +6,7 @@
 package schema
 
 import (
-	"origadmin/application/origcms/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/helpers/idutil"
 	"time"
 
 	"entgo.io/ent"

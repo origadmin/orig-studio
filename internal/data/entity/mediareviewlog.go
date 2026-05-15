@@ -4,9 +4,9 @@ package entity
 
 import (
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/media"
-	"origadmin/application/origcms/internal/data/entity/mediareviewlog"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/mediareviewlog"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"strings"
 	"time"
 

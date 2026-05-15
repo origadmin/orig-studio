@@ -406,8 +406,6 @@ github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJw
 github.com/opencontainers/image-spec v1.1.1/go.mod h1:qpqAh3Dmcf36wStyyWU+kCeDgrGnAve2nCC8+7h8Q0M=
 github.com/origadmin/contrib v1.4.0 h1:eSgJNiiWcQ2wwMQlKJ5gM42vcNbWfUII6rQrA0fwm4w=
 github.com/origadmin/contrib v1.4.0/go.mod h1:Jm2hCdMR4hTMRHAuSWS63e40bVnE6P7hzkFcFf4eHYg=
-github.com/origadmin/runtime v0.2.19 h1:K3QN041nOWift5G1a4uNmbHh9zrtJTNNaRazjvcHhs8=
-github.com/origadmin/runtime v0.2.19/go.mod h1:9vy7TJoAfKY0gYEAUsyT4mwZLrwdKeyd1LORj0kKFWs=
 github.com/origadmin/runtime v0.2.20 h1:FldT8AzFadHDLdHofaCXX+0pcDhRUc7rR8zp6Pk80u8=
 github.com/origadmin/runtime v0.2.20/go.mod h1:cs5uyieIak/68RfbiMkGZ1/dwJXVuEG9fCDXLxRh1tU=
 github.com/origadmin/slog-kratos v1.0.5 h1:yDLxVaN8A8MMmIny3xy65uT1wLKl3S9tVZVijn+1Vhc=

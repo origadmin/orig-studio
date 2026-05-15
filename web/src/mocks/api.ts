@@ -15,8 +15,8 @@ export const mockMedias: MediaItem[] = [
   },
   {
     id: 2,
-    title: 'Getting Started with OrigCMS',
-    thumbnail_url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=Getting%20Started%20with%20OrigCMS&size=1280x720',
+    title: 'Getting Started with OrigStudio',
+    thumbnail_url: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=Getting%20Started%20with%20OrigStudio&size=1280x720',
     duration: 420,
     create_time: new Date().toISOString(),
   },

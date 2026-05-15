@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/uploadsession"
+	"origadmin/application/origstudio/internal/data/entity/uploadsession"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

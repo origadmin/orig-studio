@@ -53,8 +53,8 @@ describe('useAuth Hook', () => {
                 result.current.login(token, 'refresh-token-123', mockUser);
             });
 
-            expect(localStorage.getItem('origcms_token')).toBe(token);
-            expect(localStorage.getItem('origcms_user')).toBe(JSON.stringify(mockUser));
+            expect(localStorage.getItem('origstudio_token')).toBe(token);
+            expect(localStorage.getItem('origstudio_user')).toBe(JSON.stringify(mockUser));
             expect(result.current.token).toBe(token);
             expect(result.current.user).toEqual(mockUser);
             expect(result.current.isAuthenticated).toBe(true);
@@ -67,8 +67,8 @@ describe('useAuth Hook', () => {
             const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
             const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
             const token = `${header}.${payload}.mock-signature`;
-            localStorage.setItem('origcms_token', token);
-            localStorage.setItem('origcms_user', JSON.stringify({
+            localStorage.setItem('origstudio_token', token);
+            localStorage.setItem('origstudio_user', JSON.stringify({
                 id: 1,
                 username: 'testuser',
                 displayName: 'Test User',
@@ -83,8 +83,8 @@ describe('useAuth Hook', () => {
                 result.current.logout();
             });
 
-            expect(localStorage.getItem('origcms_token')).toBeNull();
-            expect(localStorage.getItem('origcms_user')).toBeNull();
+            expect(localStorage.getItem('origstudio_token')).toBeNull();
+            expect(localStorage.getItem('origstudio_user')).toBeNull();
             expect(result.current.token).toBeNull();
             expect(result.current.user).toBeNull();
             expect(result.current.isAuthenticated).toBe(false);
@@ -96,8 +96,8 @@ describe('useAuth Hook', () => {
             const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
             const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
             const token = `${header}.${payload}.mock-signature`;
-            localStorage.setItem('origcms_token', token);
-            localStorage.setItem('origcms_user', JSON.stringify({
+            localStorage.setItem('origstudio_token', token);
+            localStorage.setItem('origstudio_user', JSON.stringify({
                 id: 1,
                 username: 'testuser',
                 displayName: 'Test User',
@@ -125,9 +125,9 @@ describe('useAuth Hook', () => {
             const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
             const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
             const token = `${header}.${payload}.mock-signature`;
-            localStorage.setItem('origcms_token', token);
+            localStorage.setItem('origstudio_token', token);
             localStorage.setItem(
-                'origcms_user',
+                'origstudio_user',
                 JSON.stringify({id: 1, username: 'admin', displayName: 'Admin', roles: ['admin']})
             );
 
@@ -142,9 +142,9 @@ describe('useAuth Hook', () => {
             const header = btoa(JSON.stringify({alg: 'HS256', typ: 'JWT'}));
             const payload = btoa(JSON.stringify({exp: Math.floor(Date.now() / 1000) + 3600, sub: '1'}));
             const token = `${header}.${payload}.mock-signature`;
-            localStorage.setItem('origcms_token', token);
+            localStorage.setItem('origstudio_token', token);
             localStorage.setItem(
-                'origcms_user',
+                'origstudio_user',
                 JSON.stringify({id: 2, username: 'user', displayName: 'User', roles: ['user']})
             );
 

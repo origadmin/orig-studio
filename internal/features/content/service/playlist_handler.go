@@ -5,14 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/server"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
-	systemservice "origadmin/application/origcms/internal/features/system/service"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/server"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	systemservice "origadmin/application/origstudio/internal/features/system/service"
 )
 
 // PlaylistHandler handles public/portal playlist HTTP endpoints.

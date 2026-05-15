@@ -24,9 +24,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/data/entity/tag"
-	"origadmin/application/origcms/internal/features/admin/service"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/features/admin/service"
 )
 
 // TestB087R2_TagResponse_MapsFieldsCorrectly verifies that the TagResponse DTO

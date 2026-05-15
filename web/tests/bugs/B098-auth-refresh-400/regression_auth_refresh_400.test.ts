@@ -64,8 +64,8 @@ import axios from 'axios';
 import { setAuth, clearAuth, attemptRefresh } from '@/lib/request';
 
 // Shared localStorage keys (must match request.ts)
-const TOKEN_KEY = 'origcms_token';
-const REFRESH_TOKEN_KEY = 'origcms_refresh_token';
+const TOKEN_KEY = 'origstudio_token';
+const REFRESH_TOKEN_KEY = 'origstudio_refresh_token';
 
 describe('B096: auth endpoints unified response format + token refresh', () => {
     beforeEach(() => {

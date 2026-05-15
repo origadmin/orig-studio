@@ -5,10 +5,10 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/article"
-	"origadmin/application/origcms/internal/data/entity/category"
-	"origadmin/application/origcms/internal/data/entity/media"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/article"
+	"origadmin/application/origstudio/internal/data/entity/category"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"strings"
 	"time"
 

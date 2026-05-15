@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  * VideoCardWithHover - Video card with hover action overlay
  * Used in subscription content page and similar video grid layouts

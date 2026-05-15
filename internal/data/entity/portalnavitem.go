@@ -5,7 +5,7 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/portalnavitem"
+	"origadmin/application/origstudio/internal/data/entity/portalnavitem"
 	"strings"
 
 	"entgo.io/ent"

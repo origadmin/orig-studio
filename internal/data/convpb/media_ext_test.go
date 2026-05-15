@@ -3,7 +3,7 @@ package convpb
 import (
 	"testing"
 
-	"origadmin/application/origcms/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 func TestConvertMediaToMediaPB_NilInput(t *testing.T) {

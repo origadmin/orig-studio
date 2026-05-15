@@ -6,11 +6,11 @@ import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "v1/types/media.proto";
 
-option go_package = "origadmin/application/origcms/api/gen/v1/upload;upload";
+option go_package = "origadmin/application/origstudio/api/gen/v1/upload;upload";
 option java_multiple_files = true;
-option java_outer_classname = "OrigCMSServiceUploadProto";
-option java_package = "com.origcms.api.v1.services.upload";
-option objc_class_prefix = "OrigCMSUpload";
+option java_outer_classname = "OrigStudioServiceUploadProto";
+option java_package = "com.origstudio.api.v1.services.upload";
+option objc_class_prefix = "OrigStudioUpload";
 
 // UploadService provides multipart upload functionality for large files.
 // Supports chunked upload, resume from interruption, and progress tracking.

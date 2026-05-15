@@ -2,11 +2,11 @@ syntax = "proto3";
 
 package api.v1.common;
 
-option go_package = "origadmin/application/origcms/api/gen/v1/common;common";
+option go_package = "origadmin/application/origstudio/api/gen/v1/common;common";
 option java_multiple_files = true;
-option java_outer_classname = "OrigCMSCommonProto";
-option java_package = "com.origcms.api.v1.common";
-option objc_class_prefix = "OrigCMSCommon";
+option java_outer_classname = "OrigStudioCommonProto";
+option java_package = "com.origstudio.api.v1.common";
+option objc_class_prefix = "OrigStudioCommon";
 
 // PaginationRequest contains standardized pagination parameters.
 // Backend enforces: DefaultPageSize=20, MaxPageSize=100, HardLimit=1000.

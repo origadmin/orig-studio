@@ -14,9 +14,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/assert"
 
-	"origadmin/application/origcms/api/gen/v1/types"
-	"origadmin/application/origcms/internal/data/entity"
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 // MockReviewRepo 模拟审核相关的媒体仓库

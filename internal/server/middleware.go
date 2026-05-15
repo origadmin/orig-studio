@@ -8,10 +8,10 @@ import (
 	"net/http"
 
 	ginhttp "github.com/gin-gonic/gin"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	"origadmin/application/origcms/internal/infra/auth"
-	authbiz "origadmin/application/origcms/internal/features/auth/biz"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	"origadmin/application/origstudio/internal/infra/auth"
+	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
 )
 
 // GetClaims retrieves claims from the gin.Context.

@@ -188,7 +188,7 @@ const file_v1_common_pagination_proto_rawDesc = "" +
 	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\x12 \n" +
 	"\vtotal_pages\x18\x04 \x01(\x05R\vtotal_pages\x12(\n" +
 	"\x0fnext_page_token\x18\x05 \x01(\tR\x0fnext_page_tokenB\xb2\x01\n" +
-	"\x11com.api.v1.commonB\x0fPaginationProtoP\x01Z6origadmin/application/origcms/api/gen/v1/common;common\xa2\x02\x03AVC\xaa\x02\rApi.V1.Common\xca\x02\rApi\\V1\\Common\xe2\x02\x19Api\\V1\\Common\\GPBMetadata\xea\x02\x0fApi::V1::Commonb\x06proto3"
+	"\x11com.api.v1.commonB\x0fPaginationProtoP\x01Z6origadmin/application/origstudio/api/gen/v1/common;common\xa2\x02\x03AVC\xaa\x02\rApi.V1.Common\xca\x02\rApi\\V1\\Common\xe2\x02\x19Api\\V1\\Common\\GPBMetadata\xea\x02\x0fApi::V1::Commonb\x06proto3"
 
 var (
 	file_v1_common_pagination_proto_rawDescOnce sync.Once

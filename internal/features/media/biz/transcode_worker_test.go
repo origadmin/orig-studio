@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origcms/internal/features/media/dto"
+	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
 func TestCountingSemaphore(t *testing.T) {

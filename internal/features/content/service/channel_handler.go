@@ -26,17 +26,17 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "origadmin/application/origcms/api/gen/v1/media"
-	types "origadmin/application/origcms/api/gen/v1/types"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/server"
-	"origadmin/application/origcms/internal/validation"
-	systembiz "origadmin/application/origcms/internal/features/system/biz"
-	systemservice "origadmin/application/origcms/internal/features/system/service"
+	pb "origadmin/application/origstudio/api/gen/v1/media"
+	types "origadmin/application/origstudio/api/gen/v1/types"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/server"
+	"origadmin/application/origstudio/internal/validation"
+	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	systemservice "origadmin/application/origstudio/internal/features/system/service"
 
 	"github.com/gin-gonic/gin"
 )

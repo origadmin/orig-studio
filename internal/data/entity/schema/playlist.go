@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/index"
 	"time"
 
-	"origadmin/application/origcms/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/helpers/idutil"
 )
 
 type Playlist struct {

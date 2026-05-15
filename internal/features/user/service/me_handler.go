@@ -10,12 +10,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/helpers/repo"
-	contentbiz "origadmin/application/origcms/internal/features/content/biz"
-	userbiz "origadmin/application/origcms/internal/features/user/biz"
-	"origadmin/application/origcms/internal/server"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
+	userbiz "origadmin/application/origstudio/internal/features/user/biz"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // MeHandler handles /api/v1/me routes.

@@ -14,9 +14,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"origadmin/application/origcms/internal/conf"
-	"origadmin/application/origcms/internal/data/enums"
-	"origadmin/application/origcms/internal/features/media/biz"
+	"origadmin/application/origstudio/internal/conf"
+	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/features/media/biz"
 )
 
 // LocalStorage implements local filesystem storage.

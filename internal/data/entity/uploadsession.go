@@ -5,7 +5,7 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/uploadsession"
+	"origadmin/application/origstudio/internal/data/entity/uploadsession"
 	"strings"
 	"time"
 

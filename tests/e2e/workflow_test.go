@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"origadmin/application/origcms/tests/integration"
+	"origadmin/application/origstudio/tests/integration"
 )
 
 func TestCompleteUserWorkflow(t *testing.T) {

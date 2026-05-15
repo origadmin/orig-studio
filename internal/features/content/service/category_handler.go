@@ -6,14 +6,14 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	types "origadmin/application/origcms/api/gen/v1/types"
-	pb "origadmin/application/origcms/api/gen/v1/media"
-	http2 "origadmin/application/origcms/internal/helpers/http"
-	ginadapter "origadmin/application/origcms/internal/helpers/http/gin"
-	"origadmin/application/origcms/internal/infra/auth"
-	"origadmin/application/origcms/internal/features/content/biz"
-	"origadmin/application/origcms/internal/helpers/repo"
-	"origadmin/application/origcms/internal/server"
+	types "origadmin/application/origstudio/api/gen/v1/types"
+	pb "origadmin/application/origstudio/api/gen/v1/media"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/server"
 )
 
 type CategoryHandler struct {

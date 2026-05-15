@@ -12,7 +12,7 @@ import (
 
 	ginhttp "github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origcms/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/helpers/http"
 )
 
 type contextKey string

@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/encodeprofile"
-	"origadmin/application/origcms/internal/data/entity/predicate"
+	"origadmin/application/origstudio/internal/data/entity/encodeprofile"
+	"origadmin/application/origstudio/internal/data/entity/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

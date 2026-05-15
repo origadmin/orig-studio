@@ -58,7 +58,7 @@ const DocHeader: React.FC<DocHeaderProps> = ({ onToggleSidebar, darkMode, onTogg
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <img src="/logo.svg" alt="" className="h-7 w-7" />
           <span className="text-base font-bold text-gray-900 dark:text-white hidden sm:inline">
-            {site.site_name || 'OrigCMS'}
+            {site.site_name || 'OrigStudio'}
           </span>
         </Link>
 

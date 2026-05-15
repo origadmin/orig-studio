@@ -5,8 +5,8 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"origadmin/application/origcms/internal/data/entity/permissiongroup"
-	"origadmin/application/origcms/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/data/entity/permissiongroup"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"strings"
 	"time"
 
