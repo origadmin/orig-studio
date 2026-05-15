@@ -37,6 +37,7 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
+      - -tags=dev
     ldflags:
       - -s -w
       - -X github.com/origadmin/toolkits/version.version={{.Version}}
