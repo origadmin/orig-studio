@@ -29,7 +29,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.5
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.34
 	github.com/origadmin/contrib v1.4.0
 	github.com/origadmin/toolkits v1.4.0
 	github.com/origadmin/toolkits/identifier/shortid v1.4.0
@@ -173,6 +172,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
+	github.com/mattn/go-sqlite3 v1.14.34 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
