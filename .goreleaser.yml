@@ -76,9 +76,9 @@ release:
     name: orig-studio
   draft: false
   prerelease: auto
-  name_template: 'OrigStudio CE {{ .Version }}'
+  name_template: 'OrigStudio {{ .Version }}'
   header: |
-    ## OrigStudio Community Edition
+    ## OrigStudio
 
     Full-featured content management system with media transcoding.
   footer: |
