@@ -3,9 +3,8 @@ name: Release
 on:
   push:
     tags:
-      - 'v*' # Push events matching v1.0, v20.15.10, etc.
+      - 'v*'
   workflow_dispatch:
-    # Allow manual triggering of the workflow
     inputs:
       version:
         description: 'Version to release (e.g., v1.0.0)'
@@ -13,18 +12,15 @@ on:
 
 env:
   GO_VERSION: '1.23'
-  REPO_OWNER: ${{ github.repository_owner }}
-  REPO_NAME: orig-cms
 
 jobs:
   goreleaser:
-    if: github.repository != 'origadmin/orig-cms'
     name: Create Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,17 +34,22 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           check-latest: true
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libc6-dev
+
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: release --rm-dist
+          version: "~> v2"
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
 
   notify:
-    if: always() && github.repository != 'origadmin/orig-cms'
+    if: always()
     name: Notify
     needs: [ goreleaser ]
     runs-on: ubuntu-latest
