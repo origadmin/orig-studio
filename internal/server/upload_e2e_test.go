@@ -34,6 +34,9 @@ import (
 )
 
 func TestUploadE2E(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping E2E upload test in short mode")
+	}
 	// 1. Setup Environment
 	gin.SetMode(gin.TestMode)
 
