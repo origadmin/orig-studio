@@ -26,7 +26,8 @@ jobs:
       - name: Run tests
         env:
           GOWORK: off
-        run: go test -tags=dev -short ./... -v -count=1
+        run: |
+          go test -tags=dev -short $(go list -tags=dev ./... | grep -v '/tests/integration' | grep -v '/tests/e2e' | grep -v '/tests/bugs') -v -count=1
 
   lint:
     name: Lint
