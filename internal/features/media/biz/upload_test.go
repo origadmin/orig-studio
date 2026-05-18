@@ -562,6 +562,9 @@ func TestUploadUseCase_UploadPart(t *testing.T) {
 }
 
 func TestUploadUseCase_CompleteMultipartUpload(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping CompleteMultipartUpload test in short mode (requires real filesystem)")
+	}
 	repo := NewMockUploadRepo()
 	mediaRepo := NewMockMediaRepo()
 	profileRepo := NewMockEncodeProfileRepo()
@@ -696,6 +699,9 @@ func TestUploadUseCase_UpdateUploadMetadata(t *testing.T) {
 }
 
 func TestUploadUseCase_CompleteMultipartUpload_FallbackToSession(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping CompleteMultipartUpload test in short mode (requires real filesystem)")
+	}
 	repo := NewMockUploadRepo()
 	mediaRepo := NewMockMediaRepo()
 	profileRepo := NewMockEncodeProfileRepo()
@@ -758,6 +764,9 @@ func TestUploadUseCase_CompleteMultipartUpload_FallbackToSession(t *testing.T) {
 }
 
 func TestUploadUseCase_CompleteMultipartUpload_OverrideWithTags(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping CompleteMultipartUpload test in short mode (requires real filesystem)")
+	}
 	repo := NewMockUploadRepo()
 	mediaRepo := NewMockMediaRepo()
 	profileRepo := NewMockEncodeProfileRepo()

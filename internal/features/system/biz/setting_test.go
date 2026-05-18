@@ -9,8 +9,8 @@ import (
 
 func TestDefaultSettings(t *testing.T) {
 	defaults := DefaultSettings()
-	if len(defaults) != 25 {
-		t.Fatalf("expected 25 default settings, got %d", len(defaults))
+	if len(defaults) != 45 {
+		t.Fatalf("expected 45 default settings, got %d", len(defaults))
 	}
 
 	keys := make(map[string]bool)
@@ -65,6 +65,8 @@ func TestDefaultSettingsSensitiveFields(t *testing.T) {
 
 	sensitiveKeys := map[string]bool{
 		"smtp_password": true,
+		"s3_access_key": true,
+		"s3_secret_key": true,
 	}
 	for _, s := range defaults {
 		if sensitiveKeys[s.Key] && !s.IsSensitive {
