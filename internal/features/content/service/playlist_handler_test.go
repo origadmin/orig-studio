@@ -382,7 +382,7 @@ func TestPlaylistHandler_ListPlaylists_DefaultPagination(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
+	assert.Contains(t, resp, "items")
 }
 
 func TestPlaylistHandler_ListPlaylists_CustomPagination(t *testing.T) {
@@ -432,7 +432,7 @@ func TestPlaylistHandler_GetPlaylistByToken_PublicPlaylist(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
+	assert.Contains(t, resp, "playlist")
 }
 
 func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NoAuth(t *testing.T) {

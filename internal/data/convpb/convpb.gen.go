@@ -356,10 +356,10 @@ func ConvertCommentPBToComment(from *CommentPB) *Comment {
 		return nil
 	}
 
-	// miss: Text                 // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
 	// miss: Edges                // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
 	to := &Comment{
 		ID:          from.Id,
+		Text:        from.Content,
 		AddDate:     ConvertTimestampToTime(from.AddDate),
 		MediaID:     from.MediaId,
 		UserID:      from.UserId,
@@ -380,10 +380,10 @@ func ConvertCommentToCommentPB(from *Comment) *CommentPB {
 		return nil
 	}
 
-	// miss: Content              // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
 	// miss: ParentId             // target struct [Comment] has this field, but source struct [Comment] has no corresponding field
 	to := &CommentPB{
 		Id:          from.ID,
+		Content:     from.Text,
 		CreateTime:  ConvertTimeToTimestamp(from.CreateTime),
 		UpdateTime:  ConvertTimeToTimestamp(from.UpdateTime),
 		UserId:      from.UserID,
@@ -527,10 +527,10 @@ func ConvertLikePBToLike(from *LikePB) *Like {
 		return nil
 	}
 
-	// miss: LikeType             // target struct [Like] has this field, but source struct [Like] has no corresponding field
 	// miss: Edges                // target struct [Like] has this field, but source struct [Like] has no corresponding field
 	to := &Like{
 		ID:         from.Id,
+		LikeType:   from.Type,
 		MediaID:    from.MediaId,
 		UserID:     from.UserId,
 		CreateTime: ConvertTimestampToTime(from.CreateTime),
@@ -544,9 +544,9 @@ func ConvertLikeToLikePB(from *Like) *LikePB {
 		return nil
 	}
 
-	// miss: Type                 // target struct [Like] has this field, but source struct [Like] has no corresponding field
 	to := &LikePB{
 		Id:         from.ID,
+		Type:       from.LikeType,
 		CreateTime: ConvertTimeToTimestamp(from.CreateTime),
 		UserId:     from.UserID,
 		MediaId:    from.MediaID,
@@ -756,10 +756,10 @@ func ConvertTagPBToTag(from *TagPB) *Tag {
 		return nil
 	}
 
-	// miss: Title                // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
 	// miss: Edges                // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
 	to := &Tag{
 		ID:                int(from.Id),
+		Title:             from.Name,
 		Slug:              from.Slug,
 		MediaCount:        int(from.MediaCount),
 		ListingsThumbnail: from.ListingsThumbnail,
@@ -778,9 +778,9 @@ func ConvertTagToTagPB(from *Tag) *TagPB {
 		return nil
 	}
 
-	// miss: Name                 // target struct [Tag] has this field, but source struct [Tag] has no corresponding field
 	to := &TagPB{
 		Id:                int64(from.ID),
+		Name:              from.Title,
 		CreateTime:        ConvertTimeToTimestamp(from.CreateTime),
 		UpdateTime:        ConvertTimeToTimestamp(from.UpdateTime),
 		Slug:              from.Slug,

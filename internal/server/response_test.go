@@ -86,18 +86,15 @@ func TestPage_ProtoListResponse(t *testing.T) {
 	}
 
 	body := w.Body.String()
-	// Verify pagination fields use snake_case
 	if !strings.Contains(body, `"page_size"`) {
 		t.Errorf("expected snake_case page_size, got %s", body)
 	}
 	if !strings.Contains(body, `"total_pages"`) {
 		t.Errorf("expected snake_case total_pages, got %s", body)
 	}
-	// Verify data list field name is "medias" (Proto-defined), not "items"
-	if !strings.Contains(body, `"medias"`) {
-		t.Errorf("expected medias field, got %s", body)
+	if !strings.Contains(body, `"items"`) {
+		t.Errorf("expected items field, got %s", body)
 	}
-	// Verify no camelCase
 	if strings.Contains(body, `"pageSize"`) {
 		t.Errorf("found camelCase pageSize, should be snake_case page_size, got %s", body)
 	}

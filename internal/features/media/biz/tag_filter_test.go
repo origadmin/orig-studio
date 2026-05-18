@@ -17,6 +17,9 @@ import (
 )
 
 func TestTagFiltering_SQLite(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping SQLite integration test in short mode")
+	}
 	dbPath := "test_tags_filter.db?_fk=1&_journal_mode=WAL"
 	os.Remove("test_tags_filter.db")
 

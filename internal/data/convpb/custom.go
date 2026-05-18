@@ -50,7 +50,14 @@ func ConvertChannelPrivacyToPrivacyPB(from channel.Privacy) types.Privacy {
 
 // ConvertInt32ToCategoryStatus converts an int32 to category.Status.
 func ConvertInt32ToCategoryStatus(from int32) category.Status {
-	return category.Status(from)
+	switch from {
+	case 1:
+		return category.StatusACTIVE
+	case 2:
+		return category.StatusINACTIVE
+	default:
+		return category.StatusACTIVE
+	}
 }
 
 // ConvertMediaPrivacyToPrivacyPB is a custom conversion function stub.

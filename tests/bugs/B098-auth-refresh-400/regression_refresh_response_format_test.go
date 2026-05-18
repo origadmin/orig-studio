@@ -25,6 +25,9 @@ import (
 // Fix: Backend uses server.OK()/server.Created() for all auth endpoints.
 // Frontend attemptRefresh/interceptor manually unwrap ApiResponse<Token>.
 func TestB096_AuthEndpointsUseUnifiedResponseFormat(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	gin.SetMode(gin.TestMode)
 
 	ts := integration.SetupTestServer(t)
@@ -96,6 +99,9 @@ func TestB096_AuthEndpointsUseUnifiedResponseFormat(t *testing.T) {
 // TestB096_LoginAndRefreshResponseFormatsMatch verifies that /auth/signin and
 // /auth/refresh return the same response structure (both server.OK() wrapped).
 func TestB096_LoginAndRefreshResponseFormatsMatch(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	gin.SetMode(gin.TestMode)
 
 	ts := integration.SetupTestServer(t)
@@ -149,6 +155,9 @@ func TestB096_LoginAndRefreshResponseFormatsMatch(t *testing.T) {
 // TestB096_RefreshTokenMissingFieldReturns400 verifies that /auth/refresh
 // returns 400 when refresh_token is missing from the request body.
 func TestB096_RefreshTokenMissingFieldReturns400(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	gin.SetMode(gin.TestMode)
 
 	ts := integration.SetupTestServer(t)
@@ -167,6 +176,9 @@ func TestB096_RefreshTokenMissingFieldReturns400(t *testing.T) {
 // TestB096_RefreshTokenInvalidTokenReturns401 verifies that /auth/refresh
 // returns 401 when the refresh_token is invalid.
 func TestB096_RefreshTokenInvalidTokenReturns401(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	gin.SetMode(gin.TestMode)
 
 	ts := integration.SetupTestServer(t)
