@@ -813,8 +813,8 @@ const file_v1_types_article_proto_rawDesc = "" +
 	"\x19ARTICLE_STATE_UNSPECIFIED\x10\x00\x12\x17\n" +
 	"\x13ARTICLE_STATE_DRAFT\x10\x01\x12\x1b\n" +
 	"\x17ARTICLE_STATE_PUBLISHED\x10\x02\x12\x1a\n" +
-	"\x16ARTICLE_STATE_ARCHIVED\x10\x03B\xd7\x01\n" +
-	"\x19com.api.v1.services.typesB\fArticleProtoP\x01Z4origadmin/application/origstudio/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
+	"\x16ARTICLE_STATE_ARCHIVED\x10\x03B\xda\x01\n" +
+	"\x19com.api.v1.services.typesB\fArticleProtoP\x01Z7origadmin/application/origstudio/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
 var (
 	file_v1_types_article_proto_rawDescOnce sync.Once

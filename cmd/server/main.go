@@ -28,7 +28,7 @@ var (
 	// Name is the name of the compiled software.
 	Name = "origcms.server"
 	// Version is the version of the compiled software.
-	Version = "v1.0.0"
+	Version = "v0.2.1"
 	// envName is the environment name suffix for .env file
 	envName = ".server"
 	// flagconf is the config flag
