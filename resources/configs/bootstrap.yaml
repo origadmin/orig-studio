@@ -23,8 +23,8 @@ data:
   databases:
     default:
       name: "${DATABASE_NAME:origcms}"
-      dialect: "${DATABASE_DIALECT:postgres}"
-      source: "${DATABASE_SOURCE:postgres://user:password@127.0.0.1:5432/origcms?sslmode=disable}"
+      dialect: "${DATABASE_DIALECT:sqlite3}"
+      source: "${DATABASE_SOURCE:data/origstudio.db?_fk=1}"
   caches:
     configs:
       - name: default
