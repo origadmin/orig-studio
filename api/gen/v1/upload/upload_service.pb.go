@@ -1245,8 +1245,8 @@ const file_v1_upload_upload_service_proto_rawDesc = "" +
 	"\n" +
 	"UploadFile\x12).api.v1.services.upload.UploadFileRequest\x1a*.api.v1.services.upload.UploadFileResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/uploads\x12\x9a\x01\n" +
 	"\x10GetUploadSession\x12/.api.v1.services.upload.GetUploadSessionRequest\x1a0.api.v1.services.upload.GetUploadSessionResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/uploads/{upload_id}\x12\x94\x01\n" +
-	"\x12ListUploadSessions\x121.api.v1.services.upload.ListUploadSessionsRequest\x1a2.api.v1.services.upload.ListUploadSessionsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/uploadsB\xe4\x01\n" +
-	"\x1acom.api.v1.services.uploadB\x12UploadServiceProtoP\x01Z6origadmin/application/origstudio/api/gen/v1/upload;upload\xa2\x02\x04AVSU\xaa\x02\x16Api.V1.Services.Upload\xca\x02\x16Api\\V1\\Services\\Upload\xe2\x02\"Api\\V1\\Services\\Upload\\GPBMetadata\xea\x02\x19Api::V1::Services::Uploadb\x06proto3"
+	"\x12ListUploadSessions\x121.api.v1.services.upload.ListUploadSessionsRequest\x1a2.api.v1.services.upload.ListUploadSessionsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/uploadsB\xe7\x01\n" +
+	"\x1acom.api.v1.services.uploadB\x12UploadServiceProtoP\x01Z9origadmin/application/origstudio/api/gen/v1/upload;upload\xa2\x02\x04AVSU\xaa\x02\x16Api.V1.Services.Upload\xca\x02\x16Api\\V1\\Services\\Upload\xe2\x02\"Api\\V1\\Services\\Upload\\GPBMetadata\xea\x02\x19Api::V1::Services::Uploadb\x06proto3"
 
 var (
 	file_v1_upload_upload_service_proto_rawDescOnce sync.Once

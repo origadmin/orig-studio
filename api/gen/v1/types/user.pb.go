@@ -983,8 +983,8 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\x12USER_STATUS_ACTIVE\x10\x02\x12\x18\n" +
 	"\x14USER_STATUS_INACTIVE\x10\x03\x12\x19\n" +
 	"\x15USER_STATUS_SUSPENDED\x10\x04\x12\x18\n" +
-	"\x14USER_STATUS_REJECTED\x10\x05B\xd4\x01\n" +
-	"\x19com.api.v1.services.typesB\tUserProtoP\x01Z4origadmin/application/origstudio/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
+	"\x14USER_STATUS_REJECTED\x10\x05B\xd7\x01\n" +
+	"\x19com.api.v1.services.typesB\tUserProtoP\x01Z7origadmin/application/origstudio/api/gen/v1/types;types\xa2\x02\x04AVST\xaa\x02\x15Api.V1.Services.Types\xca\x02\x15Api\\V1\\Services\\Types\xe2\x02!Api\\V1\\Services\\Types\\GPBMetadata\xea\x02\x18Api::V1::Services::Typesb\x06proto3"
 
 var (
 	file_v1_types_user_proto_rawDescOnce sync.Once
