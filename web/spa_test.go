@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"testing/fstest"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,15 @@ func setupTestRouter() *gin.Engine {
 	r := gin.New()
 	RegisterRoutes(r)
 	return r
+}
+
+func fakeDistFS() fs.FS {
+	return fstest.MapFS{
+		"dist/index.html":      &fstest.MapFile{Data: []byte("<html>test</html>")},
+		"dist/favicon.ico":     &fstest.MapFile{Data: []byte("favicon")},
+		"dist/assets/test.js":  &fstest.MapFile{Data: []byte("js content")},
+		"dist/static/test.css": &fstest.MapFile{Data: []byte("css content")},
+	}
 }
 
 func TestIsDistEmpty(t *testing.T) {
@@ -45,9 +55,8 @@ func TestSPAFallbackReturnsHTML(t *testing.T) {
 
 func TestAPIRoutesNotFallback(t *testing.T) {
 	origFS := DistFS
-	defer func() { DistFS = origFS }()
-
 	DistFS = fs.FS(nil)
+	defer func() { DistFS = origFS }()
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
@@ -175,6 +184,10 @@ func stringsHasPrefix(s, prefix string) bool {
 }
 
 func TestRegisterRoutesWithPopulatedDist(t *testing.T) {
+	origFS := DistFS
+	DistFS = fakeDistFS()
+	defer func() { DistFS = origFS }()
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	RegisterRoutes(r)
@@ -207,6 +220,10 @@ func TestRegisterRoutesWithPopulatedDist(t *testing.T) {
 }
 
 func TestNoRouteHandlerForAPIPaths(t *testing.T) {
+	origFS := DistFS
+	DistFS = fakeDistFS()
+	defer func() { DistFS = origFS }()
+
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	RegisterRoutes(r)
