@@ -8,6 +8,7 @@ on:
 
 env:
   GO_VERSION: '1.23'
+  BUN_VERSION: '1'
 
 jobs:
   goreleaser:
@@ -29,6 +30,28 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install frontend dependencies
+        working-directory: web
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: web
+        run: bun run build
+
+      - name: Verify dist directory
+        run: |
+          if [ ! -d "web/dist" ]; then
+            echo "ERROR: web/dist directory not found after frontend build"
+            exit 1
+          fi
+          echo "Frontend build output:"
+          ls -la web/dist/
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
