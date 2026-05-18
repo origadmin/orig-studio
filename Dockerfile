@@ -1,6 +1,6 @@
 FROM golang:1.23-alpine AS builder
 
-RUN apk add --no-cache git ca-certificates gcc musl-dev
+RUN apk add --no-cache git ca-certificates
 
 WORKDIR /src
 
@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 
 ARG SERVICE_NAME=server
-RUN CGO_ENABLED=1 GOOS=linux go build -tags dev -a -ldflags '-linkmode external -extldflags "-static"' -o /bin/origcms-${SERVICE_NAME} ./cmd/${SERVICE_NAME}
+RUN CGO_ENABLED=0 GOOS=linux go build -tags dev -a -o /bin/origcms-${SERVICE_NAME} ./cmd/${SERVICE_NAME}
 
 FROM alpine:3.20
 
