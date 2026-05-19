@@ -3,7 +3,7 @@ module origadmin/application/origstudio
 go 1.25.5
 
 require (
-	ariga.io/atlas v0.36.2-0.20250730182955-2c6300d0a3e1
+	ariga.io/atlas v1.2.0
 	entgo.io/ent v0.14.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-kratos/kratos/v2 v2.9.2
