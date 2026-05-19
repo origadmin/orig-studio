@@ -28,7 +28,7 @@ require (
 	github.com/google/gnostic v0.7.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.5
 	github.com/joho/godotenv v1.5.1
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.12.3
 	github.com/origadmin/contrib v1.4.0
 	github.com/origadmin/toolkits v1.4.0
 	github.com/origadmin/toolkits/identifier/shortid v1.4.0
