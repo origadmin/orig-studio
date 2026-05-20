@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Release Please
         id: release # Assign an ID to access outputs
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           release-type: go # Specify release type for Go projects
           # Optional: target-branch: main # If your main branch is not 'main'
