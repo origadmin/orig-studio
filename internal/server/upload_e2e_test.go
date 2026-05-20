@@ -24,13 +24,13 @@ import (
 	pb "origadmin/application/origstudio/api/gen/v1/upload"
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	contentdal "origadmin/application/origstudio/internal/features/content/dal"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dal"
 	mediaservice "origadmin/application/origstudio/internal/features/media/service"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 )
 
 func TestUploadE2E(t *testing.T) {

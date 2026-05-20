@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	pb "origadmin/application/origstudio/api/gen/v1/media"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dto"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/server"
 )
 
@@ -52,10 +52,10 @@ func (h *SearchHandler) search() http.HandlerFunc {
 		}
 
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizePagination(page, pageSize)
+		page, pageSize = types.NormalizePagination(page, pageSize)
 
 		opts := &dto.MediaQueryOption{
-			QueryOption: repo.QueryOption{
+			QueryOption: types.QueryOption{
 				Page:     int32(page),
 				PageSize: int32(pageSize),
 				Keyword:  keyword,
@@ -117,7 +117,7 @@ func (h *SearchHandler) suggestions() http.HandlerFunc {
 
 		// Get media titles as suggestions
 		opts := &dto.MediaQueryOption{
-			QueryOption: repo.QueryOption{
+			QueryOption: types.QueryOption{
 				Page:     1,
 				PageSize: int32(limit),
 				Keyword:  keyword,

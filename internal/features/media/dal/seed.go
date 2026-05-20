@@ -3,7 +3,7 @@ package dal
 import (
 	"context"
 	"log/slog"
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 	"strings"
 )
 

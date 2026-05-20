@@ -20,7 +20,7 @@ import (
 
 	pb "origadmin/application/origstudio/api/gen/v1/upload"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dal"
 	"origadmin/application/origstudio/internal/features/media/service"

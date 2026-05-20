@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	ginhttp "github.com/gin-gonic/gin"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
 	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
 )

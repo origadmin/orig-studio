@@ -5,42 +5,42 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/features/content/dto"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 )
 
 type PortalRepo interface {
-	ListNavItems(ctx context.Context) ([]*entity.PortalNavItem, error)
-	CreateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error)
-	GetNavItemByID(ctx context.Context, id string) (*entity.PortalNavItem, error)
-	UpdateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error)
+	ListNavItems(ctx context.Context) ([]*dto.PortalNavItemDTO, error)
+	CreateNavItem(ctx context.Context, item *dto.PortalNavItemDTO) (*dto.PortalNavItemDTO, error)
+	GetNavItemByID(ctx context.Context, id string) (*dto.PortalNavItemDTO, error)
+	UpdateNavItem(ctx context.Context, item *dto.PortalNavItemDTO) (*dto.PortalNavItemDTO, error)
 	DeleteNavItem(ctx context.Context, id string) error
 	ReorderNavItems(ctx context.Context, ids []string) error
 
-	ListBanners(ctx context.Context) ([]*entity.PortalBanner, error)
-	CreateBanner(ctx context.Context, b *entity.PortalBanner) (*entity.PortalBanner, error)
-	UpdateBanner(ctx context.Context, b *entity.PortalBanner) (*entity.PortalBanner, error)
+	ListBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error)
+	CreateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error)
+	UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error)
 	DeleteBanner(ctx context.Context, id string) error
-	ToggleBanner(ctx context.Context, id string) (*entity.PortalBanner, error)
-	ListActiveBanners(ctx context.Context) ([]*entity.PortalBanner, error)
+	ToggleBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error)
+	ListActiveBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error)
 
-	ListCustomPages(ctx context.Context, page, pageSize int) ([]*entity.PortalCustomPage, int, error)
-	CreateCustomPage(ctx context.Context, p *entity.PortalCustomPage) (*entity.PortalCustomPage, error)
-	GetCustomPageByID(ctx context.Context, id string) (*entity.PortalCustomPage, error)
-	GetCustomPageBySlug(ctx context.Context, slug string) (*entity.PortalCustomPage, error)
-	UpdateCustomPage(ctx context.Context, p *entity.PortalCustomPage) (*entity.PortalCustomPage, error)
+	ListCustomPages(ctx context.Context, page, pageSize int) ([]*dto.PortalCustomPageDTO, int, error)
+	CreateCustomPage(ctx context.Context, p *dto.PortalCustomPageDTO) (*dto.PortalCustomPageDTO, error)
+	GetCustomPageByID(ctx context.Context, id string) (*dto.PortalCustomPageDTO, error)
+	GetCustomPageBySlug(ctx context.Context, slug string) (*dto.PortalCustomPageDTO, error)
+	UpdateCustomPage(ctx context.Context, p *dto.PortalCustomPageDTO) (*dto.PortalCustomPageDTO, error)
 	DeleteCustomPage(ctx context.Context, id string) error
 	IncrementPageViewCount(ctx context.Context, id string) error
-	ListPublishedCustomPages(ctx context.Context) ([]*entity.PortalCustomPage, error)
+	ListPublishedCustomPages(ctx context.Context) ([]*dto.PortalCustomPageDTO, error)
 }
 
 type PortalConfigResponse struct {
-	Modules    PortalModules       `json:"modules"`
-	Layout     string              `json:"layout"`
-	Site       PortalSite          `json:"site"`
-	Navigation []*entity.PortalNavItem `json:"navigation"`
-	Banners    []*entity.PortalBanner  `json:"banners"`
-	Pages      []*entity.PortalCustomPage `json:"pages"`
+	Modules    PortalModules             `json:"modules"`
+	Layout     string                    `json:"layout"`
+	Site       PortalSite                `json:"site"`
+	Navigation []*dto.PortalNavItemDTO   `json:"navigation"`
+	Banners    []*dto.PortalBannerDTO    `json:"banners"`
+	Pages      []*dto.PortalCustomPageDTO `json:"pages"`
 }
 
 type PortalModules struct {
@@ -72,19 +72,19 @@ func NewPortalUseCase(repo PortalRepo, settingUC *systembiz.SettingUseCase, logg
 	}
 }
 
-func (uc *PortalUseCase) ListNavItems(ctx context.Context) ([]*entity.PortalNavItem, error) {
+func (uc *PortalUseCase) ListNavItems(ctx context.Context) ([]*dto.PortalNavItemDTO, error) {
 	return uc.repo.ListNavItems(ctx)
 }
 
-func (uc *PortalUseCase) CreateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error) {
+func (uc *PortalUseCase) CreateNavItem(ctx context.Context, item *dto.PortalNavItemDTO) (*dto.PortalNavItemDTO, error) {
 	return uc.repo.CreateNavItem(ctx, item)
 }
 
-func (uc *PortalUseCase) GetNavItemByID(ctx context.Context, id string) (*entity.PortalNavItem, error) {
+func (uc *PortalUseCase) GetNavItemByID(ctx context.Context, id string) (*dto.PortalNavItemDTO, error) {
 	return uc.repo.GetNavItemByID(ctx, id)
 }
 
-func (uc *PortalUseCase) UpdateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error) {
+func (uc *PortalUseCase) UpdateNavItem(ctx context.Context, item *dto.PortalNavItemDTO) (*dto.PortalNavItemDTO, error) {
 	return uc.repo.UpdateNavItem(ctx, item)
 }
 
@@ -96,15 +96,15 @@ func (uc *PortalUseCase) ReorderNavItems(ctx context.Context, ids []string) erro
 	return uc.repo.ReorderNavItems(ctx, ids)
 }
 
-func (uc *PortalUseCase) ListBanners(ctx context.Context) ([]*entity.PortalBanner, error) {
+func (uc *PortalUseCase) ListBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error) {
 	return uc.repo.ListBanners(ctx)
 }
 
-func (uc *PortalUseCase) CreateBanner(ctx context.Context, b *entity.PortalBanner) (*entity.PortalBanner, error) {
+func (uc *PortalUseCase) CreateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error) {
 	return uc.repo.CreateBanner(ctx, b)
 }
 
-func (uc *PortalUseCase) UpdateBanner(ctx context.Context, b *entity.PortalBanner) (*entity.PortalBanner, error) {
+func (uc *PortalUseCase) UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error) {
 	return uc.repo.UpdateBanner(ctx, b)
 }
 
@@ -112,31 +112,31 @@ func (uc *PortalUseCase) DeleteBanner(ctx context.Context, id string) error {
 	return uc.repo.DeleteBanner(ctx, id)
 }
 
-func (uc *PortalUseCase) ToggleBanner(ctx context.Context, id string) (*entity.PortalBanner, error) {
+func (uc *PortalUseCase) ToggleBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error) {
 	return uc.repo.ToggleBanner(ctx, id)
 }
 
-func (uc *PortalUseCase) ListActiveBanners(ctx context.Context) ([]*entity.PortalBanner, error) {
+func (uc *PortalUseCase) ListActiveBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error) {
 	return uc.repo.ListActiveBanners(ctx)
 }
 
-func (uc *PortalUseCase) ListCustomPages(ctx context.Context, page, pageSize int) ([]*entity.PortalCustomPage, int, error) {
+func (uc *PortalUseCase) ListCustomPages(ctx context.Context, page, pageSize int) ([]*dto.PortalCustomPageDTO, int, error) {
 	return uc.repo.ListCustomPages(ctx, page, pageSize)
 }
 
-func (uc *PortalUseCase) CreateCustomPage(ctx context.Context, p *entity.PortalCustomPage) (*entity.PortalCustomPage, error) {
+func (uc *PortalUseCase) CreateCustomPage(ctx context.Context, p *dto.PortalCustomPageDTO) (*dto.PortalCustomPageDTO, error) {
 	return uc.repo.CreateCustomPage(ctx, p)
 }
 
-func (uc *PortalUseCase) GetCustomPageByID(ctx context.Context, id string) (*entity.PortalCustomPage, error) {
+func (uc *PortalUseCase) GetCustomPageByID(ctx context.Context, id string) (*dto.PortalCustomPageDTO, error) {
 	return uc.repo.GetCustomPageByID(ctx, id)
 }
 
-func (uc *PortalUseCase) GetCustomPageBySlug(ctx context.Context, slug string) (*entity.PortalCustomPage, error) {
+func (uc *PortalUseCase) GetCustomPageBySlug(ctx context.Context, slug string) (*dto.PortalCustomPageDTO, error) {
 	return uc.repo.GetCustomPageBySlug(ctx, slug)
 }
 
-func (uc *PortalUseCase) UpdateCustomPage(ctx context.Context, p *entity.PortalCustomPage) (*entity.PortalCustomPage, error) {
+func (uc *PortalUseCase) UpdateCustomPage(ctx context.Context, p *dto.PortalCustomPageDTO) (*dto.PortalCustomPageDTO, error) {
 	return uc.repo.UpdateCustomPage(ctx, p)
 }
 
@@ -148,6 +148,6 @@ func (uc *PortalUseCase) IncrementPageViewCount(ctx context.Context, id string) 
 	return uc.repo.IncrementPageViewCount(ctx, id)
 }
 
-func (uc *PortalUseCase) ListPublishedCustomPages(ctx context.Context) ([]*entity.PortalCustomPage, error) {
+func (uc *PortalUseCase) ListPublishedCustomPages(ctx context.Context) ([]*dto.PortalCustomPageDTO, error) {
 	return uc.repo.ListPublishedCustomPages(ctx)
 }

@@ -5,7 +5,7 @@ package service
 import (
 	"net/http"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/server"
 )
 

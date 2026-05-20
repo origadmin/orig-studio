@@ -13,13 +13,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/setting"
 	"origadmin/application/origstudio/internal/server"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	systemdto "origadmin/application/origstudio/internal/features/system/dto"
 	systemData "origadmin/application/origstudio/internal/features/system/dal"
 )
 
@@ -54,11 +53,6 @@ func (h *SystemHandler) RegisterRoutes(r http2.Router) {
 	config := r.Group("/config")
 	{
 		config.GET("", server.HTTPToHandlerFunc(h.getPublicConfig()))
-	}
-
-	portal := r.Group("/portal")
-	{
-		portal.GET("/config", server.HTTPToHandlerFunc(h.getPortalConfig()))
 	}
 }
 
@@ -175,7 +169,7 @@ func (h *SystemHandler) getSettings() http.HandlerFunc {
 			return
 		}
 
-		grouped := make(map[string][]*entity.Setting)
+		grouped := make(map[string][]*systemdto.SettingDTO)
 		for _, item := range items {
 			masked := h.settingUC.MaskSensitive(item)
 			cat := string(item.Category)
@@ -206,7 +200,7 @@ func (h *SystemHandler) updateSettings() http.HandlerFunc {
 			return
 		}
 
-		var updated []*entity.Setting
+		var updated []*systemdto.SettingDTO
 		for _, item := range req.Settings {
 			existing, err := h.settingUC.GetByKey(r.Context(), item.Key)
 			if err != nil {
@@ -227,7 +221,7 @@ func (h *SystemHandler) updateSettings() http.HandlerFunc {
 				}
 			}
 
-			s := &entity.Setting{
+			s := &systemdto.SettingDTO{
 				Key:           existing.Key,
 				Value:         item.Value,
 				Type:          existing.Type,
@@ -498,18 +492,18 @@ func (h *SystemHandler) sendTestEmail() http.HandlerFunc {
 
 // ==================== Validation Helpers ====================
 
-func ValidateSettingValue(value string, typ setting.Type) error {
+func ValidateSettingValue(value string, typ systemdto.SettingType) error {
 	switch typ {
-	case setting.TypeBool:
+	case systemdto.SettingTypeBool:
 		if _, err := strconv.ParseBool(value); err != nil {
 			return err
 		}
-	case setting.TypeInt:
+	case systemdto.SettingTypeInt:
 		if _, err := strconv.Atoi(value); err != nil {
 			return err
 		}
-	case setting.TypeString:
-	case setting.TypeJSON:
+	case systemdto.SettingTypeString:
+	case systemdto.SettingTypeJSON:
 	}
 	return nil
 }

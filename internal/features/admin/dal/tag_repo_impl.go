@@ -5,18 +5,45 @@ import (
 	"fmt"
 	"strings"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/tag"
-	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/tag"
+	"origadmin/application/origstudio/internal/features/admin/dto"
+	"origadmin/application/origstudio/internal/pkg/hashtag"
 )
 
-// TagStatus 定义tag状态类型
-type TagStatus string
+// EntityToTagDTO converts an entity.Tag to a dto.TagDTO.
+func EntityToTagDTO(t *entity.Tag) *dto.TagDTO {
+	if t == nil {
+		return nil
+	}
+	return &dto.TagDTO{
+		ID:                t.ID,
+		Title:             t.Title,
+		Slug:              t.Slug,
+		MediaCount:        t.MediaCount,
+		ChannelCount:      t.ChannelCount,
+		ListingsThumbnail: t.ListingsThumbnail,
+		Status:            dto.TagStatusType(string(t.Status)),
+		Description:       t.Description,
+		TitleI18n:         t.TitleI18n,
+		DescriptionI18n:   t.DescriptionI18n,
+		Color:             t.Color,
+		CreateTime:        t.CreateTime,
+		UpdateTime:        t.UpdateTime,
+	}
+}
 
-const (
-	TagStatusActive   TagStatus = "active"
-	TagStatusInactive TagStatus = "inactive"
-)
+// EntityToTagDTOList converts a slice of entity.Tag to dto.TagDTO slice.
+func EntityToTagDTOList(tags []*entity.Tag) []*dto.TagDTO {
+	if len(tags) == 0 {
+		return []*dto.TagDTO{}
+	}
+	result := make([]*dto.TagDTO, len(tags))
+	for i, t := range tags {
+		result[i] = EntityToTagDTO(t)
+	}
+	return result
+}
 
 // tagRepositoryImpl implements TagRepository using Ent ORM
 type tagRepositoryImpl struct {
@@ -29,16 +56,13 @@ func NewTagRepository(client *entity.Client) TagRepository {
 }
 
 // List returns a paginated list of tags
-// B087-R2 Fix: Now applies search and status filters.
-func (r *tagRepositoryImpl) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*entity.Tag, int64, error) {
+func (r *tagRepositoryImpl) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*dto.TagDTO, int64, error) {
 	query := r.client.Tag.Query()
 
-	// B087-R2 Fix: Apply search filter (case-insensitive title match)
 	if search != "" {
 		query = query.Where(tag.TitleContainsFold(search))
 	}
 
-	// B087-R2 Fix: Apply status filter (normalize lowercase to uppercase enum)
 	if status != "" {
 		upperStatus := strings.ToUpper(status)
 		switch upperStatus {
@@ -47,13 +71,11 @@ func (r *tagRepositoryImpl) List(ctx context.Context, page, pageSize int, search
 		}
 	}
 
-	// Get total count (after filters)
 	total, err := query.Count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("count tags: %w", err)
 	}
 
-	// Apply sorting
 	orderFunc := entity.Desc
 	if sortOrder == "asc" {
 		orderFunc = entity.Asc
@@ -71,74 +93,78 @@ func (r *tagRepositoryImpl) List(ctx context.Context, page, pageSize int, search
 		sortField = tag.FieldCreateTime
 	}
 
-	// Apply pagination
 	offset := (page - 1) * pageSize
 	tags, err := query.Offset(offset).Limit(pageSize).Order(orderFunc(sortField)).All(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list tags: %w", err)
 	}
 
-	return tags, int64(total), nil
+	return EntityToTagDTOList(tags), int64(total), nil
 }
 
 // Get returns a tag by ID
-func (r *tagRepositoryImpl) Get(ctx context.Context, id string) (*entity.Tag, error) {
+func (r *tagRepositoryImpl) Get(ctx context.Context, id string) (*dto.TagDTO, error) {
 	tagID := 0
 	if _, err := fmt.Sscanf(id, "%d", &tagID); err != nil {
 		return nil, fmt.Errorf("invalid tag ID: %w", err)
 	}
-	
-	tag, err := r.client.Tag.Get(ctx, tagID)
+
+	t, err := r.client.Tag.Get(ctx, tagID)
 	if err != nil {
 		return nil, fmt.Errorf("get tag: %w", err)
 	}
-	return tag, nil
+	return EntityToTagDTO(t), nil
 }
 
 // Create creates a new tag
-// B087-R2 Fix: Now also saves Description, Color, and Status fields.
-func (r *tagRepositoryImpl) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag, error) {
+func (r *tagRepositoryImpl) Create(ctx context.Context, tagDTO *dto.TagDTO) (*dto.TagDTO, error) {
 	builder := r.client.Tag.Create().
-		SetTitle(tag.Title).
+		SetTitle(tagDTO.Title).
 		SetMediaCount(0)
 
-	if tag.Slug != "" {
-		builder = builder.SetSlug(tag.Slug)
+	if tagDTO.Slug != "" {
+		builder = builder.SetSlug(tagDTO.Slug)
 	}
-	// B087-R2 Fix: Pass through optional fields
-	if tag.Description != "" {
-		builder = builder.SetDescription(tag.Description)
+	if tagDTO.Description != "" {
+		builder = builder.SetDescription(tagDTO.Description)
 	}
-	if tag.Color != "" {
-		builder = builder.SetColor(tag.Color)
+	if tagDTO.Color != "" {
+		builder = builder.SetColor(tagDTO.Color)
 	}
-	if tag.Status != "" {
-		builder = builder.SetStatus(tag.Status)
+	if tagDTO.Status != "" {
+		builder = builder.SetStatus(tag.Status(string(tagDTO.Status)))
 	}
 
 	createdTag, err := builder.Save(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("create tag: %w", err)
 	}
-	return createdTag, nil
+	return EntityToTagDTO(createdTag), nil
 }
 
 // Update updates an existing tag
-func (r *tagRepositoryImpl) Update(ctx context.Context, tag *entity.Tag) (*entity.Tag, error) {
-	builder := r.client.Tag.UpdateOne(tag).
-		SetTitle(tag.Title).
-		SetStatus(tag.Status)
-
-	if tag.Slug != "" {
-		builder = builder.SetSlug(tag.Slug)
+func (r *tagRepositoryImpl) Update(ctx context.Context, tagDTO *dto.TagDTO) (*dto.TagDTO, error) {
+	// Fetch the entity first to get the ent reference for update
+	tagID := tagDTO.ID
+	entityTag, err := r.client.Tag.Get(ctx, tagID)
+	if err != nil {
+		return nil, fmt.Errorf("get tag for update: %w", err)
 	}
-	if tag.Color != "" {
-		builder = builder.SetColor(tag.Color)
+
+	builder := r.client.Tag.UpdateOne(entityTag).
+		SetTitle(tagDTO.Title).
+		SetStatus(tag.Status(string(tagDTO.Status)))
+
+	if tagDTO.Slug != "" {
+		builder = builder.SetSlug(tagDTO.Slug)
+	}
+	if tagDTO.Color != "" {
+		builder = builder.SetColor(tagDTO.Color)
 	} else {
 		builder = builder.ClearColor()
 	}
-	if tag.Description != "" {
-		builder = builder.SetDescription(tag.Description)
+	if tagDTO.Description != "" {
+		builder = builder.SetDescription(tagDTO.Description)
 	} else {
 		builder = builder.ClearDescription()
 	}
@@ -147,7 +173,7 @@ func (r *tagRepositoryImpl) Update(ctx context.Context, tag *entity.Tag) (*entit
 	if err != nil {
 		return nil, fmt.Errorf("update tag: %w", err)
 	}
-	return updatedTag, nil
+	return EntityToTagDTO(updatedTag), nil
 }
 
 // Delete deletes a tag by ID
@@ -156,7 +182,7 @@ func (r *tagRepositoryImpl) Delete(ctx context.Context, id string) error {
 	if _, err := fmt.Sscanf(id, "%d", &tagID); err != nil {
 		return fmt.Errorf("invalid tag ID: %w", err)
 	}
-	
+
 	if err := r.client.Tag.DeleteOneID(tagID).Exec(ctx); err != nil {
 		return fmt.Errorf("delete tag: %w", err)
 	}
@@ -179,12 +205,12 @@ func (r *tagRepositoryImpl) BulkDelete(ctx context.Context, ids []string) (int, 
 }
 
 // GetBySlug returns a tag by slug
-func (r *tagRepositoryImpl) GetBySlug(ctx context.Context, slug string) (*entity.Tag, error) {
+func (r *tagRepositoryImpl) GetBySlug(ctx context.Context, slug string) (*dto.TagDTO, error) {
 	t, err := r.client.Tag.Query().Where(tag.SlugEQ(slug)).Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get tag by slug: %w", err)
 	}
-	return t, nil
+	return EntityToTagDTO(t), nil
 }
 
 // Count returns the total number of tags
@@ -199,7 +225,7 @@ func (r *tagRepositoryImpl) Count(ctx context.Context, status string) (int64, er
 // GetByName returns a tag by title. It performs a case-insensitive lookup
 // by querying the exact title first, then falling back to a case-insensitive
 // search if the exact match fails.
-func (r *tagRepositoryImpl) GetByName(ctx context.Context, name string) (*entity.Tag, error) {
+func (r *tagRepositoryImpl) GetByName(ctx context.Context, name string) (*dto.TagDTO, error) {
 	if name == "" {
 		return nil, fmt.Errorf("tag name is required")
 	}
@@ -207,7 +233,7 @@ func (r *tagRepositoryImpl) GetByName(ctx context.Context, name string) (*entity
 	// Try exact match first (most common case, uses index)
 	t, err := r.client.Tag.Query().Where(tag.TitleEQ(name)).Only(ctx)
 	if err == nil {
-		return t, nil
+		return EntityToTagDTO(t), nil
 	}
 
 	// Fall back to case-insensitive search
@@ -215,14 +241,12 @@ func (r *tagRepositoryImpl) GetByName(ctx context.Context, name string) (*entity
 	if err != nil {
 		return nil, fmt.Errorf("get tag by name: %w", err)
 	}
-	return t, nil
+	return EntityToTagDTO(t), nil
 }
 
 // GetOrCreateTag returns an existing tag by name (case-insensitive) or creates
 // one if not found. When creating, it auto-generates a slug from the name.
-// This method handles concurrent creation races by relying on the database
-// unique constraint on title and retrying the lookup on create failure.
-func (r *tagRepositoryImpl) GetOrCreateTag(ctx context.Context, name string) (*entity.Tag, error) {
+func (r *tagRepositoryImpl) GetOrCreateTag(ctx context.Context, name string) (*dto.TagDTO, error) {
 	if name == "" {
 		return nil, fmt.Errorf("tag name is required")
 	}
@@ -235,7 +259,7 @@ func (r *tagRepositoryImpl) GetOrCreateTag(ctx context.Context, name string) (*e
 
 	// 2. Not found, create new tag with auto-generated slug
 	slug := hashtag.GenerateTagSlug(name)
-	newTag := &entity.Tag{
+	newTag := &dto.TagDTO{
 		Title: name,
 		Slug:  slug,
 	}
@@ -243,7 +267,6 @@ func (r *tagRepositoryImpl) GetOrCreateTag(ctx context.Context, name string) (*e
 	created, err := r.Create(ctx, newTag)
 	if err != nil {
 		// 3. Concurrent creation race: another request may have created it
-		// Rely on unique constraint failure, then retry lookup
 		existing, err2 := r.GetByName(ctx, name)
 		if err2 != nil {
 			return nil, fmt.Errorf("getOrCreate tag: create failed: %w, retry get failed: %v", err, err2)
@@ -256,7 +279,7 @@ func (r *tagRepositoryImpl) GetOrCreateTag(ctx context.Context, name string) (*e
 
 // BatchGetOrCreateTags returns existing tags or creates missing ones for the
 // given names. Names are deduplicated (case-insensitive). Max 20 names per call.
-func (r *tagRepositoryImpl) BatchGetOrCreateTags(ctx context.Context, names []string) ([]*entity.Tag, error) {
+func (r *tagRepositoryImpl) BatchGetOrCreateTags(ctx context.Context, names []string) ([]*dto.TagDTO, error) {
 	if len(names) == 0 {
 		return nil, nil
 	}
@@ -278,11 +301,10 @@ func (r *tagRepositoryImpl) BatchGetOrCreateTags(ctx context.Context, names []st
 		}
 	}
 
-	var result []*entity.Tag
+	var result []*dto.TagDTO
 	for _, name := range uniqueNames {
 		t, err := r.GetOrCreateTag(ctx, name)
 		if err != nil {
-			// Log and skip failed individual tags rather than failing the batch
 			continue
 		}
 		result = append(result, t)

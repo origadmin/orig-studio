@@ -11,15 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/media"
-	"origadmin/application/origstudio/internal/data/entity/migrate"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity/migrate"
 )
 
 func TestTagFiltering_SQLite(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping SQLite integration test in short mode")
-	}
 	dbPath := "test_tags_filter.db?_fk=1&_journal_mode=WAL"
 	os.Remove("test_tags_filter.db")
 

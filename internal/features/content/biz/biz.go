@@ -20,4 +20,4 @@ var ProviderSet = wire.NewSet(
 	NewCommentLikeUseCase,
 	NewHistoryUseCase,
 	NewPortalUseCase,
-)
+	)

@@ -7,11 +7,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/history"
-	"origadmin/application/origstudio/internal/data/entity/media"
-	"origadmin/application/origstudio/internal/data/entity/predicate"
-	"origadmin/application/origstudio/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/history"
+	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity/predicate"
+	"origadmin/application/origstudio/internal/dal/entity/user"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 

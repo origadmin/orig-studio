@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/biz"
 )
 

@@ -18,6 +18,7 @@ plugins:
     opt:
       - paths=source_relative
 
+  # Go gRPC 代码生成
   - local: protoc-gen-go-grpc
     out: gen
     opt:

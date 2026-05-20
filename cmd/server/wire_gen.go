@@ -14,7 +14,7 @@ import (
 	"github.com/google/wire"
 	log2 "github.com/origadmin/runtime/log"
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/features/admin"
 	biz6 "origadmin/application/origstudio/internal/features/admin/biz"
 	dal6 "origadmin/application/origstudio/internal/features/admin/dal"
@@ -42,7 +42,7 @@ import (
 	"origadmin/application/origstudio/internal/infra"
 	auth2 "origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/infra/pubsub"
-	"origadmin/application/origstudio/internal/middleware"
+	"origadmin/application/origstudio/internal/server/middleware"
 )
 
 import (
@@ -150,15 +150,16 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, func(), err
 	exploreHandler := service4.NewExploreHandler(client)
 	portalRepo := dal5.NewPortalRepo(dalData, logger)
 	portalUseCase := biz5.NewPortalUseCase(portalRepo, settingUseCase, logger)
-	portalHandler := service4.NewPortalHandler(portalUseCase, manager, settingUseCase)
+	portalHandler := service4.NewPortalHandler(portalUseCase, categoryTagUseCase, manager, settingUseCase)
 	tagRepository := dal6.NewTagRepository(client)
 	tagUseCase := biz6.NewTagUseCase(tagRepository)
 	tagService := service5.NewTagService(tagUseCase)
-	adminHandler := NewAdminHandlerBridge(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase, client, cfg)
+	statsRepo := dal2.NewStatsRepo(client)
+	adminConfig := service5.NewAdminConfig(cfg)
+	adminHandler := service5.NewAdminHandler(manager, mediaUseCase, mediaService, playlistChannelUseCase, tagService, settingUseCase, categoryTagUseCase, articleUseCase, userUseCase, permissionUseCase, statsRepo, adminConfig)
 	adminTagHandler := service5.NewAdminTagHandler(tagService, manager)
 	stubHandler := NewStubHandler(manager)
 	spriteHandler := NewSpriteHandler(mediaUseCase, storagePaths, manager, logger)
-	statsRepo := dal2.NewStatsRepo(client)
 	emailUseCase := biz.NewEmailUseCase(settingUseCase)
 	systemHandler := service6.NewSystemHandler(manager, statsRepo, settingUseCase, emailUseCase)
 	statsHandler := service6.NewStatsHandler(mediaUseCase, likeFavoriteUseCase, statsRepo, manager)
@@ -225,7 +226,6 @@ var ProviderSet = wire.NewSet(infra.ProviderSet, media.ProviderSet, content.Prov
 	NewSpriteUseCase,
 	NewTranscodeHandler,
 	NewDatabaseBridge,
-	NewAdminHandlerBridge,
 
 	NewAuthHandler,
 	NewMediaReportHandler,
@@ -259,8 +259,7 @@ func NewAdminHandlerBridge(
 	db *entity.Client,
 	cfg *conf.Config,
 ) *service5.AdminHandler {
-	dbDialect, _ := cfg.GetDefaultDB()
-	return service5.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, db, Version, dbDialect)
+	return service5.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, dal2.NewStatsRepo(db), service5.NewAdminConfig(cfg))
 }
 
 // NewStorageConfig creates storage config from defaults.

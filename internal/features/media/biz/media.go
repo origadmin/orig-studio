@@ -18,10 +18,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/api/gen/v1/types" // Import the generated Media type
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/enums"
-	"origadmin/application/origstudio/internal/helpers/ffmpeg"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/features/media/ffmpeg"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/pubsub"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
@@ -115,7 +114,7 @@ func (uc *MediaUseCase) GetMedia(ctx context.Context, id string) (*Media, error)
 
 // GetMediaWithEntity returns a single media with its loaded ent entity (including Edges).
 // This avoids extra queries when edges (user, category) are needed by the server layer.
-func (uc *MediaUseCase) GetMediaWithEntity(ctx context.Context, id string) (*entity.Media, *Media, error) {
+func (uc *MediaUseCase) GetMediaWithEntity(ctx context.Context, id string) (*dto.MediaEntityDTO, *Media, error) {
 	return uc.repo.GetWithEntity(ctx, id)
 }
 
@@ -153,7 +152,7 @@ func (uc *MediaUseCase) ListMedias(
 func (uc *MediaUseCase) ListMediasWithEntities(
 	ctx context.Context,
 	opts ...*dto.MediaQueryOption,
-) ([]*entity.Media, []*Media, int32, error) {
+) ([]*dto.MediaEntityDTO, []*Media, int32, error) {
 	return uc.repo.ListWithEntities(ctx, opts...)
 }
 
@@ -519,7 +518,7 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 		filter = &TranscodingStatusFilter{Status: "active", Page: 1, PageSize: 25}
 	}
 	// Normalize pagination parameters using centralized validation
-	filter.Page, filter.PageSize = repo.NormalizePagination(filter.Page, filter.PageSize)
+	filter.Page, filter.PageSize = repotypes.NormalizePagination(filter.Page, filter.PageSize)
 
 	var status string
 	switch filter.FilterType {
@@ -1040,7 +1039,7 @@ func (uc *MediaUseCase) GetSpriteInfoByID(ctx context.Context, id string) (*Spri
 		return nil, err
 	}
 	return &SpriteInfo{
-		Type:         ent.Type,
+		Type:         string(ent.Type),
 		SpriteStatus: ent.SpriteStatus,
 		VttPath:      ent.VttPath,
 		SpritePath:   ent.SpritePath,
@@ -1056,7 +1055,7 @@ func (uc *MediaUseCase) GetSpriteInfoByShortToken(ctx context.Context, shortToke
 		return nil, err
 	}
 	return &SpriteInfo{
-		Type:         ent.Type,
+		Type:         string(ent.Type),
 		SpriteStatus: ent.SpriteStatus,
 		VttPath:      ent.VttPath,
 		SpritePath:   ent.SpritePath,

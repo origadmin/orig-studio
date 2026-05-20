@@ -12,16 +12,16 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/channel"
-	"origadmin/application/origstudio/internal/data/entity/channeltag"
-	"origadmin/application/origstudio/internal/data/entity/media"
-	"origadmin/application/origstudio/internal/data/entity/mediaplaylist"
-	"origadmin/application/origstudio/internal/data/entity/playlist"
-	schema "origadmin/application/origstudio/internal/data/entity/schema"
-	"origadmin/application/origstudio/internal/data/entity/setting"
-	"origadmin/application/origstudio/internal/data/entity/subscription"
-	"origadmin/application/origstudio/internal/data/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
+	"origadmin/application/origstudio/internal/dal/entity/channeltag"
+	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity/mediaplaylist"
+	"origadmin/application/origstudio/internal/dal/entity/playlist"
+	schema "origadmin/application/origstudio/internal/dal/entity/schema"
+	"origadmin/application/origstudio/internal/dal/entity/setting"
+	"origadmin/application/origstudio/internal/dal/entity/subscription"
+	"origadmin/application/origstudio/internal/dal/entity/user"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
