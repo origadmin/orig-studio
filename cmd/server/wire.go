@@ -19,10 +19,11 @@ import (
 	_ "github.com/sqlite3ent/sqlite3" // SQLite3 driver
 
 	config "origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 	dal4 "origadmin/application/origstudio/internal/features/content/dal"
 	"origadmin/application/origstudio/internal/features/admin"
-	adminservice "origadmin/application/origstudio/internal/features/admin/service"
+	adminservice "origadmin/application/origstudio/internal/features/admin/service"
+	systemdal "origadmin/application/origstudio/internal/features/system/dal"
 	featureauth "origadmin/application/origstudio/internal/features/auth"
 	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
 	authservice "origadmin/application/origstudio/internal/features/auth/service"
@@ -42,7 +43,7 @@ import (
 	"origadmin/application/origstudio/internal/infra"
 	infraauth "origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/infra/pubsub"
-	"origadmin/application/origstudio/internal/middleware"
+	"origadmin/application/origstudio/internal/server/middleware"
 
 	"github.com/google/wire"
 )
@@ -75,9 +76,7 @@ var ProviderSet = wire.NewSet(
 	NewSpriteUseCase,
 	NewTranscodeHandler,
 	NewDatabaseBridge,
-	NewAdminHandlerBridge,
-
-	// Bridge functions for handler constructors
+		// Bridge functions for handler constructors
 	NewAuthHandler,
 	NewMediaReportHandler,
 	NewStubHandler,
@@ -115,8 +114,7 @@ func NewAdminHandlerBridge(
 	db *entity.Client,
 	cfg *config.Config,
 ) *adminservice.AdminHandler {
-	dbDialect, _ := cfg.GetDefaultDB()
-	return adminservice.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, db, Version, dbDialect)
+	return adminservice.NewAdminHandler(jwt, mediaUC, mediaService, channelUC, tagService, settingUC, categoryUC, articleUC, userUC, permChecker, systemdal.NewStatsRepo(db), adminservice.NewAdminConfig(cfg))
 }
 
 // NewStorageConfig creates storage config from defaults.

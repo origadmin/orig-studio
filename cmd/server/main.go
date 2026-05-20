@@ -13,7 +13,7 @@ import (
 	"flag"
 
 	"origadmin/application/origstudio/internal/conf"
-	confhelper "origadmin/application/origstudio/internal/helpers/conf"
+	confhelper "origadmin/application/origstudio/internal/pkg/conf"
 	"origadmin/application/origstudio/internal/server"
 
 	"github.com/origadmin/runtime"

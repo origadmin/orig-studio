@@ -20,8 +20,8 @@ import (
 	"github.com/origadmin/runtime/log"
 
 	config "origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/migrate"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/migrate"
 	contentdal "origadmin/application/origstudio/internal/features/content/dal"
 	mediadal "origadmin/application/origstudio/internal/features/media/dal"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"

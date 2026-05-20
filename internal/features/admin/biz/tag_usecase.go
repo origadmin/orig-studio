@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/features/admin/dal"
-	"origadmin/application/origstudio/internal/helpers/repo"
-	"origadmin/application/origstudio/internal/helpers/tagcolor"
+	"origadmin/application/origstudio/internal/features/admin/dto"
+	"origadmin/application/origstudio/internal/domain/types"
+	"origadmin/application/origstudio/internal/pkg/tagcolor"
 )
 
 // TagUseCase handles tag business logic
@@ -22,9 +22,9 @@ func NewTagUseCase(repo dal.TagRepository) *TagUseCase {
 }
 
 // List returns a paginated list of tags
-func (uc *TagUseCase) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*entity.Tag, int64, error) {
+func (uc *TagUseCase) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*dto.TagDTO, int64, error) {
 	// Normalize pagination parameters using centralized validation
-	page, pageSize = repo.NormalizePagination(page, pageSize)
+	page, pageSize = types.NormalizePagination(page, pageSize)
 
 	tags, total, err := uc.repo.List(ctx, page, pageSize, search, status, sortBy, sortOrder)
 	if err != nil {
@@ -35,7 +35,7 @@ func (uc *TagUseCase) List(ctx context.Context, page, pageSize int, search, stat
 }
 
 // Get returns a tag by ID
-func (uc *TagUseCase) Get(ctx context.Context, id string) (*entity.Tag, error) {
+func (uc *TagUseCase) Get(ctx context.Context, id string) (*dto.TagDTO, error) {
 	if id == "" {
 		return nil, errors.New("tag id is required")
 	}
@@ -49,13 +49,12 @@ func (uc *TagUseCase) Get(ctx context.Context, id string) (*entity.Tag, error) {
 }
 
 // Create creates a new tag
-func (uc *TagUseCase) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag, error) {
+func (uc *TagUseCase) Create(ctx context.Context, tag *dto.TagDTO) (*dto.TagDTO, error) {
 	if tag.Title == "" {
 		return nil, errors.New("tag title is required")
 	}
 
 	// B087-R2 Fix: Check if title is unique using GetByName (not GetBySlug).
-	// GetBySlug checks the slug field, not the title field.
 	existingTag, err := uc.repo.GetByName(ctx, tag.Title)
 	if err == nil && existingTag != nil {
 		return nil, errors.New("tag title already exists")
@@ -74,7 +73,7 @@ func (uc *TagUseCase) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag,
 }
 
 // Update updates an existing tag
-func (uc *TagUseCase) Update(ctx context.Context, id string, updates *entity.Tag) (*entity.Tag, error) {
+func (uc *TagUseCase) Update(ctx context.Context, id string, updates *dto.TagDTO) (*dto.TagDTO, error) {
 	if id == "" {
 		return nil, errors.New("tag id is required")
 	}

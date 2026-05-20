@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 	"origadmin/application/origstudio/internal/features/content/biz"
@@ -60,7 +60,7 @@ func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 		if page == 0 {
 			page = 1
 		}
-		page, limit = repo.NormalizeHTTPPagination(page, limit)
+		page, limit = types.NormalizeHTTPPagination(page, limit)
 
 		items, total, err := h.uc.ListUserNotifications(
 			ctx.Request().Context(),

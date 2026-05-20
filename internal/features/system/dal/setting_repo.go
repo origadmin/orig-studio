@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/setting"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/setting"
+	systemdto "origadmin/application/origstudio/internal/features/system/dto"
 )
 
 type SettingRepo struct {
@@ -16,35 +17,73 @@ func NewSettingRepo(db *entity.Client) *SettingRepo {
 	return &SettingRepo{db: db}
 }
 
-func (r *SettingRepo) GetByKey(ctx context.Context, key string) (*entity.Setting, error) {
+// EntityToSettingDTO converts an entity.Setting to a dto.SettingDTO.
+func EntityToSettingDTO(s *entity.Setting) *systemdto.SettingDTO {
+	if s == nil {
+		return nil
+	}
+	return &systemdto.SettingDTO{
+		ID:            s.ID,
+		Key:           s.Key,
+		Value:         s.Value,
+		Type:          systemdto.SettingType(string(s.Type)),
+		Category:      systemdto.SettingCategory(string(s.Category)),
+		Description:   s.Description,
+		IsSensitive:   s.IsSensitive,
+		FallbackValue: s.FallbackValue,
+		IsBuiltin:     s.IsBuiltin,
+		CreateTime:    s.CreateTime,
+		UpdateTime:    s.UpdateTime,
+	}
+}
+
+// SettingDTOToEntityFields extracts fields from a SettingDTO for dal operations.
+// Returns the field values needed for create/update operations.
+func SettingDTOToEntityFields(s *systemdto.SettingDTO) (key, value string, typ setting.Type, category setting.Category, desc string, isSensitive bool, fallback string, isBuiltin bool) {
+	if s == nil {
+		return
+	}
+	return s.Key, s.Value, setting.Type(string(s.Type)), setting.Category(string(s.Category)),
+		s.Description, s.IsSensitive, s.FallbackValue, s.IsBuiltin
+}
+
+func (r *SettingRepo) GetByKey(ctx context.Context, key string) (*systemdto.SettingDTO, error) {
 	s, err := r.db.Setting.Query().
 		Where(setting.KeyEQ(key)).
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get setting by key %s: %w", key, err)
 	}
-	return s, nil
+	return EntityToSettingDTO(s), nil
 }
 
-func (r *SettingRepo) ListByCategory(ctx context.Context, category string) ([]*entity.Setting, error) {
+func (r *SettingRepo) ListByCategory(ctx context.Context, category string) ([]*systemdto.SettingDTO, error) {
 	items, err := r.db.Setting.Query().
 		Where(setting.CategoryEQ(setting.Category(category))).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list settings by category %s: %w", category, err)
 	}
-	return items, nil
+	result := make([]*systemdto.SettingDTO, len(items))
+	for i, item := range items {
+		result[i] = EntityToSettingDTO(item)
+	}
+	return result, nil
 }
 
-func (r *SettingRepo) ListAll(ctx context.Context) ([]*entity.Setting, error) {
+func (r *SettingRepo) ListAll(ctx context.Context) ([]*systemdto.SettingDTO, error) {
 	items, err := r.db.Setting.Query().All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list all settings: %w", err)
 	}
-	return items, nil
+	result := make([]*systemdto.SettingDTO, len(items))
+	for i, item := range items {
+		result[i] = EntityToSettingDTO(item)
+	}
+	return result, nil
 }
 
-func (r *SettingRepo) Upsert(ctx context.Context, s *entity.Setting) (*entity.Setting, error) {
+func (r *SettingRepo) Upsert(ctx context.Context, s *systemdto.SettingDTO) (*systemdto.SettingDTO, error) {
 	existing, err := r.db.Setting.Query().
 		Where(setting.KeyEQ(s.Key)).
 		Only(ctx)
@@ -53,8 +92,8 @@ func (r *SettingRepo) Upsert(ctx context.Context, s *entity.Setting) (*entity.Se
 			created, err := r.db.Setting.Create().
 				SetKey(s.Key).
 				SetValue(s.Value).
-				SetType(s.Type).
-				SetCategory(s.Category).
+				SetType(setting.Type(string(s.Type))).
+				SetCategory(setting.Category(string(s.Category))).
 				SetDescription(s.Description).
 				SetIsSensitive(s.IsSensitive).
 				SetFallbackValue(s.FallbackValue).
@@ -63,15 +102,15 @@ func (r *SettingRepo) Upsert(ctx context.Context, s *entity.Setting) (*entity.Se
 			if err != nil {
 				return nil, fmt.Errorf("create setting %s: %w", s.Key, err)
 			}
-			return created, nil
+			return EntityToSettingDTO(created), nil
 		}
 		return nil, fmt.Errorf("query setting %s: %w", s.Key, err)
 	}
 
 	updated, err := existing.Update().
 		SetValue(s.Value).
-		SetType(s.Type).
-		SetCategory(s.Category).
+		SetType(setting.Type(string(s.Type))).
+		SetCategory(setting.Category(string(s.Category))).
 		SetNillableDescription(&s.Description).
 		SetIsSensitive(s.IsSensitive).
 		SetNillableFallbackValue(&s.FallbackValue).
@@ -80,7 +119,7 @@ func (r *SettingRepo) Upsert(ctx context.Context, s *entity.Setting) (*entity.Se
 	if err != nil {
 		return nil, fmt.Errorf("update setting %s: %w", s.Key, err)
 	}
-	return updated, nil
+	return EntityToSettingDTO(updated), nil
 }
 
 func (r *SettingRepo) Delete(ctx context.Context, id string) error {
@@ -91,7 +130,26 @@ func (r *SettingRepo) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *SettingRepo) SeedDefaults(ctx context.Context, defaults []*entity.Setting) error {
+func (r *SettingRepo) ResetToDefault(ctx context.Context, key string) (*systemdto.SettingDTO, error) {
+	s, err := r.db.Setting.Query().
+		Where(setting.KeyEQ(key)).
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get setting for reset %s: %w", key, err)
+	}
+	if s.FallbackValue == "" {
+		return EntityToSettingDTO(s), nil
+	}
+	updated, err := s.Update().
+		SetValue(s.FallbackValue).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("reset setting %s: %w", key, err)
+	}
+	return EntityToSettingDTO(updated), nil
+}
+
+func (r *SettingRepo) SeedDefaults(ctx context.Context, defaults []*systemdto.SettingDTO) error {
 	for _, s := range defaults {
 		existing, err := r.db.Setting.Query().
 			Where(setting.KeyEQ(s.Key)).
@@ -101,8 +159,8 @@ func (r *SettingRepo) SeedDefaults(ctx context.Context, defaults []*entity.Setti
 				_, err = r.db.Setting.Create().
 					SetKey(s.Key).
 					SetValue(s.Value).
-					SetType(s.Type).
-					SetCategory(s.Category).
+					SetType(setting.Type(string(s.Type))).
+					SetCategory(setting.Category(string(s.Category))).
 					SetDescription(s.Description).
 					SetIsSensitive(s.IsSensitive).
 					SetFallbackValue(s.FallbackValue).
@@ -121,7 +179,7 @@ func (r *SettingRepo) SeedDefaults(ctx context.Context, defaults []*entity.Setti
 				SetValue(s.Value).
 				SetFallbackValue(s.FallbackValue).
 				SetDescription(s.Description).
-				SetType(s.Type).
+				SetType(setting.Type(string(s.Type))).
 				SetIsSensitive(s.IsSensitive).
 				SetIsBuiltin(s.IsBuiltin).
 				Save(ctx)

@@ -28,13 +28,13 @@ import (
 
 	pb "origadmin/application/origstudio/api/gen/v1/media"
 	types "origadmin/application/origstudio/api/gen/v1/types"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/server"
-	"origadmin/application/origstudio/internal/validation"
+	"origadmin/application/origstudio/internal/server/validation"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 	systemservice "origadmin/application/origstudio/internal/features/system/service"
 
@@ -189,7 +189,7 @@ func (h *ChannelHandler) ListChannels(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 	// Normalize pagination parameters
-	page, limit = repo.NormalizeHTTPPagination(page, limit)
+	page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 
 	switch {
 	case username != "":
@@ -613,7 +613,7 @@ func (h *ChannelHandler) GetChannelSubscribers(w http.ResponseWriter, r *http.Re
 		pageSize = 20
 	}
 	// Normalize pagination parameters
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 	subscribers, total, err := h.uc.GetChannelSubscribers(r.Context(), token, page, pageSize)
 	if err != nil {
@@ -994,7 +994,7 @@ func (h *ChannelHandler) GetSubscriptionVideos(w http.ResponseWriter, r *http.Re
 		limit = 20
 	}
 	// Normalize pagination parameters
-	page, limit = repo.NormalizeHTTPPagination(page, limit)
+	page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 
 	sortBy := gc.Query("sort_by")
 	switch sortBy {
@@ -1084,7 +1084,7 @@ func (h *ChannelHandler) GetChannelVideos(w http.ResponseWriter, r *http.Request
 		limit = 20
 	}
 	// Normalize pagination parameters
-	page, limit = repo.NormalizeHTTPPagination(page, limit)
+	page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 
 	sortBy := gc.Query("sort_by")
 	switch sortBy {
@@ -1146,7 +1146,7 @@ func (h *ChannelHandler) GetChannelPlaylists(w http.ResponseWriter, r *http.Requ
 		limit = 20
 	}
 	// Normalize pagination parameters
-	page, limit = repo.NormalizeHTTPPagination(page, limit)
+	page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 
 	// Query channel playlists via biz layer
 	items, total, err := h.uc.GetChannelPlaylists(r.Context(), token, page, limit)
@@ -1350,7 +1350,7 @@ func (h *ChannelHandler) GetMyChannels(w http.ResponseWriter, r *http.Request) {
 	if pageSize < 1 {
 		pageSize = 20
 	}
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 	channels, total, err := h.uc.ListUserChannels(r.Context(), claims.GetUserID(), page, pageSize)
 	if err != nil {

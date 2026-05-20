@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/features/content/biz"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
@@ -52,7 +52,7 @@ func (h *PlaylistHandler) listPlaylists() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.playlistUC.ListPlaylists(ctx.Request().Context(), page, pageSize)
 		if err != nil {

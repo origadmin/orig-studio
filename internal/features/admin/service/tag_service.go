@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/features/admin/biz"
+	"origadmin/application/origstudio/internal/features/admin/dto"
 )
 
 // TagService handles tag service operations
@@ -19,7 +19,7 @@ func NewTagService(usecase *biz.TagUseCase) *TagService {
 }
 
 // List returns a paginated list of tags
-func (s *TagService) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*entity.Tag, int64, error) {
+func (s *TagService) List(ctx context.Context, page, pageSize int, search, status, sortBy, sortOrder string) ([]*dto.TagDTO, int64, error) {
 	tags, total, err := s.usecase.List(ctx, page, pageSize, search, status, sortBy, sortOrder)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list tags: %w", err)
@@ -29,7 +29,7 @@ func (s *TagService) List(ctx context.Context, page, pageSize int, search, statu
 }
 
 // Get returns a tag by ID
-func (s *TagService) Get(ctx context.Context, id string) (*entity.Tag, error) {
+func (s *TagService) Get(ctx context.Context, id string) (*dto.TagDTO, error) {
 	tag, err := s.usecase.Get(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("get tag: %w", err)
@@ -39,7 +39,7 @@ func (s *TagService) Get(ctx context.Context, id string) (*entity.Tag, error) {
 }
 
 // Create creates a new tag
-func (s *TagService) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag, error) {
+func (s *TagService) Create(ctx context.Context, tag *dto.TagDTO) (*dto.TagDTO, error) {
 	createdTag, err := s.usecase.Create(ctx, tag)
 	if err != nil {
 		return nil, fmt.Errorf("create tag: %w", err)
@@ -49,7 +49,7 @@ func (s *TagService) Create(ctx context.Context, tag *entity.Tag) (*entity.Tag, 
 }
 
 // Update updates an existing tag
-func (s *TagService) Update(ctx context.Context, id string, updates *entity.Tag) (*entity.Tag, error) {
+func (s *TagService) Update(ctx context.Context, id string, updates *dto.TagDTO) (*dto.TagDTO, error) {
 	updatedTag, err := s.usecase.Update(ctx, id, updates)
 	if err != nil {
 		return nil, fmt.Errorf("update tag: %w", err)

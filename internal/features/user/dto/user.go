@@ -10,16 +10,15 @@ import (
 
 	"origadmin/application/origstudio/api/gen/v1/types"
 	"origadmin/application/origstudio/api/gen/v1/user"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 )
 
 // UserRepo is a User repository interface.
 type UserRepo interface {
 	Get(context.Context, string, ...*UserQueryOption) (*types.User, error)
 	List(context.Context, ...*UserQueryOption) ([]*types.User, int32, error)
-	// ListEntities returns raw entity.User list (includes role field not in proto types).
-	ListEntities(context.Context, ...*UserQueryOption) ([]*entity.User, int32, error)
+	// ListEntities returns UserEntityDTO list (includes role field not in proto types).
+	ListEntities(context.Context, ...*UserQueryOption) ([]*UserEntityDTO, int32, error)
 	Create(context.Context, *types.User, string, ...*UserCreateOption) (*types.User, error)
 	Update(context.Context, *types.User, ...*UserUpdateOption) (*types.User, error)
 	Delete(context.Context, string) error
@@ -42,8 +41,8 @@ type UserRepo interface {
 
 	UpdateUserStatus(context.Context, string, int8) error
 
-	// GetEntity returns the raw ent entity (for fields not in proto types, e.g. role).
-	GetEntity(context.Context, string) (*entity.User, error)
+	// GetEntity returns the UserEntityDTO (for fields not in proto types, e.g. role).
+	GetEntity(context.Context, string) (*UserEntityDTO, error)
 
 	// SetUserRole updates a user's role directly via ent.
 	SetUserRole(context.Context, string, string) error
@@ -59,7 +58,7 @@ type UserRepo interface {
 
 // UserQueryOption specifies options for querying users.
 type UserQueryOption struct {
-	repo.QueryOption
+	repotypes.QueryOption
 	WithProfile bool
 	WithSetting bool
 	Role        string // Filter by role (e.g. "admin", "editor", "user")
@@ -70,7 +69,7 @@ type UserCreateOption struct{}
 
 // UserUpdateOption specifies options for updating a user.
 type UserUpdateOption struct {
-	repo.UpdateOption
+	repotypes.UpdateOption
 }
 
 // GetUserRequestToQueryOption converts a GetUserRequest to a query option object.
@@ -79,7 +78,7 @@ func GetUserRequestToQueryOption(req *user.GetUserRequest) *UserQueryOption {
 		return &UserQueryOption{}
 	}
 	return &UserQueryOption{
-		QueryOption: repo.QueryOption{Page: 1, PageSize: 10},
+		QueryOption: repotypes.QueryOption{Page: 1, PageSize: 10},
 		WithProfile: req.GetWithProfile(),
 		WithSetting: req.GetWithSetting(),
 	}
@@ -90,15 +89,15 @@ func GetUserRequestToQueryOption(req *user.GetUserRequest) *UserQueryOption {
 func ListUsersRequestToQueryOption(req *user.ListUsersRequest) *UserQueryOption {
 	if req == nil {
 		return &UserQueryOption{
-			QueryOption: repo.QueryOption{
+			QueryOption: repotypes.QueryOption{
 				Page:     1,
 				PageSize: 20,
 			},
 		}
 	}
-	page, pageSize := repo.NormalizePagination(int(req.Page), int(req.PageSize))
+	page, pageSize := repotypes.NormalizePagination(int(req.Page), int(req.PageSize))
 	opts := &UserQueryOption{
-		QueryOption: repo.QueryOption{
+		QueryOption: repotypes.QueryOption{
 			Page:     int32(page),
 			PageSize: int32(pageSize),
 			Keyword:  req.Keyword,

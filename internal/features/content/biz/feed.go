@@ -41,3 +41,7 @@ func (uc *FeedUseCase) ListLatest(ctx context.Context, page, pageSize int) ([]*M
 func (uc *FeedUseCase) GetTrendingFeed(ctx context.Context, page, pageSize int) ([]*MediaInfo, int, error) {
 	return uc.repo.ListTrending(ctx, page, pageSize)
 }
+
+func (uc *FeedUseCase) ListFeatured(ctx context.Context, page, pageSize int) ([]*MediaInfo, int, error) {
+	return uc.repo.ListFeatured(ctx, page, pageSize)
+}

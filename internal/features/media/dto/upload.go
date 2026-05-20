@@ -8,7 +8,7 @@ import (
 	"context"
 	"time"
 
-	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/dal/enums"
 )
 
 // UploadSession represents an upload session for multipart uploads.

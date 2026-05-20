@@ -20,7 +20,7 @@ import (
 
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/features/media/biz"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 )

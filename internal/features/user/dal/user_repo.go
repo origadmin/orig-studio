@@ -13,11 +13,11 @@ import (
 	"strings"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/data/convpb"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/subscription"
-	"origadmin/application/origstudio/internal/data/entity/user"
-	"origadmin/application/origstudio/internal/helpers/idutil"
+	"origadmin/application/origstudio/internal/dal/convpb"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/subscription"
+	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/pkg/idutil"
 	"origadmin/application/origstudio/internal/features/user/dto"
 )
 
@@ -111,11 +111,36 @@ func (r *userRepo) List(
 	return result, int32(total), nil
 }
 
-// ListEntities returns raw entity.User list (includes role field not in proto types).
+// EntityToUserEntityDTO converts an entity.User to a dto.UserEntityDTO.
+func EntityToUserEntityDTO(u *entity.User) *dto.UserEntityDTO {
+	if u == nil {
+		return nil
+	}
+	return &dto.UserEntityDTO{
+		ID:           u.ID,
+		Username:     u.Username,
+		Email:        u.Email,
+		Name:         u.Name,
+		Slug:         u.Slug,
+		Role:         dto.UserRoleType(string(u.Role)),
+		IsStaff:      u.IsStaff,
+		IsSuperuser:  u.IsSuperuser,
+		IsFeatured:   u.IsFeatured,
+		IsEditor:     u.IsEditor,
+		AdvancedUser: u.AdvancedUser,
+		Logo:         u.Logo,
+		Status:       string(u.Status),
+		DateJoined:   u.DateJoined,
+		CreateTime:   u.CreateTime,
+		UpdateTime:   u.UpdateTime,
+	}
+}
+
+// ListEntities returns UserEntityDTO list (includes role field not in proto types).
 func (r *userRepo) ListEntities(
 	ctx context.Context,
 	opts ...*dto.UserQueryOption,
-) ([]*entity.User, int32, error) {
+) ([]*dto.UserEntityDTO, int32, error) {
 	opt := &dto.UserQueryOption{}
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -168,7 +193,11 @@ func (r *userRepo) ListEntities(
 		return nil, 0, err
 	}
 
-	return users, int32(total), nil
+	result := make([]*dto.UserEntityDTO, len(users))
+	for i, u := range users {
+		result[i] = EntityToUserEntityDTO(u)
+	}
+	return result, int32(total), nil
 }
 
 // Create creates a new user.
@@ -389,9 +418,13 @@ func convertUserToProfileProto(u *entity.User) *types.UserProfile {
 	}
 }
 
-// GetEntity returns the raw ent entity.User (for fields not in proto types, e.g. role).
-func (r *userRepo) GetEntity(ctx context.Context, id string) (*entity.User, error) {
-	return r.db.User.Get(ctx, id)
+// GetEntity returns the UserEntityDTO (for fields not in proto types, e.g. role).
+func (r *userRepo) GetEntity(ctx context.Context, id string) (*dto.UserEntityDTO, error) {
+	u, err := r.db.User.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return EntityToUserEntityDTO(u), nil
 }
 
 // SetUserRole updates a user's role field directly.

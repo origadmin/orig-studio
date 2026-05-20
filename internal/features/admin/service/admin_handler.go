@@ -21,25 +21,23 @@ import (
 	pb "origadmin/application/origstudio/api/gen/v1/user"
 	mediapb "origadmin/application/origstudio/api/gen/v1/media"
 	types "origadmin/application/origstudio/api/gen/v1/types"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/comment"
-	"origadmin/application/origstudio/internal/data/entity/media"
-	"origadmin/application/origstudio/internal/data/entity/subscription"
-	"origadmin/application/origstudio/internal/data/entity/user"
-	"origadmin/application/origstudio/internal/data/enums"
-	"origadmin/application/origstudio/internal/helpers/repo"
-	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/dal/enums"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
+	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/server"
-	"origadmin/application/origstudio/internal/validation"
+	"origadmin/application/origstudio/internal/server/validation"
 	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
+	"origadmin/application/origstudio/internal/features/admin/dto"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	mediabiz "origadmin/application/origstudio/internal/features/media/biz"
 	mediadto "origadmin/application/origstudio/internal/features/media/dto"
 	mediaservice "origadmin/application/origstudio/internal/features/media/service"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
+	systemdal "origadmin/application/origstudio/internal/features/system/dal"
+	systemdto "origadmin/application/origstudio/internal/features/system/dto"
 	systemservice "origadmin/application/origstudio/internal/features/system/service"
 	userdto "origadmin/application/origstudio/internal/features/user/dto"
 	userbiz "origadmin/application/origstudio/internal/features/user/biz"
@@ -57,7 +55,7 @@ type AdminHandler struct {
 	articleUC      *contentbiz.ArticleUseCase
 	userUC         *userbiz.UserUseCase
 	permChecker    authbiz.PermissionChecker
-	db             *entity.Client
+	statsRepo      *systemdal.StatsRepo
 	appVersion     string
 	dbDialect      string
 	startTime      time.Time
@@ -74,9 +72,8 @@ func NewAdminHandler(
 	articleUC *contentbiz.ArticleUseCase,
 	userUC *userbiz.UserUseCase,
 	permChecker authbiz.PermissionChecker,
-	db *entity.Client,
-	appVersion string,
-	dbDialect string,
+	statsRepo *systemdal.StatsRepo,
+	adminCfg *AdminConfig,
 ) *AdminHandler {
 	return &AdminHandler{
 		jwt:            jwt,
@@ -89,9 +86,9 @@ func NewAdminHandler(
 		articleUC:      articleUC,
 		userUC:         userUC,
 		permChecker:    permChecker,
-		db:             db,
-		appVersion:     appVersion,
-		dbDialect:      dbDialect,
+		statsRepo:      statsRepo,
+		appVersion:     adminCfg.AppVersion,
+		dbDialect:      adminCfg.DBDialect,
 		startTime:      time.Now(),
 	}
 }
@@ -240,83 +237,38 @@ func (h *AdminHandler) RegisterRoutes(r http2.Router) {
 func (h *AdminHandler) getDashboardStats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
 
-		today := time.Now().Truncate(24 * time.Hour)
-
-		// Total users
-		totalUsers, _ := h.db.User.Query().Count(ctx)
-
-		// Total media
-		totalMedia, _ := h.db.Media.Query().Count(ctx)
-
-		// Total views
-		var totalViews int64
-		mediaList, err := h.db.Media.Query().All(ctx)
-		if err == nil {
-			for _, m := range mediaList {
-				totalViews += m.ViewCount
-			}
+		if h.statsRepo == nil {
+			server.Fail(gc, server.ErrInternal, "stats service not available")
+			return
 		}
 
-		// Total comments
-		totalComments, _ := h.db.Comment.Query().Count(ctx)
-
-		// Total subscribers (subscriptions)
-		totalSubscribers, _ := h.db.Subscription.Query().Count(ctx)
-
-		// New users today
-		newUsersToday, _ := h.db.User.Query().Where(user.DateAddedGTE(today)).Count(ctx)
-
-		// New media today
-		newMediaToday, _ := h.db.Media.Query().Where(media.CreateTimeGTE(today)).Count(ctx)
-
-		// New comments today
-		newCommentsToday, _ := h.db.Comment.Query().Where(comment.CreateTimeGTE(today)).Count(ctx)
-
-		// New subscribers today
-		newSubscribersToday, _ := h.db.Subscription.Query().Where(subscription.CreateTimeGTE(today)).Count(ctx)
-
-		// Media by type
-		videoCount, _ := h.db.Media.Query().Where(media.TypeEQ("video")).Count(ctx)
-		imageCount, _ := h.db.Media.Query().Where(media.TypeEQ("image")).Count(ctx)
-		audioCount, _ := h.db.Media.Query().Where(media.TypeEQ("audio")).Count(ctx)
-		otherMediaCount := totalMedia - videoCount - imageCount - audioCount
-
-		// Users by role
-		adminCount, _ := h.db.User.Query().Where(user.RoleEQ("admin")).Count(ctx)
-		editorCount, _ := h.db.User.Query().Where(user.RoleEQ("editor")).Count(ctx)
-		regularCount, _ := h.db.User.Query().Where(user.RoleEQ("user")).Count(ctx)
+		stats, err := h.statsRepo.GetExtendedDashboardStats(r.Context())
+		if err != nil {
+			server.Fail(gc, server.ErrInternal, err.Error())
+			return
+		}
 
 		server.OK(gc, gin.H{
-			"total_users":           totalUsers,
-			"total_media":           totalMedia,
-			"total_views":           totalViews,
-			"total_comments":        totalComments,
-			"total_subscribers":     totalSubscribers,
+			"total_users":           stats.TotalUsers,
+			"total_media":           stats.TotalMedia,
+			"total_views":           stats.TotalViews,
+			"total_comments":        stats.TotalComments,
+			"total_subscribers":     stats.TotalSubscribers,
 			"total_revenue":         0,
 			"active_users":          0,
-			"new_users_today":       newUsersToday,
-			"new_media_today":       newMediaToday,
+			"new_users_today":       stats.NewUsersToday,
+			"new_media_today":       stats.NewMediaToday,
 			"new_views_today":       0,
-			"new_comments_today":    newCommentsToday,
-			"new_subscribers_today": newSubscribersToday,
-			"media_by_type": gin.H{
-				"video": videoCount,
-				"image": imageCount,
-				"audio": audioCount,
-				"other": otherMediaCount,
-			},
-			"users_by_role": gin.H{
-				"admin":  adminCount,
-				"editor": editorCount,
-				"user":   regularCount,
-			},
-			"views_by_date":   []interface{}{},
-			"media_by_date":   []interface{}{},
-			"top_categories":  []interface{}{},
-			"top_creators":    []interface{}{},
-			"top_media":       []interface{}{},
+			"new_comments_today":    stats.NewCommentsToday,
+			"new_subscribers_today": stats.NewSubsToday,
+			"media_by_type":         stats.MediaByType,
+			"users_by_role":         stats.UsersByRole,
+			"views_by_date":         []interface{}{},
+			"media_by_date":         []interface{}{},
+			"top_categories":        []interface{}{},
+			"top_creators":          []interface{}{},
+			"top_media":             []interface{}{},
 		})
 	}
 }
@@ -413,7 +365,7 @@ func (h *AdminHandler) getAllEncodingTasks() http.HandlerFunc {
 			filter.PageSize = ps
 		}
 		// Normalize pagination parameters
-		page, pageSize := repo.NormalizeHTTPPagination(filter.Page, filter.PageSize)
+		page, pageSize := repotypes.NormalizeHTTPPagination(filter.Page, filter.PageSize)
 		filter.Page = page
 		filter.PageSize = pageSize
 
@@ -597,7 +549,7 @@ func (h *AdminHandler) getSystemSettings() http.HandlerFunc {
 			return
 		}
 
-		grouped := make(map[string][]*entity.Setting)
+		grouped := make(map[string][]*systemdto.SettingDTO)
 		for _, item := range items {
 			masked := h.settingUC.MaskSensitive(item)
 			cat := string(item.Category)
@@ -681,12 +633,12 @@ func (h *AdminHandler) updateSystemSettings() http.HandlerFunc {
 			return
 		}
 
-		var updated []*entity.Setting
+		var updated []*systemdto.SettingDTO
 		for _, item := range req.Settings {
 			existing, err := h.settingUC.GetByKey(r.Context(), item.Key)
 			if err != nil {
-				defaults := systembiz.DefaultSettings()
-				var defaultSetting *entity.Setting
+				defaults := systemdal.DefaultSettings()
+				var defaultSetting *systemdto.SettingDTO
 				for _, d := range defaults {
 					if d.Key == item.Key {
 						defaultSetting = d
@@ -705,7 +657,7 @@ func (h *AdminHandler) updateSystemSettings() http.HandlerFunc {
 				return
 			}
 
-			s := &entity.Setting{
+			s := &systemdto.SettingDTO{
 				Key:           existing.Key,
 				Value:         item.Value,
 				Type:          existing.Type,
@@ -750,7 +702,7 @@ func (h *AdminHandler) listTags() http.HandlerFunc {
 		sortOrder := gc.DefaultQuery("sort_order", "desc")
 
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 		// Get tags
 		tags, total, err := h.tagService.List(
@@ -815,12 +767,11 @@ func (h *AdminHandler) createTag() http.HandlerFunc {
 			return
 		}
 
-		tag := &entity.Tag{
+		tag := &dto.TagDTO{
 			Title:       req.Name,
 			Description: req.Description,
 			Color:       req.Color,
-			// B087-R2 Fix: Parse frontend status string to DB enum
-			Status: ParseTagStatus(req.Status),
+			Status:      ParseTagStatus(req.Status),
 		}
 
 		// Auto-generate slug from name when not provided
@@ -859,12 +810,11 @@ func (h *AdminHandler) updateTag() http.HandlerFunc {
 			return
 		}
 
-		updates := &entity.Tag{
+		updates := &dto.TagDTO{
 			Title:       req.Name,
 			Description: req.Description,
 			Color:       req.Color,
-			// B087-R2 Fix: Parse frontend status string to DB enum
-			Status: ParseTagStatus(req.Status),
+			Status:      ParseTagStatus(req.Status),
 		}
 
 		if req.Slug != "" {
@@ -953,7 +903,7 @@ func (h *AdminHandler) adminListChannels() http.HandlerFunc {
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.channelUC.ListChannels(r.Context(), page, pageSize)
 		if err != nil {
@@ -1127,7 +1077,7 @@ func (h *AdminHandler) adminListPlaylists() http.HandlerFunc {
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.channelUC.ListPlaylists(r.Context(), page, pageSize)
 		if err != nil {
@@ -1286,12 +1236,12 @@ func (h *AdminHandler) adminListUsers() http.HandlerFunc {
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 		keyword := gc.Query("keyword")
 
 		opts := &userdto.UserQueryOption{
-			QueryOption: repo.QueryOption{
+			QueryOption: repotypes.QueryOption{
 				Page:     int32(page),
 				PageSize: int32(pageSize),
 				Keyword:  keyword,
@@ -1637,10 +1587,10 @@ func (h *AdminHandler) adminListMedias() http.HandlerFunc {
 		gc := ginadapter.GetGinContext(r)
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
-		page, pageSize = repo.NormalizePagination(page, pageSize)
+		page, pageSize = repotypes.NormalizePagination(page, pageSize)
 
 		opts := &mediadto.MediaQueryOption{
-			QueryOption: repo.QueryOption{
+			QueryOption: repotypes.QueryOption{
 				Page:     int32(page),
 				PageSize: int32(pageSize),
 				Keyword:  gc.Query("keyword"),
@@ -2201,7 +2151,7 @@ func (h *AdminHandler) adminListCategories() http.HandlerFunc {
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 		total := len(categories)
 		start := (page - 1) * pageSize

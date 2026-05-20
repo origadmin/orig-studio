@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/channel"
-	"origadmin/application/origstudio/internal/data/entity/playlist"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
+	"origadmin/application/origstudio/internal/dal/entity/playlist"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 

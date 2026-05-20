@@ -15,11 +15,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/data/convpb"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/category"
-	"origadmin/application/origstudio/internal/data/entity/encodingtask"
-	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/dal/convpb"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/category"
+	"origadmin/application/origstudio/internal/dal/entity/encodingtask"
+	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
@@ -101,22 +101,67 @@ func (r *mediaRepo) Get(
 	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
-// GetWithEntity returns both entity.Media (with loaded Edges) and types.Media.
+// EntityToMediaEntityDTO converts an entity.Media to a dto.MediaEntityDTO.
+func EntityToMediaEntityDTO(m *entity.Media) *dto.MediaEntityDTO {
+	if m == nil {
+		return nil
+	}
+	result := &dto.MediaEntityDTO{
+		ID:              m.ID,
+		Title:           m.Title,
+		Type:            dto.MediaEntityType(string(m.Type)),
+		URL:             m.URL,
+		ShortToken:      m.ShortToken,
+		Status:          string(m.State),
+		ReviewStatus:    string(m.ReviewStatus),
+		SpriteStatus:    m.SpriteStatus,
+		SpritePath:      m.SpritePath,
+		VttPath:         m.VttPath,
+		Thumbnail:       m.Thumbnail,
+		ThumbnailTime:   m.ThumbnailTime,
+		PreviewFilePath: m.PreviewFilePath,
+		Width:           m.Width,
+		Height:          m.Height,
+		Duration:        float64(m.Duration),
+		ViewCount:       m.ViewCount,
+		LikeCount:       m.LikeCount,
+		DislikeCount:    m.DislikeCount,
+		FavoriteCount:   m.FavoriteCount,
+		CommentCount:    m.CommentCount,
+		CreateTime:      m.CreateTime,
+		UpdateTime:      m.UpdateTime,
+	}
+	// Populate edge data if loaded
+	if m.Edges.User != nil {
+		result.UserID = m.Edges.User.ID
+		result.UserName = m.Edges.User.Username
+		result.UserNickname = m.Edges.User.Name
+		result.UserAvatar = m.Edges.User.Avatar
+		result.UserSlug = m.Edges.User.Slug
+	}
+	if m.Edges.Category != nil {
+		result.CategoryID = int(m.Edges.Category.ID)
+		result.CategoryName = m.Edges.Category.Name
+	}
+	return result
+}
+
+// GetWithEntity returns both MediaEntityDTO (with loaded edges) and types.Media.
 func (r *mediaRepo) GetWithEntity(
 	ctx context.Context,
 	idOrShortToken string,
 	_ ...*dto.MediaQueryOption,
-) (*entity.Media, *types.Media, error) {
-	// 优先按 short_token 查询
+) (*dto.MediaEntityDTO, *types.Media, error) {
+	// Try short_token first
 	m, err := r.db.Media.Query().
 		Where(media.ShortTokenEQ(idOrShortToken)).
 		WithUser().
 		WithCategory().
 		Only(ctx)
 	if err == nil {
-		return m, convpb.ConvertMediaToMediaPBFull(m), nil
+		return EntityToMediaEntityDTO(m), convpb.ConvertMediaToMediaPBFull(m), nil
 	}
-	// 失败后按 ID 查询
+	// Fall back to ID
 	m, err = r.db.Media.Query().
 		Where(media.IDEQ(idOrShortToken)).
 		WithUser().
@@ -125,7 +170,7 @@ func (r *mediaRepo) GetWithEntity(
 	if err != nil {
 		return nil, nil, err
 	}
-	return m, convpb.ConvertMediaToMediaPBFull(m), nil
+	return EntityToMediaEntityDTO(m), convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 func (r *mediaRepo) List(
@@ -259,12 +304,12 @@ func (r *mediaRepo) List(
 	return result, int32(total), nil
 }
 
-// ListWithEntities returns both entity.Media (with loaded Edges) and types.Media.
-// This allows the server layer to access Edges (e.g., User, Category) without N+1 queries.
+// ListWithEntities returns both MediaEntityDTO (with loaded edges) and types.Media.
+// This allows the server layer to access edges (e.g., User, Category) without N+1 queries.
 func (r *mediaRepo) ListWithEntities(
 	ctx context.Context,
 	opts ...*dto.MediaQueryOption,
-) ([]*entity.Media, []*types.Media, int32, error) {
+) ([]*dto.MediaEntityDTO, []*types.Media, int32, error) {
 	opt := &dto.MediaQueryOption{}
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -379,10 +424,12 @@ func (r *mediaRepo) ListWithEntities(
 	}
 
 	result := make([]*types.Media, len(items))
+	entityDTOs := make([]*dto.MediaEntityDTO, len(items))
 	for i, item := range items {
 		result[i] = convpb.ConvertMediaToMediaPBFull(item)
+		entityDTOs[i] = EntityToMediaEntityDTO(item)
 	}
-	return items, result, int32(total), nil
+	return entityDTOs, result, int32(total), nil
 }
 
 func (r *mediaRepo) Create(
@@ -442,11 +489,11 @@ func (r *mediaRepo) Create(
 	return convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
-// CreateWithEntity creates a new media and returns both entity.Media and types.Media.
+// CreateWithEntity creates a new media and returns both MediaEntityDTO and types.Media.
 func (r *mediaRepo) CreateWithEntity(
 	ctx context.Context,
 	in *types.Media,
-) (*entity.Media, *types.Media, error) {
+) (*dto.MediaEntityDTO, *types.Media, error) {
 	create := r.db.Media.Create().
 		SetTitle(in.Title).
 		SetURL(in.Url).
@@ -490,7 +537,7 @@ func (r *mediaRepo) CreateWithEntity(
 	if err != nil {
 		return nil, nil, err
 	}
-	return m, convpb.ConvertMediaToMediaPBFull(m), nil
+	return EntityToMediaEntityDTO(m), convpb.ConvertMediaToMediaPBFull(m), nil
 }
 
 func (r *mediaRepo) Update(
@@ -518,10 +565,6 @@ func (r *mediaRepo) Update(
 	if in.EncodingStatus != "" {
 		update = update.SetEncodingStatus(in.EncodingStatus)
 	}
-	// Uuid field is deprecated, use Id instead
-	// if in.Uuid != "" {
-	// 	update = update.SetUUID(in.Uuid)
-	// }
 	if in.Duration > 0 {
 		update = update.SetDuration(int(in.Duration))
 	}
@@ -803,16 +846,24 @@ func (r *mediaRepo) UpdateDimensions(ctx context.Context, mediaID string, width,
 		Exec(ctx)
 }
 
-// GetEntityByID returns the raw entity.Media by ID for accessing internal fields.
-func (r *mediaRepo) GetEntityByID(ctx context.Context, id string) (*entity.Media, error) {
-	return r.db.Media.Get(ctx, id)
+// GetEntityByID returns the MediaEntityDTO by ID for accessing internal fields.
+func (r *mediaRepo) GetEntityByID(ctx context.Context, id string) (*dto.MediaEntityDTO, error) {
+	m, err := r.db.Media.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return EntityToMediaEntityDTO(m), nil
 }
 
-// GetEntityByShortToken returns the raw entity.Media by short_token for accessing internal fields.
-func (r *mediaRepo) GetEntityByShortToken(ctx context.Context, shortToken string) (*entity.Media, error) {
-	return r.db.Media.Query().
+// GetEntityByShortToken returns the MediaEntityDTO by short_token for accessing internal fields.
+func (r *mediaRepo) GetEntityByShortToken(ctx context.Context, shortToken string) (*dto.MediaEntityDTO, error) {
+	m, err := r.db.Media.Query().
 		Where(media.ShortTokenEQ(shortToken)).
 		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return EntityToMediaEntityDTO(m), nil
 }
 
 // convertCategoryToProto converts entity.Category → proto types.Category.

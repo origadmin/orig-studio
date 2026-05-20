@@ -3,10 +3,10 @@ package service
 import (
 	"strconv"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/features/content/biz"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/domain/types"
 )
 
 type FeedHandler struct {
@@ -45,7 +45,7 @@ func (h *FeedHandler) getFeed() http2.HandlerFunc {
 		if pageSize == 0 {
 			pageSize = 20
 		}
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		medias, total, err := h.uc.ListLatest(ctx.Request().Context(), page, pageSize)
 		if err != nil {

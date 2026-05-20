@@ -5,12 +5,12 @@ import (
 	"regexp"
 	"strconv"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/helpers/hashtag"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	"origadmin/application/origstudio/internal/pkg/hashtag"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/features/admin/dto"
 
 	"github.com/gin-gonic/gin"
 	"origadmin/application/origstudio/internal/server"
@@ -45,17 +45,12 @@ func (h *AdminTagHandler) RegisterRoutes(r http2.Router) {
 }
 
 // listTags handles GET /admin/tags
-// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
-// Also supports both "search" and "keyword" query parameters.
 func (h *AdminTagHandler) listTags() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		// Parse query parameters
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 
-		// B087-R2 Fix: Support both "search" and "keyword" parameters.
-		// Frontend sends "keyword", backend originally expected "search".
 		search := gc.Query("search")
 		if search == "" {
 			search = gc.Query("keyword")
@@ -65,23 +60,18 @@ func (h *AdminTagHandler) listTags() http.HandlerFunc {
 		sortBy := gc.DefaultQuery("sort_by", "create_time")
 		sortOrder := gc.DefaultQuery("sort_order", "desc")
 
-		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
-		// Get tags
 		tags, total, err := h.service.List(r.Context(), page, pageSize, search, status, sortBy, sortOrder)
 		if err != nil {
 			server.Fail(gc, 10000, "Failed to list tags")
 			return
 		}
 
-		// B087-R2 Fix: Convert entity.Tag to TagResponse DTO
 		tagResponses := ToTagResponseList(tags)
 
-		// Calculate total pages
 		totalPages := (int(total) + pageSize - 1) / pageSize
 
-		// Return response with frontend-compatible field names
 		server.OK(gc, gin.H{
 			"items":       tagResponses,
 			"total":       total,
@@ -93,7 +83,6 @@ func (h *AdminTagHandler) listTags() http.HandlerFunc {
 }
 
 // getTag handles GET /admin/tags/:id
-// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
 func (h *AdminTagHandler) getTag() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
@@ -105,20 +94,17 @@ func (h *AdminTagHandler) getTag() http.HandlerFunc {
 			return
 		}
 
-		// B087-R2 Fix: Convert to TagResponse DTO
 		server.OK(gc, ToTagResponse(tag))
 	}
 }
 
 // createTag handles POST /admin/tags
-// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
-// Also maps frontend "status" (lowercase) to DB enum.
 func (h *AdminTagHandler) createTag() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
 		var req struct {
 			Name        string `json:"name" binding:"required"`
-			Slug        string `json:"slug"` // Optional: auto-generated from name when empty
+			Slug        string `json:"slug"`
 			Description string `json:"description"`
 			Color       string `json:"color"`
 			Status      string `json:"status"`
@@ -134,15 +120,13 @@ func (h *AdminTagHandler) createTag() http.HandlerFunc {
 			return
 		}
 
-		tag := &entity.Tag{
+		tag := &dto.TagDTO{
 			Title:       req.Name,
 			Description: req.Description,
 			Color:       req.Color,
-			// B087-R2 Fix: Parse frontend status string to DB enum
-			Status: ParseTagStatus(req.Status),
+			Status:      ParseTagStatus(req.Status),
 		}
 
-		// Auto-generate slug from name when not provided
 		if req.Slug != "" {
 			tag.Slug = req.Slug
 		} else {
@@ -155,13 +139,11 @@ func (h *AdminTagHandler) createTag() http.HandlerFunc {
 			return
 		}
 
-		// B087-R2 Fix: Convert to TagResponse DTO
 		server.OK(gc, ToTagResponse(createdTag))
 	}
 }
 
 // updateTag handles PUT /admin/tags/:id
-// B087-R2 Fix: Uses TagResponse DTO for frontend-compatible field names.
 func (h *AdminTagHandler) updateTag() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
@@ -185,12 +167,11 @@ func (h *AdminTagHandler) updateTag() http.HandlerFunc {
 			return
 		}
 
-		updates := &entity.Tag{
+		updates := &dto.TagDTO{
 			Title:       req.Name,
 			Description: req.Description,
 			Color:       req.Color,
-			// B087-R2 Fix: Parse frontend status string to DB enum
-			Status: ParseTagStatus(req.Status),
+			Status:      ParseTagStatus(req.Status),
 		}
 
 		if req.Slug != "" {
@@ -203,7 +184,6 @@ func (h *AdminTagHandler) updateTag() http.HandlerFunc {
 			return
 		}
 
-		// B087-R2 Fix: Convert to TagResponse DTO
 		server.OK(gc, ToTagResponse(updatedTag))
 	}
 }
@@ -262,7 +242,6 @@ func (h *AdminTagHandler) bulkTagOperation() http.HandlerFunc {
 func (h *AdminTagHandler) exportTags() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		// TODO: Implement export functionality
 		server.OK(gc, gin.H{
 			"message": "Export functionality not implemented yet",
 		})
@@ -273,7 +252,6 @@ func (h *AdminTagHandler) exportTags() http.HandlerFunc {
 func (h *AdminTagHandler) importTags() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		// TODO: Implement import functionality
 		server.OK(gc, gin.H{
 			"message": "Import functionality not implemented yet",
 		})

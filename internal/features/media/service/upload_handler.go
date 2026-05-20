@@ -14,10 +14,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/data/enums"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/dal/enums"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/server"
 	"origadmin/application/origstudio/internal/features/media/biz"
 )

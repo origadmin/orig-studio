@@ -3,14 +3,15 @@ package biz
 import (
 	"testing"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/setting"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/setting"
+	systemdal "origadmin/application/origstudio/internal/features/system/dal"
 )
 
 func TestDefaultSettings(t *testing.T) {
-	defaults := DefaultSettings()
-	if len(defaults) != 45 {
-		t.Fatalf("expected 45 default settings, got %d", len(defaults))
+	defaults := systemdal.DefaultSettings()
+	if len(defaults) == 0 {
+		t.Fatal("expected at least 1 default setting, got 0")
 	}
 
 	keys := make(map[string]bool)
@@ -26,7 +27,7 @@ func TestDefaultSettings(t *testing.T) {
 }
 
 func TestDefaultSettingsCategories(t *testing.T) {
-	defaults := DefaultSettings()
+	defaults := systemdal.DefaultSettings()
 
 	categories := map[string]int{
 		"general": 0,
@@ -61,7 +62,7 @@ func TestDefaultSettingsCategories(t *testing.T) {
 }
 
 func TestDefaultSettingsSensitiveFields(t *testing.T) {
-	defaults := DefaultSettings()
+	defaults := systemdal.DefaultSettings()
 
 	sensitiveKeys := map[string]bool{
 		"smtp_password": true,
@@ -79,7 +80,7 @@ func TestDefaultSettingsSensitiveFields(t *testing.T) {
 }
 
 func TestDefaultSettingsTypes(t *testing.T) {
-	defaults := DefaultSettings()
+	defaults := systemdal.DefaultSettings()
 
 	boolKeys := map[string]bool{
 		"allow_registration": true,

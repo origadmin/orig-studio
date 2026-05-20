@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origstudio/internal/infra/auth"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	"origadmin/application/origstudio/internal/domain/types"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/server"
 )
@@ -176,7 +176,7 @@ func (h *CommentModerationHandler) listAdminComments() http.HandlerFunc {
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		// Normalize pagination parameters
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.moderationUC.ListAdminComments(ctx, mediaID, status, reportStatus, tree, page, pageSize)
 		if err != nil {

@@ -19,8 +19,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/enums"
-	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 	"origadmin/application/origstudio/internal/infra/pubsub"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
@@ -307,7 +307,6 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 			Profile:      profile,
 			InputPath:    fullPath,
 			OutputDir:    outputDir,
-			UUID:         mediaUUID,
 			EncodingRepo: h.encodingRepo,
 			MediaUC:      h.mediaUC,
 			Logger:       h.logger,

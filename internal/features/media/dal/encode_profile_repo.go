@@ -3,8 +3,8 @@ package dal
 import (
 	"context"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/encodeprofile"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/encodeprofile"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

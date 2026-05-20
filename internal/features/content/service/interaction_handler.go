@@ -10,9 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/server"
@@ -146,7 +146,7 @@ func (h *InteractionHandler) getSubscriptions() http2.HandlerFunc {
 
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		_ = claims
 		_ = page
@@ -181,7 +181,7 @@ func (h *InteractionHandler) getFollowers() http2.HandlerFunc {
 
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
-		page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		_ = claims
 		_ = page

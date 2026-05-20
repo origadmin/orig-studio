@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 )

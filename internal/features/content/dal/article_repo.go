@@ -11,9 +11,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/data/convpb"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/article"
+	"origadmin/application/origstudio/internal/dal/convpb"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/article"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 

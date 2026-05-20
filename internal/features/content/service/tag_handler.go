@@ -9,10 +9,10 @@ import (
 
 	types "origadmin/application/origstudio/api/gen/v1/types"
 	pb "origadmin/application/origstudio/api/gen/v1/media"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/server"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
@@ -143,7 +143,7 @@ func (h *TagHandler) listTags() http2.HandlerFunc {
 		if limit == 0 {
 			limit = 100
 		}
-		page, limit = repo.NormalizeHTTPPagination(page, limit)
+		page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 		items, total, err := h.uc.ListTags(ctx.Request().Context(), page, limit)
 		if err != nil {
 			http2.Fail(ctx, http2.ErrInternal, err.Error())

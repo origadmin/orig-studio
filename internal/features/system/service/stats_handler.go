@@ -3,14 +3,14 @@ package service
 import (
 	"net/http"
 
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	systemdal "origadmin/application/origstudio/internal/features/system/dal"
 	mediabiz "origadmin/application/origstudio/internal/features/media/biz"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 )
 
 // StatsHandler handles stats-related routes.

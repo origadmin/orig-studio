@@ -1,0 +1,331 @@
+syntax = "proto3";
+
+package api.v1.services.content;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "v1/types/user.proto";
+import "v1/types/media.proto";
+
+option go_package = "origadmin/application/origstudio/api/gen/content;content";
+option java_multiple_files = true;
+option java_outer_classname = "OrigStudioServiceContentProto";
+option java_package = "com.origstudio.api.v1.services.content";
+option objc_class_prefix = "OrigStudioContent";
+
+// ContentService handles content interactions: comments, likes, favorites, notifications, feeds.
+service ContentService {
+  // ========== Comments ==========
+  rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/medias/{media_id}/comments"
+      body: "*"
+    };
+  }
+  rpc GetComment(GetCommentRequest) returns (GetCommentResponse) {
+    option (google.api.http) = {get: "/api/v1/comments/{id}"};
+  }
+  rpc UpdateComment(UpdateCommentRequest) returns (UpdateCommentResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/comments/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse) {
+    option (google.api.http) = {delete: "/api/v1/comments/{id}"};
+  }
+  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse) {
+    option (google.api.http) = {get: "/api/v1/medias/{media_id}/comments"};
+  }
+
+  // ========== Likes ==========
+  rpc ToggleLike(ToggleLikeRequest) returns (ToggleLikeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/medias/{media_id}/like"
+      body: "*"
+    };
+  }
+  rpc ListLikes(ListLikesRequest) returns (ListLikesResponse) {
+    option (google.api.http) = {get: "/api/v1/medias/{media_id}/likes"};
+  }
+
+  // ========== Favorites ==========
+  rpc ToggleFavorite(ToggleFavoriteRequest) returns (ToggleFavoriteResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/medias/{media_id}/favorite"
+      body: "*"
+    };
+  }
+  rpc ListFavorites(ListFavoritesRequest) returns (ListFavoritesResponse) {
+    option (google.api.http) = {get: "/api/v1/me/favorites"};
+  }
+
+  // ========== Notifications ==========
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse) {
+    option (google.api.http) = {get: "/api/v1/me/notifications"};
+  }
+  rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/notifications/{id}/read"
+    };
+  }
+  rpc MarkAllNotificationsRead(MarkAllNotificationsReadRequest) returns (MarkAllNotificationsReadResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/notifications/read-all"
+    };
+  }
+
+  // ========== Feed ==========
+  rpc GetFeed(GetFeedRequest) returns (GetFeedResponse) {
+    option (google.api.http) = {get: "/api/v1/feed"};
+  }
+
+  // ========== Portal ==========
+  rpc GetPortalHome(GetPortalHomeRequest) returns (GetPortalHomeResponse) {
+    option (google.api.http) = {get: "/api/v1/portal/home"};
+  }
+  rpc GetPortalTrending(GetPortalTrendingRequest) returns (GetPortalTrendingResponse) {
+    option (google.api.http) = {get: "/api/v1/portal/trending"};
+  }
+  rpc GetPortalSubscriptionFeed(GetPortalSubscriptionFeedRequest) returns (GetPortalSubscriptionFeedResponse) {
+    option (google.api.http) = {get: "/api/v1/portal/subscriptions"};
+  }
+
+  // ========== Categories & Tags ==========
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse) {
+    option (google.api.http) = {get: "/api/v1/categories"};
+  }
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse) {
+    option (google.api.http) = {get: "/api/v1/tags"};
+  }
+}
+
+// ========== Comment Messages ==========
+
+message Comment {
+  int64 id = 1 [json_name = "id"];
+  string uid = 2 [json_name = "uid"];
+  string text = 3 [json_name = "text"];
+  int64 media_id = 4 [json_name = "media_id"];
+  int64 user_id = 5 [json_name = "user_id"];
+  int64 parent_id = 6 [json_name = "parent_id"];
+  google.protobuf.Timestamp created_at = 7 [json_name = "created_at"];
+  google.protobuf.Timestamp updated_at = 8 [json_name = "updated_at"];
+  api.v1.services.types.User user = 9 [json_name = "user"];
+  repeated Comment replies = 10 [json_name = "replies"];
+}
+
+message CreateCommentRequest {
+  int64 media_id = 1 [json_name = "media_id"];
+  string text = 2 [json_name = "text"];
+  int64 parent_id = 3 [json_name = "parent_id"];
+}
+
+message CreateCommentResponse {
+  Comment comment = 1 [json_name = "comment"];
+}
+
+message GetCommentRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
+message GetCommentResponse {
+  Comment comment = 1 [json_name = "comment"];
+}
+
+message UpdateCommentRequest {
+  int64 id = 1 [json_name = "id"];
+  string text = 2 [json_name = "text"];
+}
+
+message UpdateCommentResponse {
+  Comment comment = 1 [json_name = "comment"];
+}
+
+message DeleteCommentRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
+message DeleteCommentResponse {
+  google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+message ListCommentsRequest {
+  int64 media_id = 1 [json_name = "media_id"];
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message ListCommentsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated Comment comments = 2 [json_name = "comments"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// ========== Like Messages ==========
+
+message ToggleLikeRequest {
+  int64 media_id = 1 [json_name = "media_id"];
+}
+
+message ToggleLikeResponse {
+  bool liked = 1 [json_name = "liked"];
+  int64 total_likes = 2 [json_name = "total_likes"];
+}
+
+message ListLikesRequest {
+  int64 media_id = 1 [json_name = "media_id"];
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message ListLikesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.User users = 2 [json_name = "users"];
+}
+
+// ========== Favorite Messages ==========
+
+message ToggleFavoriteRequest {
+  int64 media_id = 1 [json_name = "media_id"];
+}
+
+message ToggleFavoriteResponse {
+  bool favorited = 1 [json_name = "favorited"];
+  int64 total_favorites = 2 [json_name = "total_favorites"];
+}
+
+message ListFavoritesRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message ListFavoritesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media medias = 2 [json_name = "medias"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// ========== Notification Messages ==========
+
+message Notification {
+  int64 id = 1 [json_name = "id"];
+  string type = 2 [json_name = "type"];
+  string title = 3 [json_name = "title"];
+  string body = 4 [json_name = "body"];
+  bool is_read = 5 [json_name = "is_read"];
+  google.protobuf.Timestamp created_at = 6 [json_name = "created_at"];
+  int64 actor_id = 7 [json_name = "actor_id"];
+  api.v1.services.types.User actor = 8 [json_name = "actor"];
+  int64 media_id = 9 [json_name = "media_id"];
+}
+
+message ListNotificationsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string type = 3 [json_name = "type"];
+}
+
+message ListNotificationsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated Notification notifications = 2 [json_name = "notifications"];
+  int32 unread_count = 3 [json_name = "unread_count"];
+}
+
+message MarkNotificationReadRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
+message MarkNotificationReadResponse {}
+
+message MarkAllNotificationsReadRequest {}
+
+message MarkAllNotificationsReadResponse {}
+
+// ========== Feed Messages ==========
+
+message GetFeedRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string category = 3 [json_name = "category"];
+}
+
+message GetFeedResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// ========== Portal Messages ==========
+
+message GetPortalHomeRequest {
+  int32 limit = 1 [json_name = "limit"];
+}
+
+message GetPortalHomeResponse {
+  repeated api.v1.services.types.Media featured = 1 [json_name = "featured"];
+  repeated api.v1.services.types.Media recommended = 2 [json_name = "recommended"];
+  repeated api.v1.services.types.Channel popular_channels = 3 [json_name = "popular_channels"];
+}
+
+message GetPortalTrendingRequest {
+  string period = 1 [json_name = "period"]; // "day", "week", "month"
+  int32 limit = 2 [json_name = "limit"];
+}
+
+message GetPortalTrendingResponse {
+  repeated api.v1.services.types.Media items = 1 [json_name = "items"];
+}
+
+message GetPortalSubscriptionFeedRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message GetPortalSubscriptionFeedResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// ========== Category & Tag Messages ==========
+
+message Category {
+  int64 id = 1 [json_name = "id"];
+  string name = 2 [json_name = "name"];
+  string slug = 3 [json_name = "slug"];
+  string description = 4 [json_name = "description"];
+  int64 media_count = 5 [json_name = "media_count"];
+}
+
+message Tag {
+  int64 id = 1 [json_name = "id"];
+  string name = 2 [json_name = "name"];
+  string slug = 3 [json_name = "slug"];
+  int64 media_count = 4 [json_name = "media_count"];
+}
+
+message ListCategoriesRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message ListCategoriesResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated Category categories = 2 [json_name = "categories"];
+}
+
+message ListTagsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message ListTagsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated Tag tags = 2 [json_name = "tags"];
+}

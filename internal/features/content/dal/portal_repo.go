@@ -7,12 +7,95 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/portalbanner"
-	"origadmin/application/origstudio/internal/data/entity/portalcustompage"
-	"origadmin/application/origstudio/internal/data/entity/portalnavitem"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/portalbanner"
+	"origadmin/application/origstudio/internal/dal/entity/portalcustompage"
+	"origadmin/application/origstudio/internal/dal/entity/portalnavitem"
 	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/features/content/dto"
 )
+
+// ==================== Entity-to-DTO Conversion ====================
+
+func entityToPortalNavItemDTO(e *entity.PortalNavItem) *dto.PortalNavItemDTO {
+	if e == nil {
+		return nil
+	}
+	return &dto.PortalNavItemDTO{
+		ID:         e.ID,
+		Type:       e.Type,
+		Label:      e.Label,
+		LabelI18n:  e.LabelI18n,
+		URL:        e.URL,
+		TargetType: e.TargetType,
+		TargetID:   e.TargetID,
+		Icon:       e.Icon,
+		Color:      e.Color,
+		Sequence:   e.Sequence,
+		ParentID:   e.ParentID,
+		IsVisible:  e.IsVisible,
+		OpenNewTab: e.OpenNewTab,
+		CSSClass:   e.CSSClass,
+		// Legacy compatibility
+		Target:    e.TargetType,
+		SortOrder: e.Sequence,
+		IsActive:  e.IsVisible,
+	}
+}
+
+func entityToPortalBannerDTO(e *entity.PortalBanner) *dto.PortalBannerDTO {
+	if e == nil {
+		return nil
+	}
+	return &dto.PortalBannerDTO{
+		ID:                e.ID,
+		Title:             e.Title,
+		TitleI18n:         e.TitleI18n,
+		Subtitle:          e.Subtitle,
+		SubtitleI18n:      e.SubtitleI18n,
+		BadgeText:         e.BadgeText,
+		ImageURL:          e.ImageURL,
+		ImageMobileURL:    e.ImageMobileURL,
+		BgColorStart:      e.BgColorStart,
+		BgColorEnd:        e.BgColorEnd,
+		BgOverlayOpacity:  e.BgOverlayOpacity,
+		PrimaryBtnText:    e.PrimaryBtnText,
+		PrimaryBtnURL:     e.PrimaryBtnURL,
+		SecondaryBtnText:  e.SecondaryBtnText,
+		SecondaryBtnURL:   e.SecondaryBtnURL,
+		Sequence:          e.Sequence,
+		IsActive:          e.IsActive,
+		StartAt:           e.StartAt,
+		EndAt:             e.EndAt,
+		AutoSlideInterval: e.AutoSlideInterval,
+		// Legacy compatibility
+		LinkURL:  e.PrimaryBtnURL,
+		SortOrder: e.Sequence,
+		StartTime: e.StartAt,
+		EndTime:   e.EndAt,
+	}
+}
+
+func entityToPortalCustomPageDTO(e *entity.PortalCustomPage) *dto.PortalCustomPageDTO {
+	if e == nil {
+		return nil
+	}
+	return &dto.PortalCustomPageDTO{
+		ID:             e.ID,
+		Title:          e.Title,
+		Slug:           e.Slug,
+		Type:           e.Type,
+		ContentFormat:  e.ContentFormat,
+		Content:        e.Content,
+		Layout:         e.Layout,
+		IsPublished:    e.IsPublished,
+		PublishedAt:    e.PublishedAt,
+		SeoTitle:       e.SeoTitle,
+		SeoDescription: e.SeoDescription,
+		FeaturedImage:  e.FeaturedImage,
+		ViewCount:      e.ViewCount,
+	}
+}
 
 type portalRepo struct {
 	data *Data
@@ -28,17 +111,21 @@ func NewPortalRepo(data *Data, logger log.Logger) biz.PortalRepo {
 
 // ==================== NavItem ====================
 
-func (r *portalRepo) ListNavItems(ctx context.Context) ([]*entity.PortalNavItem, error) {
+func (r *portalRepo) ListNavItems(ctx context.Context) ([]*dto.PortalNavItemDTO, error) {
 	items, err := r.data.db.PortalNavItem.Query().
 		Order(entity.Asc(portalnavitem.FieldSequence)).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list nav items: %w", err)
 	}
-	return items, nil
+	result := make([]*dto.PortalNavItemDTO, len(items))
+	for i, item := range items {
+		result[i] = entityToPortalNavItemDTO(item)
+	}
+	return result, nil
 }
 
-func (r *portalRepo) CreateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error) {
+func (r *portalRepo) CreateNavItem(ctx context.Context, item *dto.PortalNavItemDTO) (*dto.PortalNavItemDTO, error) {
 	builder := r.data.db.PortalNavItem.Create().
 		SetType(item.Type).
 		SetLabel(item.Label).
@@ -75,10 +162,10 @@ func (r *portalRepo) CreateNavItem(ctx context.Context, item *entity.PortalNavIt
 	if err != nil {
 		return nil, fmt.Errorf("create nav item: %w", err)
 	}
-	return ent, nil
+	return entityToPortalNavItemDTO(ent), nil
 }
 
-func (r *portalRepo) UpdateNavItem(ctx context.Context, item *entity.PortalNavItem) (*entity.PortalNavItem, error) {
+func (r *portalRepo) UpdateNavItem(ctx context.Context, item *dto.PortalNavItemDTO) (*dto.PortalNavItemDTO, error) {
 	builder := r.data.db.PortalNavItem.UpdateOneID(item.ID).
 		SetType(item.Type).
 		SetLabel(item.Label).
@@ -101,7 +188,7 @@ func (r *portalRepo) UpdateNavItem(ctx context.Context, item *entity.PortalNavIt
 	if err != nil {
 		return nil, fmt.Errorf("update nav item: %w", err)
 	}
-	return ent, nil
+	return entityToPortalNavItemDTO(ent), nil
 }
 
 func (r *portalRepo) DeleteNavItem(ctx context.Context, id string) error {
@@ -120,27 +207,31 @@ func (r *portalRepo) ReorderNavItems(ctx context.Context, ids []string) error {
 	return nil
 }
 
-func (r *portalRepo) GetNavItemByID(ctx context.Context, id string) (*entity.PortalNavItem, error) {
+func (r *portalRepo) GetNavItemByID(ctx context.Context, id string) (*dto.PortalNavItemDTO, error) {
 	item, err := r.data.db.PortalNavItem.Get(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("get nav item: %w", err)
 	}
-	return item, nil
+	return entityToPortalNavItemDTO(item), nil
 }
 
 // ==================== Banner ====================
 
-func (r *portalRepo) ListBanners(ctx context.Context) ([]*entity.PortalBanner, error) {
+func (r *portalRepo) ListBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error) {
 	items, err := r.data.db.PortalBanner.Query().
 		Order(entity.Asc(portalbanner.FieldSequence)).
 		All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list banners: %w", err)
 	}
-	return items, nil
+	result := make([]*dto.PortalBannerDTO, len(items))
+	for i, item := range items {
+		result[i] = entityToPortalBannerDTO(item)
+	}
+	return result, nil
 }
 
-func (r *portalRepo) CreateBanner(ctx context.Context, b *entity.PortalBanner) (*entity.PortalBanner, error) {
+func (r *portalRepo) CreateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error) {
 	builder := r.data.db.PortalBanner.Create().
 		SetTitle(b.Title).
 		SetSequence(b.Sequence).
@@ -197,10 +288,10 @@ func (r *portalRepo) CreateBanner(ctx context.Context, b *entity.PortalBanner) (
 	if err != nil {
 		return nil, fmt.Errorf("create banner: %w", err)
 	}
-	return ent, nil
+	return entityToPortalBannerDTO(ent), nil
 }
 
-func (r *portalRepo) UpdateBanner(ctx context.Context, b *entity.PortalBanner) (*entity.PortalBanner, error) {
+func (r *portalRepo) UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error) {
 	builder := r.data.db.PortalBanner.UpdateOneID(b.ID).
 		SetTitle(b.Title).
 		SetSequence(b.Sequence).
@@ -235,14 +326,14 @@ func (r *portalRepo) UpdateBanner(ctx context.Context, b *entity.PortalBanner) (
 	if err != nil {
 		return nil, fmt.Errorf("update banner: %w", err)
 	}
-	return ent, nil
+	return entityToPortalBannerDTO(ent), nil
 }
 
 func (r *portalRepo) DeleteBanner(ctx context.Context, id string) error {
 	return r.data.db.PortalBanner.DeleteOneID(id).Exec(ctx)
 }
 
-func (r *portalRepo) ToggleBanner(ctx context.Context, id string) (*entity.PortalBanner, error) {
+func (r *portalRepo) ToggleBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error) {
 	ent, err := r.data.db.PortalBanner.Get(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("get banner for toggle: %w", err)
@@ -253,10 +344,10 @@ func (r *portalRepo) ToggleBanner(ctx context.Context, id string) (*entity.Porta
 	if err != nil {
 		return nil, fmt.Errorf("toggle banner: %w", err)
 	}
-	return updated, nil
+	return entityToPortalBannerDTO(updated), nil
 }
 
-func (r *portalRepo) ListActiveBanners(ctx context.Context) ([]*entity.PortalBanner, error) {
+func (r *portalRepo) ListActiveBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error) {
 	now := time.Now()
 	query := r.data.db.PortalBanner.Query().
 		Where(portalbanner.IsActiveEQ(true)).
@@ -277,12 +368,17 @@ func (r *portalRepo) ListActiveBanners(ctx context.Context) ([]*entity.PortalBan
 		}
 		filtered = append(filtered, b)
 	}
-	return filtered, nil
+
+	result := make([]*dto.PortalBannerDTO, len(filtered))
+	for i, b := range filtered {
+		result[i] = entityToPortalBannerDTO(b)
+	}
+	return result, nil
 }
 
 // ==================== CustomPage ====================
 
-func (r *portalRepo) ListCustomPages(ctx context.Context, page, pageSize int) ([]*entity.PortalCustomPage, int, error) {
+func (r *portalRepo) ListCustomPages(ctx context.Context, page, pageSize int) ([]*dto.PortalCustomPageDTO, int, error) {
 	query := r.data.db.PortalCustomPage.Query()
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -297,10 +393,14 @@ func (r *portalRepo) ListCustomPages(ctx context.Context, page, pageSize int) ([
 	if err != nil {
 		return nil, 0, fmt.Errorf("list custom pages: %w", err)
 	}
-	return items, total, nil
+	result := make([]*dto.PortalCustomPageDTO, len(items))
+	for i, item := range items {
+		result[i] = entityToPortalCustomPageDTO(item)
+	}
+	return result, total, nil
 }
 
-func (r *portalRepo) CreateCustomPage(ctx context.Context, p *entity.PortalCustomPage) (*entity.PortalCustomPage, error) {
+func (r *portalRepo) CreateCustomPage(ctx context.Context, p *dto.PortalCustomPageDTO) (*dto.PortalCustomPageDTO, error) {
 	builder := r.data.db.PortalCustomPage.Create().
 		SetTitle(p.Title).
 		SetSlug(p.Slug).
@@ -335,28 +435,28 @@ func (r *portalRepo) CreateCustomPage(ctx context.Context, p *entity.PortalCusto
 	if err != nil {
 		return nil, fmt.Errorf("create custom page: %w", err)
 	}
-	return ent, nil
+	return entityToPortalCustomPageDTO(ent), nil
 }
 
-func (r *portalRepo) GetCustomPageByID(ctx context.Context, id string) (*entity.PortalCustomPage, error) {
+func (r *portalRepo) GetCustomPageByID(ctx context.Context, id string) (*dto.PortalCustomPageDTO, error) {
 	ent, err := r.data.db.PortalCustomPage.Get(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("get custom page: %w", err)
 	}
-	return ent, nil
+	return entityToPortalCustomPageDTO(ent), nil
 }
 
-func (r *portalRepo) GetCustomPageBySlug(ctx context.Context, slug string) (*entity.PortalCustomPage, error) {
+func (r *portalRepo) GetCustomPageBySlug(ctx context.Context, slug string) (*dto.PortalCustomPageDTO, error) {
 	ent, err := r.data.db.PortalCustomPage.Query().
 		Where(portalcustompage.SlugEQ(slug)).
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get custom page by slug: %w", err)
 	}
-	return ent, nil
+	return entityToPortalCustomPageDTO(ent), nil
 }
 
-func (r *portalRepo) UpdateCustomPage(ctx context.Context, p *entity.PortalCustomPage) (*entity.PortalCustomPage, error) {
+func (r *portalRepo) UpdateCustomPage(ctx context.Context, p *dto.PortalCustomPageDTO) (*dto.PortalCustomPageDTO, error) {
 	builder := r.data.db.PortalCustomPage.UpdateOneID(p.ID).
 		SetTitle(p.Title).
 		SetSlug(p.Slug).
@@ -383,7 +483,7 @@ func (r *portalRepo) UpdateCustomPage(ctx context.Context, p *entity.PortalCusto
 	if err != nil {
 		return nil, fmt.Errorf("update custom page: %w", err)
 	}
-	return ent, nil
+	return entityToPortalCustomPageDTO(ent), nil
 }
 
 func (r *portalRepo) DeleteCustomPage(ctx context.Context, id string) error {
@@ -397,7 +497,7 @@ func (r *portalRepo) IncrementPageViewCount(ctx context.Context, id string) erro
 	return err
 }
 
-func (r *portalRepo) ListPublishedCustomPages(ctx context.Context) ([]*entity.PortalCustomPage, error) {
+func (r *portalRepo) ListPublishedCustomPages(ctx context.Context) ([]*dto.PortalCustomPageDTO, error) {
 	items, err := r.data.db.PortalCustomPage.Query().
 		Where(portalcustompage.IsPublishedEQ(true)).
 		Order(entity.Desc(portalcustompage.FieldPublishedAt)).
@@ -405,5 +505,9 @@ func (r *portalRepo) ListPublishedCustomPages(ctx context.Context) ([]*entity.Po
 	if err != nil {
 		return nil, fmt.Errorf("list published custom pages: %w", err)
 	}
-	return items, nil
+	result := make([]*dto.PortalCustomPageDTO, len(items))
+	for i, item := range items {
+		result[i] = entityToPortalCustomPageDTO(item)
+	}
+	return result, nil
 }

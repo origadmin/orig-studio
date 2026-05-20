@@ -10,7 +10,7 @@ import (
 
 	"origadmin/application/origstudio/internal/conf"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
-	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 )
 
 type SpriteConfig struct {

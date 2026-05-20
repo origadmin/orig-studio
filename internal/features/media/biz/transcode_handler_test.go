@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

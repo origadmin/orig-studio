@@ -10,39 +10,34 @@ import (
 
 	"origadmin/application/origstudio/api/gen/v1/media"
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 )
 
 // MediaRepo is a Media repository interface.
 type MediaRepo interface {
-	// ========== 公开 API 使用 (short_token based) ==========
+	// ========== Public API (short_token based) ==========
 
-	// GetByShortToken 通过 short_token 获取媒体
-	// 用于: GET /api/v1/medias/{short_token}
+	// GetByShortToken gets media by short_token
 	GetByShortToken(context.Context, string) (*types.Media, error)
 
-	// ResolveToID 将 short_token 解析为内部 ID
-	// 用于: 后续操作需要 ID 时（如点赞计数）
+	// ResolveToID resolves short_token to internal ID
 	ResolveToID(context.Context, string) (string, error)
 
-	// ========== 内部/Admin API 使用 (ID based) ==========
+	// ========== Internal/Admin API (ID based) ==========
 
-	// GetByID 通过 UUID 获取媒体完整信息
-	// 用于: GET /api/v1/admin/medias/:id
+	// GetByID gets full media info by UUID
 	GetByID(context.Context, string) (*types.Media, error)
 
-	// ========== 原有方法（保持兼容）==========
+	// ========== Existing methods (backwards compatible) ==========
 	Get(context.Context, string, ...*MediaQueryOption) (*types.Media, error)
-	// GetWithEntity returns a single media with its loaded ent entity (including Edges).
-	// This avoids extra queries when edges (user, category) are needed by the server layer.
-	GetWithEntity(context.Context, string, ...*MediaQueryOption) (*entity.Media, *types.Media, error)
+	// GetWithEntity returns a single media with its entity-level data (including edges).
+	GetWithEntity(context.Context, string, ...*MediaQueryOption) (*MediaEntityDTO, *types.Media, error)
 	List(context.Context, ...*MediaQueryOption) ([]*types.Media, int32, error)
-	// ListWithEntities returns media list with loaded ent entities (including Edges)
-	// This avoids N+1 queries when edges (user, category) are needed by the server layer.
-	ListWithEntities(context.Context, ...*MediaQueryOption) ([]*entity.Media, []*types.Media, int32, error)
+	// ListWithEntities returns media list with entity-level data (including edges).
+	ListWithEntities(context.Context, ...*MediaQueryOption) ([]*MediaEntityDTO, []*types.Media, int32, error)
 	Create(context.Context, *types.Media, ...*MediaCreateOption) (*types.Media, error)
-	CreateWithEntity(context.Context, *types.Media) (*entity.Media, *types.Media, error)
+	// CreateWithEntity creates media and returns entity-level data.
+	CreateWithEntity(context.Context, *types.Media) (*MediaEntityDTO, *types.Media, error)
 	Update(context.Context, *types.Media, ...*MediaUpdateOption) (*types.Media, error)
 	Delete(context.Context, string) error
 
@@ -65,25 +60,24 @@ type MediaRepo interface {
 	UpdatePreviewFilePath(ctx context.Context, mediaID string, previewFilePath string) error
 	UpdateDimensions(ctx context.Context, mediaID string, width, height int) error
 
-	// ========== Entity-level data access (for handler -> biz migration) ==========
+	// ========== Entity-level data access ==========
 
-	// GetEntityByID returns the raw entity.Media by ID for accessing internal fields
+	// GetEntityByID returns the MediaEntityDTO by ID for accessing internal fields
 	// (SpriteStatus, VttPath, SpritePath, ThumbnailTime, etc.) not exposed in types.Media.
-	GetEntityByID(ctx context.Context, id string) (*entity.Media, error)
+	GetEntityByID(ctx context.Context, id string) (*MediaEntityDTO, error)
 
-	// GetEntityByShortToken returns the raw entity.Media by short_token for accessing
+	// GetEntityByShortToken returns the MediaEntityDTO by short_token for accessing
 	// internal fields not exposed in types.Media.
-	GetEntityByShortToken(ctx context.Context, shortToken string) (*entity.Media, error)
+	GetEntityByShortToken(ctx context.Context, shortToken string) (*MediaEntityDTO, error)
 
 	// ListTempMediaBefore returns media records whose URL starts with "temp/" and
-	// whose create_time is before the given cutoff. Used by CleanupExpiredTemp to
-	// find stale temp files that were never promoted (failed/expired transcodes).
+	// whose create_time is before the given cutoff.
 	ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*types.Media, error)
 }
 
 // MediaQueryOption specifies options for querying media.
 type MediaQueryOption struct {
-	repo.QueryOption
+	repotypes.QueryOption
 	Type         *int32
 	UserID       *string
 	CategoryID   *int64
@@ -109,12 +103,12 @@ type MediaCreateOption struct{}
 
 // MediaUpdateOption specifies options for updating media.
 type MediaUpdateOption struct {
-	repo.UpdateOption
+	repotypes.UpdateOption
 }
 
 // CategoryQueryOption specifies options for querying categories.
 type CategoryQueryOption struct {
-	repo.QueryOption
+	repotypes.QueryOption
 	ParentID *string
 }
 
@@ -123,15 +117,15 @@ type CategoryQueryOption struct {
 func ListMediasRequestToQueryOption(req *media.ListMediasRequest) *MediaQueryOption {
 	if req == nil {
 		return &MediaQueryOption{
-			QueryOption: repo.QueryOption{
+			QueryOption: repotypes.QueryOption{
 				Page:     1,
 				PageSize: 20,
 			},
 		}
 	}
-	page, pageSize := repo.NormalizePagination(int(req.Page), int(req.PageSize))
+	page, pageSize := repotypes.NormalizePagination(int(req.Page), int(req.PageSize))
 	opts := &MediaQueryOption{
-		QueryOption: repo.QueryOption{
+		QueryOption: repotypes.QueryOption{
 			Page:     int32(page),
 			PageSize: int32(pageSize),
 			Keyword:  req.Keyword,

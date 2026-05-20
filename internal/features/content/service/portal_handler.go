@@ -1,29 +1,32 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/data/entity"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/features/content/dto"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 )
 
 type PortalHandler struct {
-	uc        *biz.PortalUseCase
-	jwt       *auth.Manager
-	settingUC *systembiz.SettingUseCase
+	uc         *biz.PortalUseCase
+	catUC      *biz.CategoryTagUseCase
+	jwt        *auth.Manager
+	settingUC  *systembiz.SettingUseCase
 }
 
-func NewPortalHandler(uc *biz.PortalUseCase, jwt *auth.Manager, settingUC *systembiz.SettingUseCase) *PortalHandler {
-	return &PortalHandler{uc: uc, jwt: jwt, settingUC: settingUC}
+func NewPortalHandler(uc *biz.PortalUseCase, catUC *biz.CategoryTagUseCase, jwt *auth.Manager, settingUC *systembiz.SettingUseCase) *PortalHandler {
+	return &PortalHandler{uc: uc, catUC: catUC, jwt: jwt, settingUC: settingUC}
 }
 
 func (h *PortalHandler) RegisterRoutes(r http2.Router) {
@@ -59,6 +62,11 @@ func (h *PortalHandler) RegisterRoutes(r http2.Router) {
 	pages := r.Group("/p")
 	{
 		pages.GET("/:slug", server.HTTPToHandlerFunc(h.getPublicPageBySlug()))
+	}
+
+	portal := r.Group("/portal")
+	{
+		portal.GET("/config", server.HTTPToHandlerFunc(h.getPortalConfig()))
 	}
 }
 
@@ -110,7 +118,7 @@ func (h *PortalHandler) createNavItem() http.HandlerFunc {
 			openNewTab = *input.OpenNewTab
 		}
 
-		item := &entity.PortalNavItem{
+		item := &dto.PortalNavItemDTO{
 			Type:       input.Type,
 			Label:      input.Label,
 			LabelI18n:  input.LabelI18n,
@@ -172,7 +180,7 @@ func (h *PortalHandler) updateNavItem() http.HandlerFunc {
 		}
 		_ = existing
 
-		item := &entity.PortalNavItem{
+		item := &dto.PortalNavItemDTO{
 			ID: id,
 		}
 		if input.Type != "" {
@@ -298,7 +306,7 @@ func (h *PortalHandler) createBanner() http.HandlerFunc {
 			isActive = *input.IsActive
 		}
 
-		b := &entity.PortalBanner{
+		b := &dto.PortalBannerDTO{
 			Title:             input.Title,
 			TitleI18n:         input.TitleI18n,
 			Subtitle:          input.Subtitle,
@@ -369,7 +377,7 @@ func (h *PortalHandler) updateBanner() http.HandlerFunc {
 			return
 		}
 
-		b := &entity.PortalBanner{ID: id}
+		b := &dto.PortalBannerDTO{ID: id}
 		if input.Title != "" {
 			b.Title = input.Title
 		}
@@ -489,7 +497,7 @@ func (h *PortalHandler) createCustomPage() http.HandlerFunc {
 			isPublished = *input.IsPublished
 		}
 
-		p := &entity.PortalCustomPage{
+		p := &dto.PortalCustomPageDTO{
 			Title:          input.Title,
 			Slug:           input.Slug,
 			Type:           input.Type,
@@ -532,6 +540,98 @@ func (h *PortalHandler) getCustomPage() http.HandlerFunc {
 	}
 }
 
+// ==================== Public Portal Config ====================
+
+func (h *PortalHandler) getPortalConfig() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		ctx := r.Context()
+
+		modules := biz.PortalModules{
+			Articles: getPortalBool(h.settingUC, ctx, "module_articles", true),
+			Videos:   getPortalBool(h.settingUC, ctx, "module_videos", true),
+			Music:    getPortalBool(h.settingUC, ctx, "module_music", false),
+		}
+
+		configuredLayout := h.settingUC.Get(ctx, "homepage_layout")
+		if configuredLayout == "" {
+			configuredLayout = "auto"
+		}
+		layout := resolvePortalLayout(modules, configuredLayout)
+
+		site := biz.PortalSite{
+			SiteName:          h.settingUC.Get(ctx, "site_name"),
+			SiteDescription:   h.settingUC.Get(ctx, "site_description"),
+			AllowRegistration: getPortalBool(h.settingUC, ctx, "allow_registration", true),
+			AllowUpload:       getPortalBool(h.settingUC, ctx, "allow_upload", true),
+			PrimaryURL:        h.settingUC.Get(ctx, "primary_url"),
+		}
+		if urls := h.settingUC.Get(ctx, "base_urls"); urls != "" {
+			_ = json.Unmarshal([]byte(urls), &site.AllowedURLs)
+		}
+
+		navItems, _ := h.uc.ListNavItems(ctx)
+		banners, _ := h.uc.ListActiveBanners(ctx)
+		categories, _ := h.catUC.ListCategories(ctx)
+		pages, _ := h.uc.ListPublishedCustomPages(ctx)
+
+		features := map[string]bool{
+			"multiTenant":             false,
+			"auditLog":                false,
+			"advancedRBAC":            false,
+			"reviewWorkflow":          false,
+			"enterpriseNotification":  false,
+		}
+
+		resp := gin.H{
+			"modules":     modules,
+			"layout":      layout,
+			"site":        site,
+			"navigation":  navItems,
+			"banners":     banners,
+			"categories":  categories,
+			"pages":       pages,
+			"features":    features,
+		}
+
+		server.OK(gc, resp)
+	}
+}
+
+func getPortalBool(uc *systembiz.SettingUseCase, ctx context.Context, key string, defaultValue bool) bool {
+	val := uc.Get(ctx, key)
+	if val == "" {
+		return defaultValue
+	}
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultValue
+	}
+	return b
+}
+
+func resolvePortalLayout(modules biz.PortalModules, configuredLayout string) string {
+	if configuredLayout != "auto" {
+		if configuredLayout == "video" && !modules.Videos {
+			return "welcome"
+		}
+		if configuredLayout == "article" && !modules.Articles {
+			return "welcome"
+		}
+		return configuredLayout
+	}
+	if modules.Videos && modules.Articles {
+		return "mixed"
+	}
+	if modules.Videos {
+		return "video"
+	}
+	if modules.Articles {
+		return "article"
+	}
+	return "welcome"
+}
+
 func (h *PortalHandler) updateCustomPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
@@ -565,7 +665,7 @@ func (h *PortalHandler) updateCustomPage() http.HandlerFunc {
 			return
 		}
 
-		p := &entity.PortalCustomPage{ID: id}
+		p := &dto.PortalCustomPageDTO{ID: id}
 		if input.Title != "" {
 			p.Title = input.Title
 		} else {

@@ -10,9 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	"origadmin/application/origstudio/internal/domain/types"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	userbiz "origadmin/application/origstudio/internal/features/user/biz"
 	"origadmin/application/origstudio/internal/server"
@@ -180,7 +180,7 @@ func (h *MeHandler) GetPlaylists(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	// Normalize pagination parameters
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.playlistUC.ListUserPlaylists(c.Request.Context(), claims.GetUserID(), page, pageSize)
 	if err != nil {
@@ -385,7 +385,7 @@ func (h *MeHandler) GetFavorites(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	// Normalize pagination parameters
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	favorites, total, err := h.likeFavoriteUC.ListUserFavoritesPaginated(c.Request.Context(), claims.GetUserID(), page, pageSize)
 	if err != nil {
@@ -434,7 +434,7 @@ func (h *MeHandler) GetSubscriptions(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	// Normalize pagination parameters
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.userUC.GetSubscriptions(
 		c.Request.Context(),
@@ -466,7 +466,7 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	contentType := c.DefaultQuery("content_type", "")
 
@@ -680,7 +680,7 @@ func (h *MeHandler) GetFollowers(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	// Normalize pagination parameters
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.userUC.GetSubscribers(
 		c.Request.Context(),

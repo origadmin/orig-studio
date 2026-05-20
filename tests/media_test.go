@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dal"
 )

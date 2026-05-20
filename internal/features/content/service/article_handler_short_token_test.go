@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 )
 
 // TestGetArticle_ExtractsIdParam verifies the handler extracts the :id param

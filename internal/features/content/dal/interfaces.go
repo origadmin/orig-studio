@@ -7,7 +7,7 @@ package dal
 import (
 	"context"
 
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 )
 
 // ArticleRepo 文章仓库接口

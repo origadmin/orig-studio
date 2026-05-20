@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 )
 
 func SeedCategories(ctx context.Context, client *entity.Client) error {
