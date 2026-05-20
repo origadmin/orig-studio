@@ -15,9 +15,9 @@ import (
 
 	pb "origadmin/application/origstudio/api/gen/v1/user"
 	"origadmin/application/origstudio/api/gen/v1/types"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/user/biz"
 	"origadmin/application/origstudio/internal/features/user/dto"
 	"origadmin/application/origstudio/internal/server"
@@ -147,10 +147,10 @@ func (h *UserHandler) listUsers(c *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
-	page, limit = repo.NormalizeHTTPPagination(page, limit)
+	page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 
 	entities, total, err := h.uc.ListUserEntities(c.Request.Context(), &dto.UserQueryOption{
-		QueryOption: repo.QueryOption{
+		QueryOption: repotypes.QueryOption{
 			Page:     int32(page),
 			PageSize: int32(limit),
 		},
@@ -308,7 +308,7 @@ func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.uc.GetSubscriptions(
 		c.Request.Context(),
@@ -352,7 +352,7 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 	if pageSize == 0 {
 		pageSize = 20
 	}
-	page, pageSize = repo.NormalizeHTTPPagination(page, pageSize)
+	page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.uc.GetSubscribers(
 		c.Request.Context(),
@@ -397,7 +397,7 @@ func (h *UserHandler) getUserChannels(c *gin.Context) {
 	if page == 0 {
 		page = 1
 	}
-	page, limit = repo.NormalizeHTTPPagination(page, limit)
+	page, limit = repotypes.NormalizeHTTPPagination(page, limit)
 
 	server.OK(c, &pb.GetUserPlaylistsResponse{
 		Items:    []*types.Playlist{},

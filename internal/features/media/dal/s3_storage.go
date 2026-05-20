@@ -18,7 +18,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/enums"
+	"origadmin/application/origstudio/internal/dal/enums"
 )
 
 // S3Storage implements the Storage interface using S3-compatible object storage.

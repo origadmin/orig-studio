@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"time"
 
-	"origadmin/application/origstudio/internal/data/entity"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
+
+	"origadmin/application/origstudio/internal/features/content/dto"
 )
 
 // Comment represents a comment on a media (biz layer).
@@ -27,9 +27,9 @@ type Comment struct {
 	UpdateTime time.Time `json:"update_time"`
 	Status    string    `json:"status"` // PENDING, APPROVED, REJECTED
 
-	// Edges
-	User    *entity.User `json:"user,omitempty"`
-	Replies []*Comment   `json:"replies,omitempty"`
+	// Edges - use DTO instead of entity.User
+	User    *dto.CommentUserDTO `json:"user,omitempty"`
+	Replies []*Comment          `json:"replies,omitempty"`
 }
 
 // CommentRepo defines the storage operations for comments.

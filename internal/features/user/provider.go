@@ -11,7 +11,6 @@ import (
 	"origadmin/application/origstudio/internal/features/user/service"
 )
 
-// ProviderSet is the wire provider set for the user feature module.
 var ProviderSet = wire.NewSet(
 	dal.ProviderSet,
 	biz.ProviderSet,

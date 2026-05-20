@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"math/rand"
 
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/helpers/hashtag"
+	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/server"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/api/gen/v1/types"

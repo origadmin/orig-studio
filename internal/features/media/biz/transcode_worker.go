@@ -17,7 +17,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 
-	"origadmin/application/origstudio/internal/helpers/ffmpeg"
+	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

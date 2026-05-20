@@ -9,9 +9,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/comment"
 	"origadmin/application/origstudio/internal/features/content/biz"
+	"origadmin/application/origstudio/internal/features/content/dto"
 )
 
 type commentRepo struct {
@@ -162,6 +163,19 @@ func (r *commentRepo) ListByStatus(ctx context.Context, status string, page, pag
 	return res, total, nil
 }
 
+func entityUserToCommentUserDTO(u *entity.User) *dto.CommentUserDTO {
+	if u == nil {
+		return nil
+	}
+	return &dto.CommentUserDTO{
+		ID:       u.ID,
+		Username: u.Username,
+		Name:     u.Name,
+		Avatar:   u.Avatar,
+		Slug:     u.Slug,
+	}
+}
+
 func mapComment(ent *entity.Comment) *biz.Comment {
 	c := &biz.Comment{
 		ID:        ent.ID,
@@ -178,7 +192,7 @@ func mapComment(ent *entity.Comment) *biz.Comment {
 		c.ParentID = &pid
 	}
 	if ent.Edges.User != nil {
-		c.User = ent.Edges.User
+		c.User = entityUserToCommentUserDTO(ent.Edges.User)
 	}
 	if len(ent.Edges.Replies) > 0 {
 		c.Replies = make([]*biz.Comment, len(ent.Edges.Replies))

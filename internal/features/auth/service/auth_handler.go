@@ -12,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/features/user/biz"
 	"origadmin/application/origstudio/internal/features/user/dto"

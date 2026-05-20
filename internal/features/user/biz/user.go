@@ -13,12 +13,11 @@ import (
 
 	kratosLog "github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/runtime/log"
 	"github.com/origadmin/toolkits/crypto/hash"
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/features/user/dto"
 )
 
@@ -58,8 +57,8 @@ func (uc *UserUseCase) ListUsers(ctx context.Context, opts ...*dto.UserQueryOpti
 	return uc.repo.List(ctx, opts...)
 }
 
-// ListUserEntities returns raw entity.User list (includes role field not in proto types).
-func (uc *UserUseCase) ListUserEntities(ctx context.Context, opts ...*dto.UserQueryOption) ([]*entity.User, int32, error) {
+// ListUserEntities returns UserEntityDTO list (includes role field not in proto types).
+func (uc *UserUseCase) ListUserEntities(ctx context.Context, opts ...*dto.UserQueryOption) ([]*dto.UserEntityDTO, int32, error) {
 	return uc.repo.ListEntities(ctx, opts...)
 }
 
@@ -165,8 +164,8 @@ func (uc *UserUseCase) HashPassword(plainPassword string) (string, error) {
 	return uc.hasher.Hash(plainPassword)
 }
 
-// GetUserEntity returns the raw ent entity.User (for fields not in proto types, e.g. role).
-func (uc *UserUseCase) GetUserEntity(ctx context.Context, id string) (*entity.User, error) {
+// GetUserEntity returns the UserEntityDTO (for fields not in proto types, e.g. role).
+func (uc *UserUseCase) GetUserEntity(ctx context.Context, id string) (*dto.UserEntityDTO, error) {
 	return uc.repo.GetEntity(ctx, id)
 }
 
@@ -177,7 +176,7 @@ func (uc *UserUseCase) SetUserRole(ctx context.Context, id string, role string) 
 
 func (uc *UserUseCase) CountUsers(ctx context.Context) (int, error) {
 	// For now, list with 0 limit to get count if List returns total
-	_, total, err := uc.repo.List(ctx, &dto.UserQueryOption{QueryOption: repo.QueryOption{PageSize: 1}})
+	_, total, err := uc.repo.List(ctx, &dto.UserQueryOption{QueryOption: repotypes.QueryOption{PageSize: 1}})
 	return int(total), err
 }
 

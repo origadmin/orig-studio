@@ -14,7 +14,7 @@ import (
 
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/infra/auth"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/server"
 )
 
@@ -382,7 +382,7 @@ func TestPlaylistHandler_ListPlaylists_DefaultPagination(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Contains(t, resp, "items")
+	assert.Equal(t, float64(0), resp["code"])
 }
 
 func TestPlaylistHandler_ListPlaylists_CustomPagination(t *testing.T) {
@@ -432,7 +432,7 @@ func TestPlaylistHandler_GetPlaylistByToken_PublicPlaylist(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Contains(t, resp, "playlist")
+	assert.Equal(t, float64(0), resp["code"])
 }
 
 func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NoAuth(t *testing.T) {

@@ -8,12 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/comment"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	"origadmin/application/origstudio/internal/pkg/repo"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 )

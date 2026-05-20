@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/mediareviewlog"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/features/media/biz"
 )
 

@@ -13,15 +13,15 @@ import (
 
 	pb "origadmin/application/origstudio/api/gen/v1/media"
 	types "origadmin/application/origstudio/api/gen/v1/types"
-	http2 "origadmin/application/origstudio/internal/helpers/http"
-	ginadapter "origadmin/application/origstudio/internal/helpers/http/gin"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
 	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dto"
 	userbiz "origadmin/application/origstudio/internal/features/user/biz"
-	"origadmin/application/origstudio/internal/helpers/repo"
+	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/server"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 	systemservice "origadmin/application/origstudio/internal/features/system/service"
@@ -124,7 +124,7 @@ func (h *MediaHandler) listMedias(w http.ResponseWriter, r *http.Request) {
 	}
 
 	opts := &dto.MediaQueryOption{
-		QueryOption: repo.QueryOption{
+		QueryOption: repotypes.QueryOption{
 			Page:     int32(page),
 			PageSize: int32(pageSize),
 			Keyword:  gc.Query("keyword"),
@@ -186,7 +186,7 @@ func (h *MediaHandler) listFeaturedMedias(w http.ResponseWriter, r *http.Request
 	}
 
 	opts := &dto.MediaQueryOption{
-		QueryOption: repo.QueryOption{
+		QueryOption: repotypes.QueryOption{
 			Page:     1,
 			PageSize: int32(limit),
 		},
@@ -219,7 +219,7 @@ func (h *MediaHandler) listLatestMedias(w http.ResponseWriter, r *http.Request) 
 	}
 
 	opts := &dto.MediaQueryOption{
-		QueryOption: repo.QueryOption{
+		QueryOption: repotypes.QueryOption{
 			Page:     1,
 			PageSize: int32(limit),
 		},

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

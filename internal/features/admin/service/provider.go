@@ -10,4 +10,6 @@ import "github.com/google/wire"
 var ProviderSet = wire.NewSet(
 	NewTagService,
 	NewAdminTagHandler,
+	NewAdminConfig,
+	NewAdminHandler,
 )

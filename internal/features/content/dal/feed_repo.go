@@ -10,8 +10,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 

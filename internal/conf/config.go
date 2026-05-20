@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	discoveryv1 "github.com/origadmin/runtime/api/gen/go/config/discovery/v1"
 	"github.com/origadmin/runtime/config"
 	"github.com/origadmin/runtime/engine/bootstrap"
 )
@@ -33,6 +34,11 @@ type Config struct {
 			Addr    string `yaml:"addr"`
 			Timeout string `yaml:"timeout"`
 		} `yaml:"http"`
+		GRPC struct {
+			Network string `yaml:"network"`
+			Addr    string `yaml:"addr"`
+			Timeout string `yaml:"timeout"`
+		} `yaml:"grpc"`
 	} `yaml:"server"`
 	Security struct {
 		Authn struct {
@@ -47,7 +53,41 @@ type Config struct {
 			} `yaml:"configs"`
 		} `yaml:"authn"`
 	} `yaml:"security"`
+	Asynq *AsynqConfig `yaml:"asynq,omitempty"`
+	// Discovery configuration for service registration and discovery
+	Discovery *discoveryv1.Discoveries `yaml:"discovery,omitempty"`
+	// GRPCClients configuration for gRPC client connections
+	GRPCClients map[string]*GRPCClientConfig `yaml:"grpc_clients,omitempty"`
 }
+
+// GRPCClientConfig holds configuration for a gRPC client connection.
+type GRPCClientConfig struct {
+	// Endpoint is the service endpoint to connect to, can be direct address or discovery URI
+	Endpoint string `yaml:"endpoint"`
+	// Timeout is the default request timeout
+	Timeout string `yaml:"timeout"`
+	// DiscoveryName is the name of the discovery client to use
+	DiscoveryName string `yaml:"discovery_name,omitempty"`
+}
+
+// AsynqConfig holds asynq distributed task queue configuration.
+type AsynqConfig struct {
+	RedisAddr     string `yaml:"redis_addr"`
+	RedisPassword string `yaml:"redis_password"`
+	RedisDB       int    `yaml:"redis_db"`
+	Concurrency   int32  `yaml:"concurrency"`
+}
+
+func (c *Config) GetAsynq() *AsynqConfig {
+	if c.Asynq == nil {
+		return nil
+	}
+	return c.Asynq
+}
+
+func (a *AsynqConfig) GetRedisAddr() string     { return a.RedisAddr }
+func (a *AsynqConfig) GetRedisPassword() string  { return a.RedisPassword }
+func (a *AsynqConfig) GetConcurrency() int32     { return a.Concurrency }
 
 // GetDefaultDB returns the "default" database config for convenience.
 func (c *Config) GetDefaultDB() (dialect, source string) {
