@@ -21,7 +21,7 @@ service UserService {
   // Login authenticates a user and returns JWT tokens.
   rpc Login(LoginRequest) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/api/v1/auth/login"
+      post: "/api/v1/auth/signin"
       body: "*"
     };
   }
@@ -45,7 +45,7 @@ service UserService {
   // Register creates a new user account.
   rpc Register(RegisterRequest) returns (RegisterResponse) {
     option (google.api.http) = {
-      post: "/api/v1/auth/register"
+      post: "/api/v1/auth/signup"
       body: "*"
     };
   }

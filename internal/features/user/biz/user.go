@@ -97,6 +97,10 @@ func (uc *UserUseCase) GetUserByUsername(ctx context.Context, username string) (
 	return uc.repo.GetByUsername(ctx, username)
 }
 
+func (uc *UserUseCase) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
+	return uc.repo.GetByEmail(ctx, email)
+}
+
 // GetUserBySlug retrieves a user by their public slug.
 func (uc *UserUseCase) GetUserBySlug(ctx context.Context, slug string) (*types.User, error) {
 	return uc.repo.GetBySlug(ctx, slug)

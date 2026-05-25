@@ -120,11 +120,15 @@ const DefaultCategory = CategoryGeneral
 
 // Category values.
 const (
-	CategoryGeneral Category = "general"
-	CategoryUpload  Category = "upload"
-	CategoryReview  Category = "review"
-	CategoryEmail   Category = "email"
-	CategoryModule  Category = "module"
+	CategoryGeneral  Category = "general"
+	CategoryUpload   Category = "upload"
+	CategoryReview   Category = "review"
+	CategoryEmail    Category = "email"
+	CategoryModule   Category = "module"
+	CategoryStorage  Category = "storage"
+	CategorySecurity Category = "security"
+	CategoryAdvanced Category = "advanced"
+	CategoryPortal   Category = "portal"
 )
 
 func (c Category) String() string {
@@ -134,7 +138,7 @@ func (c Category) String() string {
 // CategoryValidator is a validator for the "category" field enum values. It is called by the builders before save.
 func CategoryValidator(c Category) error {
 	switch c {
-	case CategoryGeneral, CategoryUpload, CategoryReview, CategoryEmail, CategoryModule:
+	case CategoryGeneral, CategoryUpload, CategoryReview, CategoryEmail, CategoryModule, CategoryStorage, CategorySecurity, CategoryAdvanced, CategoryPortal:
 		return nil
 	default:
 		return fmt.Errorf("setting: invalid enum value for category field: %q", c)

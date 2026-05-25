@@ -23,6 +23,7 @@ type NotificationQuery struct {
 	order      []notification.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Notification
+	withFKs    bool
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -335,9 +336,13 @@ func (_q *NotificationQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *NotificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Notification, error) {
 	var (
-		nodes = []*Notification{}
-		_spec = _q.querySpec()
+		nodes   = []*Notification{}
+		withFKs = _q.withFKs
+		_spec   = _q.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, notification.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Notification).scanValues(nil, columns)
 	}

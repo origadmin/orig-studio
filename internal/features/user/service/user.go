@@ -7,6 +7,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -182,7 +183,25 @@ func (s *UserService) Register(
 	ctx context.Context,
 	req *userv1.RegisterRequest,
 ) (*userv1.RegisterResponse, error) {
-	// Create user object
+	if req.GetUsername() == "" {
+		return nil, errors.BadRequest("MISSING_USERNAME", "Username is required")
+	}
+	if req.GetPassword() == "" {
+		return nil, errors.BadRequest("MISSING_PASSWORD", "Password is required")
+	}
+
+	existing, _ := s.uc.GetUserByUsername(ctx, req.GetUsername())
+	if existing != nil {
+		return nil, errors.Conflict("USERNAME_ALREADY_EXISTS", "Username is already taken")
+	}
+
+	if req.GetEmail() != "" {
+		existingEmail, _ := s.uc.GetUserByEmail(ctx, req.GetEmail())
+		if existingEmail != nil {
+			return nil, errors.Conflict("EMAIL_ALREADY_EXISTS", "Email is already registered")
+		}
+	}
+
 	userInfo := &types.User{
 		Username: req.GetUsername(),
 		Email:    req.GetEmail(),
@@ -198,7 +217,11 @@ func (s *UserService) Register(
 
 	createdUser, err := s.uc.CreateUser(ctx, userInfo, hashedPassword)
 	if err != nil {
-		return nil, err
+		if strings.Contains(err.Error(), "duplicate key") || strings.Contains(err.Error(), "unique constraint") || strings.Contains(err.Error(), "UNIQUE constraint") {
+			return nil, errors.Conflict("USER_ALREADY_EXISTS", "Username or email already exists")
+		}
+		s.log.Errorf("Failed to create user: %v", err)
+		return nil, errors.InternalServer("USER_CREATE_FAILED", "Failed to create user")
 	}
 
 	// Auto login after registration

@@ -123,6 +123,11 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	// 10. Admin Settings — MOVED to AdminHandler
 	// ================================
+	adminSettings := r.Group("/admin/settings")
+	adminSettings.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
+	{
+		adminSettings.DELETE("/:key", server.HTTPToHandlerFunc(h.stubAdminSettingsDelete()))
+	}
 
 	// ================================
 	// 11. Admin Channels POST
@@ -156,6 +161,11 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	// 15. Playlist — MOVED to PlaylistHandler + MeHandler + AdminHandler
 	// ================================
+	mePlaylists := r.Group("/me/playlists")
+	mePlaylists.Use(server.JWTMiddlewareCtx(h.jwt))
+	{
+		mePlaylists.PATCH("/:id/media/reorder", server.HTTPToHandlerFunc(h.stubPlaylistMediaReorder()))
+	}
 
 	// ================================
 	// 16. Encoding status/events (public aliases)
@@ -480,21 +490,21 @@ func (h *StubHandler) stubSubtitleLanguages() http.HandlerFunc {
 func (h *StubHandler) stubMediaDownload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		server.Fail(gc, server.ErrNotFound, "download not available")
+		server.Fail(gc, server.ErrBadRequest, "download not available yet")
 	}
 }
 
 func (h *StubHandler) stubMediaStream() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		server.Fail(gc, server.ErrNotFound, "stream not available")
+		server.Fail(gc, server.ErrBadRequest, "stream not available yet")
 	}
 }
 
 func (h *StubHandler) stubMediaThumbnail() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		gc.Status(http.StatusNotFound)
+		server.Fail(gc, server.ErrBadRequest, "thumbnail not available yet")
 	}
 }
 
@@ -741,5 +751,20 @@ func (h *StubHandler) stubMediaTaskRetry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
 		server.OK(gc, gin.H{"code": 0, "message": "retry initiated"})
+	}
+}
+
+func (h *StubHandler) stubPlaylistMediaReorder() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		server.OK(gc, gin.H{"code": 0, "message": "reordered"})
+	}
+}
+
+func (h *StubHandler) stubAdminSettingsDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gc := ginadapter.GetGinContext(r)
+		key := gc.Param("key")
+		server.OK(gc, gin.H{"code": 0, "message": "deleted", "key": key})
 	}
 }

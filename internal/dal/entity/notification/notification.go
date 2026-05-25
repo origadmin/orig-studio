@@ -21,14 +21,14 @@ const (
 	FieldMethod = "method"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldIsRead holds the string denoting the is_read field in the database.
-	FieldIsRead = "is_read"
-	// FieldCreateTime holds the string denoting the create_time field in the database.
-	FieldCreateTime = "create_time"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldBody holds the string denoting the body field in the database.
 	FieldBody = "body"
+	// FieldIsRead holds the string denoting the is_read field in the database.
+	FieldIsRead = "is_read"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
 	// Table holds the table name of the notification in the database.
@@ -42,11 +42,32 @@ var Columns = []string{
 	FieldNotify,
 	FieldMethod,
 	FieldUserID,
-	FieldIsRead,
-	FieldCreateTime,
 	FieldTitle,
 	FieldBody,
+	FieldIsRead,
+	FieldCreateTime,
 	FieldUpdateTime,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "user_notifications"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"user_notifications",
+}
+
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
 }
 
 var (
@@ -60,29 +81,17 @@ var (
 	MethodValidator func(string) error
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	UserIDValidator func(string) error
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
 	// DefaultIsRead holds the default value on creation for the "is_read" field.
 	DefaultIsRead bool
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
-	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	TitleValidator func(string) error
-	// BodyValidator is a validator for the "body" field. It is called by the builders before save.
-	BodyValidator func(string) error
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
 )
-
-// ValidColumn reports if the column name is valid (part of the table columns).
-func ValidColumn(column string) bool {
-	for i := range Columns {
-		if column == Columns[i] {
-			return true
-		}
-	}
-	return false
-}
 
 // OrderOption defines the ordering options for the Notification queries.
 type OrderOption func(*sql.Selector)
@@ -112,16 +121,6 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByIsRead orders the results by the is_read field.
-func ByIsRead(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsRead, opts...).ToFunc()
-}
-
-// ByCreateTime orders the results by the create_time field.
-func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
-}
-
 // ByTitle orders the results by the title field.
 func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
@@ -130,6 +129,16 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByBody orders the results by the body field.
 func ByBody(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBody, opts...).ToFunc()
+}
+
+// ByIsRead orders the results by the is_read field.
+func ByIsRead(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsRead, opts...).ToFunc()
+}
+
+// ByCreateTime orders the results by the create_time field.
+func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
 }
 
 // ByUpdateTime orders the results by the update_time field.

@@ -783,25 +783,41 @@ func init() {
 	mediareviewlog.IDValidator = mediareviewlogDescID.Validators[0].(func(string) error)
 	notificationFields := schema.Notification{}.Fields()
 	_ = notificationFields
+	// notificationDescAction is the schema descriptor for action field.
 	notificationDescAction := notificationFields[0].Descriptor()
+	// notification.ActionValidator is a validator for the "action" field. It is called by the builders before save.
 	notification.ActionValidator = notificationDescAction.Validators[0].(func(string) error)
+	// notificationDescNotify is the schema descriptor for notify field.
 	notificationDescNotify := notificationFields[1].Descriptor()
+	// notification.DefaultNotify holds the default value on creation for the notify field.
 	notification.DefaultNotify = notificationDescNotify.Default.(bool)
+	// notificationDescMethod is the schema descriptor for method field.
 	notificationDescMethod := notificationFields[2].Descriptor()
+	// notification.DefaultMethod holds the default value on creation for the method field.
 	notification.DefaultMethod = notificationDescMethod.Default.(string)
+	// notification.MethodValidator is a validator for the "method" field. It is called by the builders before save.
 	notification.MethodValidator = notificationDescMethod.Validators[0].(func(string) error)
+	// notificationDescUserID is the schema descriptor for user_id field.
 	notificationDescUserID := notificationFields[3].Descriptor()
+	// notification.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	notification.UserIDValidator = notificationDescUserID.Validators[0].(func(string) error)
+	// notificationDescTitle is the schema descriptor for title field.
 	notificationDescTitle := notificationFields[4].Descriptor()
+	// notification.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	notification.TitleValidator = notificationDescTitle.Validators[0].(func(string) error)
-	_ = notificationFields[5].Descriptor()
-	notification.BodyValidator = func(body string) error { return nil }
+	// notificationDescIsRead is the schema descriptor for is_read field.
 	notificationDescIsRead := notificationFields[6].Descriptor()
+	// notification.DefaultIsRead holds the default value on creation for the is_read field.
 	notification.DefaultIsRead = notificationDescIsRead.Default.(bool)
+	// notificationDescCreateTime is the schema descriptor for create_time field.
 	notificationDescCreateTime := notificationFields[7].Descriptor()
+	// notification.DefaultCreateTime holds the default value on creation for the create_time field.
 	notification.DefaultCreateTime = notificationDescCreateTime.Default.(func() time.Time)
+	// notificationDescUpdateTime is the schema descriptor for update_time field.
 	notificationDescUpdateTime := notificationFields[8].Descriptor()
+	// notification.DefaultUpdateTime holds the default value on creation for the update_time field.
 	notification.DefaultUpdateTime = notificationDescUpdateTime.Default.(func() time.Time)
+	// notification.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	notification.UpdateDefaultUpdateTime = notificationDescUpdateTime.UpdateDefault.(func() time.Time)
 	permissiongroupFields := schema.PermissionGroup{}.Fields()
 	_ = permissiongroupFields

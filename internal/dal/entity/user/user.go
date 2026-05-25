@@ -162,11 +162,13 @@ const (
 	CommentsInverseTable = "content_comments"
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "user_comments"
-	// NotificationsTable is the table that holds the notifications relation/edge. The primary key declared below.
-	NotificationsTable = "user_notification_mappings"
+	// NotificationsTable is the table that holds the notifications relation/edge.
+	NotificationsTable = "user_notifications"
 	// NotificationsInverseTable is the table name for the Notification entity.
 	// It exists in this package in order to avoid circular dependency with the "notification" package.
 	NotificationsInverseTable = "user_notifications"
+	// NotificationsColumn is the table column denoting the notifications relation/edge.
+	NotificationsColumn = "user_notifications"
 	// CategoriesTable is the table that holds the categories relation/edge.
 	CategoriesTable = "content_categories"
 	// CategoriesInverseTable is the table name for the Category entity.
@@ -310,9 +312,6 @@ var (
 	// PlaylistsPrimaryKey and PlaylistsColumn2 are the table columns denoting the
 	// primary key for the playlists relation (M2M).
 	PlaylistsPrimaryKey = []string{"user_id", "playlist_id"}
-	// NotificationsPrimaryKey and NotificationsColumn2 are the table columns denoting the
-	// primary key for the notifications relation (M2M).
-	NotificationsPrimaryKey = []string{"user_id", "notification_id"}
 	// TagsPrimaryKey and TagsColumn2 are the table columns denoting the
 	// primary key for the tags relation (M2M).
 	TagsPrimaryKey = []string{"user_id", "tag_id"}
@@ -959,7 +958,7 @@ func newNotificationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(NotificationsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, NotificationsTable, NotificationsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, NotificationsTable, NotificationsColumn),
 	)
 }
 func newCategoriesStep() *sqlgraph.Step {

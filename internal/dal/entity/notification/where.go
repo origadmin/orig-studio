@@ -74,6 +74,16 @@ func UserID(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldUserID, v))
 }
 
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldTitle, v))
+}
+
+// Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
+func Body(v string) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldBody, v))
+}
+
 // IsRead applies equality check predicate on the "is_read" field. It's identical to IsReadEQ.
 func IsRead(v bool) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldIsRead, v))
@@ -82,6 +92,11 @@ func IsRead(v bool) predicate.Notification {
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // ActionEQ applies the EQ predicate on the "action" field.
@@ -289,56 +304,6 @@ func UserIDContainsFold(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldContainsFold(FieldUserID, v))
 }
 
-// IsReadEQ applies the EQ predicate on the "is_read" field.
-func IsReadEQ(v bool) predicate.Notification {
-	return predicate.Notification(sql.FieldEQ(FieldIsRead, v))
-}
-
-// IsReadNEQ applies the NEQ predicate on the "is_read" field.
-func IsReadNEQ(v bool) predicate.Notification {
-	return predicate.Notification(sql.FieldNEQ(FieldIsRead, v))
-}
-
-// CreateTimeEQ applies the EQ predicate on the "create_time" field.
-func CreateTimeEQ(v time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldEQ(FieldCreateTime, v))
-}
-
-// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
-func CreateTimeNEQ(v time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldNEQ(FieldCreateTime, v))
-}
-
-// CreateTimeIn applies the In predicate on the "create_time" field.
-func CreateTimeIn(vs ...time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldIn(FieldCreateTime, vs...))
-}
-
-// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
-func CreateTimeNotIn(vs ...time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldNotIn(FieldCreateTime, vs...))
-}
-
-// CreateTimeGT applies the GT predicate on the "create_time" field.
-func CreateTimeGT(v time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldGT(FieldCreateTime, v))
-}
-
-// CreateTimeGTE applies the GTE predicate on the "create_time" field.
-func CreateTimeGTE(v time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldGTE(FieldCreateTime, v))
-}
-
-// CreateTimeLT applies the LT predicate on the "create_time" field.
-func CreateTimeLT(v time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldLT(FieldCreateTime, v))
-}
-
-// CreateTimeLTE applies the LTE predicate on the "create_time" field.
-func CreateTimeLTE(v time.Time) predicate.Notification {
-	return predicate.Notification(sql.FieldLTE(FieldCreateTime, v))
-}
-
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldEQ(FieldTitle, v))
@@ -467,6 +432,56 @@ func BodyEqualFold(v string) predicate.Notification {
 // BodyContainsFold applies the ContainsFold predicate on the "body" field.
 func BodyContainsFold(v string) predicate.Notification {
 	return predicate.Notification(sql.FieldContainsFold(FieldBody, v))
+}
+
+// IsReadEQ applies the EQ predicate on the "is_read" field.
+func IsReadEQ(v bool) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldIsRead, v))
+}
+
+// IsReadNEQ applies the NEQ predicate on the "is_read" field.
+func IsReadNEQ(v bool) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldIsRead, v))
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldNEQ(FieldCreateTime, v))
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Notification {
+	return predicate.Notification(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
