@@ -19,3 +19,6 @@ web/screenshots
 *.out
 .vscode
 .idea
+tmp/
+*.db
+*.sqlite

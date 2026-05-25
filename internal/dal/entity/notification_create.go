@@ -60,6 +60,18 @@ func (_c *NotificationCreate) SetUserID(v string) *NotificationCreate {
 	return _c
 }
 
+// SetTitle sets the "title" field.
+func (_c *NotificationCreate) SetTitle(v string) *NotificationCreate {
+	_c.mutation.SetTitle(v)
+	return _c
+}
+
+// SetBody sets the "body" field.
+func (_c *NotificationCreate) SetBody(v string) *NotificationCreate {
+	_c.mutation.SetBody(v)
+	return _c
+}
+
 // SetIsRead sets the "is_read" field.
 func (_c *NotificationCreate) SetIsRead(v bool) *NotificationCreate {
 	_c.mutation.SetIsRead(v)
@@ -85,18 +97,6 @@ func (_c *NotificationCreate) SetNillableCreateTime(v *time.Time) *NotificationC
 	if v != nil {
 		_c.SetCreateTime(*v)
 	}
-	return _c
-}
-
-// SetTitle sets the "title" field.
-func (_c *NotificationCreate) SetTitle(v string) *NotificationCreate {
-	_c.mutation.SetTitle(v)
-	return _c
-}
-
-// SetBody sets the "body" field.
-func (_c *NotificationCreate) SetBody(v string) *NotificationCreate {
-	_c.mutation.SetBody(v)
 	return _c
 }
 
@@ -200,21 +200,25 @@ func (_c *NotificationCreate) check() error {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`entity: validator failed for field "Notification.user_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.IsRead(); !ok {
-		return &ValidationError{Name: "is_read", err: errors.New(`entity: missing required field "Notification.is_read"`)}
-	}
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Notification.create_time"`)}
+	if _, ok := _c.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New(`entity: missing required field "Notification.title"`)}
 	}
 	if v, ok := _c.mutation.Title(); ok {
 		if err := notification.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Notification.title": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Body(); ok {
-		if err := notification.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf(`entity: validator failed for field "Notification.body": %w`, err)}
-		}
+	if _, ok := _c.mutation.Body(); !ok {
+		return &ValidationError{Name: "body", err: errors.New(`entity: missing required field "Notification.body"`)}
+	}
+	if _, ok := _c.mutation.IsRead(); !ok {
+		return &ValidationError{Name: "is_read", err: errors.New(`entity: missing required field "Notification.is_read"`)}
+	}
+	if _, ok := _c.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Notification.create_time"`)}
+	}
+	if _, ok := _c.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`entity: missing required field "Notification.update_time"`)}
 	}
 	return nil
 }
@@ -258,14 +262,6 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 		_node.UserID = value
 	}
-	if value, ok := _c.mutation.IsRead(); ok {
-		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
-		_node.IsRead = value
-	}
-	if value, ok := _c.mutation.CreateTime(); ok {
-		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
-	}
 	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(notification.FieldTitle, field.TypeString, value)
 		_node.Title = value
@@ -273,6 +269,14 @@ func (_c *NotificationCreate) createSpec() (*Notification, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.Body(); ok {
 		_spec.SetField(notification.FieldBody, field.TypeString, value)
 		_node.Body = value
+	}
+	if value, ok := _c.mutation.IsRead(); ok {
+		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
+		_node.IsRead = value
+	}
+	if value, ok := _c.mutation.CreateTime(); ok {
+		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
+		_node.CreateTime = value
 	}
 	if value, ok := _c.mutation.UpdateTime(); ok {
 		_spec.SetField(notification.FieldUpdateTime, field.TypeTime, value)

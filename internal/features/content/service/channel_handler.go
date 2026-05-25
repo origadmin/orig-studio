@@ -252,7 +252,6 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 
 	var input struct {
 		Name          string   `json:"name" binding:"required,min=3,max=150"`
-		Handle        string   `json:"handle" binding:"required,min=3,max=39"`
 		Description   string   `json:"description"`
 		Avatar        string   `json:"avatar"`
 		Banner        string   `json:"banner"`
@@ -268,32 +267,28 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate handle format
-	if !validation.IsValidHandle(input.Handle) {
-		server.Fail(gc, server.ErrBadRequest, "invalid_handle_format: must be 3-39 chars, alphanumeric and hyphens only")
+	if input.ShortToken != "" && !validation.IsValidShortToken(input.ShortToken) {
+		server.Fail(gc, server.ErrBadRequest, "invalid_short_token_format: must be 6-12 chars, alphanumeric, underscores and hyphens only")
 		return
 	}
 
-	// Auto-generate slug from name
 	slug := generateSlug(input.Name)
 
 	chItem := &biz.Channel{
 		Name:        input.Name,
-		Title:       input.Name, // Title defaults to name
+		Title:       input.Name,
 		Slug:        slug,
-		Handle:      input.Handle,
+		Handle:      slug,
 		Description: input.Description,
 		Avatar:      input.Avatar,
 		Banner:      input.Banner,
 		BannerLogo:  input.BannerLogo,
-		// Only set ShortToken when FriendlyToken is provided and non-empty;
-		// otherwise let ent schema's DefaultFunc (idutil.GenShortID) auto-generate one.
-		Privacy:    input.Privacy,
-		Tags:       input.Tags,
-		TagIDs:     input.TagIDs,
-		CategoryID: input.CategoryID,
-		Status:     "ACTIVE",
-		UserID:     claims.GetUserID(),
+		Privacy:     input.Privacy,
+		Tags:        input.Tags,
+		TagIDs:      input.TagIDs,
+		CategoryID:  input.CategoryID,
+		Status:      "ACTIVE",
+		UserID:      claims.GetUserID(),
 	}
 	if input.ShortToken != "" {
 		chItem.ShortToken = input.ShortToken
@@ -310,8 +305,8 @@ func (h *ChannelHandler) CreateChannel(w http.ResponseWriter, r *http.Request) {
 			server.Fail(gc, server.ErrBadRequest, errMsg)
 			return
 		}
-		if strings.Contains(errMsg, "handle_already_taken") {
-			server.Fail(gc, server.ErrConflict, errMsg)
+		if strings.Contains(errMsg, "short_token_already_taken") || strings.Contains(errMsg, "handle_already_taken") {
+			server.Fail(gc, server.ErrConflict, "short_token_already_taken")
 			return
 		}
 		if strings.Contains(errMsg, "too_many_tags") {

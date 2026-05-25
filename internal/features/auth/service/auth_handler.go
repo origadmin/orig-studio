@@ -67,6 +67,7 @@ type LoginUser struct {
 	Nickname string `json:"nickname,omitempty"`
 	Email    string `json:"email,omitempty"`
 	IsStaff  bool   `json:"is_staff"`
+	Role     string `json:"role,omitempty"`
 }
 
 func (h *AuthHandler) login() http2.HandlerFunc {
@@ -115,6 +116,7 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 			Nickname: u.Nickname,
 			Email:    u.Email,
 			IsStaff:  u.IsStaff,
+			Role:     userRole,
 		}
 
 		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
@@ -197,6 +199,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			Nickname: created.Nickname,
 			Email:    created.Email,
 			IsStaff:  created.IsStaff,
+			Role:     userRole,
 		}
 
 		http2.Created(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
@@ -248,6 +251,7 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 			Nickname: u.Nickname,
 			Email:    u.Email,
 			IsStaff:  u.IsStaff,
+			Role:     u.Role,
 		}
 
 		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})

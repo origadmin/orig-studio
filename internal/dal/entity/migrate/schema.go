@@ -1069,12 +1069,21 @@ var (
 		{Name: "is_read", Type: field.TypeBool, Default: false},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "user_notifications", Type: field.TypeString, Nullable: true, Size: 36},
 	}
 	// UserNotificationsTable holds the schema information for the "user_notifications" table.
 	UserNotificationsTable = &schema.Table{
 		Name:       "user_notifications",
 		Columns:    UserNotificationsColumns,
 		PrimaryKey: []*schema.Column{UserNotificationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_notifications_users_notifications",
+				Columns:    []*schema.Column{UserNotificationsColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "notification_user_id",
@@ -1290,7 +1299,7 @@ var (
 		{Name: "key", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "value", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"string", "int", "bool", "json"}, Default: "string"},
-		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "upload", "review", "email", "module"}, Default: "general"},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "upload", "review", "email", "module", "storage", "security", "advanced", "portal"}, Default: "general"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_sensitive", Type: field.TypeBool, Default: false},
 		{Name: "fallback_value", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -1608,31 +1617,6 @@ var (
 			},
 		},
 	}
-	// UserNotificationMappingsColumns holds the columns for the "user_notification_mappings" table.
-	UserNotificationMappingsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeString, Size: 36},
-		{Name: "notification_id", Type: field.TypeInt},
-	}
-	// UserNotificationMappingsTable holds the schema information for the "user_notification_mappings" table.
-	UserNotificationMappingsTable = &schema.Table{
-		Name:       "user_notification_mappings",
-		Columns:    UserNotificationMappingsColumns,
-		PrimaryKey: []*schema.Column{UserNotificationMappingsColumns[0], UserNotificationMappingsColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_notification_mappings_user_id",
-				Columns:    []*schema.Column{UserNotificationMappingsColumns[0]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "user_notification_mappings_notification_id",
-				Columns:    []*schema.Column{UserNotificationMappingsColumns[1]},
-				RefColumns: []*schema.Column{UserNotificationsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// UserTagsColumns holds the columns for the "user_tags" table.
 	UserTagsColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeString, Size: 36},
@@ -1692,7 +1676,6 @@ var (
 		SystemUploadSessionsTable,
 		UsersTable,
 		UserPlaylistsTable,
-		UserNotificationMappingsTable,
 		UserTagsTable,
 	}
 )
@@ -1795,6 +1778,7 @@ func init() {
 	ContentMediaTagsTable.Annotation = &entsql.Annotation{
 		Table: "content_media_tags",
 	}
+	UserNotificationsTable.ForeignKeys[0].RefTable = UsersTable
 	UserNotificationsTable.Annotation = &entsql.Annotation{
 		Table: "user_notifications",
 	}
@@ -1838,8 +1822,6 @@ func init() {
 	}
 	UserPlaylistsTable.ForeignKeys[0].RefTable = UsersTable
 	UserPlaylistsTable.ForeignKeys[1].RefTable = ContentPlaylistsTable
-	UserNotificationMappingsTable.ForeignKeys[0].RefTable = UsersTable
-	UserNotificationMappingsTable.ForeignKeys[1].RefTable = UserNotificationsTable
 	UserTagsTable.ForeignKeys[0].RefTable = UsersTable
 	UserTagsTable.ForeignKeys[1].RefTable = ContentTagsTable
 }

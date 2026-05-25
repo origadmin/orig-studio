@@ -85,34 +85,6 @@ func (_u *NotificationUpdate) SetNillableUserID(v *string) *NotificationUpdate {
 	return _u
 }
 
-// SetIsRead sets the "is_read" field.
-func (_u *NotificationUpdate) SetIsRead(v bool) *NotificationUpdate {
-	_u.mutation.SetIsRead(v)
-	return _u
-}
-
-// SetNillableIsRead sets the "is_read" field if the given value is not nil.
-func (_u *NotificationUpdate) SetNillableIsRead(v *bool) *NotificationUpdate {
-	if v != nil {
-		_u.SetIsRead(*v)
-	}
-	return _u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (_u *NotificationUpdate) SetCreateTime(v time.Time) *NotificationUpdate {
-	_u.mutation.SetCreateTime(v)
-	return _u
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_u *NotificationUpdate) SetNillableCreateTime(v *time.Time) *NotificationUpdate {
-	if v != nil {
-		_u.SetCreateTime(*v)
-	}
-	return _u
-}
-
 // SetTitle sets the "title" field.
 func (_u *NotificationUpdate) SetTitle(v string) *NotificationUpdate {
 	_u.mutation.SetTitle(v)
@@ -141,17 +113,37 @@ func (_u *NotificationUpdate) SetNillableBody(v *string) *NotificationUpdate {
 	return _u
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (_u *NotificationUpdate) SetUpdateTime(v time.Time) *NotificationUpdate {
-	_u.mutation.SetUpdateTime(v)
+// SetIsRead sets the "is_read" field.
+func (_u *NotificationUpdate) SetIsRead(v bool) *NotificationUpdate {
+	_u.mutation.SetIsRead(v)
 	return _u
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (_u *NotificationUpdate) SetNillableUpdateTime(v *time.Time) *NotificationUpdate {
+// SetNillableIsRead sets the "is_read" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableIsRead(v *bool) *NotificationUpdate {
 	if v != nil {
-		_u.SetUpdateTime(*v)
+		_u.SetIsRead(*v)
 	}
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *NotificationUpdate) SetCreateTime(v time.Time) *NotificationUpdate {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *NotificationUpdate) SetNillableCreateTime(v *time.Time) *NotificationUpdate {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *NotificationUpdate) SetUpdateTime(v time.Time) *NotificationUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -162,6 +154,7 @@ func (_u *NotificationUpdate) Mutation() *NotificationMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NotificationUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -187,6 +180,14 @@ func (_u *NotificationUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *NotificationUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := notification.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *NotificationUpdate) check() error {
 	if v, ok := _u.mutation.Action(); ok {
@@ -207,11 +208,6 @@ func (_u *NotificationUpdate) check() error {
 	if v, ok := _u.mutation.Title(); ok {
 		if err := notification.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Notification.title": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.Body(); ok {
-		if err := notification.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf(`entity: validator failed for field "Notification.body": %w`, err)}
 		}
 	}
 	return nil
@@ -247,17 +243,17 @@ func (_u *NotificationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.IsRead(); ok {
-		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.CreateTime(); ok {
-		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
-	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(notification.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Body(); ok {
 		_spec.SetField(notification.FieldBody, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.IsRead(); ok {
+		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdateTime(); ok {
 		_spec.SetField(notification.FieldUpdateTime, field.TypeTime, value)
@@ -340,34 +336,6 @@ func (_u *NotificationUpdateOne) SetNillableUserID(v *string) *NotificationUpdat
 	return _u
 }
 
-// SetIsRead sets the "is_read" field.
-func (_u *NotificationUpdateOne) SetIsRead(v bool) *NotificationUpdateOne {
-	_u.mutation.SetIsRead(v)
-	return _u
-}
-
-// SetNillableIsRead sets the "is_read" field if the given value is not nil.
-func (_u *NotificationUpdateOne) SetNillableIsRead(v *bool) *NotificationUpdateOne {
-	if v != nil {
-		_u.SetIsRead(*v)
-	}
-	return _u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (_u *NotificationUpdateOne) SetCreateTime(v time.Time) *NotificationUpdateOne {
-	_u.mutation.SetCreateTime(v)
-	return _u
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_u *NotificationUpdateOne) SetNillableCreateTime(v *time.Time) *NotificationUpdateOne {
-	if v != nil {
-		_u.SetCreateTime(*v)
-	}
-	return _u
-}
-
 // SetTitle sets the "title" field.
 func (_u *NotificationUpdateOne) SetTitle(v string) *NotificationUpdateOne {
 	_u.mutation.SetTitle(v)
@@ -396,17 +364,37 @@ func (_u *NotificationUpdateOne) SetNillableBody(v *string) *NotificationUpdateO
 	return _u
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (_u *NotificationUpdateOne) SetUpdateTime(v time.Time) *NotificationUpdateOne {
-	_u.mutation.SetUpdateTime(v)
+// SetIsRead sets the "is_read" field.
+func (_u *NotificationUpdateOne) SetIsRead(v bool) *NotificationUpdateOne {
+	_u.mutation.SetIsRead(v)
 	return _u
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (_u *NotificationUpdateOne) SetNillableUpdateTime(v *time.Time) *NotificationUpdateOne {
+// SetNillableIsRead sets the "is_read" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableIsRead(v *bool) *NotificationUpdateOne {
 	if v != nil {
-		_u.SetUpdateTime(*v)
+		_u.SetIsRead(*v)
 	}
+	return _u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (_u *NotificationUpdateOne) SetCreateTime(v time.Time) *NotificationUpdateOne {
+	_u.mutation.SetCreateTime(v)
+	return _u
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (_u *NotificationUpdateOne) SetNillableCreateTime(v *time.Time) *NotificationUpdateOne {
+	if v != nil {
+		_u.SetCreateTime(*v)
+	}
+	return _u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (_u *NotificationUpdateOne) SetUpdateTime(v time.Time) *NotificationUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -430,6 +418,7 @@ func (_u *NotificationUpdateOne) Select(field string, fields ...string) *Notific
 
 // Save executes the query and returns the updated Notification entity.
 func (_u *NotificationUpdateOne) Save(ctx context.Context) (*Notification, error) {
+	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -455,6 +444,14 @@ func (_u *NotificationUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *NotificationUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
+		v := notification.UpdateDefaultUpdateTime()
+		_u.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_u *NotificationUpdateOne) check() error {
 	if v, ok := _u.mutation.Action(); ok {
@@ -475,11 +472,6 @@ func (_u *NotificationUpdateOne) check() error {
 	if v, ok := _u.mutation.Title(); ok {
 		if err := notification.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`entity: validator failed for field "Notification.title": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.Body(); ok {
-		if err := notification.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf(`entity: validator failed for field "Notification.body": %w`, err)}
 		}
 	}
 	return nil
@@ -532,17 +524,17 @@ func (_u *NotificationUpdateOne) sqlSave(ctx context.Context) (_node *Notificati
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(notification.FieldUserID, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.IsRead(); ok {
-		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.CreateTime(); ok {
-		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
-	}
 	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(notification.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Body(); ok {
 		_spec.SetField(notification.FieldBody, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.IsRead(); ok {
+		_spec.SetField(notification.FieldIsRead, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.CreateTime(); ok {
+		_spec.SetField(notification.FieldCreateTime, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.UpdateTime(); ok {
 		_spec.SetField(notification.FieldUpdateTime, field.TypeTime, value)

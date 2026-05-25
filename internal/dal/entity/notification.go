@@ -25,17 +25,18 @@ type Notification struct {
 	Method string `json:"method,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
-	// IsRead holds the value of the "is_read" field.
-	IsRead bool `json:"is_read,omitempty"`
-	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Body holds the value of the "body" field.
 	Body string `json:"body,omitempty"`
+	// IsRead holds the value of the "is_read" field.
+	IsRead bool `json:"is_read,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime time.Time `json:"update_time,omitempty"`
-	selectValues sql.SelectValues
+	UpdateTime         time.Time `json:"update_time,omitempty"`
+	user_notifications *string
+	selectValues       sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -51,6 +52,8 @@ func (*Notification) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case notification.FieldCreateTime, notification.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
+		case notification.ForeignKeys[0]: // user_notifications
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -96,18 +99,6 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = value.String
 			}
-		case notification.FieldIsRead:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_read", values[i])
-			} else if value.Valid {
-				_m.IsRead = value.Bool
-			}
-		case notification.FieldCreateTime:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
-			} else if value.Valid {
-				_m.CreateTime = value.Time
-			}
 		case notification.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -120,11 +111,30 @@ func (_m *Notification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Body = value.String
 			}
+		case notification.FieldIsRead:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_read", values[i])
+			} else if value.Valid {
+				_m.IsRead = value.Bool
+			}
+		case notification.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				_m.CreateTime = value.Time
+			}
 		case notification.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				_m.UpdateTime = value.Time
+			}
+		case notification.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field user_notifications", values[i])
+			} else if value.Valid {
+				_m.user_notifications = new(string)
+				*_m.user_notifications = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -174,17 +184,17 @@ func (_m *Notification) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)
 	builder.WriteString(", ")
-	builder.WriteString("is_read=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsRead))
-	builder.WriteString(", ")
-	builder.WriteString("create_time=")
-	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
 	builder.WriteString("body=")
 	builder.WriteString(_m.Body)
+	builder.WriteString(", ")
+	builder.WriteString("is_read=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsRead))
+	builder.WriteString(", ")
+	builder.WriteString("create_time=")
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
 	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))

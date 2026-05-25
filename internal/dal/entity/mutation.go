@@ -21760,10 +21760,10 @@ type NotificationMutation struct {
 	notify        *bool
 	method        *string
 	user_id       *string
-	is_read       *bool
-	create_time   *time.Time
 	title         *string
 	body          *string
+	is_read       *bool
+	create_time   *time.Time
 	update_time   *time.Time
 	clearedFields map[string]struct{}
 	done          bool
@@ -22013,78 +22013,6 @@ func (m *NotificationMutation) ResetUserID() {
 	m.user_id = nil
 }
 
-// SetIsRead sets the "is_read" field.
-func (m *NotificationMutation) SetIsRead(b bool) {
-	m.is_read = &b
-}
-
-// IsRead returns the value of the "is_read" field in the mutation.
-func (m *NotificationMutation) IsRead() (r bool, exists bool) {
-	v := m.is_read
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsRead returns the old "is_read" field's value of the Notification entity.
-// If the Notification object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NotificationMutation) OldIsRead(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsRead is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsRead requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsRead: %w", err)
-	}
-	return oldValue.IsRead, nil
-}
-
-// ResetIsRead resets all changes to the "is_read" field.
-func (m *NotificationMutation) ResetIsRead() {
-	m.is_read = nil
-}
-
-// SetCreateTime sets the "create_time" field.
-func (m *NotificationMutation) SetCreateTime(t time.Time) {
-	m.create_time = &t
-}
-
-// CreateTime returns the value of the "create_time" field in the mutation.
-func (m *NotificationMutation) CreateTime() (r time.Time, exists bool) {
-	v := m.create_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreateTime returns the old "create_time" field's value of the Notification entity.
-// If the Notification object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *NotificationMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
-	}
-	return oldValue.CreateTime, nil
-}
-
-// ResetCreateTime resets all changes to the "create_time" field.
-func (m *NotificationMutation) ResetCreateTime() {
-	m.create_time = nil
-}
-
 // SetTitle sets the "title" field.
 func (m *NotificationMutation) SetTitle(s string) {
 	m.title = &s
@@ -22155,6 +22083,78 @@ func (m *NotificationMutation) OldBody(ctx context.Context) (v string, err error
 // ResetBody resets all changes to the "body" field.
 func (m *NotificationMutation) ResetBody() {
 	m.body = nil
+}
+
+// SetIsRead sets the "is_read" field.
+func (m *NotificationMutation) SetIsRead(b bool) {
+	m.is_read = &b
+}
+
+// IsRead returns the value of the "is_read" field in the mutation.
+func (m *NotificationMutation) IsRead() (r bool, exists bool) {
+	v := m.is_read
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsRead returns the old "is_read" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldIsRead(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsRead is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsRead requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsRead: %w", err)
+	}
+	return oldValue.IsRead, nil
+}
+
+// ResetIsRead resets all changes to the "is_read" field.
+func (m *NotificationMutation) ResetIsRead() {
+	m.is_read = nil
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *NotificationMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *NotificationMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the Notification entity.
+// If the Notification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NotificationMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *NotificationMutation) ResetCreateTime() {
+	m.create_time = nil
 }
 
 // SetUpdateTime sets the "update_time" field.
@@ -22240,17 +22240,17 @@ func (m *NotificationMutation) Fields() []string {
 	if m.user_id != nil {
 		fields = append(fields, notification.FieldUserID)
 	}
-	if m.is_read != nil {
-		fields = append(fields, notification.FieldIsRead)
-	}
-	if m.create_time != nil {
-		fields = append(fields, notification.FieldCreateTime)
-	}
 	if m.title != nil {
 		fields = append(fields, notification.FieldTitle)
 	}
 	if m.body != nil {
 		fields = append(fields, notification.FieldBody)
+	}
+	if m.is_read != nil {
+		fields = append(fields, notification.FieldIsRead)
+	}
+	if m.create_time != nil {
+		fields = append(fields, notification.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, notification.FieldUpdateTime)
@@ -22271,14 +22271,14 @@ func (m *NotificationMutation) Field(name string) (ent.Value, bool) {
 		return m.Method()
 	case notification.FieldUserID:
 		return m.UserID()
-	case notification.FieldIsRead:
-		return m.IsRead()
-	case notification.FieldCreateTime:
-		return m.CreateTime()
 	case notification.FieldTitle:
 		return m.Title()
 	case notification.FieldBody:
 		return m.Body()
+	case notification.FieldIsRead:
+		return m.IsRead()
+	case notification.FieldCreateTime:
+		return m.CreateTime()
 	case notification.FieldUpdateTime:
 		return m.UpdateTime()
 	}
@@ -22298,14 +22298,14 @@ func (m *NotificationMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldMethod(ctx)
 	case notification.FieldUserID:
 		return m.OldUserID(ctx)
-	case notification.FieldIsRead:
-		return m.OldIsRead(ctx)
-	case notification.FieldCreateTime:
-		return m.OldCreateTime(ctx)
 	case notification.FieldTitle:
 		return m.OldTitle(ctx)
 	case notification.FieldBody:
 		return m.OldBody(ctx)
+	case notification.FieldIsRead:
+		return m.OldIsRead(ctx)
+	case notification.FieldCreateTime:
+		return m.OldCreateTime(ctx)
 	case notification.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
 	}
@@ -22345,20 +22345,6 @@ func (m *NotificationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
-	case notification.FieldIsRead:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsRead(v)
-		return nil
-	case notification.FieldCreateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreateTime(v)
-		return nil
 	case notification.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -22372,6 +22358,20 @@ func (m *NotificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBody(v)
+		return nil
+	case notification.FieldIsRead:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsRead(v)
+		return nil
+	case notification.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
 		return nil
 	case notification.FieldUpdateTime:
 		v, ok := value.(time.Time)
@@ -22401,6 +22401,8 @@ func (m *NotificationMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *NotificationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Notification numeric field %s", name)
 }
 
@@ -22439,17 +22441,17 @@ func (m *NotificationMutation) ResetField(name string) error {
 	case notification.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case notification.FieldIsRead:
-		m.ResetIsRead()
-		return nil
-	case notification.FieldCreateTime:
-		m.ResetCreateTime()
-		return nil
 	case notification.FieldTitle:
 		m.ResetTitle()
 		return nil
 	case notification.FieldBody:
 		m.ResetBody()
+		return nil
+	case notification.FieldIsRead:
+		m.ResetIsRead()
+		return nil
+	case notification.FieldCreateTime:
+		m.ResetCreateTime()
 		return nil
 	case notification.FieldUpdateTime:
 		m.ResetUpdateTime()
@@ -22460,7 +22462,7 @@ func (m *NotificationMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *NotificationMutation) AddedEdges() []string {
-	edges := make([]string, 0)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -22472,7 +22474,7 @@ func (m *NotificationMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *NotificationMutation) RemovedEdges() []string {
-	edges := make([]string, 0)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -22484,7 +22486,7 @@ func (m *NotificationMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *NotificationMutation) ClearedEdges() []string {
-	edges := make([]string, 0)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
