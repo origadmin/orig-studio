@@ -1525,6 +1525,7 @@ var (
 		{Name: "first_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "last_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED"}, Default: "ACTIVE"},
+		{Name: "is_staff", Type: field.TypeBool, Default: false},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "editor"}, Default: "user"},
 		{Name: "is_superuser", Type: field.TypeBool, Default: false},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
@@ -1580,14 +1581,14 @@ var (
 				Columns: []*schema.Column{UsersColumns[8]},
 			},
 			{
-				Name:    "user_role",
+				Name:    "user_is_staff",
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[9]},
 			},
 			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[23]},
+				Columns: []*schema.Column{UsersColumns[24]},
 			},
 		},
 	}

@@ -104,7 +104,7 @@ func (h *CommentHandler) listComments(c *gin.Context) {
 		query = query.Where(comment.HasParentWith(comment.ID(parentID)))
 	}
 
-	if claims, ok := server.GetClaims(c); ok && (claims.IsAdmin() || claims.Role == "admin") {
+	if claims, ok := server.GetClaims(c); ok && (claims.IsStaff || claims.Role == "admin") {
 	} else if currentUserID != "" {
 		query = query.Where(comment.Or(
 			comment.StatusEQ(comment.StatusAPPROVED),

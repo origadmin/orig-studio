@@ -177,6 +177,20 @@ func (_u *UserUpdate) SetNillableStatus(v *user.Status) *UserUpdate {
 	return _u
 }
 
+// SetIsStaff sets the "is_staff" field.
+func (_u *UserUpdate) SetIsStaff(v bool) *UserUpdate {
+	_u.mutation.SetIsStaff(v)
+	return _u
+}
+
+// SetNillableIsStaff sets the "is_staff" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableIsStaff(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetIsStaff(*v)
+	}
+	return _u
+}
+
 // SetRole sets the "role" field.
 func (_u *UserUpdate) SetRole(v user.Role) *UserUpdate {
 	_u.mutation.SetRole(v)
@@ -1528,6 +1542,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.IsStaff(); ok {
+		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
@@ -2696,6 +2713,20 @@ func (_u *UserUpdateOne) SetStatus(v user.Status) *UserUpdateOne {
 func (_u *UserUpdateOne) SetNillableStatus(v *user.Status) *UserUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetIsStaff sets the "is_staff" field.
+func (_u *UserUpdateOne) SetIsStaff(v bool) *UserUpdateOne {
+	_u.mutation.SetIsStaff(v)
+	return _u
+}
+
+// SetNillableIsStaff sets the "is_staff" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableIsStaff(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetIsStaff(*v)
 	}
 	return _u
 }
@@ -4080,6 +4111,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.IsStaff(); ok {
+		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)

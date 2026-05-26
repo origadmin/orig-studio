@@ -3915,12 +3915,12 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\rdeleted_count\x18\x01 \x01(\x05R\rdeleted_count\"*\n" +
 	"\x18RemoveHistoryItemRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x1b\n" +
-	"\x19RemoveHistoryItemResponse2\x8e#\n" +
-	"\vUserService\x12p\n" +
-	"\x05Login\x12\".api.v1.services.user.LoginRequest\x1a#.api.v1.services.user.LoginResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/signin\x12s\n" +
+	"\x19RemoveHistoryItemResponse2\x8f#\n" +
+	"\vUserService\x12o\n" +
+	"\x05Login\x12\".api.v1.services.user.LoginRequest\x1a#.api.v1.services.user.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12s\n" +
 	"\x06Logout\x12#.api.v1.services.user.LogoutRequest\x1a$.api.v1.services.user.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12\x86\x01\n" +
-	"\fRefreshToken\x12).api.v1.services.user.RefreshTokenRequest\x1a*.api.v1.services.user.RefreshTokenResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12y\n" +
-	"\bRegister\x12%.api.v1.services.user.RegisterRequest\x1a&.api.v1.services.user.RegisterResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/signup\x12\x94\x01\n" +
+	"\fRefreshToken\x12).api.v1.services.user.RefreshTokenRequest\x1a*.api.v1.services.user.RefreshTokenResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12{\n" +
+	"\bRegister\x12%.api.v1.services.user.RegisterRequest\x1a&.api.v1.services.user.RegisterResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/auth/register\x12\x94\x01\n" +
 	"\x0eForgotPassword\x12+.api.v1.services.user.ForgotPasswordRequest\x1a,.api.v1.services.user.ForgotPasswordResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/api/v1/auth/forgot-password\x12\x90\x01\n" +
 	"\rResetPassword\x12*.api.v1.services.user.ResetPasswordRequest\x1a+.api.v1.services.user.ResetPasswordResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/auth/reset-password\x12\x84\x01\n" +
 	"\x0eGetCurrentUser\x12+.api.v1.services.user.GetCurrentUserRequest\x1a,.api.v1.services.user.GetCurrentUserResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/auth/me\x12d\n" +

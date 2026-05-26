@@ -309,6 +309,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/google.rpc.Status'
+    /api/v1/auth/login:
+        post:
+            tags:
+                - UserService
+            description: Login authenticates a user and returns JWT tokens.
+            operationId: UserService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.v1.services.user.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.v1.services.user.LoginResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
     /api/v1/auth/logout:
         post:
             tags:
@@ -380,6 +405,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/google.rpc.Status'
+    /api/v1/auth/register:
+        post:
+            tags:
+                - UserService
+            description: Register creates a new user account.
+            operationId: UserService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.v1.services.user.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.v1.services.user.RegisterResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/google.rpc.Status'
     /api/v1/auth/reset-password:
         post:
             tags:
@@ -399,56 +449,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.v1.services.user.ResetPasswordResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/auth/signin:
-        post:
-            tags:
-                - UserService
-            description: Login authenticates a user and returns JWT tokens.
-            operationId: UserService_Login
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.v1.services.user.LoginRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.user.LoginResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/auth/signup:
-        post:
-            tags:
-                - UserService
-            description: Register creates a new user account.
-            operationId: UserService_Register
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.v1.services.user.RegisterRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.user.RegisterResponse'
                 default:
                     description: Default error response
                     content:
@@ -1067,35 +1067,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/google.rpc.Status'
-        put:
-            tags:
-                - ContentService
-            operationId: ContentService_UpdateComment
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.v1.services.content.UpdateCommentRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.UpdateCommentResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
         delete:
             tags:
                 - CommentService
@@ -1176,40 +1147,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.v1.services.media.CreateCommentReplyResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/feed:
-        get:
-            tags:
-                - ContentService
-            description: ========== Feed ==========
-            operationId: ContentService_GetFeed
-            parameters:
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: page_size
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: category
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.GetFeedResponse'
                 default:
                     description: Default error response
                     content:
@@ -1442,40 +1379,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.v1.services.user.GetMyLikesResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/me/notifications:
-        get:
-            tags:
-                - ContentService
-            description: ========== Notifications ==========
-            operationId: ContentService_ListNotifications
-            parameters:
-                - name: page
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: page_size
-                  in: query
-                  schema:
-                    type: integer
-                    format: int32
-                - name: type
-                  in: query
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.ListNotificationsResponse'
                 default:
                     description: Default error response
                     content:
@@ -2169,67 +2072,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/google.rpc.Status'
-        post:
-            tags:
-                - ContentService
-            description: ========== Comments ==========
-            operationId: ContentService_CreateComment
-            parameters:
-                - name: media_id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.v1.services.content.CreateCommentRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.CreateCommentResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/medias/{media_id}/favorite:
-        post:
-            tags:
-                - ContentService
-            description: ========== Favorites ==========
-            operationId: ContentService_ToggleFavorite
-            parameters:
-                - name: media_id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.v1.services.content.ToggleFavoriteRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.ToggleFavoriteResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
     /api/v1/medias/{media_id}/favorites:
         get:
             tags:
@@ -2303,37 +2145,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.v1.services.media.DeleteMediaFavoriteResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/medias/{media_id}/like:
-        post:
-            tags:
-                - ContentService
-            description: ========== Likes ==========
-            operationId: ContentService_ToggleLike
-            parameters:
-                - name: media_id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.v1.services.content.ToggleLikeRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.ToggleLikeResponse'
                 default:
                     description: Default error response
                     content:
@@ -2609,48 +2420,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.v1.services.media.RetryEncodingTaskResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/notifications/read-all:
-        patch:
-            tags:
-                - ContentService
-            operationId: ContentService_MarkAllNotificationsRead
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.MarkAllNotificationsReadResponse'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/google.rpc.Status'
-    /api/v1/notifications/{id}/read:
-        patch:
-            tags:
-                - ContentService
-            operationId: ContentService_MarkNotificationRead
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.v1.services.content.MarkNotificationReadResponse'
                 default:
                     description: Default error response
                     content:
@@ -3836,272 +3605,6 @@ paths:
                                 $ref: '#/components/schemas/google.rpc.Status'
 components:
     schemas:
-        api.v1.services.content.Category:
-            type: object
-            properties:
-                id:
-                    type: string
-                name:
-                    type: string
-                slug:
-                    type: string
-                description:
-                    type: string
-                media_count:
-                    type: string
-        api.v1.services.content.Comment:
-            type: object
-            properties:
-                id:
-                    type: string
-                uid:
-                    type: string
-                text:
-                    type: string
-                media_id:
-                    type: string
-                user_id:
-                    type: string
-                parent_id:
-                    type: string
-                created_at:
-                    type: string
-                    format: date-time
-                updated_at:
-                    type: string
-                    format: date-time
-                user:
-                    $ref: '#/components/schemas/api.v1.services.types.User'
-                replies:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.content.Comment'
-        api.v1.services.content.CreateCommentRequest:
-            type: object
-            properties:
-                media_id:
-                    type: string
-                text:
-                    type: string
-                parent_id:
-                    type: string
-        api.v1.services.content.CreateCommentResponse:
-            type: object
-            properties:
-                comment:
-                    $ref: '#/components/schemas/api.v1.services.content.Comment'
-        api.v1.services.content.DeleteCommentResponse:
-            type: object
-            properties: {}
-        api.v1.services.content.GetCommentResponse:
-            type: object
-            properties:
-                comment:
-                    $ref: '#/components/schemas/api.v1.services.content.Comment'
-        api.v1.services.content.GetFeedResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Media'
-                page:
-                    type: integer
-                    format: int32
-                page_size:
-                    type: integer
-                    format: int32
-        api.v1.services.content.GetPortalHomeResponse:
-            type: object
-            properties:
-                featured:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Media'
-                recommended:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Media'
-                popular_channels:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Channel'
-        api.v1.services.content.GetPortalSubscriptionFeedResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Media'
-                page:
-                    type: integer
-                    format: int32
-                page_size:
-                    type: integer
-                    format: int32
-        api.v1.services.content.GetPortalTrendingResponse:
-            type: object
-            properties:
-                items:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Media'
-        api.v1.services.content.ListCategoriesResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                categories:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.content.Category'
-        api.v1.services.content.ListCommentsResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                comments:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.content.Comment'
-                page:
-                    type: integer
-                    format: int32
-                page_size:
-                    type: integer
-                    format: int32
-        api.v1.services.content.ListFavoritesResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                medias:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.Media'
-                page:
-                    type: integer
-                    format: int32
-                page_size:
-                    type: integer
-                    format: int32
-        api.v1.services.content.ListLikesResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                users:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.types.User'
-        api.v1.services.content.ListNotificationsResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                notifications:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.content.Notification'
-                unread_count:
-                    type: integer
-                    format: int32
-        api.v1.services.content.ListTagsResponse:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                tags:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/api.v1.services.content.Tag'
-        api.v1.services.content.MarkAllNotificationsReadResponse:
-            type: object
-            properties: {}
-        api.v1.services.content.MarkNotificationReadResponse:
-            type: object
-            properties: {}
-        api.v1.services.content.Notification:
-            type: object
-            properties:
-                id:
-                    type: string
-                type:
-                    type: string
-                title:
-                    type: string
-                body:
-                    type: string
-                is_read:
-                    type: boolean
-                created_at:
-                    type: string
-                    format: date-time
-                actor_id:
-                    type: string
-                actor:
-                    $ref: '#/components/schemas/api.v1.services.types.User'
-                media_id:
-                    type: string
-        api.v1.services.content.Tag:
-            type: object
-            properties:
-                id:
-                    type: string
-                name:
-                    type: string
-                slug:
-                    type: string
-                media_count:
-                    type: string
-        api.v1.services.content.ToggleFavoriteRequest:
-            type: object
-            properties:
-                media_id:
-                    type: string
-        api.v1.services.content.ToggleFavoriteResponse:
-            type: object
-            properties:
-                favorited:
-                    type: boolean
-                total_favorites:
-                    type: string
-        api.v1.services.content.ToggleLikeRequest:
-            type: object
-            properties:
-                media_id:
-                    type: string
-        api.v1.services.content.ToggleLikeResponse:
-            type: object
-            properties:
-                liked:
-                    type: boolean
-                total_likes:
-                    type: string
-        api.v1.services.content.UpdateCommentRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                text:
-                    type: string
-        api.v1.services.content.UpdateCommentResponse:
-            type: object
-            properties:
-                comment:
-                    $ref: '#/components/schemas/api.v1.services.content.Comment'
         api.v1.services.media.AddChannelMediaRequest:
             type: object
             properties:
@@ -5704,6 +5207,8 @@ components:
                     format: enum
                 is_superuser:
                     type: boolean
+                is_staff:
+                    type: boolean
                 last_login_ip:
                     type: string
                 login_ip:
@@ -6612,8 +6117,6 @@ tags:
     - name: CategoryService
     - name: ChannelService
     - name: CommentService
-    - name: ContentService
-      description: 'ContentService handles content interactions: comments, likes, favorites, notifications, feeds.'
     - name: EncodingProfileService
     - name: MediaService
       description: The media service definition.
