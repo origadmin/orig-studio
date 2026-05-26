@@ -14,7 +14,6 @@ var protojsonMarshaler = protojson.MarshalOptions{
 }
 
 const (
-	// HTTP-style error codes (aligned with HTTP status code * 100)
 	ErrOK           = 0
 	ErrBadRequest   = 40000
 	ErrUnauthorized = 40100
@@ -23,8 +22,6 @@ const (
 	ErrConflict     = 40900
 	ErrInternal     = 50000
 
-	// Application error codes (aligned with server/error.go)
-	// Common errors (1xxxx)
 	AppErrInternal     = 10000
 	AppErrNotFound     = 10001
 	AppErrUnauthorized = 10002
@@ -32,20 +29,17 @@ const (
 	AppErrBadRequest   = 10004
 	AppErrConflict     = 10005
 
-	// User errors (2xxxx)
 	AppErrUserNotFound  = 20001
 	AppErrUserExists    = 20002
 	AppErrPasswordWrong = 20003
 	AppErrTokenExpired  = 20004
 	AppErrTokenInvalid  = 20005
 
-	// Media errors (3xxxx)
 	AppErrMediaNotFound  = 30001
 	AppErrMediaTooLarge  = 30002
 	AppErrMediaForbidden = 30003
 	AppErrEncodingFailed = 30004
 
-	// Comment errors (4xxxx)
 	AppErrCommentNotFound  = 40001
 	AppErrCommentForbidden = 40002
 )
@@ -64,7 +58,11 @@ type PageData struct {
 }
 
 func OK(ctx Context, data interface{}) error {
-	return writeProtoOrJSON(ctx, http.StatusOK, data)
+	if msg, ok := data.(proto.Message); ok {
+		return writeProtoOrJSON(ctx, http.StatusOK, msg)
+	}
+	resp := &Response{Code: ErrOK, Message: "ok", Data: data}
+	return ctx.Result(http.StatusOK, resp)
 }
 
 func Created(ctx Context, data interface{}) error {
@@ -84,7 +82,8 @@ func Page(ctx Context, items interface{}, total int64, page, pageSize int) error
 		Page:     page,
 		PageSize: pageSize,
 	}
-	return writeProtoOrJSON(ctx, http.StatusOK, data)
+	resp := &Response{Code: ErrOK, Message: "ok", Data: data}
+	return writeProtoOrJSON(ctx, http.StatusOK, resp)
 }
 
 func writeProtoOrJSON(ctx Context, statusCode int, data interface{}) error {

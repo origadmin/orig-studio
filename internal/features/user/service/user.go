@@ -100,13 +100,13 @@ func (s *UserService) Login(
 	}
 
 	// Generate JWT tokens
-	accessToken, err := s.jwtMgr.Generate(userInfo.Id, userInfo.Username, userInfo.IsStaff, string(userEnt.Role))
+	accessToken, err := s.jwtMgr.Generate(userInfo.Id, userInfo.Username, string(userEnt.Role))
 	if err != nil {
 		s.log.Errorf("Failed to generate JWT token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate token")
 	}
 
-	refreshToken, err := s.jwtMgr.GenerateRefreshToken(userInfo.Id, userInfo.Username, userInfo.IsStaff, string(userEnt.Role))
+	refreshToken, err := s.jwtMgr.GenerateRefreshToken(userInfo.Id, userInfo.Username, string(userEnt.Role))
 	if err != nil {
 		s.log.Errorf("Failed to generate refresh token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate refresh token")
@@ -158,14 +158,14 @@ func (s *UserService) RefreshToken(
 	}
 
 	// Generate new access token
-	accessToken, err := s.jwtMgr.Generate(userInfo.Id, userInfo.Username, userInfo.IsStaff, string(userEnt.Role))
+	accessToken, err := s.jwtMgr.Generate(userInfo.Id, userInfo.Username, string(userEnt.Role))
 	if err != nil {
 		s.log.Errorf("Failed to generate JWT token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate token")
 	}
 
 	// Generate new refresh token
-	refreshToken, err := s.jwtMgr.GenerateRefreshToken(userInfo.Id, userInfo.Username, userInfo.IsStaff, string(userEnt.Role))
+	refreshToken, err := s.jwtMgr.GenerateRefreshToken(userInfo.Id, userInfo.Username, string(userEnt.Role))
 	if err != nil {
 		s.log.Errorf("Failed to generate refresh token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate refresh token")
@@ -209,6 +209,9 @@ func (s *UserService) Register(
 		Status:   types.UserStatus_USER_STATUS_ACTIVE,
 	}
 
+	count, _ := s.uc.CountUsers(ctx)
+	isFirstUser := count == 0
+
 	hashedPassword, err := s.hasher.Hash(req.GetPassword())
 	if err != nil {
 		s.log.Errorf("Failed to hash password: %v", err)
@@ -224,14 +227,20 @@ func (s *UserService) Register(
 		return nil, errors.InternalServer("USER_CREATE_FAILED", "Failed to create user")
 	}
 
+	userRole := "user"
+	if isFirstUser {
+		userRole = "admin"
+		_ = s.uc.SetUserRole(ctx, createdUser.Id, "admin")
+	}
+
 	// Auto login after registration
-	token, err := s.jwtMgr.Generate(createdUser.Id, createdUser.Username, createdUser.IsStaff, "user")
+	token, err := s.jwtMgr.Generate(createdUser.Id, createdUser.Username, userRole)
 	if err != nil {
 		s.log.Errorf("Failed to generate JWT token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate token")
 	}
 
-	refreshToken, err := s.jwtMgr.GenerateRefreshToken(createdUser.Id, createdUser.Username, createdUser.IsStaff, "user")
+	refreshToken, err := s.jwtMgr.GenerateRefreshToken(createdUser.Id, createdUser.Username, userRole)
 	if err != nil {
 		s.log.Errorf("Failed to generate refresh token: %v", err)
 		return nil, errors.InternalServer("TOKEN_GENERATION_FAILED", "Failed to generate refresh token")

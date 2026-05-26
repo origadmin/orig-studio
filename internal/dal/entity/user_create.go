@@ -118,20 +118,6 @@ func (_c *UserCreate) SetNillableStatus(v *user.Status) *UserCreate {
 	return _c
 }
 
-// SetIsStaff sets the "is_staff" field.
-func (_c *UserCreate) SetIsStaff(v bool) *UserCreate {
-	_c.mutation.SetIsStaff(v)
-	return _c
-}
-
-// SetNillableIsStaff sets the "is_staff" field if the given value is not nil.
-func (_c *UserCreate) SetNillableIsStaff(v *bool) *UserCreate {
-	if v != nil {
-		_c.SetIsStaff(*v)
-	}
-	return _c
-}
-
 // SetRole sets the "role" field.
 func (_c *UserCreate) SetRole(v user.Role) *UserCreate {
 	_c.mutation.SetRole(v)
@@ -863,10 +849,6 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
-	if _, ok := _c.mutation.IsStaff(); !ok {
-		v := user.DefaultIsStaff
-		_c.mutation.SetIsStaff(v)
-	}
 	if _, ok := _c.mutation.Role(); !ok {
 		v := user.DefaultRole
 		_c.mutation.SetRole(v)
@@ -989,9 +971,6 @@ func (_c *UserCreate) check() error {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`entity: validator failed for field "User.status": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.IsStaff(); !ok {
-		return &ValidationError{Name: "is_staff", err: errors.New(`entity: missing required field "User.is_staff"`)}
 	}
 	if _, ok := _c.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New(`entity: missing required field "User.role"`)}
@@ -1154,10 +1133,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
-	}
-	if value, ok := _c.mutation.IsStaff(); ok {
-		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
-		_node.IsStaff = value
 	}
 	if value, ok := _c.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
