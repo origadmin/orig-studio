@@ -34,5 +34,6 @@ type LoginUser struct {
 	Username string `json:"username"`
 	Nickname string `json:"nickname,omitempty"`
 	Email    string `json:"email,omitempty"`
+	IsStaff  bool   `json:"is_staff"`
 	Role     string `json:"role,omitempty"`
 }

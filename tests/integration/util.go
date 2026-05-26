@@ -283,11 +283,12 @@ func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC 
 		email   string
 		name    string
 		pass    string
+		isStaff bool
 		roleStr string
 	}{
-		{RoleAdmin, "admin@test.com", "admin", "admin123", "admin"},
-		{RoleUser, "user@test.com", "user1", "user123", "user"},
-		{RoleEditor, "editor@test.com", "editor", "editor123", "editor"},
+		{RoleAdmin, "admin@test.com", "admin", "admin123", true, "admin"},
+		{RoleUser, "user@test.com", "user1", "user123", false, "user"},
+		{RoleEditor, "editor@test.com", "editor", "editor123", false, "editor"},
 	}
 
 	for _, u := range users {
@@ -299,6 +300,7 @@ func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC 
 		created, err := userUC.CreateUser(ctx, &types.User{
 			Username: u.name,
 			Email:    u.email,
+			IsStaff:  u.isStaff,
 		}, hashedPass)
 		if err != nil {
 			t.Fatalf("failed to create test user %s: %v", u.role, err)
@@ -308,7 +310,7 @@ func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC 
 			t.Fatalf("failed to set role for test user %s: %v", u.role, err)
 		}
 
-		token, err := ts.JWTMgr.Generate(created.Id, u.name, u.roleStr)
+		token, err := ts.JWTMgr.Generate(created.Id, u.name, u.isStaff, u.roleStr)
 		if err != nil {
 			t.Fatalf("failed to generate token for test user %s: %v", u.role, err)
 		}

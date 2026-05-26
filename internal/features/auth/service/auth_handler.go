@@ -2,6 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package service implements the HTTP handlers for the auth feature module.
 package service
 
 import (
@@ -14,7 +15,6 @@ import (
 	http2 "origadmin/application/origstudio/internal/pkg/http"
 	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
-	authdto "origadmin/application/origstudio/internal/features/auth/dto"
 	"origadmin/application/origstudio/internal/features/user/biz"
 	"origadmin/application/origstudio/internal/features/user/dto"
 	"origadmin/application/origstudio/internal/server"
@@ -41,11 +41,40 @@ func (h *AuthHandler) RegisterRoutes(r http2.Router) {
 	}
 }
 
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type RegisterRequest struct {
+	Username string `json:"username" binding:"required,min=3,max=64"`
+	Password string `json:"password" binding:"required,min=6,max=128"`
+	Email    string `json:"email"    binding:"omitempty,email"`
+	Nickname string `json:"nickname"`
+}
+
+type TokenResponse struct {
+	AccessToken  string     `json:"access_token"`
+	RefreshToken string     `json:"refresh_token"`
+	TokenType    string     `json:"token_type"`
+	ExpiresIn    int64      `json:"expires_in"`
+	User         *LoginUser `json:"user"`
+}
+
+type LoginUser struct {
+	Id       string `json:"id"`
+	Username string `json:"username"`
+	Nickname string `json:"nickname,omitempty"`
+	Email    string `json:"email,omitempty"`
+	IsStaff  bool   `json:"is_staff"`
+	Role     string `json:"role,omitempty"`
+}
+
 func (h *AuthHandler) login() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		var req authdto.LoginRequest
+		var req LoginRequest
 		if err := gc.ShouldBindJSON(&req); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
@@ -67,29 +96,30 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 			return nil
 		}
 
-		token, err := h.jwt.Generate(u.Id, u.Username, userRole)
+		token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
 		if err != nil {
 			slog.Error("failed to generate token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
-		refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, userRole)
+		refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
 			return nil
 		}
 
-		loginUser := &authdto.LoginUser{
+		loginUser := &LoginUser{
 			Id:       u.Id,
 			Username: u.Username,
 			Nickname: u.Nickname,
 			Email:    u.Email,
+			IsStaff:  u.IsStaff,
 			Role:     userRole,
 		}
 
-		http2.OK(ctx, authdto.TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
@@ -98,7 +128,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		var req authdto.RegisterRequest
+		var req RegisterRequest
 		if err := gc.ShouldBindJSON(&req); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
@@ -128,6 +158,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			Nickname: req.Nickname,
 			Email:    req.Email,
 			Status:   1,
+			IsStaff:  isFirstUser,
 		}
 
 		created, err := func() (*types.User, error) {
@@ -149,28 +180,29 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			_ = h.uc.SetUserRole(ctx.Request().Context(), created.Id, "admin")
 		}
 
-		token, err := h.jwt.Generate(created.Id, created.Username, userRole)
+		token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
-		refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, userRole)
+		refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, created.IsStaff, userRole)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
 			return nil
 		}
 
-		loginUser := &authdto.LoginUser{
+		loginUser := &LoginUser{
 			Id:       created.Id,
 			Username: created.Username,
 			Nickname: created.Nickname,
 			Email:    created.Email,
+			IsStaff:  created.IsStaff,
 			Role:     userRole,
 		}
 
-		http2.Created(ctx, authdto.TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.Created(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
@@ -199,29 +231,30 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 			return nil
 		}
 
-		token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.Role)
+		token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
 		if err != nil {
 			slog.Error("failed to generate token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
-		refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.Role)
+		refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
 			return nil
 		}
 
-		loginUser := &authdto.LoginUser{
+		loginUser := &LoginUser{
 			Id:       u.Id,
 			Username: u.Username,
 			Nickname: u.Nickname,
 			Email:    u.Email,
+			IsStaff:  u.IsStaff,
 			Role:     u.Role,
 		}
 
-		http2.OK(ctx, authdto.TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }

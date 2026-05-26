@@ -27,6 +27,7 @@ type UserEntityDTO struct {
 	Name          string       `json:"name,omitempty"`
 	Slug          string       `json:"slug,omitempty"`
 	Role          UserRoleType `json:"role,omitempty"`
+	IsStaff       bool         `json:"is_staff,omitempty"`
 	IsSuperuser   bool         `json:"is_superuser,omitempty"`
 	IsFeatured    bool         `json:"is_featured,omitempty"`
 	IsEditor      bool         `json:"is_editor,omitempty"`
