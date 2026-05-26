@@ -316,12 +316,12 @@ func TestAuthRolePermissions(t *testing.T) {
 	roles := []struct {
 		name     string
 		token    string
-		roleStr  string
+		isStaff  bool
 		username string
 	}{
-		{"admin", ts.GetToken(RoleAdmin), "admin", "admin"},
-		{"editor", ts.GetToken(RoleEditor), "editor", "editor"},
-		{"user", ts.GetToken(RoleUser), "user", "user1"},
+		{"admin", ts.GetToken(RoleAdmin), true, "admin"},
+		{"editor", ts.GetToken(RoleEditor), false, "editor"},
+		{"user", ts.GetToken(RoleUser), false, "user1"},
 	}
 
 	for _, role := range roles {
@@ -342,10 +342,10 @@ func TestAuthRolePermissions(t *testing.T) {
 				t.Fatalf("failed to parse response: %v", err)
 			}
 
-			// Check role field - MeHandler returns {code, message, data: {user object}}
-			if roleVal, ok := data["role"]; ok {
-				if roleVal != role.roleStr {
-					t.Errorf("expected role=%v, got %v", role.roleStr, roleVal)
+			// Check is_staff field - MeHandler returns {code, message, data: {user object}}
+			if isStaff, ok := data["is_staff"]; ok {
+				if isStaff != role.isStaff {
+					t.Errorf("expected is_staff=%v, got %v", role.isStaff, isStaff)
 				}
 			}
 		})

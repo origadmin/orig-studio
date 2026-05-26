@@ -54,7 +54,7 @@ message User {
   string avatar = 12 [json_name = "avatar"];
   UserStatus status = 13 [json_name = "status"];
   bool is_superuser = 14 [json_name = "is_superuser"];
-  reserved 15;  // formerly is_staff, removed: use role field instead
+  bool is_staff = 15 [json_name = "is_staff"];
   string last_login_ip = 16 [json_name = "last_login_ip"];
   string login_ip = 17 [json_name = "login_ip"];
   google.protobuf.Timestamp last_login_time = 18 [json_name = "last_login_time"];

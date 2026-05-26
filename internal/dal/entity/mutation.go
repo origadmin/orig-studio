@@ -33500,6 +33500,7 @@ type UserMutation struct {
 	first_name                *string
 	last_name                 *string
 	status                    *user.Status
+	is_staff                  *bool
 	role                      *user.Role
 	is_superuser              *bool
 	is_featured               *bool
@@ -34023,6 +34024,42 @@ func (m *UserMutation) OldStatus(ctx context.Context) (v user.Status, err error)
 // ResetStatus resets all changes to the "status" field.
 func (m *UserMutation) ResetStatus() {
 	m.status = nil
+}
+
+// SetIsStaff sets the "is_staff" field.
+func (m *UserMutation) SetIsStaff(b bool) {
+	m.is_staff = &b
+}
+
+// IsStaff returns the value of the "is_staff" field in the mutation.
+func (m *UserMutation) IsStaff() (r bool, exists bool) {
+	v := m.is_staff
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsStaff returns the old "is_staff" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldIsStaff(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsStaff is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsStaff requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsStaff: %w", err)
+	}
+	return oldValue.IsStaff, nil
+}
+
+// ResetIsStaff resets all changes to the "is_staff" field.
+func (m *UserMutation) ResetIsStaff() {
+	m.is_staff = nil
 }
 
 // SetRole sets the "role" field.
@@ -36287,7 +36324,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 35)
+	fields := make([]string, 0, 36)
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
@@ -36311,6 +36348,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, user.FieldStatus)
+	}
+	if m.is_staff != nil {
+		fields = append(fields, user.FieldIsStaff)
 	}
 	if m.role != nil {
 		fields = append(fields, user.FieldRole)
@@ -36417,6 +36457,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.LastName()
 	case user.FieldStatus:
 		return m.Status()
+	case user.FieldIsStaff:
+		return m.IsStaff()
 	case user.FieldRole:
 		return m.Role()
 	case user.FieldIsSuperuser:
@@ -36496,6 +36538,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldLastName(ctx)
 	case user.FieldStatus:
 		return m.OldStatus(ctx)
+	case user.FieldIsStaff:
+		return m.OldIsStaff(ctx)
 	case user.FieldRole:
 		return m.OldRole(ctx)
 	case user.FieldIsSuperuser:
@@ -36614,6 +36658,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case user.FieldIsStaff:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsStaff(v)
 		return nil
 	case user.FieldRole:
 		v, ok := value.(user.Role)
@@ -36984,6 +37035,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case user.FieldIsStaff:
+		m.ResetIsStaff()
 		return nil
 	case user.FieldRole:
 		m.ResetRole()

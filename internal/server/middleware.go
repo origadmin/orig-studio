@@ -191,7 +191,7 @@ func AdminMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 				http2.Fail(ctx, http2.AppErrUnauthorized, "no claims")
 				return nil
 			}
-			if claims.Role != "admin" {
+			if claims.Role != "admin" && !claims.IsStaff {
 				http2.Fail(ctx, http2.AppErrForbidden, "admin required")
 				return nil
 			}
@@ -211,7 +211,7 @@ func RequirePermissionCtx(permChecker authbiz.PermissionChecker, permission stri
 				return nil
 			}
 
-			if claims.Role == "admin" {
+			if claims.Role == "admin" || claims.IsStaff {
 				return next(ctx)
 			}
 
@@ -293,7 +293,7 @@ func OptionalJWTMiddleware(jwtMgr *auth.Manager) ginhttp.HandlerFunc {
 func RequiredRole(role string) ginhttp.HandlerFunc {
 	return func(c *ginhttp.Context) {
 		claims, ok := GetClaims(c)
-		if !ok || (claims.Role != role && claims.Role != "admin") {
+		if !ok || (claims.Role != role && !claims.IsStaff && claims.Role != "admin") {
 			c.AbortWithStatusJSON(http.StatusForbidden, ginhttp.H{"error": "permission denied: " + role + " role required"})
 			return
 		}
@@ -310,7 +310,7 @@ func AdminMiddleware(jwtMgr *auth.Manager) ginhttp.HandlerFunc {
 			return
 		}
 
-		if claims.Role != "admin" {
+		if claims.Role != "admin" && !claims.IsStaff {
 			c.AbortWithStatusJSON(http.StatusForbidden, ginhttp.H{"error": "admin access required"})
 			return
 		}
@@ -351,7 +351,7 @@ func RequirePermission(permChecker authbiz.PermissionChecker, permission string,
 			return
 		}
 
-		if claims.Role == "admin" {
+		if claims.Role == "admin" || claims.IsStaff {
 			c.Next()
 			return
 		}

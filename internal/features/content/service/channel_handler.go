@@ -448,7 +448,7 @@ func (h *ChannelHandler) UpdateChannel(w http.ResponseWriter, r *http.Request) {
 		r.Context(),
 		chItem,
 		claims.GetUserID(),
-		claims.IsAdmin(),
+		claims.IsStaff,
 	)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
@@ -484,7 +484,7 @@ func (h *ChannelHandler) DeleteChannel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.uc.DeleteChannel(r.Context(), existingChannel.ID, claims.GetUserID(), claims.IsAdmin())
+	err = h.uc.DeleteChannel(r.Context(), existingChannel.ID, claims.GetUserID(), claims.IsStaff)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
 		return
@@ -524,7 +524,7 @@ func (h *ChannelHandler) AddMedia(w http.ResponseWriter, r *http.Request) {
 		token,
 		input.MediaID,
 		claims.GetUserID(),
-		claims.IsAdmin(),
+		claims.IsStaff,
 	)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
@@ -564,7 +564,7 @@ func (h *ChannelHandler) RemoveMedia(w http.ResponseWriter, r *http.Request) {
 		token,
 		mediaId,
 		claims.GetUserID(),
-		claims.IsAdmin(),
+		claims.IsStaff,
 	)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
@@ -748,7 +748,7 @@ func (h *ChannelHandler) InviteUserToChannel(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err := h.uc.InviteUserToChannel(r.Context(), token, input.UserID, claims.GetUserID(), claims.IsAdmin())
+	err := h.uc.InviteUserToChannel(r.Context(), token, input.UserID, claims.GetUserID(), claims.IsStaff)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
 		return
@@ -911,7 +911,7 @@ func (h *ChannelHandler) UpdateMyHandle(w http.ResponseWriter, r *http.Request) 
 	ch := channels[0]
 	ch.Handle = input.Handle
 
-	updated, err := h.uc.UpdateChannel(r.Context(), ch, claims.GetUserID(), claims.IsAdmin())
+	updated, err := h.uc.UpdateChannel(r.Context(), ch, claims.GetUserID(), claims.IsStaff)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
 		return
@@ -1378,7 +1378,7 @@ func (h *ChannelHandler) GetChannelLimits(w http.ResponseWriter, r *http.Request
 	if val != nil {
 		claims := val.(*auth.Claims)
 		userID = claims.GetUserID()
-		isAdmin = claims.IsAdmin()
+		isAdmin = claims.IsStaff
 	}
 
 	maxChannels, currentCount, canCreate, err := h.uc.GetChannelLimits(r.Context(), userID, isAdmin)
