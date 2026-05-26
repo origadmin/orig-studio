@@ -33,8 +33,6 @@ type User struct {
 	LastName string `json:"last_name,omitempty"`
 	// Status holds the value of the "status" field.
 	Status user.Status `json:"status,omitempty"`
-	// IsStaff holds the value of the "is_staff" field.
-	IsStaff bool `json:"is_staff,omitempty"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
 	// IsSuperuser holds the value of the "is_superuser" field.
@@ -327,7 +325,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldIsStaff, user.FieldIsSuperuser, user.FieldIsFeatured, user.FieldAdvancedUser, user.FieldIsEditor, user.FieldIsManager, user.FieldNotificationOnComments, user.FieldAllowContact:
+		case user.FieldIsSuperuser, user.FieldIsFeatured, user.FieldAdvancedUser, user.FieldIsEditor, user.FieldIsManager, user.FieldNotificationOnComments, user.FieldAllowContact:
 			values[i] = new(sql.NullBool)
 		case user.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
@@ -403,12 +401,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = user.Status(value.String)
-			}
-		case user.FieldIsStaff:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_staff", values[i])
-			} else if value.Valid {
-				_m.IsStaff = value.Bool
 			}
 		case user.FieldRole:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -731,9 +723,6 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
-	builder.WriteString(", ")
-	builder.WriteString("is_staff=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsStaff))
 	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Role))

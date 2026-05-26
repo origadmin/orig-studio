@@ -307,8 +307,8 @@ func TestUserRoles(t *testing.T) {
 			t.Fatalf("Failed to parse response: %v", err)
 		}
 		// Me handler returns user object in data field
-		if _, ok := data["is_staff"]; !ok {
-			t.Log("Note: 'is_staff' field not found in me response; field may not exist in current schema")
+		if _, ok := data["role"]; !ok {
+			t.Log("Note: 'role' field not found in me response; field may not exist in current schema")
 		}
 	})
 

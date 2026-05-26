@@ -32,7 +32,6 @@ func (User) Fields() []ent.Field {
 		field.String("first_name").Optional().MaxLen(150),
 		field.String("last_name").Optional().MaxLen(150),
 		field.Enum("status").Values("PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED").Default("ACTIVE"),
-		field.Bool("is_staff").Default(false),
 		field.Enum("role").Values("user", "admin", "editor").Default("user"),
 		field.Bool("is_superuser").Default(false),
 		field.Bool("is_featured").Default(false),
@@ -70,7 +69,7 @@ func (User) Indexes() []ent.Index {
 		index.Fields("email"),
 		index.Fields("slug"),
 		index.Fields("status"),
-		index.Fields("is_staff"),
+		index.Fields("role"),
 		index.Fields("date_added"),
 	}
 }

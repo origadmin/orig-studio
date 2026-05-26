@@ -31,8 +31,6 @@ const (
 	FieldLastName = "last_name"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldIsStaff holds the string denoting the is_staff field in the database.
-	FieldIsStaff = "is_staff"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldIsSuperuser holds the string denoting the is_superuser field in the database.
@@ -278,7 +276,6 @@ var Columns = []string{
 	FieldFirstName,
 	FieldLastName,
 	FieldStatus,
-	FieldIsStaff,
 	FieldRole,
 	FieldIsSuperuser,
 	FieldIsFeatured,
@@ -342,8 +339,6 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
-	// DefaultIsStaff holds the default value on creation for the "is_staff" field.
-	DefaultIsStaff bool
 	// DefaultIsSuperuser holds the default value on creation for the "is_superuser" field.
 	DefaultIsSuperuser bool
 	// DefaultIsFeatured holds the default value on creation for the "is_featured" field.
@@ -498,11 +493,6 @@ func ByLastName(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByIsStaff orders the results by the is_staff field.
-func ByIsStaff(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsStaff, opts...).ToFunc()
 }
 
 // ByRole orders the results by the role field.

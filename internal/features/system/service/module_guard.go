@@ -20,7 +20,7 @@ func ModuleGuard(settingUC *systembiz.SettingUseCase, moduleKey string) gin.Hand
 	return func(c *gin.Context) {
 		if claims, exists := c.Get("claims"); exists {
 			if cl, ok := claims.(*auth.Claims); ok {
-				if cl.Role == "admin" || cl.IsStaff {
+				if cl.Role == "admin" || cl.IsAdmin() {
 					c.Next()
 					return
 				}
@@ -63,7 +63,7 @@ func ModuleGuardCtx(settingUC *systembiz.SettingUseCase, moduleKey string) http2
 			// Admin/staff bypass
 			if claims, ok := ctx.Get("claims"); ok {
 				if cl, ok := claims.(*auth.Claims); ok {
-					if cl.Role == "admin" || cl.IsStaff {
+					if cl.Role == "admin" || cl.IsAdmin() {
 						return next(ctx)
 					}
 				}
