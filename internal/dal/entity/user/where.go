@@ -100,11 +100,6 @@ func LastName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldLastName, v))
 }
 
-// IsStaff applies equality check predicate on the "is_staff" field. It's identical to IsStaffEQ.
-func IsStaff(v bool) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldIsStaff, v))
-}
-
 // IsSuperuser applies equality check predicate on the "is_superuser" field. It's identical to IsSuperuserEQ.
 func IsSuperuser(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldIsSuperuser, v))
@@ -738,16 +733,6 @@ func StatusIn(vs ...Status) predicate.User {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldStatus, vs...))
-}
-
-// IsStaffEQ applies the EQ predicate on the "is_staff" field.
-func IsStaffEQ(v bool) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldIsStaff, v))
-}
-
-// IsStaffNEQ applies the NEQ predicate on the "is_staff" field.
-func IsStaffNEQ(v bool) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldIsStaff, v))
 }
 
 // RoleEQ applies the EQ predicate on the "role" field.

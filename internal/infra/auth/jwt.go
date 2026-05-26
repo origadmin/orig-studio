@@ -2,7 +2,6 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package auth provides JWT token generation and validation utilities.
 package auth
 
 import (
@@ -12,10 +11,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims is the JWT claims structure for origcms.
 type Claims struct {
 	Username string `json:"username"`
-	IsStaff  bool   `json:"is_staff"`
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
@@ -24,38 +21,36 @@ func (c *Claims) GetUserID() string {
 	return c.Subject
 }
 
-// Manager handles JWT signing and parsing.
+func (c *Claims) IsAdmin() bool {
+	return c.Role == "admin"
+}
+
 type Manager struct {
-	secret         []byte
-	ttl            time.Duration
+	secret          []byte
+	ttl             time.Duration
 	refreshTokenTTL time.Duration
 }
 
-// NewManager creates a new JWT Manager.
 func NewManager(secret string, ttl time.Duration, refreshTokenTTL time.Duration) *Manager {
 	return &Manager{
-		secret:         []byte(secret),
-		ttl:            ttl,
+		secret:          []byte(secret),
+		ttl:             ttl,
 		refreshTokenTTL: refreshTokenTTL,
 	}
 }
 
-// TTL returns the token time-to-live duration.
 func (m *Manager) TTL() time.Duration {
 	return m.ttl
 }
 
-// Generate creates a signed JWT token for the given user.
 func (m *Manager) Generate(
 	userID string,
 	username string,
-	isStaff bool,
 	role string,
 ) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		Username: username,
-		IsStaff:  isStaff,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
@@ -71,13 +66,11 @@ func (m *Manager) Generate(
 func (m *Manager) GenerateRefreshToken(
 	userID string,
 	username string,
-	isStaff bool,
 	role string,
 ) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		Username: username,
-		IsStaff:  isStaff,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
@@ -90,7 +83,6 @@ func (m *Manager) GenerateRefreshToken(
 	return token.SignedString(m.secret)
 }
 
-// Parse validates and parses a JWT token string.
 func (m *Manager) Parse(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

@@ -123,7 +123,6 @@ func EntityToUserEntityDTO(u *entity.User) *dto.UserEntityDTO {
 		Name:         u.Name,
 		Slug:         u.Slug,
 		Role:         dto.UserRoleType(string(u.Role)),
-		IsStaff:      u.IsStaff,
 		IsSuperuser:  u.IsSuperuser,
 		IsFeatured:   u.IsFeatured,
 		IsEditor:     u.IsEditor,
@@ -230,7 +229,6 @@ func (r *userRepo) Create(
 		SetPassword(hashedPassword).
 		SetSlug(slug).
 		SetStatus(status).
-		SetIsStaff(in.IsStaff).
 		SetIsSuperuser(in.IsSuperuser).
 		SetLogo(in.Avatar).
 		SetRole("user").
@@ -282,7 +280,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (*types.U
 	slog.Info("user from db raw",
 		"id", u.ID,
 		"username", u.Username,
-		"is_staff", u.IsStaff,
 		"is_superuser", u.IsSuperuser,
 		"status", u.Status,
 	)
