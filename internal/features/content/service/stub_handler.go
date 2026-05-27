@@ -68,34 +68,28 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	medias := r.Group("/medias")
 	{
-		// Metadata
-		medias.GET("/:id/metadata", server.HTTPToHandlerFunc(h.stubMediaMetadata()))
-		medias.POST("/:id/metadata/mining", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaMetadataMining())))
-		medias.GET("/:id/metadata/status", server.HTTPToHandlerFunc(h.stubMediaMetadataStatus()))
-		medias.GET("/:id/metadata/key-frames", server.HTTPToHandlerFunc(h.stubMediaMetadataKeyFrames()))
-		medias.GET("/:id/metadata/audio-waveform", server.HTTPToHandlerFunc(h.stubMediaMetadataAudioWaveform()))
-		medias.GET("/:id/metadata/text-content", server.HTTPToHandlerFunc(h.stubMediaMetadataTextContent()))
-		medias.GET("/:id/metadata/scene-changes", server.HTTPToHandlerFunc(h.stubMediaMetadataSceneChanges()))
+		medias.GET("/:token/metadata", server.HTTPToHandlerFunc(h.stubMediaMetadata()))
+		medias.POST("/:token/metadata/mining", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaMetadataMining())))
+		medias.GET("/:token/metadata/status", server.HTTPToHandlerFunc(h.stubMediaMetadataStatus()))
+		medias.GET("/:token/metadata/key-frames", server.HTTPToHandlerFunc(h.stubMediaMetadataKeyFrames()))
+		medias.GET("/:token/metadata/audio-waveform", server.HTTPToHandlerFunc(h.stubMediaMetadataAudioWaveform()))
+		medias.GET("/:token/metadata/text-content", server.HTTPToHandlerFunc(h.stubMediaMetadataTextContent()))
+		medias.GET("/:token/metadata/scene-changes", server.HTTPToHandlerFunc(h.stubMediaMetadataSceneChanges()))
 
-		// Subtitle
-		medias.GET("/:id/subtitles", server.HTTPToHandlerFunc(h.stubSubtitleList()))
-		medias.POST("/:id/subtitles", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubSubtitleCreate())))
+		medias.GET("/:token/subtitles", server.HTTPToHandlerFunc(h.stubSubtitleList()))
+		medias.POST("/:token/subtitles", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubSubtitleCreate())))
 
-		// Download/Stream/Thumbnail
-		medias.GET("/:id/download", server.HTTPToHandlerFunc(h.stubMediaDownload()))
-		medias.GET("/:id/stream", server.HTTPToHandlerFunc(h.stubMediaStream()))
-		medias.GET("/:id/thumbnail", server.HTTPToHandlerFunc(h.stubMediaThumbnail()))
+		medias.GET("/:token/download", server.HTTPToHandlerFunc(h.stubMediaDownload()))
+		medias.GET("/:token/stream", server.HTTPToHandlerFunc(h.stubMediaStream()))
+		medias.GET("/:token/thumbnail", server.HTTPToHandlerFunc(h.stubMediaThumbnail()))
 
-		// Update/Delete
-		medias.PUT("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaUpdate())))
-		medias.DELETE("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaDelete())))
+		medias.PUT("/:token", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaUpdate())))
+		medias.DELETE("/:token", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaDelete())))
 
-		// Upload alias
 		medias.POST("/upload", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaUpload())))
 
-		// Tasks (deprecated)
-		medias.GET("/:id/tasks", server.HTTPToHandlerFunc(h.stubMediaTasks()))
-		medias.POST("/:id/tasks/:taskId/retry", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaTaskRetry())))
+		medias.GET("/:token/tasks", server.HTTPToHandlerFunc(h.stubMediaTasks()))
+		medias.POST("/:token/tasks/:taskId/retry", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubMediaTaskRetry())))
 	}
 
 	// ================================
@@ -151,11 +145,11 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	users := r.Group("/users")
 	{
-		users.GET("/:id/subscription", server.HTTPToHandlerFunc(h.stubUserSubscription()))
-		users.POST("/:id/subscribe", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserSubscribe())))
-		users.DELETE("/:id/subscribe", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserUnsubscribe())))
-		users.PUT("/:id", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserUpdate())))
-		users.PATCH("/:id/status", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserStatusUpdate())))
+		users.GET("/:slug/subscription", server.HTTPToHandlerFunc(h.stubUserSubscription()))
+		users.POST("/:slug/subscribe", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserSubscribe())))
+		users.DELETE("/:slug/subscribe", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserUnsubscribe())))
+		users.PUT("/:slug", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserUpdate())))
+		users.PATCH("/:slug/status", server.WithJWTCtx(h.jwt, server.HTTPToHandlerFunc(h.stubUserStatusUpdate())))
 	}
 
 	// ================================

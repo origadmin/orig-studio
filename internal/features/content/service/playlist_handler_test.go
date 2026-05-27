@@ -191,12 +191,16 @@ func setupPlaylistTestHandler() *PlaylistHandler {
 }
 
 // setAuthClaims injects mock claims into the gin context for authenticated endpoints.
-func setAuthClaims(c *gin.Context, userID string, isStaff bool) {
+func setAuthClaims(c *gin.Context, userID string, isAdmin bool) {
+	role := "user"
+	if isAdmin {
+		role = "admin"
+	}
 	c.Set("claims", &auth.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject: userID,
 		},
-		IsStaff: isStaff,
+		Role: role,
 	})
 }
 

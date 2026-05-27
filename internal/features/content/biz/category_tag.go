@@ -47,6 +47,7 @@ type Tag struct {
 type CategoryRepo interface {
 	Create(ctx context.Context, c *Category) (*Category, error)
 	Get(ctx context.Context, id int) (*Category, error)
+	GetBySlug(ctx context.Context, slug string) (*Category, error)
 	Update(ctx context.Context, c *Category) (*Category, error)
 	Delete(ctx context.Context, id int) error
 	ListAll(ctx context.Context) ([]*Category, error)
@@ -129,6 +130,10 @@ func (uc *CategoryTagUseCase) GetCategory(ctx context.Context, id int) (*Categor
 	return uc.categoryRepo.Get(ctx, id)
 }
 
+func (uc *CategoryTagUseCase) GetCategoryBySlug(ctx context.Context, slug string) (*Category, error) {
+	return uc.categoryRepo.GetBySlug(ctx, slug)
+}
+
 func (uc *CategoryTagUseCase) ListTags(
 	ctx context.Context,
 	page, pageSize int,
@@ -146,6 +151,10 @@ func (uc *CategoryTagUseCase) DeleteTag(ctx context.Context, id int) error {
 
 func (uc *CategoryTagUseCase) GetTag(ctx context.Context, id int) (*Tag, error) {
 	return uc.tagRepo.Get(ctx, id)
+}
+
+func (uc *CategoryTagUseCase) GetTagBySlug(ctx context.Context, slug string) (*Tag, error) {
+	return uc.tagRepo.GetBySlug(ctx, slug)
 }
 
 func (uc *CategoryTagUseCase) UpdateTag(ctx context.Context, t *Tag) (*Tag, error) {

@@ -49,9 +49,9 @@ func NewSpriteHandler(mediaUC *biz.MediaUseCase, paths *conf.StoragePaths, jwt *
 // GetSpriteVTT handles GET /medias/:id/sprite.vtt
 // Returns the WebVTT file for sprite-based video preview thumbnails.
 func (h *SpriteHandler) GetSpriteVTT(c *gin.Context) {
-	shortToken := c.Param("id")
+	shortToken := c.Param("token")
 	if shortToken == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing media id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing media token"})
 		return
 	}
 
@@ -99,9 +99,9 @@ func (h *SpriteHandler) GetSpriteVTT(c *gin.Context) {
 // GetSpriteImage handles GET /medias/:id/sprite.jpg
 // Returns the JPEG sprite sheet image for video preview thumbnails.
 func (h *SpriteHandler) GetSpriteImage(c *gin.Context) {
-	shortToken := c.Param("id")
+	shortToken := c.Param("token")
 	if shortToken == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing media id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing media token"})
 		return
 	}
 
@@ -232,8 +232,8 @@ func (h *SpriteHandler) RegisterRoutes(r http2.Router) {
 	// Public sprite routes (no auth required)
 	medias := r.Group("/medias")
 	{
-		medias.GET("/:id/sprite.vtt", server.GinHandlerToHandlerFunc(h.GetSpriteVTT))
-		medias.GET("/:id/sprite.jpg", server.GinHandlerToHandlerFunc(h.GetSpriteImage))
+		medias.GET("/:token/sprite.vtt", server.GinHandlerToHandlerFunc(h.GetSpriteVTT))
+		medias.GET("/:token/sprite.jpg", server.GinHandlerToHandlerFunc(h.GetSpriteImage))
 	}
 
 	// Admin sprite/thumbnail regeneration routes (auth + admin required)

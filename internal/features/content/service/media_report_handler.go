@@ -24,7 +24,7 @@ func NewMediaReportHandler(mediaReportUC *contentbiz.MediaReportUseCase, jwtMgr 
 }
 
 func (h *MediaReportHandler) RegisterRoutes(r http2.Router) {
-	r.POST("/medias/:id/report", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.reportMedia())))
+	r.POST("/medias/:token/report", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.reportMedia())))
 }
 
 type MediaReportRequest struct {
@@ -43,7 +43,7 @@ func (h *MediaReportHandler) reportMedia() http.HandlerFunc {
 		gc := ginadapter.GetGinContext(r)
 		ctx := r.Context()
 
-		id := gc.Param("id")
+		id := gc.Param("token")
 		if id == "" {
 			server.Fail(gc, server.ErrBadRequest, "media ID is required")
 			return
