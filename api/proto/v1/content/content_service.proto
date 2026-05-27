@@ -16,15 +16,18 @@ option objc_class_prefix = "OrigStudioContent";
 
 // ContentService handles content interactions: comments, likes, favorites, notifications, feeds.
 service ContentService {
-  // ========== Comments ==========
-  rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse) {
-    option (google.api.http) = {
-      post: "/api/v1/medias/{media_id}/comments"
-      body: "*"
-    };
+  // ========== Comments (independent /comments routes) ==========
+  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse) {
+    option (google.api.http) = {get: "/api/v1/comments"};
   }
   rpc GetComment(GetCommentRequest) returns (GetCommentResponse) {
     option (google.api.http) = {get: "/api/v1/comments/{id}"};
+  }
+  rpc CreateComment(CreateCommentRequest) returns (CreateCommentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/comments"
+      body: "*"
+    };
   }
   rpc UpdateComment(UpdateCommentRequest) returns (UpdateCommentResponse) {
     option (google.api.http) = {
@@ -35,8 +38,23 @@ service ContentService {
   rpc DeleteComment(DeleteCommentRequest) returns (DeleteCommentResponse) {
     option (google.api.http) = {delete: "/api/v1/comments/{id}"};
   }
-  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse) {
-    option (google.api.http) = {get: "/api/v1/medias/{media_id}/comments"};
+  rpc ListMediaComments(ListMediaCommentsRequest) returns (ListMediaCommentsResponse) {
+    option (google.api.http) = {get: "/api/v1/medias/{id}/comments"};
+  }
+  rpc GetCommentLikes(GetCommentLikesRequest) returns (GetCommentLikesResponse) {
+    option (google.api.http) = {get: "/api/v1/comments/{id}/likes"};
+  }
+  rpc ToggleCommentLike(ToggleCommentLikeRequest) returns (ToggleCommentLikeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/comments/{id}/likes"
+      body: "*"
+    };
+  }
+  rpc ToggleCommentDislike(ToggleCommentDislikeRequest) returns (ToggleCommentDislikeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/comments/{id}/dislikes"
+      body: "*"
+    };
   }
 
   // ========== Likes ==========
@@ -74,6 +92,34 @@ service ContentService {
     option (google.api.http) = {
       patch: "/api/v1/notifications/read-all"
     };
+  }
+
+  // Additional notification routes
+  rpc ListAllNotifications(ListAllNotificationsRequest) returns (ListAllNotificationsResponse) {
+    option (google.api.http) = {get: "/api/v1/notifications"};
+  }
+  rpc GetUnreadNotificationCount(GetUnreadNotificationCountRequest) returns (GetUnreadNotificationCountResponse) {
+    option (google.api.http) = {get: "/api/v1/notifications/unread-count"};
+  }
+  rpc MarkNotificationReadPost(MarkNotificationReadPostRequest) returns (MarkNotificationReadPostResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications/{id}/read"
+      body: "*"
+    };
+  }
+  rpc MarkAllNotificationsReadPost(MarkAllNotificationsReadPostRequest) returns (MarkAllNotificationsReadPostResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications/read-all"
+      body: "*"
+    };
+  }
+  rpc DeleteNotification(DeleteNotificationRequest) returns (DeleteNotificationResponse) {
+    option (google.api.http) = {delete: "/api/v1/notifications/{id}"};
+  }
+
+  // ========== Explore ==========
+  rpc GetExploreTrending(GetExploreTrendingRequest) returns (GetExploreTrendingResponse) {
+    option (google.api.http) = {get: "/api/v1/explore/trending"};
   }
 
   // ========== Feed ==========
@@ -158,6 +204,19 @@ message ListCommentsRequest {
 }
 
 message ListCommentsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated Comment comments = 2 [json_name = "comments"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message ListMediaCommentsRequest {
+  int64 id = 1 [json_name = "id"];
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message ListMediaCommentsResponse {
   int32 total = 1 [json_name = "total"];
   repeated Comment comments = 2 [json_name = "comments"];
   int32 page = 3 [json_name = "page"];
@@ -328,4 +387,88 @@ message ListTagsRequest {
 message ListTagsResponse {
   int32 total = 1 [json_name = "total"];
   repeated Tag tags = 2 [json_name = "tags"];
+}
+
+// ========== Additional Notification Messages ==========
+
+message ListAllNotificationsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string type = 3 [json_name = "type"];
+}
+
+message ListAllNotificationsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated Notification notifications = 2 [json_name = "notifications"];
+  int32 unread_count = 3 [json_name = "unread_count"];
+}
+
+message GetUnreadNotificationCountRequest {}
+
+message GetUnreadNotificationCountResponse {
+  int32 count = 1 [json_name = "count"];
+}
+
+message MarkNotificationReadPostRequest {
+  string id = 1 [json_name = "id"];
+}
+
+message MarkNotificationReadPostResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+message MarkAllNotificationsReadPostRequest {}
+
+message MarkAllNotificationsReadPostResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+message DeleteNotificationRequest {
+  string id = 1 [json_name = "id"];
+}
+
+message DeleteNotificationResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+// ========== Explore Messages ==========
+
+message GetExploreTrendingRequest {
+  string period = 1 [json_name = "period"];
+  int32 limit = 2 [json_name = "limit"];
+}
+
+message GetExploreTrendingResponse {
+  repeated api.v1.services.types.Media items = 1 [json_name = "items"];
+}
+
+// ========== Comment Like Messages ==========
+
+message GetCommentLikesRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
+message GetCommentLikesResponse {
+  int64 like_count = 1 [json_name = "like_count"];
+  int64 dislike_count = 2 [json_name = "dislike_count"];
+  bool is_liked = 3 [json_name = "is_liked"];
+  bool is_disliked = 4 [json_name = "is_disliked"];
+}
+
+message ToggleCommentLikeRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
+message ToggleCommentLikeResponse {
+  bool liked = 1 [json_name = "liked"];
+  int64 like_count = 2 [json_name = "like_count"];
+}
+
+message ToggleCommentDislikeRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
+message ToggleCommentDislikeResponse {
+  bool disliked = 1 [json_name = "disliked"];
+  int64 dislike_count = 2 [json_name = "dislike_count"];
 }

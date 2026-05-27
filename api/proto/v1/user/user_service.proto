@@ -29,7 +29,7 @@ service UserService {
   // Logout invalidates the current session.
   rpc Logout(LogoutRequest) returns (LogoutResponse) {
     option (google.api.http) = {
-      post: "/api/v1/auth/logout"
+      post: "/api/v1/auth/signout"
       body: "*"
     };
   }
@@ -50,24 +50,7 @@ service UserService {
     };
   }
 
-  // ForgotPassword initiates password reset process.
-  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse) {
-    option (google.api.http) = {
-      post: "/api/v1/auth/forgot-password"
-      body: "*"
-    };
-  }
-
-  // ResetPassword resets user password with token.
-  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {
-    option (google.api.http) = {
-      post: "/api/v1/auth/reset-password"
-      body: "*"
-    };
-  }
-
-  // GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
-  // This is kept for backward compatibility, use MeService for new code.
+  // GetCurrentUser returns the current authenticated user.
   rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
     option (google.api.http) = {get: "/api/v1/auth/me"};
   }
@@ -235,6 +218,76 @@ service UserService {
   rpc GetUserFollowers(GetUserFollowersRequest) returns (GetUserFollowersResponse) {
     option (google.api.http) = {get: "/api/v1/users/{id}/followers"};
   }
+
+  // GetUserByUsername returns a user by username.
+  rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserByUsernameResponse) {
+    option (google.api.http) = {get: "/api/v1/users/username/{username}"};
+  }
+
+  // SubscribeUser subscribes to a user.
+  rpc SubscribeUser(SubscribeUserRequest) returns (SubscribeUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/users/{id}/subscribe"
+      body: "*"
+    };
+  }
+
+  // UnsubscribeUser unsubscribes from a user.
+  rpc UnsubscribeUser(UnsubscribeUserRequest) returns (UnsubscribeUserResponse) {
+    option (google.api.http) = {delete: "/api/v1/users/{id}/subscribe"};
+  }
+
+  // GetUserSubscription returns subscription status for a user.
+  rpc GetUserSubscription(GetUserSubscriptionRequest) returns (GetUserSubscriptionResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/subscription"};
+  }
+
+  // GetMyFollowers returns the current user's followers.
+  rpc GetMyFollowers(GetMyFollowersRequest) returns (GetMyFollowersResponse) {
+    option (google.api.http) = {get: "/api/v1/me/followers"};
+  }
+
+  // GetMyChannels returns the current user's channels.
+  rpc GetMyChannels(GetMyChannelsRequest) returns (GetMyChannelsResponse) {
+    option (google.api.http) = {get: "/api/v1/me/channels"};
+  }
+
+  // RemoveFavorite removes a favorite for the current user.
+  rpc RemoveFavorite(RemoveFavoriteRequest) returns (RemoveFavoriteResponse) {
+    option (google.api.http) = {delete: "/api/v1/me/favorites/{id}"};
+  }
+
+  // UpdateMySlug updates the current user's slug.
+  rpc UpdateMySlug(UpdateMySlugRequest) returns (UpdateMySlugResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/me/slug"
+      body: "*"
+    };
+  }
+
+  // GetUserLikes returns likes for a user.
+  rpc GetUserLikes(GetUserLikesRequest) returns (GetUserLikesResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/likes"};
+  }
+
+  // GetUserSubscriptions returns subscriptions for a user.
+  rpc GetUserSubscriptions(GetUserSubscriptionsRequest) returns (GetUserSubscriptionsResponse) {
+    option (google.api.http) = {get: "/api/v1/users/{id}/subscriptions"};
+  }
+
+  // GetUserBySlug returns a user by slug.
+  rpc GetUserBySlug(GetUserBySlugRequest) returns (GetUserBySlugResponse) {
+    option (google.api.http) = {get: "/api/v1/users/slug/{slug}"};
+  }
+
+  // ChangePassword changes the current user's password (auth endpoint).
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/auth/password"
+      body: "*"
+    };
+  }
+
 }
 
 // ========== Auth Messages ==========
@@ -309,34 +362,6 @@ message RegisterResponse {
   string refresh_token = 3 [json_name = "refresh_token"];
   // Token expiration timestamp.
   int64 expires_at = 4 [json_name = "expires_at"];
-}
-
-// ForgotPasswordRequest is the request message for forgot password.
-message ForgotPasswordRequest {
-  // The email address.
-  string email = 1 [json_name = "email"];
-}
-
-// ForgotPasswordResponse is the response message for forgot password.
-message ForgotPasswordResponse {
-  // Whether the request was successful.
-  bool success = 1 [json_name = "success"];
-  // Message to display to user.
-  string message = 2 [json_name = "message"];
-}
-
-// ResetPasswordRequest is the request message for resetting password.
-message ResetPasswordRequest {
-  // The reset token.
-  string token = 1 [json_name = "token"];
-  // The new password.
-  string password = 2 [json_name = "password"];
-}
-
-// ResetPasswordResponse is the response message for resetting password.
-message ResetPasswordResponse {
-  // Whether the reset was successful.
-  bool success = 1 [json_name = "success"];
 }
 
 // GetCurrentUserRequest is the request message for getting current user.
@@ -728,3 +753,137 @@ message RemoveHistoryItemRequest {
 
 // RemoveHistoryItemResponse is the response for removing a single history item.
 message RemoveHistoryItemResponse {}
+
+// ========== Additional User Messages ==========
+
+// GetUserByUsernameRequest is the request for getting a user by username.
+message GetUserByUsernameRequest {
+  string username = 1 [json_name = "username"];
+}
+
+// GetUserByUsernameResponse is the response for getting a user by username.
+message GetUserByUsernameResponse {
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+// SubscribeUserRequest is the request for subscribing to a user.
+message SubscribeUserRequest {
+  string id = 1;
+}
+
+// SubscribeUserResponse is the response for subscribing to a user.
+message SubscribeUserResponse {
+  bool success = 1 [json_name = "success"];
+  bool is_subscribed = 2 [json_name = "is_subscribed"];
+}
+
+// UnsubscribeUserRequest is the request for unsubscribing from a user.
+message UnsubscribeUserRequest {
+  string id = 1;
+}
+
+// UnsubscribeUserResponse is the response for unsubscribing from a user.
+message UnsubscribeUserResponse {
+  bool success = 1 [json_name = "success"];
+  bool is_subscribed = 2 [json_name = "is_subscribed"];
+}
+
+// GetUserSubscriptionRequest is the request for getting subscription status.
+message GetUserSubscriptionRequest {
+  string id = 1;
+}
+
+// GetUserSubscriptionResponse is the response for getting subscription status.
+message GetUserSubscriptionResponse {
+  bool is_subscribed = 1 [json_name = "is_subscribed"];
+}
+
+// GetMyFollowersRequest is the request for getting my followers.
+message GetMyFollowersRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMyFollowersResponse is the response for getting my followers.
+message GetMyFollowersResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.User followers = 2 [json_name = "followers"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// GetMyChannelsRequest is the request for getting my channels.
+message GetMyChannelsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+// GetMyChannelsResponse is the response for getting my channels.
+message GetMyChannelsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Channel channels = 2 [json_name = "channels"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+// RemoveFavoriteRequest is the request for removing a favorite.
+message RemoveFavoriteRequest {
+  string id = 1;
+}
+
+// RemoveFavoriteResponse is the response for removing a favorite.
+message RemoveFavoriteResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+// ========== Additional User Messages ==========
+
+message UpdateMySlugRequest {
+  string slug = 1 [json_name = "slug"];
+}
+message UpdateMySlugResponse {
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+message GetUserLikesRequest {
+  string id = 1;
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+message GetUserLikesResponse {
+  repeated api.v1.services.types.Like items = 1 [json_name = "items"];
+  int32 total = 2 [json_name = "total"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message GetUserSubscriptionsRequest {
+  string id = 1;
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+message GetUserSubscriptionsResponse {
+  repeated api.v1.services.types.Channel items = 1 [json_name = "items"];
+  int32 total = 2 [json_name = "total"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message GetUserBySlugRequest {
+  string slug = 1 [json_name = "slug"];
+}
+message GetUserBySlugResponse {
+  api.v1.services.types.User user = 1 [json_name = "user"];
+}
+
+message ChangePasswordRequest {
+  string current_password = 1 [json_name = "current_password"];
+  string new_password = 2 [json_name = "new_password"];
+}
+message ChangePasswordResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+// ========== User Subscription Stub Messages ==========
+
+

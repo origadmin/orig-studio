@@ -35,25 +35,17 @@ func NewUserHandler(uc *biz.UserUseCase, jwt *auth.Manager) *UserHandler {
 func (h *UserHandler) RegisterRoutes(r http2.Router) {
 	users := r.Group("/users")
 	{
-		users.GET("/me", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getMe)))
-		users.PUT("/me", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.updateMe)))
-		users.PUT("/me/password", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.updatePassword)))
-
 		users.GET("", server.GinHandlerToHandlerFunc(h.listUsers))
-
 		users.POST("", server.GinHandlerToHandlerFunc(h.createUser))
-
 		users.GET("/:id/playlists", server.GinHandlerToHandlerFunc(h.getUserPlaylists))
 		users.GET("/username/:username", server.GinHandlerToHandlerFunc(h.getUserByUsername))
 		users.GET("/slug/:slug", server.GinHandlerToHandlerFunc(h.getUserBySlug))
-		users.PUT("/me/slug", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.updateUserSlug)))
 		users.GET("/:id/favorites", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserFavorites)))
 		users.GET("/:id/likes", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserLikes)))
 		users.GET("/:id/subscriptions", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserSubscriptions)))
 		users.GET("/:id/followers", server.GinHandlerToHandlerFunc(h.getUserFollowers))
 		users.GET("/:id/stats", server.GinHandlerToHandlerFunc(h.getUserStats))
 		users.GET("/:id/channels", server.GinHandlerToHandlerFunc(h.getUserChannels))
-
 		users.GET("/:id", server.GinHandlerToHandlerFunc(h.getUser))
 		users.DELETE("/:id", server.GinHandlerToHandlerFunc(h.deleteUser))
 	}

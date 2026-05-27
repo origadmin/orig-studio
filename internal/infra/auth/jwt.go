@@ -15,13 +15,16 @@ import (
 // Claims is the JWT claims structure for origcms.
 type Claims struct {
 	Username string `json:"username"`
-	IsStaff  bool   `json:"is_staff"`
 	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 func (c *Claims) GetUserID() string {
 	return c.Subject
+}
+
+func (c *Claims) IsAdmin() bool {
+	return c.Role == "admin"
 }
 
 // Manager handles JWT signing and parsing.
@@ -49,13 +52,11 @@ func (m *Manager) TTL() time.Duration {
 func (m *Manager) Generate(
 	userID string,
 	username string,
-	isStaff bool,
 	role string,
 ) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		Username: username,
-		IsStaff:  isStaff,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
@@ -71,13 +72,11 @@ func (m *Manager) Generate(
 func (m *Manager) GenerateRefreshToken(
 	userID string,
 	username string,
-	isStaff bool,
 	role string,
 ) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		Username: username,
-		IsStaff:  isStaff,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
