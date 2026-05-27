@@ -96,14 +96,14 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 			return nil
 		}
 
-		token, err := h.jwt.Generate(u.Id, u.Username, u.IsStaff, userRole)
+		token, err := h.jwt.Generate(u.Id, u.Username, userRole)
 		if err != nil {
 			slog.Error("failed to generate token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
-		refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, u.IsStaff, userRole)
+		refreshToken, err := h.jwt.GenerateRefreshToken(u.Id, u.Username, userRole)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
@@ -180,13 +180,13 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			_ = h.uc.SetUserRole(ctx.Request().Context(), created.Id, "admin")
 		}
 
-		token, err := h.jwt.Generate(created.Id, created.Username, created.IsStaff, userRole)
+		token, err := h.jwt.Generate(created.Id, created.Username, userRole)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
-		refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, created.IsStaff, userRole)
+		refreshToken, err := h.jwt.GenerateRefreshToken(created.Id, created.Username, userRole)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")
@@ -231,14 +231,14 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 			return nil
 		}
 
-		token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
+		token, err := h.jwt.Generate(claims.GetUserID(), claims.Username, claims.Role)
 		if err != nil {
 			slog.Error("failed to generate token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "token generation failed")
 			return nil
 		}
 
-		refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.IsStaff, claims.Role)
+		refreshToken, err := h.jwt.GenerateRefreshToken(claims.GetUserID(), claims.Username, claims.Role)
 		if err != nil {
 			slog.Error("failed to generate refresh token", "err", err)
 			http2.Fail(ctx, server.ErrInternal, "refresh token generation failed")

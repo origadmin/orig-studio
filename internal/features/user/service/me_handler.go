@@ -81,6 +81,8 @@ func (h *MeHandler) RegisterRoutes(r http2.Router) {
 		me.DELETE("/history/:id", server.GinHandlerToHandlerFunc(h.RemoveHistoryItem))
 
 		me.GET("/stats", server.GinHandlerToHandlerFunc(h.GetStats))
+		me.PUT("/slug", server.GinHandlerToHandlerFunc(h.UpdateSlug))
+		me.GET("/channels", server.GinHandlerToHandlerFunc(h.GetChannels))
 	}
 }
 
@@ -641,6 +643,48 @@ func (h *MeHandler) GetStats(c *gin.Context) {
 		"user_id": claims.GetUserID(),
 		"stats":   gin.H{},
 	})
+}
+
+func (h *MeHandler) UpdateSlug(c *gin.Context) {
+	claims, ok := server.GetClaims(c)
+	if !ok {
+		server.Fail(c, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+
+	var input struct {
+		Slug string `json:"slug" binding:"required,min=3,max=64"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		server.Fail(c, server.ErrBadRequest, err.Error())
+		return
+	}
+
+	if err := h.userUC.UpdateUserSlug(c.Request.Context(), claims.GetUserID(), input.Slug); err != nil {
+		server.Fail(c, server.ErrBadRequest, err.Error())
+		return
+	}
+
+	u, _ := h.userUC.GetUser(c.Request.Context(), claims.GetUserID())
+	server.OK(c, u)
+}
+
+func (h *MeHandler) GetChannels(c *gin.Context) {
+	claims, ok := server.GetClaims(c)
+	if !ok {
+		server.Fail(c, server.ErrUnauthorized, "unauthorized")
+		return
+	}
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
+	server.OK(c, gin.H{
+		"channels":  []interface{}{},
+		"total":     0,
+		"page":      page,
+		"page_size": pageSize,
+	})
+	_ = claims
 }
 
 // RemoveFavorite removes a favorite by its ID.

@@ -51,28 +51,38 @@ service UploadService {
   }
 
   // AbortMultipartUpload cancels an in-progress multipart upload.
-  // All uploaded parts will be deleted.
   rpc AbortMultipartUpload(AbortMultipartUploadRequest) returns (AbortMultipartUploadResponse) {
-    option (google.api.http) = {delete: "/api/v1/uploads/{upload_id}"};
-  }
-
-  // UploadFile uploads a small file in a single request.
-  // For files larger than 2MB, use multipart upload instead.
-  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {
     option (google.api.http) = {
-      post: "/api/v1/uploads"
+      post: "/api/v1/uploads/{upload_id}/abort"
       body: "*"
     };
   }
 
-  // GetUploadSession returns the current state of an upload session.
-  rpc GetUploadSession(GetUploadSessionRequest) returns (GetUploadSessionResponse) {
-    option (google.api.http) = {get: "/api/v1/uploads/{upload_id}"};
+  // UpdateMetadata updates upload session metadata.
+  rpc UpdateMetadata(UpdateMetadataRequest) returns (UpdateMetadataResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/uploads/{upload_id}/metadata"
+      body: "*"
+    };
   }
 
   // ListUploadSessions returns all upload sessions for the current user.
   rpc ListUploadSessions(ListUploadSessionsRequest) returns (ListUploadSessionsResponse) {
-    option (google.api.http) = {get: "/api/v1/uploads"};
+    option (google.api.http) = {get: "/api/v1/uploads/sessions"};
+  }
+
+  // GetUploadSession returns the current state of an upload session.
+  rpc GetUploadSession(GetUploadSessionRequest) returns (GetUploadSessionResponse) {
+    option (google.api.http) = {get: "/api/v1/uploads/sessions/{upload_id}"};
+  }
+
+  // NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
+  // SimpleUpload uploads a file with a simple single-request approach.
+  rpc SimpleUpload(SimpleUploadRequest) returns (SimpleUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/uploads/simple"
+      body: "*"
+    };
   }
 }
 
@@ -179,28 +189,26 @@ message AbortMultipartUploadResponse {
   google.protobuf.Empty empty = 1 [json_name = "empty"];
 }
 
-// UploadFileRequest is the request for uploading a small file.
-message UploadFileRequest {
-  // File data
-  bytes data = 1 [json_name = "data"];
-  // Original filename
-  string filename = 2 [json_name = "filename"];
-  // MIME type of the file
-  string content_type = 3 [json_name = "content_type"];
+// UpdateMetadataRequest is the request for updating upload session metadata.
+message UpdateMetadataRequest {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
   // Media title (optional)
-  string title = 4 [json_name = "title"];
+  optional string title = 2 [json_name = "title"];
   // Media description (optional)
-  string description = 5 [json_name = "description"];
+  optional string description = 3 [json_name = "description"];
   // Category ID (optional)
-  int64 category_id = 6 [json_name = "category_id"];
+  optional int64 category_id = 4 [json_name = "category_id"];
   // Tags (optional)
-  repeated string tags = 7 [json_name = "tags"];
+  repeated string tags = 5 [json_name = "tags"];
 }
 
-// UploadFileResponse is the response for uploading a small file.
-message UploadFileResponse {
-  // Created media record
-  api.v1.services.types.Media media = 1 [json_name = "media"];
+// UpdateMetadataResponse is the response for updating upload session metadata.
+message UpdateMetadataResponse {
+  // Upload session ID
+  string upload_id = 1 [json_name = "upload_id"];
+  // Updated status
+  string status = 2 [json_name = "status"];
 }
 
 // GetUploadSessionRequest is the request for getting upload session info.
@@ -251,4 +259,30 @@ message ListUploadSessionsResponse {
   repeated GetUploadSessionResponse sessions = 1 [json_name = "sessions"];
   // Total count
   int32 total = 2 [json_name = "total"];
+}
+
+// SimpleUploadRequest is the request for simple file upload.
+message SimpleUploadRequest {
+  // File data
+  bytes data = 1 [json_name = "data"];
+  // Original filename
+  string filename = 2 [json_name = "filename"];
+  // MIME type of the file
+  string content_type = 3 [json_name = "content_type"];
+  // Media title (optional)
+  string title = 4 [json_name = "title"];
+  // Media description (optional)
+  string description = 5 [json_name = "description"];
+  // Category ID (optional)
+  int64 category_id = 6 [json_name = "category_id"];
+  // Tags (optional)
+  repeated string tags = 7 [json_name = "tags"];
+}
+
+// SimpleUploadResponse is the response for simple file upload.
+message SimpleUploadResponse {
+  // Created media record
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+  // Upload URL (pre-signed, if applicable)
+  string upload_url = 2 [json_name = "upload_url"];
 }

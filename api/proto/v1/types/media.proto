@@ -150,7 +150,7 @@ message Tag {
   int64 id = 1 [json_name = "id"];
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  string name = 4 [json_name = "name"];
+  string title = 4 [json_name = "title"];
   string slug = 5 [json_name = "slug"];
   string description = 6 [json_name = "description"];
   string color = 7 [json_name = "color"];
@@ -164,7 +164,7 @@ message Comment {
   string id = 1 [json_name = "id"];
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   google.protobuf.Timestamp update_time = 3 [json_name = "update_time"];
-  string content = 4 [json_name = "content"];
+  string text = 4 [json_name = "text"];
   string user_id = 5 [json_name = "user_id"];
   string media_id = 6 [json_name = "media_id"];
   string parent_id = 7 [json_name = "parent_id"];
@@ -182,7 +182,7 @@ message Like {
   google.protobuf.Timestamp create_time = 2 [json_name = "create_time"];
   string user_id = 3 [json_name = "user_id"];
   string media_id = 4 [json_name = "media_id"];
-  string type = 5 [json_name = "type"];
+  string like_type = 5 [json_name = "like_type"];
 }
 
 // Favorite is the model entity for Favorite.
