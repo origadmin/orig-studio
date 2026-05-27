@@ -22,8 +22,8 @@ func NewShareHandler(uc *biz.LikeFavoriteUseCase, jwt *auth.Manager) *ShareHandl
 }
 
 func (h *ShareHandler) RegisterRoutes(r http2.Router) {
-	r.GET("/medias/:id/shares", h.getShareUrl())
-	r.POST("/medias/:id/shares", server.WithJWTCtx(h.jwt, h.recordShare()))
+	r.GET("/medias/:token/shares", h.getShareUrl())
+	r.POST("/medias/:token/shares", server.WithJWTCtx(h.jwt, h.recordShare()))
 }
 
 type SocialShareLinks struct {
@@ -39,7 +39,7 @@ type SocialShareLinks struct {
 func (h *ShareHandler) getShareUrl() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		mediaID := gc.Param("id")
+		mediaID := gc.Param("token")
 
 		shareUrl := gc.Request.Host + "/watch/" + mediaID
 		if len(shareUrl) > 0 && shareUrl[0] != 'h' {

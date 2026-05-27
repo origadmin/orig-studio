@@ -31,10 +31,10 @@ func (h *TagHandler) RegisterRoutes(r http2.Router) {
 	{
 		tags.GET("", h.listTags())
 		tags.POST("", server.WithJWTCtx(h.jwt, h.createTag()))
-		tags.GET("/:id/media", h.getMediaByTag())
-		tags.GET("/:id", h.getTag())
-		tags.PUT("/:id", server.WithJWTCtx(h.jwt, h.updateTag()))
-		tags.DELETE("/:id", server.WithJWTCtx(h.jwt, h.deleteTag()))
+		tags.GET("/:slug/media", h.getMediaByTag())
+		tags.GET("/:slug", h.getTag())
+		tags.PUT("/:slug", server.WithJWTCtx(h.jwt, h.updateTag()))
+		tags.DELETE("/:slug", server.WithJWTCtx(h.jwt, h.deleteTag()))
 	}
 }
 
@@ -67,12 +67,12 @@ func (h *TagHandler) createTag() http2.HandlerFunc {
 func (h *TagHandler) getTag() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, err := strconv.Atoi(gc.Param("id"))
-		if err != nil {
-			http2.Fail(ctx, http2.ErrBadRequest, "invalid tag id")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, http2.ErrBadRequest, "tag slug is required")
 			return nil
 		}
-		t, err := h.uc.GetTag(ctx.Request().Context(), id)
+		t, err := h.uc.GetTagBySlug(ctx.Request().Context(), slug)
 		if err != nil {
 			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
@@ -87,11 +87,19 @@ func (h *TagHandler) getTag() http2.HandlerFunc {
 func (h *TagHandler) updateTag() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, err := strconv.Atoi(gc.Param("id"))
-		if err != nil {
-			http2.Fail(ctx, http2.ErrBadRequest, "invalid tag id")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, http2.ErrBadRequest, "tag slug is required")
 			return nil
 		}
+
+		// Resolve slug to tag first
+		existing, err := h.uc.GetTagBySlug(ctx.Request().Context(), slug)
+		if err != nil {
+			http2.Fail(ctx, http2.ErrNotFound, "tag not found")
+			return nil
+		}
+
 		var input struct {
 			Title string `json:"title"`
 		}
@@ -101,7 +109,7 @@ func (h *TagHandler) updateTag() http2.HandlerFunc {
 		}
 
 		t, err := h.uc.UpdateTag(ctx.Request().Context(), &biz.Tag{
-			ID:    id,
+			ID:    existing.ID,
 			Title: input.Title,
 		})
 		if err != nil {
@@ -119,8 +127,20 @@ func (h *TagHandler) updateTag() http2.HandlerFunc {
 func (h *TagHandler) deleteTag() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, _ := strconv.Atoi(gc.Param("id"))
-		err := h.uc.DeleteTag(ctx.Request().Context(), id)
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, http2.ErrBadRequest, "tag slug is required")
+			return nil
+		}
+
+		// Resolve slug to tag first
+		existing, err := h.uc.GetTagBySlug(ctx.Request().Context(), slug)
+		if err != nil {
+			http2.Fail(ctx, http2.ErrNotFound, "tag not found")
+			return nil
+		}
+
+		err = h.uc.DeleteTag(ctx.Request().Context(), existing.ID)
 		if err != nil {
 			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil

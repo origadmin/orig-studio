@@ -31,10 +31,10 @@ func (h *CategoryHandler) RegisterRoutes(r http2.Router) {
 		categories.GET("", h.listCategories())
 		categories.POST("", server.WithJWTCtx(h.jwt, h.createCategory()))
 
-		categories.GET("/:id", h.getCategory())
-		categories.PUT("/:id", server.WithJWTCtx(h.jwt, h.updateCategory()))
-		categories.PATCH("/:id", server.WithJWTCtx(h.jwt, h.updateCategoryPartial()))
-		categories.DELETE("/:id", server.WithJWTCtx(h.jwt, h.deleteCategory()))
+		categories.GET("/:slug", h.getCategory())
+		categories.PUT("/:slug", server.WithJWTCtx(h.jwt, h.updateCategory()))
+		categories.PATCH("/:slug", server.WithJWTCtx(h.jwt, h.updateCategoryPartial()))
+		categories.DELETE("/:slug", server.WithJWTCtx(h.jwt, h.deleteCategory()))
 	}
 }
 
@@ -104,12 +104,12 @@ func (h *CategoryHandler) createCategory() http2.HandlerFunc {
 func (h *CategoryHandler) getCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, err := strconv.Atoi(gc.Param("id"))
-		if err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
 			return nil
 		}
-		cat, err := h.uc.GetCategory(ctx.Request().Context(), id)
+		cat, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
 		if err != nil {
 			http2.Fail(ctx, server.ErrNotFound, "category not found")
 			return nil
@@ -124,9 +124,16 @@ func (h *CategoryHandler) getCategory() http2.HandlerFunc {
 func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, err := strconv.Atoi(gc.Param("id"))
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
+			return nil
+		}
+
+		// Resolve slug to category first
+		existing, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
 		if err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
+			http2.Fail(ctx, server.ErrNotFound, "category not found")
 			return nil
 		}
 
@@ -141,7 +148,7 @@ func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 		}
 
 		cat, err := h.uc.UpdateCategory(ctx.Request().Context(), &biz.Category{
-			ID:          id,
+			ID:          existing.ID,
 			Name:        input.Name,
 			Description: input.Description,
 			Slug:        input.Slug,
@@ -161,9 +168,16 @@ func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 func (h *CategoryHandler) updateCategoryPartial() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, err := strconv.Atoi(gc.Param("id"))
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
+			return nil
+		}
+
+		// Resolve slug to category first
+		existing, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
 		if err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
+			http2.Fail(ctx, server.ErrNotFound, "category not found")
 			return nil
 		}
 
@@ -173,7 +187,7 @@ func (h *CategoryHandler) updateCategoryPartial() http2.HandlerFunc {
 			return nil
 		}
 
-		cat, err := h.uc.UpdateCategoryPartial(ctx.Request().Context(), id, &input)
+		cat, err := h.uc.UpdateCategoryPartial(ctx.Request().Context(), existing.ID, &input)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
@@ -189,12 +203,20 @@ func (h *CategoryHandler) updateCategoryPartial() http2.HandlerFunc {
 func (h *CategoryHandler) deleteCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id, err := strconv.Atoi(gc.Param("id"))
-		if err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, "invalid category id")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
 			return nil
 		}
-		err = h.uc.DeleteCategory(ctx.Request().Context(), id)
+
+		// Resolve slug to category first
+		existing, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
+		if err != nil {
+			http2.Fail(ctx, server.ErrNotFound, "category not found")
+			return nil
+		}
+
+		err = h.uc.DeleteCategory(ctx.Request().Context(), existing.ID)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil

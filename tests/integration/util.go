@@ -192,7 +192,7 @@ func SetupTestServer(t *testing.T) *TestServer {
 	articleRepo := contentdal.NewArticleRepo(contentDB, logger)
 	articleUC := contentbiz.NewArticleUseCase(articleRepo, logger)
 
-	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, nil, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil, db, "test", "sqlite3")
+	adminHandler := adminservice.NewAdminHandler(jwtMgr, mediaUC, nil, playlistChannelUC, tagService, settingUC, categoryTagUC, articleUC, userUC, nil, statsRepo, &adminservice.AdminConfig{AppVersion: "test", DBDialect: "sqlite3"})
 
 	// Explore handler
 	exploreHandler := contentservice.NewExploreHandler(db)
@@ -310,7 +310,7 @@ func (ts *TestServer) createTestUsers(ctx context.Context, t *testing.T, userUC 
 			t.Fatalf("failed to set role for test user %s: %v", u.role, err)
 		}
 
-		token, err := ts.JWTMgr.Generate(created.Id, u.name, u.isStaff, u.roleStr)
+		token, err := ts.JWTMgr.Generate(created.Id, u.name, u.roleStr)
 		if err != nil {
 			t.Fatalf("failed to generate token for test user %s: %v", u.role, err)
 		}
