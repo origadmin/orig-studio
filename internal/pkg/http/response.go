@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"google.golang.org/protobuf/encoding/protojson"
@@ -14,7 +13,6 @@ var protojsonMarshaler = protojson.MarshalOptions{
 }
 
 const (
-	// HTTP-style error codes (aligned with HTTP status code * 100)
 	ErrOK           = 0
 	ErrBadRequest   = 40000
 	ErrUnauthorized = 40100
@@ -23,8 +21,6 @@ const (
 	ErrConflict     = 40900
 	ErrInternal     = 50000
 
-	// Application error codes (aligned with server/error.go)
-	// Common errors (1xxxx)
 	AppErrInternal     = 10000
 	AppErrNotFound     = 10001
 	AppErrUnauthorized = 10002
@@ -32,28 +28,24 @@ const (
 	AppErrBadRequest   = 10004
 	AppErrConflict     = 10005
 
-	// User errors (2xxxx)
 	AppErrUserNotFound  = 20001
 	AppErrUserExists    = 20002
 	AppErrPasswordWrong = 20003
 	AppErrTokenExpired  = 20004
 	AppErrTokenInvalid  = 20005
 
-	// Media errors (3xxxx)
 	AppErrMediaNotFound  = 30001
 	AppErrMediaTooLarge  = 30002
 	AppErrMediaForbidden = 30003
 	AppErrEncodingFailed = 30004
 
-	// Comment errors (4xxxx)
 	AppErrCommentNotFound  = 40001
 	AppErrCommentForbidden = 40002
 )
 
-type Response struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+type ErrorResponse struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }
 
 type PageData struct {
@@ -64,17 +56,23 @@ type PageData struct {
 }
 
 func OK(ctx Context, data interface{}) error {
-	return writeProtoOrJSON(ctx, http.StatusOK, data)
+	if msg, ok := data.(proto.Message); ok {
+		return writeProtoResponse(ctx, http.StatusOK, msg)
+	}
+	return ctx.Result(http.StatusOK, data)
 }
 
 func Created(ctx Context, data interface{}) error {
-	return writeProtoOrJSON(ctx, http.StatusCreated, data)
+	if msg, ok := data.(proto.Message); ok {
+		return writeProtoResponse(ctx, http.StatusCreated, msg)
+	}
+	return ctx.Result(http.StatusCreated, data)
 }
 
 func Fail(ctx Context, code int, message string) error {
 	status := errorToHTTPStatus(code)
-	resp := &Response{Code: code, Message: message}
-	return ctx.Result(status, resp)
+	errorCode := errorCodeToString(code)
+	return ctx.Result(status, ErrorResponse{Code: errorCode, Message: message})
 }
 
 func Page(ctx Context, items interface{}, total int64, page, pageSize int) error {
@@ -84,22 +82,44 @@ func Page(ctx Context, items interface{}, total int64, page, pageSize int) error
 		Page:     page,
 		PageSize: pageSize,
 	}
-	return writeProtoOrJSON(ctx, http.StatusOK, data)
+	return ctx.Result(http.StatusOK, data)
 }
 
-func writeProtoOrJSON(ctx Context, statusCode int, data interface{}) error {
-	if msg, ok := data.(proto.Message); ok {
-		b, err := protojsonMarshaler.Marshal(msg)
-		if err != nil {
-			return err
-		}
-		wrapped := fmt.Sprintf(`{"code":0,"message":"ok","data":%s}`, string(b))
-		ctx.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
-		ctx.Response().WriteHeader(statusCode)
-		_, err = ctx.Response().Write([]byte(wrapped))
+func writeProtoResponse(ctx Context, statusCode int, data proto.Message) error {
+	b, err := protojsonMarshaler.Marshal(data)
+	if err != nil {
 		return err
 	}
-	return ctx.Result(statusCode, data)
+	ctx.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
+	ctx.Response().WriteHeader(statusCode)
+	_, err = ctx.Response().Write(b)
+	return err
+}
+
+func errorCodeToString(code int) string {
+	switch code {
+	case ErrNotFound, AppErrNotFound, AppErrUserNotFound, AppErrMediaNotFound, AppErrCommentNotFound:
+		return "NOT_FOUND"
+	case ErrUnauthorized, AppErrUnauthorized, AppErrPasswordWrong, AppErrTokenExpired, AppErrTokenInvalid:
+		return "UNAUTHORIZED"
+	case ErrForbidden, AppErrForbidden, AppErrMediaForbidden, AppErrCommentForbidden:
+		return "FORBIDDEN"
+	case ErrBadRequest, AppErrBadRequest:
+		return "BAD_REQUEST"
+	case ErrConflict, AppErrConflict, AppErrUserExists:
+		return "CONFLICT"
+	case AppErrMediaTooLarge:
+		return "PAYLOAD_TOO_LARGE"
+	case AppErrEncodingFailed:
+		return "ENCODING_FAILED"
+	case ErrInternal, AppErrInternal:
+		return "INTERNAL_ERROR"
+	default:
+		if code >= 10000 {
+			return "INTERNAL_ERROR"
+		}
+		return "ERROR"
+	}
 }
 
 func errorToHTTPStatus(code int) int {
