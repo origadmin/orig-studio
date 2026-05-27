@@ -218,10 +218,7 @@ func (a *RouterAdapter) applyMiddleware(handler ginhttp.HandlerFunc, mws []http2
 }
 
 func handleError(c *ginhttp.Context, err error) {
-	c.JSON(http.StatusInternalServerError, http2.Response{
-		Code:    http2.ErrInternal,
-		Message: err.Error(),
-	})
+	c.JSON(http.StatusInternalServerError, http2.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 }
 
 // ==================== contextWrapper ====================
