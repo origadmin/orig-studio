@@ -44,8 +44,10 @@ const (
 )
 
 type ErrorResponse struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code     int               `json:"code"`
+	Reason   string            `json:"reason"`
+	Message  string            `json:"message"`
+	Metadata map[string]string `json:"metadata"`
 }
 
 type PageData struct {
@@ -71,8 +73,8 @@ func Created(ctx Context, data interface{}) error {
 
 func Fail(ctx Context, code int, message string) error {
 	status := errorToHTTPStatus(code)
-	errorCode := errorCodeToString(code)
-	return ctx.Result(status, ErrorResponse{Code: errorCode, Message: message})
+	reason := errorCodeToReason(code)
+	return ctx.Result(status, ErrorResponse{Code: status, Reason: reason, Message: message, Metadata: map[string]string{}})
 }
 
 func Page(ctx Context, items interface{}, total int64, page, pageSize int) error {
@@ -96,23 +98,53 @@ func writeProtoResponse(ctx Context, statusCode int, data proto.Message) error {
 	return err
 }
 
-func errorCodeToString(code int) string {
+func errorCodeToReason(code int) string {
 	switch code {
-	case ErrNotFound, AppErrNotFound, AppErrUserNotFound, AppErrMediaNotFound, AppErrCommentNotFound:
+	case ErrNotFound:
 		return "NOT_FOUND"
-	case ErrUnauthorized, AppErrUnauthorized, AppErrPasswordWrong, AppErrTokenExpired, AppErrTokenInvalid:
+	case AppErrNotFound:
+		return "NOT_FOUND"
+	case AppErrUserNotFound:
+		return "USER_NOT_FOUND"
+	case AppErrMediaNotFound:
+		return "MEDIA_NOT_FOUND"
+	case AppErrCommentNotFound:
+		return "COMMENT_NOT_FOUND"
+	case ErrUnauthorized:
 		return "UNAUTHORIZED"
-	case ErrForbidden, AppErrForbidden, AppErrMediaForbidden, AppErrCommentForbidden:
+	case AppErrUnauthorized:
+		return "UNAUTHORIZED"
+	case AppErrPasswordWrong:
+		return "PASSWORD_WRONG"
+	case AppErrTokenExpired:
+		return "TOKEN_EXPIRED"
+	case AppErrTokenInvalid:
+		return "TOKEN_INVALID"
+	case ErrForbidden:
 		return "FORBIDDEN"
-	case ErrBadRequest, AppErrBadRequest:
+	case AppErrForbidden:
+		return "FORBIDDEN"
+	case AppErrMediaForbidden:
+		return "MEDIA_FORBIDDEN"
+	case AppErrCommentForbidden:
+		return "COMMENT_FORBIDDEN"
+	case ErrBadRequest:
 		return "BAD_REQUEST"
-	case ErrConflict, AppErrConflict, AppErrUserExists:
+	case AppErrBadRequest:
+		return "BAD_REQUEST"
+	case ErrConflict:
 		return "CONFLICT"
+	case AppErrConflict:
+		return "CONFLICT"
+	case AppErrUserExists:
+		return "USER_EXISTS"
 	case AppErrMediaTooLarge:
 		return "PAYLOAD_TOO_LARGE"
 	case AppErrEncodingFailed:
 		return "ENCODING_FAILED"
-	case ErrInternal, AppErrInternal:
+	case ErrInternal:
+		return "INTERNAL_ERROR"
+	case AppErrInternal:
 		return "INTERNAL_ERROR"
 	default:
 		if code >= 10000 {
