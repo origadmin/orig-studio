@@ -141,9 +141,9 @@ service UserService {
     option (google.api.http) = {get: "/api/v1/users"};
   }
 
-  // GetUser returns a user by ID.
+  // GetUser returns a user by slug.
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}"};
   }
 
   // CreateUser creates a new user.
@@ -164,13 +164,13 @@ service UserService {
 
   // DeleteUser deletes a user.
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
-    option (google.api.http) = {delete: "/api/v1/users/{id}"};
+    option (google.api.http) = {delete: "/api/v1/users/{slug}"};
   }
 
   // UpdateUserStatus updates a user's status.
   rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse) {
     option (google.api.http) = {
-      patch: "/api/v1/users/{id}/status"
+      patch: "/api/v1/users/{slug}/status"
       body: "*"
     };
   }
@@ -178,7 +178,7 @@ service UserService {
   // UpdateUserRoles updates a user's roles.
   rpc UpdateUserRoles(UpdateUserRolesRequest) returns (UpdateUserRolesResponse) {
     option (google.api.http) = {
-      put: "/api/v1/users/{id}/roles"
+      put: "/api/v1/users/{slug}/roles"
       body: "*"
     };
   }
@@ -186,7 +186,7 @@ service UserService {
   // ChangeUserPassword changes a user's password.
   rpc ChangeUserPassword(ChangeUserPasswordRequest) returns (ChangeUserPasswordResponse) {
     option (google.api.http) = {
-      post: "/api/v1/users/{id}/password"
+      post: "/api/v1/users/{slug}/password"
       body: "*"
     };
   }
@@ -201,22 +201,22 @@ service UserService {
 
   // ListUserRoles returns roles assigned to a user.
   rpc ListUserRoles(ListUserRolesRequest) returns (ListUserRolesResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/roles"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/roles"};
   }
 
   // GetUserStats returns statistics for a user.
   rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/stats"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/stats"};
   }
 
   // GetUserPlaylists returns public playlists for a user.
   rpc GetUserPlaylists(GetUserPlaylistsRequest) returns (GetUserPlaylistsResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/playlists"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/playlists"};
   }
 
   // GetUserFollowers returns followers for a user.
   rpc GetUserFollowers(GetUserFollowersRequest) returns (GetUserFollowersResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/followers"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/followers"};
   }
 
   // GetUserByUsername returns a user by username.
@@ -227,19 +227,19 @@ service UserService {
   // SubscribeUser subscribes to a user.
   rpc SubscribeUser(SubscribeUserRequest) returns (SubscribeUserResponse) {
     option (google.api.http) = {
-      post: "/api/v1/users/{id}/subscribe"
+      post: "/api/v1/users/{slug}/subscribe"
       body: "*"
     };
   }
 
   // UnsubscribeUser unsubscribes from a user.
   rpc UnsubscribeUser(UnsubscribeUserRequest) returns (UnsubscribeUserResponse) {
-    option (google.api.http) = {delete: "/api/v1/users/{id}/subscribe"};
+    option (google.api.http) = {delete: "/api/v1/users/{slug}/subscribe"};
   }
 
   // GetUserSubscription returns subscription status for a user.
   rpc GetUserSubscription(GetUserSubscriptionRequest) returns (GetUserSubscriptionResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/subscription"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/subscription"};
   }
 
   // GetMyFollowers returns the current user's followers.
@@ -267,12 +267,12 @@ service UserService {
 
   // GetUserLikes returns likes for a user.
   rpc GetUserLikes(GetUserLikesRequest) returns (GetUserLikesResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/likes"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/likes"};
   }
 
   // GetUserSubscriptions returns subscriptions for a user.
   rpc GetUserSubscriptions(GetUserSubscriptionsRequest) returns (GetUserSubscriptionsResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{id}/subscriptions"};
+    option (google.api.http) = {get: "/api/v1/users/{slug}/subscriptions"};
   }
 
   // GetUserBySlug returns a user by slug.

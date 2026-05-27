@@ -64,6 +64,14 @@ func (r *categoryRepo) Get(ctx context.Context, id int) (*biz.Category, error) {
 	return mapCategory(ent), nil
 }
 
+func (r *categoryRepo) GetBySlug(ctx context.Context, slug string) (*biz.Category, error) {
+	ent, err := r.data.db.Category.Query().Where(category.SlugEQ(slug)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mapCategory(ent), nil
+}
+
 func (r *categoryRepo) Update(ctx context.Context, c *biz.Category) (*biz.Category, error) {
 	ent, err := r.data.db.Category.UpdateOneID(int64(c.ID)).
 		SetName(c.Name).

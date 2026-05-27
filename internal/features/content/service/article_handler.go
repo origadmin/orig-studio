@@ -60,24 +60,21 @@ func (h *ArticleHandler) RegisterRoutes(r http2.Router) {
 	// GET /articles/me - List current user's articles (requires auth)
 	g.GET("/me", server.WithJWTCtx(h.jwt, h.listMyArticles()))
 
-	// GET /articles/slug/:slug - Get article by slug
-	g.GET("/slug/:slug", h.getArticleBySlug())
-
 	// ================================
-	// 2. PARAMETER ROUTES (WITH :id) - MUST BE LAST
+	// 2. PARAMETER ROUTES (WITH :slug) - MUST BE LAST
 	// ================================
 
-	// GET /articles/:id - Get article by ID
-	g.GET("/:id", h.getArticle())
+	// GET /articles/:slug - Get article by slug
+	g.GET("/:slug", h.getArticle())
 
-	// PUT /articles/:id - Update article (requires auth)
-	g.PUT("/:id", server.WithJWTCtx(h.jwt, h.updateArticle()))
+	// PUT /articles/:slug - Update article (requires auth)
+	g.PUT("/:slug", server.WithJWTCtx(h.jwt, h.updateArticle()))
 
-	// DELETE /articles/:id - Delete article (requires auth)
-	g.DELETE("/:id", server.WithJWTCtx(h.jwt, h.deleteArticle()))
+	// DELETE /articles/:slug - Delete article (requires auth)
+	g.DELETE("/:slug", server.WithJWTCtx(h.jwt, h.deleteArticle()))
 
-	// PATCH /articles/:id/state - Update article state (requires auth)
-	g.PATCH("/:id/state", server.WithJWTCtx(h.jwt, h.updateArticleState()))
+	// PATCH /articles/:slug/state - Update article state (requires auth)
+	g.PATCH("/:slug/state", server.WithJWTCtx(h.jwt, h.updateArticleState()))
 }
 
 func (h *ArticleHandler) listArticles() http2.HandlerFunc {
@@ -128,29 +125,9 @@ func (h *ArticleHandler) listArticles() http2.HandlerFunc {
 func (h *ArticleHandler) getArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
-		id := gc.Param("id")
-		if id == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
-			return nil
-		}
-
-		article, err := h.uc.Get(ctx.Request().Context(), id)
-		if err != nil {
-			http2.Fail(ctx, server.ErrNotFound, "article not found")
-			return nil
-		}
-
-		http2.OK(ctx, article)
-		return nil
-	}
-}
-
-func (h *ArticleHandler) getArticleBySlug() http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
 		slug := gc.Param("slug")
 		if slug == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "slug is required")
+			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
 		}
 
@@ -299,9 +276,9 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		id := gc.Param("id")
-		if id == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
 		}
 
@@ -328,7 +305,7 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 			return nil
 		}
 
-		existing, err := h.uc.Get(ctx.Request().Context(), id)
+		existing, err := h.uc.GetBySlug(ctx.Request().Context(), slug)
 		if err != nil {
 			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
@@ -381,13 +358,13 @@ func (h *ArticleHandler) deleteArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		id := gc.Param("id")
-		if id == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
 		}
 
-		article, err := h.uc.Get(ctx.Request().Context(), id)
+		article, err := h.uc.GetBySlug(ctx.Request().Context(), slug)
 		if err != nil {
 			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
@@ -404,7 +381,7 @@ func (h *ArticleHandler) deleteArticle() http2.HandlerFunc {
 			return nil
 		}
 
-		if err := h.uc.Delete(ctx.Request().Context(), id); err != nil {
+		if err := h.uc.Delete(ctx.Request().Context(), article.Id); err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
@@ -418,9 +395,9 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 
-		id := gc.Param("id")
-		if id == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "article id is required")
+		slug := gc.Param("slug")
+		if slug == "" {
+			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
 		}
 
@@ -439,7 +416,7 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 			return nil
 		}
 
-		article, err := h.uc.Get(ctx.Request().Context(), id)
+		article, err := h.uc.GetBySlug(ctx.Request().Context(), slug)
 		if err != nil {
 			http2.Fail(ctx, server.ErrNotFound, "article not found")
 			return nil
@@ -451,12 +428,12 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 			return nil
 		}
 
-		if err := h.uc.UpdateState(ctx.Request().Context(), id, input.State); err != nil {
+		if err := h.uc.UpdateState(ctx.Request().Context(), article.Id, input.State); err != nil {
 			http2.Fail(ctx, server.ErrInternal, err.Error())
 			return nil
 		}
 
-		updated, err := h.uc.Get(ctx.Request().Context(), id)
+		updated, err := h.uc.Get(ctx.Request().Context(), article.Id)
 		if err != nil {
 			http2.OK(ctx, nil)
 			return nil

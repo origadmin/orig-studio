@@ -11,9 +11,10 @@
  * - GET /api/v1/channels/:token/subscription - subscription status/operations
  * - PUT /api/v1/channels/:token/notification - notification settings
  * - GET /api/v1/subscriptions/videos  - subscribed channels' videos
+ * - GET /api/v1/resolve?handle=xxx    - resolve @handle to channel or user
  * - POST /api/v1/channels              - create channel
- * - PUT /api/v1/channels/:id           - update channel (UUID)
- * - DELETE /api/v1/channels/:id        - delete channel (UUID)
+ * - PUT /api/v1/channels/:token        - update channel (by short_token)
+ * - DELETE /api/v1/channels/:token     - delete channel (by short_token)
  */
 
 package service
@@ -120,7 +121,7 @@ func (h *ChannelHandler) RegisterRoutes(r http2.Router) {
 	// ================================
 	resolveGroup := r.Group("/resolve")
 	{
-		resolveGroup.GET("/@:handle", httpToHandlerFunc(h.ResolveHandle))
+		resolveGroup.GET("", httpToHandlerFunc(h.ResolveHandle))
 	}
 
 	// ================================
@@ -1277,14 +1278,14 @@ func generateSlug(name string) string {
 }
 
 // ResolveHandle resolves a @handle to a channel or user.
-// GET /api/v1/resolve/@{handle}
+// GET /api/v1/resolve?handle=xxx
 func (h *ChannelHandler) ResolveHandle(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
 
-	handle := gc.Param("handle")
+	handle := gc.Query("handle")
 	if handle == "" {
-		server.Fail(gc, server.ErrBadRequest, "handle is required")
+		server.Fail(gc, server.ErrBadRequest, "handle query parameter is required")
 		return
 	}
 

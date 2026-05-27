@@ -87,23 +87,23 @@ func (h *MediaHandler) RegisterRoutes(r http2.Router) {
 		// See admin_handler.go encoding group
 
 		// Parameter routes
-		medias.GET("/:id", server.HTTPToHandlerFunc(h.getMedia))
-		medias.GET("/:id/variants", server.HTTPToHandlerFunc(h.mediaVariants))
-		medias.POST("/:id/view", server.HTTPToHandlerFunc(h.incrementViewCount))
+		medias.GET("/:token", server.HTTPToHandlerFunc(h.getMedia))
+		medias.GET("/:token/variants", server.HTTPToHandlerFunc(h.mediaVariants))
+		medias.POST("/:token/view", server.HTTPToHandlerFunc(h.incrementViewCount))
 
 		// Like/favorite routes (singular - proto canonical)
-		medias.POST("/:id/like", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.likeMedia)))
-		medias.DELETE("/:id/like", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unlikeMedia)))
-		medias.POST("/:id/favorite", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.favoriteMedia)))
-		medias.DELETE("/:id/favorite", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unfavoriteMedia)))
+		medias.POST("/:token/like", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.likeMedia)))
+		medias.DELETE("/:token/like", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unlikeMedia)))
+		medias.POST("/:token/favorite", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.favoriteMedia)))
+		medias.DELETE("/:token/favorite", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unfavoriteMedia)))
 
 		// Like/favorite routes (plural - frontend compatibility)
-		medias.GET("/:id/likes", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getMediaLikes)))
-		medias.POST("/:id/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.likeMedia)))
-		medias.DELETE("/:id/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unlikeMedia)))
-		medias.GET("/:id/favorites", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getMediaFavorites)))
-		medias.POST("/:id/favorites", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.favoriteMedia)))
-		medias.DELETE("/:id/favorites", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unfavoriteMedia)))
+		medias.GET("/:token/likes", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getMediaLikes)))
+		medias.POST("/:token/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.likeMedia)))
+		medias.DELETE("/:token/likes", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unlikeMedia)))
+		medias.GET("/:token/favorites", server.WithOptionalJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getMediaFavorites)))
+		medias.POST("/:token/favorites", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.favoriteMedia)))
+		medias.DELETE("/:token/favorites", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.unfavoriteMedia)))
 	}
 }
 
@@ -238,17 +238,24 @@ func (h *MediaHandler) listLatestMedias(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
-// getMedia handles GET /medias/:id
+// getMedia handles GET /medias/:token
 func (h *MediaHandler) getMedia(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	id := gc.Param("id")
-	if id == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
 		return
 	}
 
-	item, err := h.mediaUC.GetMedia(r.Context(), id)
+	// Resolve short_token to internal ID
+	mediaID, err := h.mediaUC.ResolveToID(r.Context(), token)
+	if err != nil {
+		server.Fail(gc, server.ErrNotFound, "media not found")
+		return
+	}
+
+	item, err := h.mediaUC.GetMedia(r.Context(), mediaID)
 	if err != nil {
 		server.Fail(gc, server.ErrNotFound, "media not found")
 		return
@@ -265,17 +272,24 @@ func (h *MediaHandler) getMedia(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// incrementViewCount handles POST /medias/:id/view
+// incrementViewCount handles POST /medias/:token/view
 func (h *MediaHandler) incrementViewCount(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	id := gc.Param("id")
-	if id == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
 		return
 	}
 
-	count, err := h.mediaUC.IncrementViewCount(r.Context(), id)
+	// Resolve short_token to internal ID
+	mediaID, err := h.mediaUC.ResolveToID(r.Context(), token)
+	if err != nil {
+		server.Fail(gc, server.ErrNotFound, "media not found")
+		return
+	}
+
+	count, err := h.mediaUC.IncrementViewCount(r.Context(), mediaID)
 	if err != nil {
 		server.Fail(gc, server.ErrInternal, err.Error())
 		return
@@ -347,16 +361,16 @@ func (h *MediaHandler) sseHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
 
-// mediaVariants handles GET /medias/:id/variants
+// mediaVariants handles GET /medias/:token/variants
 func (h *MediaHandler) mediaVariants(w http.ResponseWriter, r *http.Request) {
 	if h.mediaService != nil {
 		h.mediaService.MediaVariantsHTTPHandler(w, r)
 		return
 	}
 	gc := ginadapter.GetGinContext(r)
-	id := gc.Param("id")
-	if id == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
 		return
 	}
 	server.OK(gc, &pb.GetMediaVariantsResponse{
@@ -364,13 +378,20 @@ func (h *MediaHandler) mediaVariants(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// likeMedia handles POST /medias/:id/like
+// likeMedia handles POST /medias/:token/like
 func (h *MediaHandler) likeMedia(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	mediaID := gc.Param("id")
-	if mediaID == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
+		return
+	}
+
+	// Resolve short_token to internal ID
+	mediaID, err := h.mediaUC.ResolveToID(r.Context(), token)
+	if err != nil {
+		server.Fail(gc, server.ErrNotFound, "media not found")
 		return
 	}
 
@@ -399,13 +420,20 @@ func (h *MediaHandler) likeMedia(w http.ResponseWriter, r *http.Request) {
 	server.OK(gc, &pb.ToggleMediaLikeResponse{})
 }
 
-// unlikeMedia handles DELETE /medias/:id/like
+// unlikeMedia handles DELETE /medias/:token/like
 func (h *MediaHandler) unlikeMedia(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	mediaID := gc.Param("id")
-	if mediaID == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
+		return
+	}
+
+	// Resolve short_token to internal ID
+	mediaID, err := h.mediaUC.ResolveToID(r.Context(), token)
+	if err != nil {
+		server.Fail(gc, server.ErrNotFound, "media not found")
 		return
 	}
 
@@ -434,13 +462,20 @@ func (h *MediaHandler) unlikeMedia(w http.ResponseWriter, r *http.Request) {
 	server.OK(gc, &pb.DeleteMediaLikeResponse{})
 }
 
-// favoriteMedia handles POST /medias/:id/favorite
+// favoriteMedia handles POST /medias/:token/favorite
 func (h *MediaHandler) favoriteMedia(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	mediaID := gc.Param("id")
-	if mediaID == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
+		return
+	}
+
+	// Resolve short_token to internal ID
+	mediaID, err := h.mediaUC.ResolveToID(r.Context(), token)
+	if err != nil {
+		server.Fail(gc, server.ErrNotFound, "media not found")
 		return
 	}
 
@@ -467,13 +502,20 @@ func (h *MediaHandler) favoriteMedia(w http.ResponseWriter, r *http.Request) {
 	server.OK(gc, &pb.ToggleMediaFavoriteResponse{})
 }
 
-// unfavoriteMedia handles DELETE /medias/:id/favorite
+// unfavoriteMedia handles DELETE /medias/:token/favorite
 func (h *MediaHandler) unfavoriteMedia(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	mediaID := gc.Param("id")
-	if mediaID == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
+		return
+	}
+
+	// Resolve short_token to internal ID
+	mediaID, err := h.mediaUC.ResolveToID(r.Context(), token)
+	if err != nil {
+		server.Fail(gc, server.ErrNotFound, "media not found")
 		return
 	}
 
@@ -500,20 +542,20 @@ func (h *MediaHandler) unfavoriteMedia(w http.ResponseWriter, r *http.Request) {
 	server.OK(gc, &pb.DeleteMediaFavoriteResponse{})
 }
 
-// getMediaLikes handles GET /medias/:id/likes (plural path for frontend compatibility)
+// getMediaLikes handles GET /medias/:token/likes (plural path for frontend compatibility)
 func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	mediaID := gc.Param("id")
-	if mediaID == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
 		return
 	}
 
-	// Resolve short_token to internal ID if needed
-	resolvedID, err := h.mediaUC.ResolveToID(r.Context(), mediaID)
+	// Resolve short_token to internal ID
+	resolvedID, err := h.mediaUC.ResolveToID(r.Context(), token)
 	if err != nil {
-		resolvedID = mediaID
+		resolvedID = token
 	}
 
 	val, exists := gc.Get("claims")
@@ -546,20 +588,20 @@ func (h *MediaHandler) getMediaLikes(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// getMediaFavorites handles GET /medias/:id/favorites (plural path for frontend compatibility)
+// getMediaFavorites handles GET /medias/:token/favorites (plural path for frontend compatibility)
 func (h *MediaHandler) getMediaFavorites(w http.ResponseWriter, r *http.Request) {
 	gc := ginadapter.GetGinContext(r)
 
-	mediaID := gc.Param("id")
-	if mediaID == "" {
-		server.Fail(gc, server.ErrBadRequest, "media id is required")
+	token := gc.Param("token")
+	if token == "" {
+		server.Fail(gc, server.ErrBadRequest, "media token is required")
 		return
 	}
 
-	// Resolve short_token to internal ID if needed
-	resolvedID, err := h.mediaUC.ResolveToID(r.Context(), mediaID)
+	// Resolve short_token to internal ID
+	resolvedID, err := h.mediaUC.ResolveToID(r.Context(), token)
 	if err != nil {
-		resolvedID = mediaID
+		resolvedID = token
 	}
 
 	val, exists := gc.Get("claims")

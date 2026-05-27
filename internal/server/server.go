@@ -19,6 +19,7 @@ import (
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/infra/auth"
+	"origadmin/application/origstudio/internal/server/middleware"
 	"origadmin/application/origstudio/web"
 )
 
@@ -168,6 +169,9 @@ func (s *Server) RegisterRoutes(r *gin.Engine) {
 	// API v1 routes — adapt *gin.RouterGroup to http2.Router
 	apiV1 := r.Group("/api/v1")
 	router := ginadapter.NewRouterAdapter(apiV1)
+
+	// Deprecated path redirects (301 Moved Permanently)
+	apiV1.Use(middleware.DeprecatedRedirects())
 
 	// Register all handler modules
 	for _, mod := range s.modules {

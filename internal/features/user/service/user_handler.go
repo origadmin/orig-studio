@@ -37,17 +37,15 @@ func (h *UserHandler) RegisterRoutes(r http2.Router) {
 	{
 		users.GET("", server.GinHandlerToHandlerFunc(h.listUsers))
 		users.POST("", server.GinHandlerToHandlerFunc(h.createUser))
-		users.GET("/:id/playlists", server.GinHandlerToHandlerFunc(h.getUserPlaylists))
-		users.GET("/username/:username", server.GinHandlerToHandlerFunc(h.getUserByUsername))
-		users.GET("/slug/:slug", server.GinHandlerToHandlerFunc(h.getUserBySlug))
-		users.GET("/:id/favorites", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserFavorites)))
-		users.GET("/:id/likes", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserLikes)))
-		users.GET("/:id/subscriptions", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserSubscriptions)))
-		users.GET("/:id/followers", server.GinHandlerToHandlerFunc(h.getUserFollowers))
-		users.GET("/:id/stats", server.GinHandlerToHandlerFunc(h.getUserStats))
-		users.GET("/:id/channels", server.GinHandlerToHandlerFunc(h.getUserChannels))
-		users.GET("/:id", server.GinHandlerToHandlerFunc(h.getUser))
-		users.DELETE("/:id", server.GinHandlerToHandlerFunc(h.deleteUser))
+		users.GET("/:slug/playlists", server.GinHandlerToHandlerFunc(h.getUserPlaylists))
+		users.GET("/:slug/favorites", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserFavorites)))
+		users.GET("/:slug/likes", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserLikes)))
+		users.GET("/:slug/subscriptions", server.WithJWTCtx(h.jwt, server.GinHandlerToHandlerFunc(h.getUserSubscriptions)))
+		users.GET("/:slug/followers", server.GinHandlerToHandlerFunc(h.getUserFollowers))
+		users.GET("/:slug/stats", server.GinHandlerToHandlerFunc(h.getUserStats))
+		users.GET("/:slug/channels", server.GinHandlerToHandlerFunc(h.getUserChannels))
+		users.GET("/:slug", server.GinHandlerToHandlerFunc(h.getUser))
+		users.DELETE("/:slug", server.GinHandlerToHandlerFunc(h.deleteUser))
 	}
 }
 
@@ -200,88 +198,33 @@ func (h *UserHandler) createUser(c *gin.Context) {
 }
 
 func (h *UserHandler) getUserPlaylists(c *gin.Context) {
-	id := c.Param("id")
-	_ = id
+	slug := c.Param("slug")
+	_ = slug
 	server.OK(c, &pb.GetUserPlaylistsResponse{
 		Items: []*types.Playlist{},
 	})
 }
 
-func (h *UserHandler) getUserByUsername(c *gin.Context) {
-	username := c.Param("username")
-	if username == "" {
-		server.Fail(c, server.ErrBadRequest, "Invalid username")
-		return
-	}
-
-	u, err := h.uc.GetUserByUsername(c.Request.Context(), username)
-	if err != nil {
-		server.Fail(c, server.ErrNotFound, "User not found")
-		return
-	}
-	server.OK(c, &pb.GetUserResponse{User: u})
-}
-
-func (h *UserHandler) getUserBySlug(c *gin.Context) {
-	slug := c.Param("slug")
-	if slug == "" {
-		server.Fail(c, server.ErrBadRequest, "Invalid slug")
-		return
-	}
-
-	u, err := h.uc.GetUserBySlug(c.Request.Context(), slug)
-	if err != nil {
-		server.Fail(c, server.ErrNotFound, "User not found")
-		return
-	}
-	sanitizePublicUser(u)
-	server.OK(c, &pb.GetUserResponse{User: u})
-}
-
-func (h *UserHandler) updateUserSlug(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
-	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
-	}
-
-	var input struct {
-		Slug string `json:"slug" binding:"required,min=3,max=64"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
-
-	if err := h.uc.UpdateUserSlug(c.Request.Context(), claims.GetUserID(), input.Slug); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
-
-	u, _ := h.uc.GetUser(c.Request.Context(), claims.GetUserID())
-	server.OK(c, &pb.UpdateMeResponse{User: u})
-}
-
 func (h *UserHandler) getUserFavorites(c *gin.Context) {
-	id := c.Param("id")
-	_ = id
+	slug := c.Param("slug")
+	_ = slug
 	server.OK(c, &pb.GetMyFavoritesResponse{
 		Items: []*types.Media{},
 	})
 }
 
 func (h *UserHandler) getUserLikes(c *gin.Context) {
-	id := c.Param("id")
-	_ = id
+	slug := c.Param("slug")
+	_ = slug
 	server.OK(c, &pb.GetMyLikesResponse{
 		Likes: []*types.Like{},
 	})
 }
 
 func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
-	id := c.Param("id")
+	slug := c.Param("slug")
 	var userID string
-	if id == "me" {
+	if slug == "me" {
 		if claims, ok := server.GetClaims(c); ok {
 			userID = claims.GetUserID()
 		} else {
@@ -289,7 +232,12 @@ func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
 			return
 		}
 	} else {
-		userID = id
+		u, err := h.uc.GetUserBySlug(c.Request.Context(), slug)
+		if err != nil {
+			server.Fail(c, server.ErrNotFound, "User not found")
+			return
+		}
+		userID = u.Id
 	}
 
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -323,9 +271,9 @@ func (h *UserHandler) getUserSubscriptions(c *gin.Context) {
 }
 
 func (h *UserHandler) getUserFollowers(c *gin.Context) {
-	id := c.Param("id")
+	slug := c.Param("slug")
 	var userID string
-	if id == "me" {
+	if slug == "me" {
 		if claims, ok := server.GetClaims(c); ok {
 			userID = claims.GetUserID()
 		} else {
@@ -333,7 +281,12 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 			return
 		}
 	} else {
-		userID = id
+		u, err := h.uc.GetUserBySlug(c.Request.Context(), slug)
+		if err != nil {
+			server.Fail(c, server.ErrNotFound, "User not found")
+			return
+		}
+		userID = u.Id
 	}
 
 	page, _ := strconv.Atoi(c.Query("page"))
@@ -367,14 +320,14 @@ func (h *UserHandler) getUserFollowers(c *gin.Context) {
 }
 
 func (h *UserHandler) getUserStats(c *gin.Context) {
-	id := c.Param("id")
-	_ = id
+	slug := c.Param("slug")
+	_ = slug
 	server.OK(c, &pb.GetUserStatsResponse{})
 }
 
 func (h *UserHandler) getUserChannels(c *gin.Context) {
-	id := c.Param("id")
-	if id == "me" {
+	slug := c.Param("slug")
+	if slug == "me" {
 		if _, ok := server.GetClaims(c); !ok {
 			server.Fail(c, server.ErrUnauthorized, "unauthorized")
 			return
@@ -400,18 +353,25 @@ func (h *UserHandler) getUserChannels(c *gin.Context) {
 }
 
 func (h *UserHandler) getUser(c *gin.Context) {
-	id := c.Param("id")
-	u, err := h.uc.GetUser(c.Request.Context(), id)
+	slug := c.Param("slug")
+	u, err := h.uc.GetUserBySlug(c.Request.Context(), slug)
 	if err != nil {
 		server.Fail(c, server.ErrNotFound, "User not found")
 		return
 	}
+	sanitizePublicUser(u)
 	server.OK(c, &pb.GetUserResponse{User: u})
 }
 
 func (h *UserHandler) deleteUser(c *gin.Context) {
-	id := c.Param("id")
-	err := h.uc.DeleteUser(c.Request.Context(), id)
+	slug := c.Param("slug")
+	// Resolve slug to user ID first
+	u, err := h.uc.GetUserBySlug(c.Request.Context(), slug)
+	if err != nil {
+		server.Fail(c, server.ErrNotFound, "User not found")
+		return
+	}
+	err = h.uc.DeleteUser(c.Request.Context(), u.Id)
 	if err != nil {
 		server.Fail(c, server.ErrInternal, err.Error())
 		return
