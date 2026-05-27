@@ -108,7 +108,7 @@ func TestUploadE2E(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate Token manually for testing (simulating a login)
-	token, err := jwtMgr.Generate(user.ID, username, true, "admin")
+	token, err := jwtMgr.Generate(user.ID, username, "admin")
 	require.NoError(t, err)
 	authHeader := "Bearer " + token
 
