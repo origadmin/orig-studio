@@ -48,7 +48,7 @@ func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		userID, ok := getUserID(gc)
 		if !ok {
-			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
+			gc.JSON(401, server.ErrorResponse{Code: "UNAUTHORIZED", Message: "unauthorized"})
 			return nil
 		}
 
@@ -69,19 +69,19 @@ func (h *NotificationHandler) listNotifications() http2.HandlerFunc {
 			limit,
 		)
 		if err != nil {
-			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			gc.JSON(500, server.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 			return nil
 		}
 
 		unread, _ := h.uc.GetUnreadCount(ctx.Request().Context(), userID)
 
-		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{
+		gc.JSON(200, gin.H{
 			"items":        items,
 			"total":        total,
 			"unread_count": unread,
 			"page":         page,
 			"page_size":    limit,
-		}})
+		})
 		return nil
 	}
 }
@@ -98,7 +98,7 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 			Body   string `json:"body" binding:"required"`
 		}
 		if err := gc.Bind(&input); err != nil {
-			gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: err.Error()})
+			gc.JSON(400, server.ErrorResponse{Code: "BAD_REQUEST", Message: err.Error()})
 			return nil
 		}
 
@@ -106,7 +106,7 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 		if targetUserID == "" {
 			id, ok := getUserID(gc)
 			if !ok {
-				gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: "user_id required"})
+				gc.JSON(400, server.ErrorResponse{Code: "BAD_REQUEST", Message: "user_id required"})
 				return nil
 			}
 			targetUserID = id
@@ -123,7 +123,7 @@ func (h *NotificationHandler) createNotification() http2.HandlerFunc {
 
 		created, err := h.uc.CreateNotification(ctx.Request().Context(), n)
 		if err != nil {
-			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			gc.JSON(500, server.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 			return nil
 		}
 
@@ -137,23 +137,23 @@ func (h *NotificationHandler) markAsRead() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		userID, ok := getUserID(gc)
 		if !ok {
-			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
+			gc.JSON(401, server.ErrorResponse{Code: "UNAUTHORIZED", Message: "unauthorized"})
 			return nil
 		}
 
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: "Invalid ID"})
+			gc.JSON(400, server.ErrorResponse{Code: "BAD_REQUEST", Message: "Invalid ID"})
 			return nil
 		}
 
 		err = h.uc.MarkAsRead(ctx.Request().Context(), id, userID)
 		if err != nil {
-			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			gc.JSON(500, server.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 			return nil
 		}
 
-		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"message": "marked as read"}})
+		gc.JSON(200, gin.H{"message": "marked as read"})
 		return nil
 	}
 }
@@ -163,17 +163,17 @@ func (h *NotificationHandler) markAllRead() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		userID, ok := getUserID(gc)
 		if !ok {
-			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
+			gc.JSON(401, server.ErrorResponse{Code: "UNAUTHORIZED", Message: "unauthorized"})
 			return nil
 		}
 
 		err := h.uc.MarkAllAsRead(ctx.Request().Context(), userID)
 		if err != nil {
-			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			gc.JSON(500, server.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 			return nil
 		}
 
-		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"message": "all marked as read"}})
+		gc.JSON(200, gin.H{"message": "all marked as read"})
 		return nil
 	}
 }
@@ -183,17 +183,17 @@ func (h *NotificationHandler) unreadCount() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		userID, ok := getUserID(gc)
 		if !ok {
-			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
+			gc.JSON(401, server.ErrorResponse{Code: "UNAUTHORIZED", Message: "unauthorized"})
 			return nil
 		}
 
 		count, err := h.uc.GetUnreadCount(ctx.Request().Context(), userID)
 		if err != nil {
-			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			gc.JSON(500, server.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 			return nil
 		}
 
-		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"unread_count": count}})
+		gc.JSON(200, gin.H{"unread_count": count})
 		return nil
 	}
 }
@@ -203,23 +203,23 @@ func (h *NotificationHandler) deleteNotification() http2.HandlerFunc {
 		gc := ginadapter.GinContextFromHTTP(ctx)
 		userID, ok := getUserID(gc)
 		if !ok {
-			gc.JSON(401, server.Response[interface{}]{Code: server.ErrUnauthorized, Message: "unauthorized"})
+			gc.JSON(401, server.ErrorResponse{Code: "UNAUTHORIZED", Message: "unauthorized"})
 			return nil
 		}
 
 		id, err := strconv.Atoi(gc.Param("id"))
 		if err != nil {
-			gc.JSON(400, server.Response[interface{}]{Code: server.ErrBadRequest, Message: "Invalid ID"})
+			gc.JSON(400, server.ErrorResponse{Code: "BAD_REQUEST", Message: "Invalid ID"})
 			return nil
 		}
 
 		err = h.uc.DeleteNotification(ctx.Request().Context(), id, userID)
 		if err != nil {
-			gc.JSON(500, server.Response[interface{}]{Code: server.ErrInternal, Message: err.Error()})
+			gc.JSON(500, server.ErrorResponse{Code: "INTERNAL_ERROR", Message: err.Error()})
 			return nil
 		}
 
-		gc.JSON(200, server.Response[interface{}]{Code: 0, Message: "ok", Data: gin.H{"message": "deleted"}})
+		gc.JSON(200, gin.H{"message": "deleted"})
 		return nil
 	}
 }

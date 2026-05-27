@@ -132,7 +132,7 @@ func (h *PermissionHandler) createGroup() http.HandlerFunc {
 			return
 		}
 
-		gc.JSON(201, server.Response[interface{}]{Code: 0, Message: "ok", Data: group})
+		gc.JSON(201, group)
 	}
 }
 
