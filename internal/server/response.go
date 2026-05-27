@@ -13,8 +13,10 @@ import (
 )
 
 type ErrorResponse struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code     int               `json:"code"`
+	Reason   string            `json:"reason"`
+	Message  string            `json:"message"`
+	Metadata map[string]string `json:"metadata"`
 }
 
 type PageData struct {
@@ -81,14 +83,14 @@ func Created(c *gin.Context, data interface{}) {
 
 func Fail(c *gin.Context, code int, message string) {
 	httpStatus := getHTTPStatus(code)
-	errorCode := errorCodeToString(code)
-	c.JSON(httpStatus, ErrorResponse{Code: errorCode, Message: message})
+	reason := errorCodeToReason(code)
+	c.JSON(httpStatus, ErrorResponse{Code: httpStatus, Reason: reason, Message: message, Metadata: map[string]string{}})
 }
 
 func FailAbort(c *gin.Context, code int, message string) {
 	httpStatus := getHTTPStatus(code)
-	errorCode := errorCodeToString(code)
-	c.AbortWithStatusJSON(httpStatus, ErrorResponse{Code: errorCode, Message: message})
+	reason := errorCodeToReason(code)
+	c.AbortWithStatusJSON(httpStatus, ErrorResponse{Code: httpStatus, Reason: reason, Message: message, Metadata: map[string]string{}})
 }
 
 func ProtoOK(c *gin.Context, data proto.Message) {
@@ -107,18 +109,36 @@ func OKPage(c *gin.Context, items interface{}, total int64, page, pageSize int) 
 	Page(c, items, total, page, pageSize)
 }
 
-func errorCodeToString(code int) string {
+func errorCodeToReason(code int) string {
 	switch code {
-	case ErrNotFound, ErrUserNotFound, ErrMediaNotFound, ErrCommentNotFound:
+	case ErrNotFound:
 		return "NOT_FOUND"
-	case ErrUnauthorized, ErrTokenExpired, ErrTokenInvalid, ErrPasswordWrong:
+	case ErrUserNotFound:
+		return "USER_NOT_FOUND"
+	case ErrMediaNotFound:
+		return "MEDIA_NOT_FOUND"
+	case ErrCommentNotFound:
+		return "COMMENT_NOT_FOUND"
+	case ErrUnauthorized:
 		return "UNAUTHORIZED"
-	case ErrForbidden, ErrMediaForbidden, ErrCommentForbidden:
+	case ErrTokenExpired:
+		return "TOKEN_EXPIRED"
+	case ErrTokenInvalid:
+		return "TOKEN_INVALID"
+	case ErrPasswordWrong:
+		return "PASSWORD_WRONG"
+	case ErrForbidden:
 		return "FORBIDDEN"
+	case ErrMediaForbidden:
+		return "MEDIA_FORBIDDEN"
+	case ErrCommentForbidden:
+		return "COMMENT_FORBIDDEN"
 	case ErrBadRequest:
 		return "BAD_REQUEST"
-	case ErrConflict, ErrUserExists:
+	case ErrConflict:
 		return "CONFLICT"
+	case ErrUserExists:
+		return "USER_EXISTS"
 	case ErrMediaTooLarge:
 		return "PAYLOAD_TOO_LARGE"
 	case ErrEncodingFailed:
