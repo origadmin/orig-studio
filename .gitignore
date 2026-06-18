@@ -97,7 +97,6 @@ internal/frontend/dist/
 
 # AI / IDE tool configs
 .trae/
-_docs/
 .cursor/
 .cursorrules
 .kiro/
