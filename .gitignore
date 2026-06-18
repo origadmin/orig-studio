@@ -96,7 +96,8 @@ internal/frontend/dist/
 .beads-credential-key
 
 # AI / IDE tool configs
-.claude/
+.trae/
+_docs/
 .cursor/
 .cursorrules
 .kiro/
