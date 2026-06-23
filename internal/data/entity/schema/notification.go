@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ * Notification model - corresponds to Django users.Notification model
+ */
+
+package schema
+
+import (
+	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+)
+
+type Notification struct {
+	ent.Schema
+}
+
+func (Notification) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("action").MaxLen(30),
+		field.Bool("notify").Default(false),
+		field.String("method").MaxLen(20).Default("email"),
+		field.String("user_id").MaxLen(36),
+		field.String("title").MaxLen(200),
+		field.Text("body"),
+		field.Bool("is_read").Default(false),
+		field.Time("create_time").Default(time.Now),
+		field.Time("update_time").Default(time.Now).UpdateDefault(time.Now),
+	}
+}
+
+func (Notification) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("user_id"),
+		index.Fields("create_time"),
+		index.Fields("is_read"),
+	}
+}
+
+func (Notification) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Table("user_notifications"),
+		entsql.WithComments(true),
+	}
+}
+
+func (Notification) Edges() []ent.Edge {
+	return nil
+}
