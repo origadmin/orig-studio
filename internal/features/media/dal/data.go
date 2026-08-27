@@ -18,7 +18,9 @@ var ProviderSet = wire.NewSet(
 	NewEncodeProfileRepo,
 	NewEncodingTaskRepo,
 	NewReviewLogRepo,
-	)
+	NewStorage,
+	NewStorageInterface,
+)
 
 var MicroserviceProviderSet = wire.NewSet(
 	NewEntClient,

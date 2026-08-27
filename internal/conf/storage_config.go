@@ -1,14 +1,11 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package conf
 
 import (
+	"os"
+	"strconv"
 	"time"
 )
 
-// StorageType defines the type of storage backend.
 type StorageType string
 
 const (
@@ -17,18 +14,17 @@ const (
 	StorageTypeHybrid StorageType = "hybrid"
 )
 
-// StorageConfig holds the configuration for the storage subsystem.
-// It determines which storage backend to use and provides
-// backend-specific configuration blocks.
 type StorageConfig struct {
-	Type     StorageType  `json:"type" yaml:"type"`
-	BasePath string       `json:"base_path" yaml:"base_path"`
-	S3       S3Config     `json:"s3" yaml:"s3"`
-	Hybrid   HybridConfig `json:"hybrid" yaml:"hybrid"`
-	Temp     TempConfig   `json:"temp" yaml:"temp"`
+	Type       StorageType        `json:"type" yaml:"type"`
+	BasePath   string             `json:"base_path" yaml:"base_path"`
+	CDNBaseURL string             `json:"cdn_base_url" yaml:"cdn_base_url"`
+	Overrides  map[string]string  `json:"overrides" yaml:"overrides"`     // per-dir path override: name → absolute path
+	Strategies map[string]string  `json:"strategies" yaml:"strategies"`   // impl version per module: name → "v1"|"v2"
+	S3         S3Config           `json:"s3" yaml:"s3"`
+	Hybrid     HybridConfig       `json:"hybrid" yaml:"hybrid"`
+	Temp       TempConfig         `json:"temp" yaml:"temp"`
 }
 
-// S3Config holds the configuration for S3/MinIO object storage.
 type S3Config struct {
 	Endpoint      string        `json:"endpoint" yaml:"endpoint"`
 	Region        string        `json:"region" yaml:"region"`
@@ -39,7 +35,6 @@ type S3Config struct {
 	PresignExpiry time.Duration `json:"presign_expiry" yaml:"presign_expiry"`
 }
 
-// HybridConfig holds the configuration for hybrid (local + S3) storage.
 type HybridConfig struct {
 	SyncWorkers    int           `json:"sync_workers" yaml:"sync_workers"`
 	SyncQueueSize  int           `json:"sync_queue_size" yaml:"sync_queue_size"`
@@ -48,16 +43,13 @@ type HybridConfig struct {
 	SyncRetryDelay time.Duration `json:"sync_retry_delay" yaml:"sync_retry_delay"`
 }
 
-// TempConfig holds the configuration for temp file lifecycle management.
 type TempConfig struct {
 	TTL             time.Duration `json:"ttl" yaml:"ttl"`
 	CleanupInterval time.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
 }
 
-// DefaultStorageConfig returns a StorageConfig with sensible defaults.
-// The default type is "local" for backward compatibility.
 func DefaultStorageConfig() *StorageConfig {
-	return &StorageConfig{
+	cfg := &StorageConfig{
 		Type:     StorageTypeLocal,
 		BasePath: "./data/uploads",
 		Temp: TempConfig{
@@ -72,4 +64,44 @@ func DefaultStorageConfig() *StorageConfig {
 			SyncRetryDelay: 30 * time.Second,
 		},
 	}
+
+	if v := os.Getenv("STORAGE_BASE_PATH"); v != "" {
+		cfg.BasePath = v
+	}
+	if v := os.Getenv("CDN_BASE_URL"); v != "" {
+		cfg.CDNBaseURL = v
+	}
+	if v := os.Getenv("S3_ENDPOINT"); v != "" {
+		cfg.S3.Endpoint = v
+		if os.Getenv("STORAGE_TYPE") == "" {
+			cfg.Type = StorageTypeS3
+		}
+	}
+	if v := os.Getenv("S3_REGION"); v != "" {
+		cfg.S3.Region = v
+	}
+	if v := os.Getenv("S3_BUCKET"); v != "" {
+		cfg.S3.Bucket = v
+	}
+	if v := os.Getenv("S3_ACCESS_KEY"); v != "" {
+		cfg.S3.AccessKey = v
+	}
+	if v := os.Getenv("S3_SECRET_KEY"); v != "" {
+		cfg.S3.SecretKey = v
+	}
+	if v := os.Getenv("S3_USE_PATH_STYLE"); v != "" {
+		cfg.S3.UsePathStyle, _ = strconv.ParseBool(v)
+	}
+	if v := os.Getenv("STORAGE_TYPE"); v != "" {
+		cfg.Type = StorageType(v)
+	}
+
+	return cfg
+}
+
+func (c *StorageConfig) GetURLPrefix() string {
+	if c.CDNBaseURL != "" {
+		return c.CDNBaseURL
+	}
+	return "/files"
 }

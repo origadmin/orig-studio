@@ -1,18 +1,15 @@
 package service
 
 import (
-	"net/http"
 	"regexp"
 	"strconv"
 
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/features/admin/dto"
 
-	"github.com/gin-gonic/gin"
 	"origadmin/application/origstudio/internal/server"
 )
 
@@ -33,46 +30,44 @@ func NewAdminTagHandler(service *TagService, jwtMgr *auth.Manager) *AdminTagHand
 func (h *AdminTagHandler) RegisterRoutes(r http2.Router) {
 	tags := r.Group("/admin/tags")
 	{
-		tags.GET("", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.listTags())))
-		tags.GET("/:id", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.getTag())))
-		tags.POST("", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.createTag())))
-		tags.PUT("/:id", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.updateTag())))
-		tags.DELETE("/:id", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.deleteTag())))
-		tags.POST("/bulk", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.bulkTagOperation())))
-		tags.GET("/export", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.exportTags())))
-		tags.POST("/import", server.WithAdminCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.importTags())))
+		tags.GET("", server.WithAdminCtx(h.jwtMgr, h.listTags()))
+		tags.GET("/:id", server.WithAdminCtx(h.jwtMgr, h.getTag()))
+		tags.POST("", server.WithAdminCtx(h.jwtMgr, h.createTag()))
+		tags.PUT("/:id", server.WithAdminCtx(h.jwtMgr, h.updateTag()))
+		tags.DELETE("/:id", server.WithAdminCtx(h.jwtMgr, h.deleteTag()))
+		tags.POST("/bulk", server.WithAdminCtx(h.jwtMgr, h.bulkTagOperation()))
+		tags.GET("/export", server.WithAdminCtx(h.jwtMgr, h.exportTags()))
+		tags.POST("/import", server.WithAdminCtx(h.jwtMgr, h.importTags()))
 	}
 }
 
 // listTags handles GET /admin/tags
-func (h *AdminTagHandler) listTags() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+func (h *AdminTagHandler) listTags() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 
-		search := gc.Query("search")
+		search := ctx.QueryVar("search")
 		if search == "" {
-			search = gc.Query("keyword")
+			search = ctx.QueryVar("keyword")
 		}
 
-		status := gc.Query("status")
-		sortBy := gc.DefaultQuery("sort_by", "create_time")
-		sortOrder := gc.DefaultQuery("sort_order", "desc")
+		status := ctx.QueryVar("status")
+		sortBy := ctx.QueryVarDefault("sort_by", "create_time")
+		sortOrder := ctx.QueryVarDefault("sort_order", "desc")
 
 		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
-		tags, total, err := h.service.List(r.Context(), page, pageSize, search, status, sortBy, sortOrder)
+		tags, total, err := h.service.List(ctx.Request().Context(), page, pageSize, search, status, sortBy, sortOrder)
 		if err != nil {
-			server.Fail(gc, 10000, "Failed to list tags")
-			return
+			return server.FailCtx(ctx, 10000, "Failed to list tags")
 		}
 
 		tagResponses := ToTagResponseList(tags)
 
 		totalPages := (int(total) + pageSize - 1) / pageSize
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"items":       tagResponses,
 			"total":       total,
 			"page":        page,
@@ -83,45 +78,40 @@ func (h *AdminTagHandler) listTags() http.HandlerFunc {
 }
 
 // getTag handles GET /admin/tags/:id
-func (h *AdminTagHandler) getTag() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *AdminTagHandler) getTag() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 
-		tag, err := h.service.Get(r.Context(), id)
+		tag, err := h.service.Get(ctx.Request().Context(), id)
 		if err != nil {
-			server.Fail(gc, 10001, "Tag not found")
-			return
+			return server.FailCtx(ctx, 10001, "Tag not found")
 		}
 
-		server.OK(gc, ToTagResponse(tag))
+		return server.OKCtx(ctx, ToTagResponse(tag))
 	}
 }
 
 // createTag handles POST /admin/tags
-func (h *AdminTagHandler) createTag() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *AdminTagHandler) createTag() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var req struct {
-			Name        string `json:"name" binding:"required"`
+			Title       string `json:"title" binding:"required"`
 			Slug        string `json:"slug"`
 			Description string `json:"description"`
 			Color       string `json:"color"`
 			Status      string `json:"status"`
 		}
 
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, 10004, "Invalid request")
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, 10004, "Invalid request")
 		}
 
 		if req.Color != "" && !hexColorRegex.MatchString(req.Color) {
-			server.Fail(gc, 10004, "Invalid color format, expected #RRGGBB")
-			return
+			return server.FailCtx(ctx, 10004, "Invalid color format, expected #RRGGBB")
 		}
 
 		tag := &dto.TagDTO{
-			Title:       req.Name,
+			Title:       req.Title,
 			Description: req.Description,
 			Color:       req.Color,
 			Status:      ParseTagStatus(req.Status),
@@ -130,45 +120,41 @@ func (h *AdminTagHandler) createTag() http.HandlerFunc {
 		if req.Slug != "" {
 			tag.Slug = req.Slug
 		} else {
-			tag.Slug = hashtag.GenerateTagSlug(req.Name)
+			tag.Slug = hashtag.GenerateTagSlug(req.Title)
 		}
 
-		createdTag, err := h.service.Create(r.Context(), tag)
+		createdTag, err := h.service.Create(ctx.Request().Context(), tag)
 		if err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		server.OK(gc, ToTagResponse(createdTag))
+		return server.OKCtx(ctx, ToTagResponse(createdTag))
 	}
 }
 
 // updateTag handles PUT /admin/tags/:id
-func (h *AdminTagHandler) updateTag() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *AdminTagHandler) updateTag() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 
 		var req struct {
-			Name        string `json:"name"`
+			Title       string `json:"title"`
 			Slug        string `json:"slug"`
 			Description string `json:"description"`
 			Color       string `json:"color"`
 			Status      string `json:"status"`
 		}
 
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, 10004, "Invalid request")
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, 10004, "Invalid request")
 		}
 
 		if req.Color != "" && !hexColorRegex.MatchString(req.Color) {
-			server.Fail(gc, 10004, "Invalid color format, expected #RRGGBB")
-			return
+			return server.FailCtx(ctx, 10004, "Invalid color format, expected #RRGGBB")
 		}
 
 		updates := &dto.TagDTO{
-			Title:       req.Name,
+			Title:       req.Title,
 			Description: req.Description,
 			Color:       req.Color,
 			Status:      ParseTagStatus(req.Status),
@@ -178,28 +164,25 @@ func (h *AdminTagHandler) updateTag() http.HandlerFunc {
 			updates.Slug = req.Slug
 		}
 
-		updatedTag, err := h.service.Update(r.Context(), id, updates)
+		updatedTag, err := h.service.Update(ctx.Request().Context(), id, updates)
 		if err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		server.OK(gc, ToTagResponse(updatedTag))
+		return server.OKCtx(ctx, ToTagResponse(updatedTag))
 	}
 }
 
 // deleteTag handles DELETE /admin/tags/:id
-func (h *AdminTagHandler) deleteTag() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *AdminTagHandler) deleteTag() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 
-		if err := h.service.Delete(r.Context(), id); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := h.service.Delete(ctx.Request().Context(), id); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"code":    0,
 			"message": "Tag deleted successfully",
 		})
@@ -207,31 +190,27 @@ func (h *AdminTagHandler) deleteTag() http.HandlerFunc {
 }
 
 // bulkTagOperation handles POST /admin/tags/bulk
-func (h *AdminTagHandler) bulkTagOperation() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *AdminTagHandler) bulkTagOperation() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var req struct {
 			IDs    []string `json:"ids" binding:"required"`
 			Action string   `json:"action" binding:"required"`
 		}
 
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, 10004, "Invalid request")
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, 10004, "Invalid request")
 		}
 
 		if req.Action != "delete" {
-			server.Fail(gc, 10004, "Unsupported action")
-			return
+			return server.FailCtx(ctx, 10004, "Unsupported action")
 		}
 
-		count, err := h.service.BulkDelete(r.Context(), req.IDs)
+		count, err := h.service.BulkDelete(ctx.Request().Context(), req.IDs)
 		if err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"success": count,
 			"failed":  len(req.IDs) - count,
 		})
@@ -239,20 +218,18 @@ func (h *AdminTagHandler) bulkTagOperation() http.HandlerFunc {
 }
 
 // exportTags handles GET /admin/tags/export
-func (h *AdminTagHandler) exportTags() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		server.OK(gc, gin.H{
+func (h *AdminTagHandler) exportTags() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		return server.OKCtx(ctx, map[string]any{
 			"message": "Export functionality not implemented yet",
 		})
 	}
 }
 
 // importTags handles POST /admin/tags/import
-func (h *AdminTagHandler) importTags() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		server.OK(gc, gin.H{
+func (h *AdminTagHandler) importTags() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		return server.OKCtx(ctx, map[string]any{
 			"message": "Import functionality not implemented yet",
 		})
 	}

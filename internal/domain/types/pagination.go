@@ -133,6 +133,16 @@ func CalculateTotalPages(totalSize int64, pageSize int) int32 {
 	return int32((totalSize + int64(pageSize) - 1) / int64(pageSize))
 }
 
+func CalcOffset(page, pageSize int) int {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 1
+	}
+	return (page - 1) * pageSize
+}
+
 // NormalizeHTTPPagination validates and corrects page/pageSize parsed from HTTP query params.
 // This is a convenience function for Gin HTTP handlers that parse page/pageSize from query strings.
 // It returns the corrected page and pageSize values.

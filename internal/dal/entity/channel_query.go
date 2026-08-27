@@ -13,6 +13,7 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/channeltag"
 	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
+	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
 
 	"entgo.io/ent"
@@ -25,16 +26,17 @@ import (
 // ChannelQuery is the builder for querying Channel entities.
 type ChannelQuery struct {
 	config
-	ctx          *QueryContext
-	order        []channel.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Channel
-	withUser     *UserQuery
-	withMedia    *MediaQuery
-	withArticles *ArticleQuery
-	withCategory *CategoryQuery
-	withTagsRel  *ChannelTagQuery
-	modifiers    []func(*sql.Selector)
+	ctx             *QueryContext
+	order           []channel.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.Channel
+	withUser        *UserQuery
+	withMedia       *MediaQuery
+	withArticles    *ArticleQuery
+	withCategory    *CategoryQuery
+	withTagsRel     *ChannelTagQuery
+	withSubscribers *SubscriptionQuery
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -174,6 +176,28 @@ func (_q *ChannelQuery) QueryTagsRel() *ChannelTagQuery {
 			sqlgraph.From(channel.Table, channel.FieldID, selector),
 			sqlgraph.To(channeltag.Table, channeltag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, channel.TagsRelTable, channel.TagsRelColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySubscribers chains the current query on the "subscribers" edge.
+func (_q *ChannelQuery) QuerySubscribers() *SubscriptionQuery {
+	query := (&SubscriptionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(channel.Table, channel.FieldID, selector),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, channel.SubscribersTable, channel.SubscribersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -368,16 +392,17 @@ func (_q *ChannelQuery) Clone() *ChannelQuery {
 		return nil
 	}
 	return &ChannelQuery{
-		config:       _q.config,
-		ctx:          _q.ctx.Clone(),
-		order:        append([]channel.OrderOption{}, _q.order...),
-		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.Channel{}, _q.predicates...),
-		withUser:     _q.withUser.Clone(),
-		withMedia:    _q.withMedia.Clone(),
-		withArticles: _q.withArticles.Clone(),
-		withCategory: _q.withCategory.Clone(),
-		withTagsRel:  _q.withTagsRel.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]channel.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.Channel{}, _q.predicates...),
+		withUser:        _q.withUser.Clone(),
+		withMedia:       _q.withMedia.Clone(),
+		withArticles:    _q.withArticles.Clone(),
+		withCategory:    _q.withCategory.Clone(),
+		withTagsRel:     _q.withTagsRel.Clone(),
+		withSubscribers: _q.withSubscribers.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -437,6 +462,17 @@ func (_q *ChannelQuery) WithTagsRel(opts ...func(*ChannelTagQuery)) *ChannelQuer
 		opt(query)
 	}
 	_q.withTagsRel = query
+	return _q
+}
+
+// WithSubscribers tells the query-builder to eager-load the nodes that are connected to
+// the "subscribers" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ChannelQuery) WithSubscribers(opts ...func(*SubscriptionQuery)) *ChannelQuery {
+	query := (&SubscriptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubscribers = query
 	return _q
 }
 
@@ -518,12 +554,13 @@ func (_q *ChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Chan
 	var (
 		nodes       = []*Channel{}
 		_spec       = _q.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			_q.withUser != nil,
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withCategory != nil,
 			_q.withTagsRel != nil,
+			_q.withSubscribers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -577,6 +614,13 @@ func (_q *ChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Chan
 		if err := _q.loadTagsRel(ctx, query, nodes,
 			func(n *Channel) { n.Edges.TagsRel = []*ChannelTag{} },
 			func(n *Channel, e *ChannelTag) { n.Edges.TagsRel = append(n.Edges.TagsRel, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSubscribers; query != nil {
+		if err := _q.loadSubscribers(ctx, query, nodes,
+			func(n *Channel) { n.Edges.Subscribers = []*Subscription{} },
+			func(n *Channel, e *Subscription) { n.Edges.Subscribers = append(n.Edges.Subscribers, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -729,6 +773,36 @@ func (_q *ChannelQuery) loadTagsRel(ctx context.Context, query *ChannelTagQuery,
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "channel_tags_rel" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ChannelQuery) loadSubscribers(ctx context.Context, query *SubscriptionQuery, nodes []*Channel, init func(*Channel), assign func(*Channel, *Subscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Channel)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subscription.FieldChannelID)
+	}
+	query.Where(predicate.Subscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(channel.SubscribersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ChannelID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "channel_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

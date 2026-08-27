@@ -44,7 +44,7 @@ type TagDTO struct {
 // Field names match the frontend Tag interface in admin-tags.ts.
 type TagResponse struct {
 	ID                string `json:"id"`                          // int -> string
-	Name              string `json:"name"`                        // TagDTO.Title -> name
+	Name              string `json:"title"`                       // TagDTO.Title -> title
 	Slug              string `json:"slug,omitempty"`              // pass through
 	Count             int    `json:"count"`                       // TagDTO.MediaCount -> count
 	ListingsThumbnail string `json:"listings_thumbnail,omitempty"` // pass through

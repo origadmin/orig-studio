@@ -73,7 +73,7 @@ type CommentModerationRepo interface {
 	IncrementReportCount(ctx context.Context, commentID string) (int, error)
 	ResetReportCount(ctx context.Context, commentID string) error
 	ListByMedia(ctx context.Context, mediaID string, status string, page, pageSize int) ([]*CommentModerationItem, int, error)
-	ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*CommentModerationItem, int, error)
+	ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, keyword string, page, pageSize int) ([]*CommentModerationItem, int, error)
 	ListPending(ctx context.Context, mediaID string, page, pageSize int) ([]*CommentModerationItem, int, error)
 	CountByStatus(ctx context.Context, mediaID string) (*CommentStatusCounts, error)
 	Delete(ctx context.Context, id string) error
@@ -199,10 +199,14 @@ func (uc *CommentModerationUseCase) BatchModerateComments(ctx context.Context, c
 }
 
 var validReportReasons = map[string]bool{
-	"SPAM":          true,
-	"HARASSMENT":    true,
-	"INAPPROPRIATE": true,
-	"OTHER":         true,
+	"SPAM":            true,
+	"HARASSMENT":      true,
+	"INAPPROPRIATE":   true,
+	"PLAYBACK_ERROR":  true,
+	"SUBTITLE_ERROR":  true,
+	"QUALITY_ISSUE":   true,
+	"BROKEN_LINK":     true,
+	"OTHER":           true,
 }
 
 func (uc *CommentModerationUseCase) ReportComment(ctx context.Context, commentID string, reporterID string, reason string, description string) (int, bool, error) {
@@ -411,6 +415,6 @@ func (uc *CommentModerationUseCase) DismissReports(ctx context.Context, commentI
 }
 
 // ListAdminComments returns comments with optional tree structure and report status filtering.
-func (uc *CommentModerationUseCase) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*CommentModerationItem, int, error) {
-	return uc.commentRepo.ListAdminComments(ctx, mediaID, status, reportStatus, tree, page, pageSize)
+func (uc *CommentModerationUseCase) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, keyword string, page, pageSize int) ([]*CommentModerationItem, int, error) {
+	return uc.commentRepo.ListAdminComments(ctx, mediaID, status, reportStatus, tree, keyword, page, pageSize)
 }

@@ -49,8 +49,8 @@ type Media struct {
 	Height int `json:"height,omitempty"`
 	// MimeType holds the value of the "mime_type" field.
 	MimeType string `json:"mime_type,omitempty"`
-	// Md5sum holds the value of the "md5sum" field.
-	Md5sum string `json:"md5sum,omitempty"`
+	// Sha256 holds the value of the "sha256" field.
+	Sha256 string `json:"sha256,omitempty"`
 	// Extension holds the value of the "extension" field.
 	Extension string `json:"extension,omitempty"`
 	// Privacy holds the value of the "privacy" field.
@@ -73,8 +73,6 @@ type Media struct {
 	DownloadCount int64 `json:"download_count,omitempty"`
 	// ShareCount holds the value of the "share_count" field.
 	ShareCount int64 `json:"share_count,omitempty"`
-	// UUID holds the value of the "uuid" field.
-	UUID string `json:"uuid,omitempty"`
 	// AllowDownload holds the value of the "allow_download" field.
 	AllowDownload bool `json:"allow_download,omitempty"`
 	// EnableComments holds the value of the "enable_comments" field.
@@ -97,6 +95,8 @@ type Media struct {
 	ThumbnailTime float64 `json:"thumbnail_time,omitempty"`
 	// Tags holds the value of the "tags" field.
 	Tags []string `json:"tags,omitempty"`
+	// Metadata holds the value of the "metadata" field.
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// TitleI18n holds the value of the "title_i18n" field.
 	TitleI18n map[string]string `json:"title_i18n,omitempty"`
 	// DescriptionI18n holds the value of the "description_i18n" field.
@@ -125,7 +125,6 @@ type Media struct {
 	// The values are being populated by the MediaQuery when eager-loading is set.
 	Edges                MediaEdges `json:"edges"`
 	media_category_media *int
-	media_tag_media      *int
 	selectValues         sql.SelectValues
 }
 
@@ -149,13 +148,17 @@ type MediaEdges struct {
 	Likes []*Like `json:"likes,omitempty"`
 	// ReviewLogs holds the value of the review_logs edge.
 	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
+	// Subtitles holds the value of the subtitles edge.
+	Subtitles []*Subtitle `json:"subtitles,omitempty"`
 	// Articles holds the value of the articles edge.
 	Articles []*Article `json:"articles,omitempty"`
 	// Reports holds the value of the reports edge.
 	Reports []*MediaReport `json:"reports,omitempty"`
+	// DrmPolicies holds the value of the drm_policies edge.
+	DrmPolicies []*MediaDrmPolicy `json:"drm_policies,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [13]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -245,10 +248,19 @@ func (e MediaEdges) ReviewLogsOrErr() ([]*MediaReviewLog, error) {
 	return nil, &NotLoadedError{edge: "review_logs"}
 }
 
+// SubtitlesOrErr returns the Subtitles value or an error if the edge
+// was not loaded in eager-loading.
+func (e MediaEdges) SubtitlesOrErr() ([]*Subtitle, error) {
+	if e.loadedTypes[9] {
+		return e.Subtitles, nil
+	}
+	return nil, &NotLoadedError{edge: "subtitles"}
+}
+
 // ArticlesOrErr returns the Articles value or an error if the edge
 // was not loaded in eager-loading.
 func (e MediaEdges) ArticlesOrErr() ([]*Article, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.Articles, nil
 	}
 	return nil, &NotLoadedError{edge: "articles"}
@@ -257,10 +269,19 @@ func (e MediaEdges) ArticlesOrErr() ([]*Article, error) {
 // ReportsOrErr returns the Reports value or an error if the edge
 // was not loaded in eager-loading.
 func (e MediaEdges) ReportsOrErr() ([]*MediaReport, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		return e.Reports, nil
 	}
 	return nil, &NotLoadedError{edge: "reports"}
+}
+
+// DrmPoliciesOrErr returns the DrmPolicies value or an error if the edge
+// was not loaded in eager-loading.
+func (e MediaEdges) DrmPoliciesOrErr() ([]*MediaDrmPolicy, error) {
+	if e.loadedTypes[12] {
+		return e.DrmPolicies, nil
+	}
+	return nil, &NotLoadedError{edge: "drm_policies"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -268,7 +289,7 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case media.FieldTags, media.FieldTitleI18n, media.FieldDescriptionI18n:
+		case media.FieldTags, media.FieldMetadata, media.FieldTitleI18n, media.FieldDescriptionI18n:
 			values[i] = new([]byte)
 		case media.FieldAllowDownload, media.FieldEnableComments, media.FieldFeatured, media.FieldListable:
 			values[i] = new(sql.NullBool)
@@ -276,13 +297,11 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case media.FieldDuration, media.FieldWidth, media.FieldHeight, media.FieldViewCount, media.FieldLikeCount, media.FieldDislikeCount, media.FieldCommentCount, media.FieldFavoriteCount, media.FieldDownloadCount, media.FieldShareCount, media.FieldReportedTimes, media.FieldCategoryID:
 			values[i] = new(sql.NullInt64)
-		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldMd5sum, media.FieldExtension, media.FieldPrivacy, media.FieldEncodingStatus, media.FieldState, media.FieldUUID, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldSyncStatus, media.FieldUserID, media.FieldChannelID, media.FieldCreateAuthor, media.FieldUpdateAuthor:
+		case media.FieldID, media.FieldTitle, media.FieldDescription, media.FieldShortToken, media.FieldType, media.FieldURL, media.FieldHlsFile, media.FieldThumbnail, media.FieldPoster, media.FieldPreviewFilePath, media.FieldSize, media.FieldMimeType, media.FieldSha256, media.FieldExtension, media.FieldPrivacy, media.FieldEncodingStatus, media.FieldState, media.FieldReviewStatus, media.FieldSpriteStatus, media.FieldSpritePath, media.FieldVttPath, media.FieldSyncStatus, media.FieldUserID, media.FieldChannelID, media.FieldCreateAuthor, media.FieldUpdateAuthor:
 			values[i] = new(sql.NullString)
 		case media.FieldSyncedAt, media.FieldPublishedAt, media.FieldCreateTime, media.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		case media.ForeignKeys[0]: // media_category_media
-			values[i] = new(sql.NullInt64)
-		case media.ForeignKeys[1]: // media_tag_media
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -389,11 +408,11 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.MimeType = value.String
 			}
-		case media.FieldMd5sum:
+		case media.FieldSha256:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field md5sum", values[i])
+				return fmt.Errorf("unexpected type %T for field sha256", values[i])
 			} else if value.Valid {
-				_m.Md5sum = value.String
+				_m.Sha256 = value.String
 			}
 		case media.FieldExtension:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -461,12 +480,6 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ShareCount = value.Int64
 			}
-		case media.FieldUUID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uuid", values[i])
-			} else if value.Valid {
-				_m.UUID = value.String
-			}
 		case media.FieldAllowDownload:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field allow_download", values[i])
@@ -533,6 +546,14 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.Tags); err != nil {
 					return fmt.Errorf("unmarshal field tags: %w", err)
+				}
+			}
+		case media.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
 			}
 		case media.FieldTitleI18n:
@@ -619,13 +640,6 @@ func (_m *Media) assignValues(columns []string, values []any) error {
 				_m.media_category_media = new(int)
 				*_m.media_category_media = int(value.Int64)
 			}
-		case media.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_tag_media", value)
-			} else if value.Valid {
-				_m.media_tag_media = new(int)
-				*_m.media_tag_media = int(value.Int64)
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -684,6 +698,11 @@ func (_m *Media) QueryReviewLogs() *MediaReviewLogQuery {
 	return NewMediaClient(_m.config).QueryReviewLogs(_m)
 }
 
+// QuerySubtitles queries the "subtitles" edge of the Media entity.
+func (_m *Media) QuerySubtitles() *SubtitleQuery {
+	return NewMediaClient(_m.config).QuerySubtitles(_m)
+}
+
 // QueryArticles queries the "articles" edge of the Media entity.
 func (_m *Media) QueryArticles() *ArticleQuery {
 	return NewMediaClient(_m.config).QueryArticles(_m)
@@ -692,6 +711,11 @@ func (_m *Media) QueryArticles() *ArticleQuery {
 // QueryReports queries the "reports" edge of the Media entity.
 func (_m *Media) QueryReports() *MediaReportQuery {
 	return NewMediaClient(_m.config).QueryReports(_m)
+}
+
+// QueryDrmPolicies queries the "drm_policies" edge of the Media entity.
+func (_m *Media) QueryDrmPolicies() *MediaDrmPolicyQuery {
+	return NewMediaClient(_m.config).QueryDrmPolicies(_m)
 }
 
 // Update returns a builder for updating this Media.
@@ -759,8 +783,8 @@ func (_m *Media) String() string {
 	builder.WriteString("mime_type=")
 	builder.WriteString(_m.MimeType)
 	builder.WriteString(", ")
-	builder.WriteString("md5sum=")
-	builder.WriteString(_m.Md5sum)
+	builder.WriteString("sha256=")
+	builder.WriteString(_m.Sha256)
 	builder.WriteString(", ")
 	builder.WriteString("extension=")
 	builder.WriteString(_m.Extension)
@@ -795,9 +819,6 @@ func (_m *Media) String() string {
 	builder.WriteString("share_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ShareCount))
 	builder.WriteString(", ")
-	builder.WriteString("uuid=")
-	builder.WriteString(_m.UUID)
-	builder.WriteString(", ")
 	builder.WriteString("allow_download=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AllowDownload))
 	builder.WriteString(", ")
@@ -830,6 +851,9 @@ func (_m *Media) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("tags=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Tags))
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("title_i18n=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TitleI18n))

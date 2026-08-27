@@ -8,14 +8,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/infra/auth"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
-	"origadmin/application/origstudio/internal/server"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	"origadmin/application/origstudio/internal/pkg/http/std"
 )
 
 // ---------------------------------------------------------------------------
@@ -94,12 +93,32 @@ func (m *mockPlaylistRepo) ListByUser(_ context.Context, userID string, page, pa
 	return result, len(result), nil
 }
 
+func (m *mockPlaylistRepo) ListPublicByUser(_ context.Context, userID string, page, pageSize int) ([]*biz.Playlist, int, error) {
+	var result []*biz.Playlist
+	for _, p := range m.playlists {
+		if p.UserID == userID && p.IsPublic {
+			result = append(result, p)
+		}
+	}
+	return result, len(result), nil
+}
+
 func (m *mockPlaylistRepo) ListAll(_ context.Context, page, pageSize int) ([]*biz.Playlist, int, error) {
 	var result []*biz.Playlist
 	for _, p := range m.playlists {
 		result = append(result, p)
 	}
 	return result, len(result), nil
+}
+
+// ResolveMediaID mirrors the real repository contract: any non-empty reference
+// resolves to itself, while the empty string and the reserved "missing-media"
+// token report biz.ErrMediaNotFound so BUG-128 root cause C stays covered.
+func (m *mockPlaylistRepo) ResolveMediaID(_ context.Context, idOrToken string) (string, error) {
+	if idOrToken == "" || idOrToken == "missing-media" {
+		return "", biz.ErrMediaNotFound
+	}
+	return idOrToken, nil
 }
 
 func (m *mockPlaylistRepo) AddMedia(_ context.Context, playlistID, mediaID string) error {
@@ -190,18 +209,18 @@ func setupPlaylistTestHandler() *PlaylistHandler {
 	return NewPlaylistHandler(uc, nil, nil)
 }
 
-// setAuthClaims injects mock claims into the gin context for authenticated endpoints.
-func setAuthClaims(c *gin.Context, userID string, isAdmin bool) {
-	role := "user"
-	if isAdmin {
-		role = "admin"
+// withClaims creates a middleware that injects test claims into the http2 context.
+func withClaims(userID string) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			ctx.Set("claims", &auth.Claims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Subject: userID,
+				},
+			})
+			return next(ctx)
+		}
 	}
-	c.Set("claims", &auth.Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject: userID,
-		},
-		Role: role,
-	})
 }
 
 // ---------------------------------------------------------------------------
@@ -209,57 +228,49 @@ func setAuthClaims(c *gin.Context, userID string, isAdmin bool) {
 // ---------------------------------------------------------------------------
 
 func TestPlaylistHandler_RouteRegistration(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 
-	apiV1 := r.Group("/api/v1")
+	apiV1 := rt.Group("/api/v1")
 	playlists := apiV1.Group("/playlists")
 	{
-		playlists.GET("", func(c *gin.Context) {
-			c.JSON(200, gin.H{"test": "list"})
+		playlists.GET("", func(ctx http2.Context) error {
+			return ctx.JSON(200, map[string]any{"test": "list"})
 		})
-		playlists.GET("/:token", func(c *gin.Context) {
-			token := c.Param("token")
-			c.JSON(200, gin.H{"test": "detail", "token": token})
+		playlists.GET("/:token", func(ctx http2.Context) error {
+			token := ctx.Var("token")
+			return ctx.JSON(200, map[string]any{"test": "detail", "token": token})
 		})
-	}
-
-	routes := r.Routes()
-	t.Logf("Registered routes (%d):", len(routes))
-	for _, route := range routes {
-		t.Logf("  %s %s -> %s", route.Method, route.Path, route.Handler)
 	}
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code, "GET /api/v1/playlists should return 200")
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", "/api/v1/playlists/rJvQd0-ll", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code, "GET /api/v1/playlists/rJvQd0-ll should return 200")
 	assert.Contains(t, w.Body.String(), "rJvQd0-ll")
 
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", "/api/v1/playlists-nonexistent/xxx", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusNotFound, w.Code, "non-matching route should return 404")
 }
 
 func TestPlaylistHandler_TokenParamExtraction(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 
 	var capturedToken string
-	r.GET("/api/v1/playlists/:token", func(c *gin.Context) {
-		capturedToken = c.Param("token")
-		c.Status(200)
+	rt.GET("/api/v1/playlists/:token", func(ctx http2.Context) error {
+		capturedToken = ctx.Var("token")
+		return ctx.Result(http.StatusOK, nil)
 	})
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/rJvQd0-ll", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, "rJvQd0-ll", capturedToken)
@@ -270,65 +281,58 @@ func TestPlaylistHandler_TokenParamExtraction(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestPlaylistHandler_GetPlaylistByToken_MissingToken(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 	handler := setupPlaylistTestHandler()
 
 	// Register without ModuleGuard (which needs settingUC)
-	adapter := ginadapter.NewRouterAdapter(&r.RouterGroup)
-	adapter.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
+	rt.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
-	// Empty token should be caught by Gin's routing (no match)
-	// But if token is provided as empty string via param, handler should catch it
+	// Empty token should be caught by routing (no match)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/", nil)
-	r.ServeHTTP(w, req)
-	// Gin redirects /playlists/ to /playlists, so this is a 301 or 404
+	rt.ServeHTTP(w, req)
 	assert.True(t, w.Code == http.StatusMovedPermanently || w.Code == http.StatusNotFound)
 }
 
 func TestPlaylistHandler_GetPlaylistByToken_ValidToken(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 	handler := setupPlaylistTestHandler()
 
-	adapter2 := ginadapter.NewRouterAdapter(&r.RouterGroup)
-	adapter2.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
+	rt.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	// Non-existent token should return not found
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/nonexistent-token", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	// Should return 404 since the playlist doesn't exist
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(server.ErrNotFound), resp["code"])
+	assert.Equal(t, float64(http.StatusNotFound), resp["code"])
 }
 
 func TestPlaylistHandler_FullServerSimulation(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 
-	apiV1 := r.Group("/api/v1")
+	apiV1 := rt.Group("/api/v1")
 
 	playlists := apiV1.Group("/playlists")
 	{
-		playlists.GET("", func(c *gin.Context) {
-			c.JSON(200, gin.H{"test": "list"})
+		playlists.GET("", func(ctx http2.Context) error {
+			return ctx.JSON(200, map[string]any{"test": "list"})
 		})
-		playlists.GET("/:token", func(c *gin.Context) {
-			token := c.Param("token")
-			c.JSON(200, gin.H{"test": "detail", "token": token})
+		playlists.GET("/:token", func(ctx http2.Context) error {
+			token := ctx.Var("token")
+			return ctx.JSON(200, map[string]any{"test": "detail", "token": token})
 		})
 	}
 
 	medias := apiV1.Group("/medias")
 	{
-		medias.GET("/:id/metadata", func(c *gin.Context) {
-			c.JSON(200, gin.H{"test": "metadata"})
+		medias.GET("/:id/metadata", func(ctx http2.Context) error {
+			return ctx.JSON(200, map[string]any{"test": "metadata"})
 		})
 	}
 
@@ -336,8 +340,8 @@ func TestPlaylistHandler_FullServerSimulation(t *testing.T) {
 	{
 		adminPlaylists := admin.Group("/playlists")
 		{
-			adminPlaylists.GET("/:id", func(c *gin.Context) {
-				c.JSON(200, gin.H{"test": "admin-detail"})
+			adminPlaylists.GET("/:id", func(ctx http2.Context) error {
+				return ctx.JSON(200, map[string]any{"test": "admin-detail"})
 			})
 		}
 	}
@@ -360,7 +364,7 @@ func TestPlaylistHandler_FullServerSimulation(t *testing.T) {
 		t.Run(fmt.Sprintf("%s %s", tc.method, tc.path), func(t *testing.T) {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tc.method, tc.path, nil)
-			r.ServeHTTP(w, req)
+			rt.ServeHTTP(w, req)
 			assert.Equal(t, tc.expectedCode, w.Code, tc.description)
 		})
 	}
@@ -371,35 +375,32 @@ func TestPlaylistHandler_FullServerSimulation(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestPlaylistHandler_ListPlaylists_DefaultPagination(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 	handler := setupPlaylistTestHandler()
 
-	adapter3 := ginadapter.NewRouterAdapter(&r.RouterGroup)
-	adapter3.GET("/api/v1/playlists", handler.listPlaylists())
+	rt.GET("/api/v1/playlists", handler.listPlaylists())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
+	_, hasItems := resp["items"]
+	assert.True(t, hasItems, "response should have items field")
 }
 
 func TestPlaylistHandler_ListPlaylists_CustomPagination(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
+	rt := std.NewRouter()
 	handler := setupPlaylistTestHandler()
 
-	adapter4 := ginadapter.NewRouterAdapter(&r.RouterGroup)
-	adapter4.GET("/api/v1/playlists", handler.listPlaylists())
+	rt.GET("/api/v1/playlists", handler.listPlaylists())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists?page=2&page_size=5", nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
@@ -409,8 +410,6 @@ func TestPlaylistHandler_ListPlaylists_CustomPagination(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestPlaylistHandler_GetPlaylistByToken_PublicPlaylist(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	playlistRepo := newMockPlaylistRepo()
 	configRepo := newMockSystemConfigRepo()
 	configRepo.configs["module_videos"] = "true"
@@ -424,24 +423,22 @@ func TestPlaylistHandler_GetPlaylistByToken_PublicPlaylist(t *testing.T) {
 		IsPublic: true,
 	})
 
-	r := gin.New()
-	adapterPub := ginadapter.NewRouterAdapter(&r.RouterGroup)
-	adapterPub.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
+	rt := std.NewRouter()
+	rt.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/"+created.ShortToken, nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
+	_, hasPlaylist := resp["playlist"]
+	assert.True(t, hasPlaylist, "response should have playlist field")
 }
 
 func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NoAuth(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	playlistRepo := newMockPlaylistRepo()
 	configRepo := newMockSystemConfigRepo()
 	configRepo.configs["module_videos"] = "true"
@@ -455,23 +452,20 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NoAuth(t *testing.T)
 		IsPublic: false,
 	})
 
-	r := gin.New()
-	adapterNoAuth := ginadapter.NewRouterAdapter(&r.RouterGroup)
-	adapterNoAuth.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
+	rt := std.NewRouter()
+	rt.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/"+created.ShortToken, nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(server.ErrNotFound), resp["code"])
+	assert.Equal(t, float64(http.StatusNotFound), resp["code"])
 }
 
 func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_OwnerAccess(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	playlistRepo := newMockPlaylistRepo()
 	configRepo := newMockSystemConfigRepo()
 	configRepo.configs["module_videos"] = "true"
@@ -485,29 +479,18 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_OwnerAccess(t *testi
 		IsPublic: false,
 	})
 
-	r := gin.New()
-	adapterOwner := ginadapter.NewRouterAdapter(r.Group(""))
-	adapterOwner.UseGin(func(c *gin.Context) {
-		c.Set("claims", &auth.Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject: "user-001",
-			},
-		})
-		c.Next()
-	})
-	adapterOwner.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
+	rt := std.NewRouter()
+	rt.GET("/api/v1/playlists/:token", handler.getPlaylistByToken(), withClaims("user-001"))
 
 	// Access as owner - should succeed
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/"+created.ShortToken, nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NonOwnerAccess(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	playlistRepo := newMockPlaylistRepo()
 	configRepo := newMockSystemConfigRepo()
 	configRepo.configs["module_videos"] = "true"
@@ -521,28 +504,19 @@ func TestPlaylistHandler_GetPlaylistByToken_PrivatePlaylist_NonOwnerAccess(t *te
 		IsPublic: false,
 	})
 
-	r := gin.New()
-	adapterNonOwner := ginadapter.NewRouterAdapter(r.Group(""))
-	adapterNonOwner.UseGin(func(c *gin.Context) {
-		c.Set("claims", &auth.Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject: "user-002",
-			},
-		})
-		c.Next()
-	})
-	adapterNonOwner.GET("/api/v1/playlists/:token", handler.getPlaylistByToken())
+	rt := std.NewRouter()
+	rt.GET("/api/v1/playlists/:token", handler.getPlaylistByToken(), withClaims("user-002"))
 
 	// Access as non-owner - should return not found
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/playlists/"+created.ShortToken, nil)
-	r.ServeHTTP(w, req)
+	rt.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(server.ErrNotFound), resp["code"])
+	assert.Equal(t, float64(http.StatusNotFound), resp["code"])
 }
 
 // ---------------------------------------------------------------------------

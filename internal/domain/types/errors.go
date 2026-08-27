@@ -4,7 +4,10 @@
 
 package types
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 // IsNotFound checks if the given error is a "not found" error.
 // This is a domain-level wrapper that avoids importing internal/dal/entity
@@ -25,11 +28,14 @@ func IsNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
-	if notFoundChecker != nil {
-		return notFoundChecker(err)
+	if notFoundChecker != nil && notFoundChecker(err) {
+		return true
 	}
-	// Fallback: check for common not-found patterns
-	return errors.Is(err, ErrNotFound)
+	if errors.Is(err, ErrNotFound) {
+		return true
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "not found") || strings.Contains(errMsg, "no rows")
 }
 
 // ErrNotFound is a sentinel error for not-found conditions.

@@ -321,6 +321,7 @@ func TranscodeToHLS(
 		"-f", "hls",
 		"-hls_time", "6",
 		"-hls_list_size", "0",
+		"-hls_playlist_type", "vod",
 		"-hls_segment_filename", segmentPattern,
 		"-y", playlistPath,
 	)
@@ -370,6 +371,7 @@ func TranscodeToHLSWithProgress(
 		"-f", "hls",
 		"-hls_time", "6",
 		"-hls_list_size", "0",
+		"-hls_playlist_type", "vod",
 		"-hls_segment_filename", segmentPattern,
 		"-y", playlistPath,
 	)
@@ -461,13 +463,13 @@ func parseProgressOutput(reader io.Reader, duration float64, progressCb Progress
 
 func parseInt64(s string) int64 {
 	var result int64
-	fmt.Sscanf(s, "%d", &result)
+	_, _ = fmt.Sscanf(s, "%d", &result)
 	return result
 }
 
 func parseFloat64(s string) float64 {
 	var result float64
-	fmt.Sscanf(s, "%f", &result)
+	_, _ = fmt.Sscanf(s, "%f", &result)
 	return result
 }
 
@@ -525,6 +527,7 @@ func PreviewHLSCommand(inputPath, outputDir, profileName, resolution, videoCodec
 		"-f", "hls",
 		"-hls_time", "6",
 		"-hls_list_size", "0",
+		"-hls_playlist_type", "vod",
 		"-hls_segment_filename", filepath.Join(outputDir, "segment_%03d.ts"),
 		"-y", filepath.Join(outputDir, "index.m3u8"),
 	)
@@ -649,6 +652,98 @@ func parseRFrameRate(rate string) float64 {
 	}
 	fps, _ := strconv.ParseFloat(rate, 64)
 	return fps
+}
+
+type WebFriendlyResult struct {
+	IsWebFriendly  bool
+	VideoCodec     string
+	AudioCodec     string
+	ContainerMP4   bool
+	NeedsRemux     bool
+	NeedsTranscode bool
+}
+
+func CheckWebFriendly(info *MediaInfo) WebFriendlyResult {
+	r := WebFriendlyResult{
+		VideoCodec:   info.VideoCodec,
+		AudioCodec:   info.AudioCodec,
+		ContainerMP4: isContainerMP4(info.FormatName),
+	}
+
+	videoOK := info.VideoCodec == "h264"
+	audioOK := info.AudioCodec == "aac" || info.AudioCodec == "mp3" || info.AudioCodec == ""
+
+	if videoOK && audioOK && r.ContainerMP4 {
+		r.IsWebFriendly = true
+		return r
+	}
+
+	if videoOK && audioOK && !r.ContainerMP4 {
+		r.NeedsRemux = true
+		return r
+	}
+
+	r.NeedsTranscode = true
+	return r
+}
+
+func isContainerMP4(formatName string) bool {
+	for _, f := range []string{"mp4", "mov", "m4a", "isom", "mp42", "avc1"} {
+		if strings.Contains(strings.ToLower(formatName), f) {
+			return true
+		}
+	}
+	return false
+}
+
+func RemuxToMP4(ctx context.Context, inputPath, outputPath string) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	args := []string{
+		"-i", inputPath,
+		"-c", "copy",
+		"-movflags", "+faststart",
+		"-y",
+		outputPath,
+	}
+
+	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg remux to MP4 failed: %w, output: %s", err, string(output))
+	}
+
+	return nil
+}
+
+func QuickTranscodeToMP4(ctx context.Context, inputPath, outputPath string) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	args := []string{
+		"-i", inputPath,
+		"-c:v", "libx264",
+		"-preset", "ultrafast",
+		"-crf", "23",
+		"-pix_fmt", "yuv420p",
+		"-c:a", "aac",
+		"-b:a", "128k",
+		"-ac", "2",
+		"-movflags", "+faststart",
+		"-y",
+		outputPath,
+	}
+
+	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg quick transcode to MP4 failed: %w, output: %s", err, string(output))
+	}
+
+	return nil
 }
 
 

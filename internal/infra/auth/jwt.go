@@ -2,7 +2,6 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package auth provides JWT token generation and validation utilities.
 package auth
 
 import (
@@ -12,7 +11,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims is the JWT claims structure for origcms.
 type Claims struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
@@ -27,28 +25,24 @@ func (c *Claims) IsAdmin() bool {
 	return c.Role == "admin"
 }
 
-// Manager handles JWT signing and parsing.
 type Manager struct {
-	secret         []byte
-	ttl            time.Duration
+	secret          []byte
+	ttl             time.Duration
 	refreshTokenTTL time.Duration
 }
 
-// NewManager creates a new JWT Manager.
 func NewManager(secret string, ttl time.Duration, refreshTokenTTL time.Duration) *Manager {
 	return &Manager{
-		secret:         []byte(secret),
-		ttl:            ttl,
+		secret:          []byte(secret),
+		ttl:             ttl,
 		refreshTokenTTL: refreshTokenTTL,
 	}
 }
 
-// TTL returns the token time-to-live duration.
 func (m *Manager) TTL() time.Duration {
 	return m.ttl
 }
 
-// Generate creates a signed JWT token for the given user.
 func (m *Manager) Generate(
 	userID string,
 	username string,
@@ -89,7 +83,6 @@ func (m *Manager) GenerateRefreshToken(
 	return token.SignedString(m.secret)
 }
 
-// Parse validates and parses a JWT token string.
 func (m *Manager) Parse(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

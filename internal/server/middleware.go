@@ -5,13 +5,15 @@
 package server
 
 import (
-	"net/http"
+	stdcontext "context"
+	"fmt"
+	stdhttp "net/http"
+	"time"
 
 	ginhttp "github.com/gin-gonic/gin"
+	"origadmin/application/origstudio/internal/infra/auth"
 	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	"origadmin/application/origstudio/internal/infra/auth"
-	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
 )
 
 // GetClaims retrieves claims from the gin.Context.
@@ -24,16 +26,16 @@ func GetClaims(c *ginhttp.Context) (*auth.Claims, bool) {
 	return nil, false
 }
 
-// ==================== http.HandlerFunc wrappers (legacy) ====================
+// ==================== http.HandlerFunc wrappers (legacy, Gin-based) ====================
 
-// WithJWT wraps an http.HandlerFunc with JWT middleware.
+// WithJWT wraps an stdhttp.HandlerFunc with JWT middleware.
 // It retrieves the real gin.Context from the request context,
 // runs JWT validation on it, and proceeds only if the token is valid.
-func WithJWT(jwtMgr *auth.Manager, h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func WithJWT(jwtMgr *auth.Manager, h stdhttp.HandlerFunc) stdhttp.HandlerFunc {
+	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		gc := ginadapter.GetGinContext(r)
 		if gc == nil {
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			stdhttp.Error(w, "internal error", stdhttp.StatusInternalServerError)
 			return
 		}
 		JWTMiddleware(jwtMgr)(gc)
@@ -44,11 +46,9 @@ func WithJWT(jwtMgr *auth.Manager, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// WithOptionalJWT wraps an http.HandlerFunc with optional JWT middleware.
-// If a valid token is present, claims are set in the gin.Context.
-// If no token is present or the token is invalid, the handler still proceeds.
-func WithOptionalJWT(jwtMgr *auth.Manager, h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+// WithOptionalJWT wraps an stdhttp.HandlerFunc with optional JWT middleware.
+func WithOptionalJWT(jwtMgr *auth.Manager, h stdhttp.HandlerFunc) stdhttp.HandlerFunc {
+	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		gc := ginadapter.GetGinContext(r)
 		if gc == nil {
 			h(w, r)
@@ -71,12 +71,12 @@ func WithOptionalJWT(jwtMgr *auth.Manager, h http.HandlerFunc) http.HandlerFunc 
 	}
 }
 
-// WithAdmin wraps an http.HandlerFunc with JWT + Admin middleware.
-func WithAdmin(jwtMgr *auth.Manager, h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+// WithAdmin wraps an stdhttp.HandlerFunc with JWT + Admin middleware.
+func WithAdmin(jwtMgr *auth.Manager, h stdhttp.HandlerFunc) stdhttp.HandlerFunc {
+	return func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 		gc := ginadapter.GetGinContext(r)
 		if gc == nil {
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			stdhttp.Error(w, "internal error", stdhttp.StatusInternalServerError)
 			return
 		}
 		JWTMiddleware(jwtMgr)(gc)
@@ -91,31 +91,7 @@ func WithAdmin(jwtMgr *auth.Manager, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// WithAdminAndPerm wraps an http.HandlerFunc with JWT + Admin + Permission middleware.
-func WithAdminAndPerm(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecker, permission string, h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		if gc == nil {
-			http.Error(w, "internal error", http.StatusInternalServerError)
-			return
-		}
-		JWTMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return
-		}
-		AdminMiddleware(jwtMgr)(gc)
-		if gc.IsAborted() {
-			return
-		}
-		RequirePermission(permChecker, permission)(gc)
-		if gc.IsAborted() {
-			return
-		}
-		h(w, r)
-	}
-}
-
-// ==================== http2.HandlerFunc wrappers (new) ====================
+// ==================== http2.HandlerFunc wrappers (adapter-based) ====================
 
 // WithJWTCtx wraps an http2.HandlerFunc with JWT middleware.
 func WithJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
@@ -123,8 +99,6 @@ func WithJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
 }
 
 // WithOptionalJWTCtx wraps an http2.HandlerFunc with optional JWT middleware.
-// If a valid token is present, claims are set in the context.
-// If no token is present or the token is invalid, the handler still proceeds.
 func WithOptionalJWTCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
 	return OptionalJWTMiddlewareCtx(jwtMgr)(h)
 }
@@ -134,18 +108,79 @@ func WithAdminCtx(jwtMgr *auth.Manager, h http2.HandlerFunc) http2.HandlerFunc {
 	return http2.Chain(JWTMiddlewareCtx(jwtMgr), AdminMiddlewareCtx(jwtMgr))(h)
 }
 
-// WithAdminAndPermCtx wraps an http2.HandlerFunc with JWT + Admin + Permission middleware.
-func WithAdminAndPermCtx(jwtMgr *auth.Manager, permChecker authbiz.PermissionChecker, permission string, h http2.HandlerFunc) http2.HandlerFunc {
-	return http2.Chain(JWTMiddlewareCtx(jwtMgr), AdminMiddlewareCtx(jwtMgr), RequirePermissionCtx(permChecker, permission))(h)
+// ==================== Standard net/http Handler wrappers (NO Gin dependency) ====================
+
+type stdClaimsContextKey struct{}
+
+// StdWithJWT wraps a standard stdhttp.Handler with JWT validation middleware.
+// It does NOT depend on Gin - extracts token directly from the request.
+// Token sources: Authorization header "Bearer <token>" or query "?token=<token>".
+// Valid claims are stored in the request context under a private key.
+func StdWithJWT(jwtMgr *auth.Manager, h stdhttp.Handler) stdhttp.Handler {
+	return stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		tokenStr := extractStdToken(r)
+		if tokenStr == "" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(stdhttp.StatusUnauthorized)
+			_, _ = w.Write([]byte(`{"error":"missing token"}`))
+			return
+		}
+		claims, err := jwtMgr.Parse(tokenStr)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(stdhttp.StatusUnauthorized)
+			_, _ = w.Write([]byte(`{"error":"invalid token"}`))
+			return
+		}
+		ctx := stdcontext.WithValue(r.Context(), stdClaimsContextKey{}, claims)
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// StdWithAdmin wraps a standard stdhttp.Handler with JWT + admin role validation.
+func StdWithAdmin(jwtMgr *auth.Manager, h stdhttp.Handler) stdhttp.Handler {
+	return StdWithJWT(jwtMgr, stdhttp.HandlerFunc(func(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+		claims, ok := GetClaimsFromStdCtx(r.Context())
+		if !ok {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(stdhttp.StatusUnauthorized)
+			_, _ = w.Write([]byte(`{"error":"no claims"}`))
+			return
+		}
+		if claims.Role != "admin" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(stdhttp.StatusForbidden)
+			_, _ = w.Write([]byte(`{"error":"admin required"}`))
+			return
+		}
+		h.ServeHTTP(w, r)
+	}))
+}
+
+// GetClaimsFromStdCtx retrieves auth.Claims from a standard context.Context.
+func GetClaimsFromStdCtx(ctx stdcontext.Context) (*auth.Claims, bool) {
+	val := ctx.Value(stdClaimsContextKey{})
+	if val == nil {
+		return nil, false
+	}
+	claims, ok := val.(*auth.Claims)
+	return claims, ok
+}
+
+func extractStdToken(r *stdhttp.Request) string {
+	header := r.Header.Get("Authorization")
+	if len(header) >= 8 && header[:7] == "Bearer " {
+		return header[7:]
+	}
+	if t := r.URL.Query().Get("token"); t != "" {
+		return t
+	}
+	return ""
 }
 
 // ==================== http2.MiddlewareFunc implementations ====================
 
 // JWTMiddlewareCtx returns a MiddlewareFunc that validates JWT tokens.
-// It supports two token sources:
-//  1. Authorization header: "Bearer <token>" (standard, for regular API calls)
-//  2. Query parameter: "?token=<token>" (fallback, for SSE/EventSource which
-//     cannot set custom headers)
 func JWTMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 	return func(next http2.HandlerFunc) http2.HandlerFunc {
 		return func(ctx http2.Context) error {
@@ -165,8 +200,7 @@ func JWTMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 	}
 }
 
-// OptionalJWTMiddlewareCtx returns a MiddlewareFunc that parses JWT token if
-// present but does not require it. If a valid token is found, claims are set.
+// OptionalJWTMiddlewareCtx returns a MiddlewareFunc that parses JWT token if present.
 func OptionalJWTMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 	return func(next http2.HandlerFunc) http2.HandlerFunc {
 		return func(ctx http2.Context) error {
@@ -181,8 +215,7 @@ func OptionalJWTMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 	}
 }
 
-// AdminMiddlewareCtx returns a MiddlewareFunc that requires admin (or staff) role.
-// It expects claims to already be set in the context (typically by JWTMiddlewareCtx).
+// AdminMiddlewareCtx returns a MiddlewareFunc that requires admin role.
 func AdminMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 	return func(next http2.HandlerFunc) http2.HandlerFunc {
 		return func(ctx http2.Context) error {
@@ -191,7 +224,7 @@ func AdminMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 				http2.Fail(ctx, http2.AppErrUnauthorized, "no claims")
 				return nil
 			}
-			if claims.Role != "admin" && !claims.IsAdmin() {
+			if claims.Role != "admin" {
 				http2.Fail(ctx, http2.AppErrForbidden, "admin required")
 				return nil
 			}
@@ -200,35 +233,6 @@ func AdminMiddlewareCtx(jwtMgr *auth.Manager) http2.MiddlewareFunc {
 	}
 }
 
-// RequirePermissionCtx returns a MiddlewareFunc that checks if the authenticated
-// user has the specified permission.
-func RequirePermissionCtx(permChecker authbiz.PermissionChecker, permission string) http2.MiddlewareFunc {
-	return func(next http2.HandlerFunc) http2.HandlerFunc {
-		return func(ctx http2.Context) error {
-			claims, ok := GetClaimsCtx(ctx)
-			if !ok {
-				http2.Fail(ctx, http2.AppErrUnauthorized, "authentication required")
-				return nil
-			}
-
-			if claims.Role == "admin" || claims.IsAdmin() {
-				return next(ctx)
-			}
-
-			userID := claims.GetUserID()
-			allowed, err := permChecker.CheckPermission(ctx.Request().Context(), userID, permission, "")
-			if err != nil || !allowed {
-				http2.Fail(ctx, http2.AppErrForbidden, "permission denied")
-				return nil
-			}
-			return next(ctx)
-		}
-	}
-}
-
-// extractTokenFromCtx extracts the JWT token from an http2.Context.
-// It checks the Authorization header first, then falls back to the
-// "token" query parameter (for SSE/EventSource connections).
 func extractTokenFromCtx(ctx http2.Context) string {
 	auth := ctx.GetHeader("Authorization")
 	if len(auth) >= 8 && auth[:7] == "Bearer " {
@@ -240,22 +244,18 @@ func extractTokenFromCtx(ctx http2.Context) string {
 	return ""
 }
 
+// ==================== Gin middleware implementations ====================
+
 // JWTMiddleware validates Bearer token and injects claims into context.
-// It supports two token sources:
-//  1. Authorization header: "Bearer <token>" (standard, for regular API calls)
-//  2. Query parameter: "?token=<token>" (fallback, for SSE/EventSource which
-//     cannot set custom headers)
 func JWTMiddleware(jwtMgr *auth.Manager) ginhttp.HandlerFunc {
 	return func(c *ginhttp.Context) {
 		var tokenStr string
 
-		// Try Authorization header first
 		header := c.GetHeader("Authorization")
 		if len(header) >= 8 && header[:7] == "Bearer " {
 			tokenStr = header[7:]
 		}
 
-		// Fallback to query parameter (for SSE/EventSource connections)
 		if tokenStr == "" {
 			if t := c.Query("token"); t != "" {
 				tokenStr = t
@@ -263,12 +263,12 @@ func JWTMiddleware(jwtMgr *auth.Manager) ginhttp.HandlerFunc {
 		}
 
 		if tokenStr == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ginhttp.H{"error": "missing or invalid Authorization header"})
+			c.AbortWithStatusJSON(stdhttp.StatusUnauthorized, ginhttp.H{"error": "missing or invalid Authorization header"})
 			return
 		}
 		claims, err := jwtMgr.Parse(tokenStr)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ginhttp.H{"error": "invalid token: " + err.Error()})
+			c.AbortWithStatusJSON(stdhttp.StatusUnauthorized, ginhttp.H{"error": "invalid token: " + err.Error()})
 			return
 		}
 		c.Set("claims", claims)
@@ -293,92 +293,92 @@ func OptionalJWTMiddleware(jwtMgr *auth.Manager) ginhttp.HandlerFunc {
 func RequiredRole(role string) ginhttp.HandlerFunc {
 	return func(c *ginhttp.Context) {
 		claims, ok := GetClaims(c)
-		if !ok || (claims.Role != role && !claims.IsAdmin() && claims.Role != "admin") {
-			c.AbortWithStatusJSON(http.StatusForbidden, ginhttp.H{"error": "permission denied: " + role + " role required"})
+		if !ok || (claims.Role != role && claims.Role != "admin") {
+			c.AbortWithStatusJSON(stdhttp.StatusForbidden, ginhttp.H{"error": "permission denied: " + role + " role required"})
 			return
 		}
 		c.Next()
 	}
 }
 
-// AdminMiddleware requires JWT + admin (or staff) role.
+// AdminMiddleware requires JWT + admin role.
 func AdminMiddleware(jwtMgr *auth.Manager) ginhttp.HandlerFunc {
 	return func(c *ginhttp.Context) {
 		claims, ok := GetClaims(c)
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, ginhttp.H{"error": "no claims in context"})
+			c.AbortWithStatusJSON(stdhttp.StatusUnauthorized, ginhttp.H{"error": "no claims in context"})
 			return
 		}
 
-		if claims.Role != "admin" && !claims.IsAdmin() {
-			c.AbortWithStatusJSON(http.StatusForbidden, ginhttp.H{"error": "admin access required"})
+		if claims.Role != "admin" {
+			c.AbortWithStatusJSON(stdhttp.StatusForbidden, ginhttp.H{"error": "admin access required"})
 			return
 		}
 		c.Next()
 	}
 }
 
-type permissionConfig struct {
-	ownershipExtractor func(*ginhttp.Context) (string, error)
-	categoryExtractor  func(*ginhttp.Context) (string, error)
-}
+// ==================== Base http2.MiddlewareFunc (framework-agnostic) ====================
 
-type PermissionOption func(*permissionConfig)
-
-func WithOwnershipCheck(extractor func(*ginhttp.Context) (string, error)) PermissionOption {
-	return func(c *permissionConfig) {
-		c.ownershipExtractor = extractor
-	}
-}
-
-func WithResourceCategory(extractor func(*ginhttp.Context) (string, error)) PermissionOption {
-	return func(c *permissionConfig) {
-		c.categoryExtractor = extractor
-	}
-}
-
-func RequirePermission(permChecker authbiz.PermissionChecker, permission string, opts ...PermissionOption) ginhttp.HandlerFunc {
-	cfg := &permissionConfig{}
-	for _, opt := range opts {
-		opt(cfg)
-	}
-
-	return func(c *ginhttp.Context) {
-		claims, ok := GetClaims(c)
-		if !ok {
-			Fail(c, ErrUnauthorized, "authentication required")
-			c.Abort()
-			return
-		}
-
-		if claims.Role == "admin" || claims.IsAdmin() {
-			c.Next()
-			return
-		}
-
-		userID := claims.GetUserID()
-
-		categoryID := ""
-		if cfg.categoryExtractor != nil {
-			if catID, err := cfg.categoryExtractor(c); err == nil && catID != "" {
-				categoryID = catID
+// RequestIDCtx returns a MiddlewareFunc that generates or propagates an
+// X-Request-ID header. If the incoming request already carries one, it is
+// preserved; otherwise a new UUID-like ID is generated from timestamp.
+func RequestIDCtx() http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			rid := ctx.GetHeader("X-Request-ID")
+			if rid == "" {
+				rid = fmt.Sprintf("req-%d", time.Now().UnixNano())
 			}
+			ctx.Set("request_id", rid)
+			ctx.Response().Header().Set("X-Request-ID", rid)
+			return next(ctx)
 		}
+	}
+}
 
-		allowed, err := permChecker.CheckPermission(c.Request.Context(), userID, permission, categoryID)
-		if err == nil && allowed {
-			c.Next()
-			return
+// RecoveryCtx returns a MiddlewareFunc that recovers from panics, logs the
+// error, and returns a 500 response. This is the framework-agnostic
+// counterpart of gin.Recovery().
+func RecoveryCtx() http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) (err error) {
+			defer func() {
+				if r := recover(); r != nil {
+					http2.Fail(ctx, http2.AppErrInternal, "internal server error")
+					err = nil
+				}
+			}()
+			return next(ctx)
 		}
+	}
+}
 
-		if cfg.ownershipExtractor != nil {
-			if ownerID, err := cfg.ownershipExtractor(c); err == nil && ownerID == userID {
-				c.Next()
-				return
+// CORSCtx returns a MiddlewareFunc that adds CORS headers to the response.
+// This is the framework-agnostic counterpart of rs/cors handlers.
+func CORSCtx(allowedOrigins []string) http2.MiddlewareFunc {
+	originSet := make(map[string]bool, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		originSet[o] = true
+	}
+	allowAll := len(allowedOrigins) == 0
+
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			origin := ctx.GetHeader("Origin")
+			if origin != "" && (allowAll || originSet[origin]) {
+				ctx.Response().Header().Set("Access-Control-Allow-Origin", origin)
+				ctx.Response().Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+				ctx.Response().Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Request-ID")
+				ctx.Response().Header().Set("Access-Control-Allow-Credentials", "true")
+				ctx.Response().Header().Set("Access-Control-Max-Age", "86400")
 			}
+			// Handle preflight
+			if ctx.Request().Method == stdhttp.MethodOptions {
+				ctx.Response().WriteHeader(stdhttp.StatusNoContent)
+				return nil
+			}
+			return next(ctx)
 		}
-
-		Fail(c, ErrForbidden, "insufficient permissions")
-		c.Abort()
 	}
 }

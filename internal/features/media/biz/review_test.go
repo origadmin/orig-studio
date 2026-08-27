@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/origadmin/runtime/errors"
 	"github.com/stretchr/testify/assert"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
@@ -39,12 +39,23 @@ func (r *MockReviewRepo) Get(ctx context.Context, id string, opts ...*dto.MediaQ
 	return r.media[id], nil
 }
 
-func (r *MockReviewRepo) GetWithEntity(ctx context.Context, id string, opts ...*dto.MediaQueryOption) (*entity.Media, *Media, error) {
+// GetChannelOwnerID satisfies dto.MediaRepo. The review flow under test does
+// not consult channel ownership.
+func (r *MockReviewRepo) GetChannelOwnerID(ctx context.Context, channelID string) (string, error) {
+	return "", nil
+}
+
+// UpdateMediaChannel satisfies dto.MediaRepo (BUG-105 channel assignment).
+func (r *MockReviewRepo) UpdateMediaChannel(ctx context.Context, mediaID, channelID string) error {
+	return nil
+}
+
+func (r *MockReviewRepo) GetWithEntity(ctx context.Context, id string, opts ...*dto.MediaQueryOption) (*dto.MediaEntityDTO, *Media, error) {
 	m := r.media[id]
 	if m == nil {
 		return nil, nil, fmt.Errorf("not found")
 	}
-	return &entity.Media{ID: m.Id}, m, nil
+	return &dto.MediaEntityDTO{ID: m.Id}, m, nil
 }
 
 func (r *MockReviewRepo) List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*Media, int32, error) {
@@ -55,12 +66,12 @@ func (r *MockReviewRepo) List(ctx context.Context, opts ...*dto.MediaQueryOption
 	return mediaList, int32(len(mediaList)), nil
 }
 
-func (r *MockReviewRepo) ListWithEntities(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*entity.Media, []*Media, int32, error) {
+func (r *MockReviewRepo) ListWithEntities(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*dto.MediaEntityDTO, []*Media, int32, error) {
 	var mediaList []*Media
-	var entityList []*entity.Media
+	var entityList []*dto.MediaEntityDTO
 	for _, media := range r.media {
 		mediaList = append(mediaList, media)
-		entityList = append(entityList, &entity.Media{ID: media.Id})
+		entityList = append(entityList, &dto.MediaEntityDTO{ID: media.Id})
 	}
 	return entityList, mediaList, int32(len(mediaList)), nil
 }
@@ -75,9 +86,9 @@ func (r *MockReviewRepo) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *MockReviewRepo) CreateWithEntity(ctx context.Context, media *Media) (*entity.Media, *Media, error) {
+func (r *MockReviewRepo) CreateWithEntity(ctx context.Context, media *Media) (*dto.MediaEntityDTO, *Media, error) {
 	r.media[media.Id] = media
-	return &entity.Media{ID: media.Id}, media, nil
+	return &dto.MediaEntityDTO{ID: media.Id}, media, nil
 }
 
 func (r *MockReviewRepo) ListCategories(ctx context.Context, opts ...*dto.CategoryQueryOption) ([]*types.Category, int32, error) {
@@ -86,6 +97,38 @@ func (r *MockReviewRepo) ListCategories(ctx context.Context, opts ...*dto.Catego
 
 func (r *MockReviewRepo) GetCategory(ctx context.Context, id string) (*types.Category, error) {
 	return nil, nil
+}
+
+func (r *MockReviewRepo) CreateCategory(ctx context.Context, cat *types.Category) (*types.Category, error) {
+	return cat, nil
+}
+
+func (r *MockReviewRepo) UpdateCategory(ctx context.Context, cat *types.Category) (*types.Category, error) {
+	return cat, nil
+}
+
+func (r *MockReviewRepo) DeleteCategory(ctx context.Context, id string) error {
+	return nil
+}
+
+func (r *MockReviewRepo) ListTags(ctx context.Context, opts ...*dto.TagQueryOption) ([]*types.Tag, int32, error) {
+	return nil, 0, nil
+}
+
+func (r *MockReviewRepo) GetTag(ctx context.Context, id string) (*types.Tag, error) {
+	return nil, nil
+}
+
+func (r *MockReviewRepo) CreateTag(ctx context.Context, tag *types.Tag) (*types.Tag, error) {
+	return tag, nil
+}
+
+func (r *MockReviewRepo) UpdateTag(ctx context.Context, tag *types.Tag) (*types.Tag, error) {
+	return tag, nil
+}
+
+func (r *MockReviewRepo) DeleteTag(ctx context.Context, id string) error {
+	return nil
 }
 
 func (r *MockReviewRepo) IncrementViewCount(ctx context.Context, id string) (int64, error) {
@@ -108,11 +151,15 @@ func (r *MockReviewRepo) UpdateFavoriteCount(ctx context.Context, id string, del
 	return nil
 }
 
-func (r *MockReviewRepo) GetEntityByID(ctx context.Context, id string) (*entity.Media, error) {
+func (r *MockReviewRepo) UpdateReportedTimes(ctx context.Context, id string, delta int) error {
+	return nil
+}
+
+func (r *MockReviewRepo) GetEntityByID(ctx context.Context, id string) (*dto.MediaEntityDTO, error) {
 	return nil, nil
 }
 
-func (r *MockReviewRepo) GetEntityByShortToken(ctx context.Context, shortToken string) (*entity.Media, error) {
+func (r *MockReviewRepo) GetEntityByShortToken(ctx context.Context, shortToken string) (*dto.MediaEntityDTO, error) {
 	return nil, nil
 }
 
@@ -171,6 +218,10 @@ func (r *MockReviewRepo) UpdateDimensions(ctx context.Context, mediaID string, w
 
 func (r *MockReviewRepo) ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*Media, error) {
 	return nil, nil
+}
+
+func (r *MockReviewRepo) GetDefaultChannelID(ctx context.Context, userID string) (string, error) {
+	return "", nil
 }
 
 // MockReviewLogRepo simulates the review log repository
@@ -325,4 +376,116 @@ func TestMediaUseCase_ShouldBeListable(t *testing.T) {
 	
 	listable4 := uc.ShouldBeListable(media4)
 	assert.False(t, listable4)
+}
+
+// TestMediaUseCase_PublishEncodingGuard covers BUG-138 CASE_1: publishing before
+// transcoding completes is rejected with a 400 ENCODING_NOT_READY error and the
+// media's encoding_status/state are left unchanged.
+func TestMediaUseCase_PublishEncodingGuard(t *testing.T) {
+	repo := NewMockReviewRepo()
+	reviewLogRepo := NewMockReviewLogRepo()
+	logger := log.NewStdLogger(os.Stdout)
+
+	uc := NewMediaUseCase(repo, nil, nil, reviewLogRepo, nil, nil, logger, nil)
+	ctx := context.Background()
+
+	media := &Media{
+		Id:             "media-enc",
+		EncodingStatus: "processing",
+		ReviewStatus:   "",
+		State:          "draft",
+		Listable:       false,
+	}
+	_, err := repo.Create(ctx, media)
+	assert.NoError(t, err)
+
+	updated, err := uc.PublishMedia(ctx, "media-enc", "manual", "user-1")
+	assert.Error(t, err)
+	assert.True(t, errors.IsBadRequest(err))
+	assert.Nil(t, updated)
+
+	stored, _ := repo.Get(ctx, "media-enc")
+	assert.Equal(t, "processing", stored.EncodingStatus)
+	assert.Equal(t, "draft", stored.State)
+}
+
+// TestMediaUseCase_PublishManualMode covers BUG-138 CASE_2 (manual): publish after
+// transcoding completes transitions review_status -> pending_review, state untouched
+// until admin approves, and the media is not yet listable.
+func TestMediaUseCase_PublishManualMode(t *testing.T) {
+	repo := NewMockReviewRepo()
+	reviewLogRepo := NewMockReviewLogRepo()
+	logger := log.NewStdLogger(os.Stdout)
+
+	uc := NewMediaUseCase(repo, nil, nil, reviewLogRepo, nil, nil, logger, nil)
+	ctx := context.Background()
+
+	media := &Media{
+		Id:             "media-manual",
+		EncodingStatus: "success",
+		ReviewStatus:   "",
+		State:          "draft",
+		Listable:       false,
+	}
+	_, err := repo.Create(ctx, media)
+	assert.NoError(t, err)
+
+	updated, err := uc.PublishMedia(ctx, "media-manual", "manual", "user-1")
+	assert.NoError(t, err)
+	assert.Equal(t, "pending_review", updated.ReviewStatus)
+	assert.Equal(t, "draft", updated.State)
+	assert.False(t, updated.Listable)
+}
+
+// TestMediaUseCase_PublishAutoApprove covers BUG-138 CASE_4 (auto_approve/skip):
+// publish transitions straight to active + reviewed and becomes listable.
+func TestMediaUseCase_PublishAutoApprove(t *testing.T) {
+	repo := NewMockReviewRepo()
+	reviewLogRepo := NewMockReviewLogRepo()
+	logger := log.NewStdLogger(os.Stdout)
+
+	uc := NewMediaUseCase(repo, nil, nil, reviewLogRepo, nil, nil, logger, nil)
+	ctx := context.Background()
+
+	media := &Media{
+		Id:             "media-auto",
+		EncodingStatus: "success",
+		ReviewStatus:   "",
+		State:          "draft",
+		Listable:       false,
+	}
+	_, err := repo.Create(ctx, media)
+	assert.NoError(t, err)
+
+	updated, err := uc.PublishMedia(ctx, "media-auto", "auto_approve", "user-1")
+	assert.NoError(t, err)
+	assert.Equal(t, "reviewed", updated.ReviewStatus)
+	assert.Equal(t, "active", updated.State)
+	assert.True(t, updated.Listable)
+}
+
+// TestMediaUseCase_PublishDefaultManual covers BUG-138 CASE_4 default: an empty
+// reviewMode resolves to manual (pending_review), not auto-publish.
+func TestMediaUseCase_PublishDefaultManual(t *testing.T) {
+	repo := NewMockReviewRepo()
+	reviewLogRepo := NewMockReviewLogRepo()
+	logger := log.NewStdLogger(os.Stdout)
+
+	uc := NewMediaUseCase(repo, nil, nil, reviewLogRepo, nil, nil, logger, nil)
+	ctx := context.Background()
+
+	media := &Media{
+		Id:             "media-default",
+		EncodingStatus: "success",
+		ReviewStatus:   "",
+		State:          "draft",
+		Listable:       false,
+	}
+	_, err := repo.Create(ctx, media)
+	assert.NoError(t, err)
+
+	updated, err := uc.PublishMedia(ctx, "media-default", "", "user-1")
+	assert.NoError(t, err)
+	assert.Equal(t, "pending_review", updated.ReviewStatus)
+	assert.Equal(t, "draft", updated.State)
 }

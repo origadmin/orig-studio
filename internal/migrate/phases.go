@@ -48,6 +48,15 @@ func init() {
 	RegisterPhase(PhaseDef{Name: PhasePlaylists, Fn: func(ctx context.Context, e *Engine) error {
 		return e.phasePlaylists(ctx)
 	}})
+	RegisterPhase(PhaseDef{Name: PhasePlaylistMedia, Fn: func(ctx context.Context, e *Engine) error {
+		return e.phasePlaylistMedia(ctx)
+	}})
+	RegisterPhase(PhaseDef{Name: PhaseSubtitles, Fn: func(ctx context.Context, e *Engine) error {
+		return e.phaseSubtitles(ctx)
+	}})
+	RegisterPhase(PhaseDef{Name: PhaseSubscriptions, Fn: func(ctx context.Context, e *Engine) error {
+		return e.phaseSubscriptions(ctx)
+	}})
 	RegisterPhase(PhaseDef{Name: PhaseFiles, Fn: func(ctx context.Context, e *Engine) error {
 		return e.phaseFiles(ctx)
 	}})

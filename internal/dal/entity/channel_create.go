@@ -11,8 +11,9 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/channel"
 	"origadmin/application/origstudio/internal/dal/entity/channeltag"
 	"origadmin/application/origstudio/internal/dal/entity/media"
-	"origadmin/application/origstudio/internal/dal/entity/schema"
+	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity/schema"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -371,6 +372,21 @@ func (_c *ChannelCreate) AddTagsRel(v ...*ChannelTag) *ChannelCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddTagsRelIDs(ids...)
+}
+
+// AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
+func (_c *ChannelCreate) AddSubscriberIDs(ids ...string) *ChannelCreate {
+	_c.mutation.AddSubscriberIDs(ids...)
+	return _c
+}
+
+// AddSubscribers adds the "subscribers" edges to the Subscription entity.
+func (_c *ChannelCreate) AddSubscribers(v ...*Subscription) *ChannelCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSubscriberIDs(ids...)
 }
 
 // Mutation returns the ChannelMutation object of the builder.
@@ -768,6 +784,22 @@ func (_c *ChannelCreate) createSpec() (*Channel, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SubscribersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

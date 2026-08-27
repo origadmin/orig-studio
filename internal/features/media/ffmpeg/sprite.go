@@ -2,6 +2,7 @@ package ffmpeg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -12,6 +13,67 @@ import (
 	"strconv"
 	"strings"
 )
+
+type probeSizeOutput struct {
+	Streams []struct {
+		CodecType string `json:"codec_type"`
+		Width     int    `json:"width"`
+		Height    int    `json:"height"`
+		Tags      struct {
+			Rotate string `json:"rotate"`
+		} `json:"tags"`
+		SideDataList []struct {
+			SideDataType string  `json:"side_data_type"`
+			Rotation     float64 `json:"rotation"`
+		} `json:"side_data_list"`
+	} `json:"streams"`
+}
+
+func GetVideoDisplaySize(ctx context.Context, inputPath string) (width int, height int, err error) {
+	args := []string{
+		"-v", "error",
+		"-show_streams",
+		"-print_format", "json",
+		inputPath,
+	}
+
+	cmd := exec.CommandContext(ctx, ffprobePath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return 0, 0, fmt.Errorf("ffprobe failed: %w, output: %s", err, string(output))
+	}
+
+	var probe probeSizeOutput
+	if err := json.Unmarshal(output, &probe); err != nil {
+		return 0, 0, fmt.Errorf("parse ffprobe json: %w", err)
+	}
+
+	for _, s := range probe.Streams {
+		if s.CodecType != "video" {
+			continue
+		}
+		w, h := s.Width, s.Height
+		rotation := 0
+		if s.Tags.Rotate != "" {
+			if r, err := strconv.Atoi(s.Tags.Rotate); err == nil {
+				rotation = r
+			}
+		}
+		for _, sd := range s.SideDataList {
+			if sd.SideDataType == "Display Matrix" {
+				rotation = int(sd.Rotation)
+				break
+			}
+		}
+		rotation = ((rotation % 360) + 360) % 360
+		if rotation == 90 || rotation == 270 {
+			w, h = h, w
+		}
+		return w, h, nil
+	}
+
+	return 0, 0, fmt.Errorf("no video stream found")
+}
 
 func GetVideoDurationSeconds(ctx context.Context, inputPath string) (float64, error) {
 	args := []string{
@@ -36,16 +98,16 @@ func GetVideoDurationSeconds(ctx context.Context, inputPath string) (float64, er
 	return seconds, nil
 }
 
-func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath string, frameInterval int, frameWidth int, frameHeight int, columns int) (frameCount int, err error) {
+func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath string, frameInterval int, frameWidth int, frameHeight int, columns int) (frameCount int, spriteWidth int, spriteHeight int, tileCols int, err error) {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
-		return 0, fmt.Errorf("failed to create sprite output directory: %w", err)
+		return 0, 0, 0, 0, fmt.Errorf("failed to create sprite output directory: %w", err)
 	}
 
 	os.Remove(outputPath)
 
 	duration, err := GetVideoDurationSeconds(ctx, inputPath)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get video duration: %w", err)
+		return 0, 0, 0, 0, fmt.Errorf("failed to get video duration: %w", err)
 	}
 
 	totalFrames := int(duration/float64(frameInterval)) + 1
@@ -56,7 +118,16 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 
 	rows := (totalFrames + columns - 1) / columns
 
-	tileFilter := fmt.Sprintf("fps=1/%d,scale=%d:%d,tile=%dx%d", frameInterval, frameWidth, frameHeight, columns, rows)
+	tileCols = columns
+	if rows == 1 {
+		tileCols = totalFrames
+	}
+
+	actualSpriteWidth := tileCols * frameWidth
+	actualSpriteHeight := rows * frameHeight
+
+	scalePadFilter := fmt.Sprintf("fps=1/%d,scale=%d:%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2", frameInterval, frameWidth, frameHeight, frameWidth, frameHeight)
+	tileFilter := fmt.Sprintf("%s,tile=%dx%d", scalePadFilter, tileCols, rows)
 	args := []string{
 		"-i", inputPath,
 		"-vf", tileFilter,
@@ -69,19 +140,19 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
 	output, err := cmd.CombinedOutput()
 	if err == nil {
-		return totalFrames, nil
+		return totalFrames, actualSpriteWidth, actualSpriteHeight, tileCols, nil
 	}
 
 	tmpDir, tmpErr := os.MkdirTemp("", "sprite_frames_*")
 	if tmpErr != nil {
-		return 0, fmt.Errorf("ffmpeg tile filter failed and temp dir creation failed: tile error: %w, output: %s; temp dir error: %w", err, string(output), tmpErr)
+		return 0, 0, 0, 0, fmt.Errorf("ffmpeg tile filter failed and temp dir creation failed: tile error: %w, output: %s; temp dir error: %w", err, string(output), tmpErr)
 	}
 	defer os.RemoveAll(tmpDir)
 
 	framePattern := filepath.Join(tmpDir, "frame_%04d.jpg")
 	extractArgs := []string{
 		"-i", inputPath,
-		"-vf", fmt.Sprintf("fps=1/%d,scale=%d:%d", frameInterval, frameWidth, frameHeight),
+		"-vf", fmt.Sprintf("fps=1/%d,scale=%d:%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2", frameInterval, frameWidth, frameHeight, frameWidth, frameHeight),
 		"-q:v", "3",
 		"-y",
 		framePattern,
@@ -90,12 +161,12 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 	extractCmd := exec.CommandContext(ctx, ffmpegPath, extractArgs...)
 	extractOutput, extractErr := extractCmd.CombinedOutput()
 	if extractErr != nil {
-		return 0, fmt.Errorf("ffmpeg frame extraction failed: %w, output: %s", extractErr, string(extractOutput))
+		return 0, 0, 0, 0, fmt.Errorf("ffmpeg frame extraction failed: %w, output: %s", extractErr, string(extractOutput))
 	}
 
 	entries, readErr := os.ReadDir(tmpDir)
 	if readErr != nil {
-		return 0, fmt.Errorf("failed to read temp frame directory: %w", readErr)
+		return 0, 0, 0, 0, fmt.Errorf("failed to read temp frame directory: %w", readErr)
 	}
 
 	var frames []image.Image
@@ -117,15 +188,20 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 	}
 
 	if len(frames) == 0 {
-		return 0, fmt.Errorf("no frames extracted from video")
+		return 0, 0, 0, 0, fmt.Errorf("no frames extracted from video")
 	}
 
 	actualFrames := len(frames)
 	actualRows := (actualFrames + columns - 1) / columns
-	spriteWidth := columns * frameWidth
-	spriteHeight := actualRows * frameHeight
+	if actualRows == 1 {
+		actualSpriteWidth = actualFrames * frameWidth
+		tileCols = actualFrames
+	} else {
+		actualSpriteWidth = columns * frameWidth
+	}
+	actualSpriteHeight = actualRows * frameHeight
 
-	spriteImg := image.NewRGBA(image.Rect(0, 0, spriteWidth, spriteHeight))
+	spriteImg := image.NewRGBA(image.Rect(0, 0, actualSpriteWidth, actualSpriteHeight))
 
 	for i, frame := range frames {
 		col := i % columns
@@ -141,15 +217,15 @@ func GenerateSpriteSheet(ctx context.Context, inputPath string, outputPath strin
 
 	outFile, createErr := os.Create(outputPath)
 	if createErr != nil {
-		return 0, fmt.Errorf("failed to create sprite sheet file: %w", createErr)
+		return 0, 0, 0, 0, fmt.Errorf("failed to create sprite sheet file: %w", createErr)
 	}
 	defer outFile.Close()
 
 	if encodeErr := jpeg.Encode(outFile, spriteImg, &jpeg.Options{Quality: 85}); encodeErr != nil {
-		return 0, fmt.Errorf("failed to encode sprite sheet: %w", encodeErr)
+		return 0, 0, 0, 0, fmt.Errorf("failed to encode sprite sheet: %w", encodeErr)
 	}
 
-	return actualFrames, nil
+	return actualFrames, actualSpriteWidth, actualSpriteHeight, tileCols, nil
 }
 
 func GenerateWebVTT(outputPath string, spriteImagePath string, frameCount int, frameInterval float64, columns int, frameWidth int, frameHeight int, videoDuration float64) error {
@@ -209,7 +285,7 @@ func ExtractThumbnailAtPosition(ctx context.Context, inputPath string, outputPat
 		height = 720
 	}
 
-	scaleFilter := fmt.Sprintf("scale=%d:%d", width, height)
+	scaleFilter := fmt.Sprintf("scale=%d:%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2", width, height, width, height)
 	args := []string{
 		"-ss", fmt.Sprintf("%.3f", timestamp),
 		"-i", inputPath,
@@ -246,8 +322,42 @@ func ExtractThumbnailAtPosition(ctx context.Context, inputPath string, outputPat
 	return fallbackTimestamp, nil
 }
 
+func ProcessImageToThumbnail(ctx context.Context, inputPath string, outputPath string, quality int, resolution string) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create thumbnail directory: %w", err)
+	}
+
+	var width, height int
+	parts := strings.Split(resolution, "x")
+	if len(parts) == 2 {
+		width, _ = strconv.Atoi(parts[0])
+		height, _ = strconv.Atoi(parts[1])
+	}
+	if width == 0 || height == 0 {
+		width = 1280
+		height = 720
+	}
+
+	scaleFilter := fmt.Sprintf("scale=%d:%d:force_original_aspect_ratio=decrease,pad=%d:%d:(ow-iw)/2:(oh-ih)/2", width, height, width, height)
+	args := []string{
+		"-i", inputPath,
+		"-vf", scaleFilter,
+		"-q:v", strconv.Itoa(quality),
+		"-y",
+		outputPath,
+	}
+
+	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg image processing failed: %w (output: %s)", err, string(output))
+	}
+
+	return nil
+}
+
 func GenerateGIFPreviewConditional(ctx context.Context, inputPath string, outputPath string, videoDuration float64, threshold float64, maxDuration float64, fps int, width int) (bool, error) {
-	if videoDuration >= threshold {
+	if threshold > 0 && videoDuration >= threshold {
 		return false, nil
 	}
 

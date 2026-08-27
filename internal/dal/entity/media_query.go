@@ -14,11 +14,13 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/like"
 	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity/mediadrmpolicy"
 	"origadmin/application/origstudio/internal/dal/entity/mediaplaylist"
 	"origadmin/application/origstudio/internal/dal/entity/mediareport"
 	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/dal/entity/mediatag"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
+	"origadmin/application/origstudio/internal/dal/entity/subtitle"
 	"origadmin/application/origstudio/internal/dal/entity/user"
 
 	"entgo.io/ent"
@@ -31,23 +33,25 @@ import (
 // MediaQuery is the builder for querying Media entities.
 type MediaQuery struct {
 	config
-	ctx            *QueryContext
-	order          []media.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.Media
-	withUser       *UserQuery
-	withCategory   *CategoryQuery
-	withComments   *CommentQuery
-	withChannel    *ChannelQuery
-	withPlaylists  *MediaPlaylistQuery
-	withTagsRel    *MediaTagQuery
-	withFavorites  *FavoriteQuery
-	withLikes      *LikeQuery
-	withReviewLogs *MediaReviewLogQuery
-	withArticles   *ArticleQuery
-	withReports    *MediaReportQuery
-	withFKs        bool
-	modifiers      []func(*sql.Selector)
+	ctx             *QueryContext
+	order           []media.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.Media
+	withUser        *UserQuery
+	withCategory    *CategoryQuery
+	withComments    *CommentQuery
+	withChannel     *ChannelQuery
+	withPlaylists   *MediaPlaylistQuery
+	withTagsRel     *MediaTagQuery
+	withFavorites   *FavoriteQuery
+	withLikes       *LikeQuery
+	withReviewLogs  *MediaReviewLogQuery
+	withSubtitles   *SubtitleQuery
+	withArticles    *ArticleQuery
+	withReports     *MediaReportQuery
+	withDrmPolicies *MediaDrmPolicyQuery
+	withFKs         bool
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -282,6 +286,28 @@ func (_q *MediaQuery) QueryReviewLogs() *MediaReviewLogQuery {
 	return query
 }
 
+// QuerySubtitles chains the current query on the "subtitles" edge.
+func (_q *MediaQuery) QuerySubtitles() *SubtitleQuery {
+	query := (&SubtitleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, selector),
+			sqlgraph.To(subtitle.Table, subtitle.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.SubtitlesTable, media.SubtitlesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryArticles chains the current query on the "articles" edge.
 func (_q *MediaQuery) QueryArticles() *ArticleQuery {
 	query := (&ArticleClient{config: _q.config}).Query()
@@ -319,6 +345,28 @@ func (_q *MediaQuery) QueryReports() *MediaReportQuery {
 			sqlgraph.From(media.Table, media.FieldID, selector),
 			sqlgraph.To(mediareport.Table, mediareport.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, media.ReportsTable, media.ReportsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDrmPolicies chains the current query on the "drm_policies" edge.
+func (_q *MediaQuery) QueryDrmPolicies() *MediaDrmPolicyQuery {
+	query := (&MediaDrmPolicyClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(media.Table, media.FieldID, selector),
+			sqlgraph.To(mediadrmpolicy.Table, mediadrmpolicy.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, media.DrmPoliciesTable, media.DrmPoliciesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -513,22 +561,24 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		return nil
 	}
 	return &MediaQuery{
-		config:         _q.config,
-		ctx:            _q.ctx.Clone(),
-		order:          append([]media.OrderOption{}, _q.order...),
-		inters:         append([]Interceptor{}, _q.inters...),
-		predicates:     append([]predicate.Media{}, _q.predicates...),
-		withUser:       _q.withUser.Clone(),
-		withCategory:   _q.withCategory.Clone(),
-		withComments:   _q.withComments.Clone(),
-		withChannel:    _q.withChannel.Clone(),
-		withPlaylists:  _q.withPlaylists.Clone(),
-		withTagsRel:    _q.withTagsRel.Clone(),
-		withFavorites:  _q.withFavorites.Clone(),
-		withLikes:      _q.withLikes.Clone(),
-		withReviewLogs: _q.withReviewLogs.Clone(),
-		withArticles:   _q.withArticles.Clone(),
-		withReports:    _q.withReports.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]media.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.Media{}, _q.predicates...),
+		withUser:        _q.withUser.Clone(),
+		withCategory:    _q.withCategory.Clone(),
+		withComments:    _q.withComments.Clone(),
+		withChannel:     _q.withChannel.Clone(),
+		withPlaylists:   _q.withPlaylists.Clone(),
+		withTagsRel:     _q.withTagsRel.Clone(),
+		withFavorites:   _q.withFavorites.Clone(),
+		withLikes:       _q.withLikes.Clone(),
+		withReviewLogs:  _q.withReviewLogs.Clone(),
+		withSubtitles:   _q.withSubtitles.Clone(),
+		withArticles:    _q.withArticles.Clone(),
+		withReports:     _q.withReports.Clone(),
+		withDrmPolicies: _q.withDrmPolicies.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -635,6 +685,17 @@ func (_q *MediaQuery) WithReviewLogs(opts ...func(*MediaReviewLogQuery)) *MediaQ
 	return _q
 }
 
+// WithSubtitles tells the query-builder to eager-load the nodes that are connected to
+// the "subtitles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaQuery) WithSubtitles(opts ...func(*SubtitleQuery)) *MediaQuery {
+	query := (&SubtitleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSubtitles = query
+	return _q
+}
+
 // WithArticles tells the query-builder to eager-load the nodes that are connected to
 // the "articles" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MediaQuery) WithArticles(opts ...func(*ArticleQuery)) *MediaQuery {
@@ -654,6 +715,17 @@ func (_q *MediaQuery) WithReports(opts ...func(*MediaReportQuery)) *MediaQuery {
 		opt(query)
 	}
 	_q.withReports = query
+	return _q
+}
+
+// WithDrmPolicies tells the query-builder to eager-load the nodes that are connected to
+// the "drm_policies" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MediaQuery) WithDrmPolicies(opts ...func(*MediaDrmPolicyQuery)) *MediaQuery {
+	query := (&MediaDrmPolicyClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDrmPolicies = query
 	return _q
 }
 
@@ -736,7 +808,7 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		nodes       = []*Media{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [11]bool{
+		loadedTypes = [13]bool{
 			_q.withUser != nil,
 			_q.withCategory != nil,
 			_q.withComments != nil,
@@ -746,8 +818,10 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			_q.withFavorites != nil,
 			_q.withLikes != nil,
 			_q.withReviewLogs != nil,
+			_q.withSubtitles != nil,
 			_q.withArticles != nil,
 			_q.withReports != nil,
+			_q.withDrmPolicies != nil,
 		}
 	)
 	if withFKs {
@@ -834,6 +908,13 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 			return nil, err
 		}
 	}
+	if query := _q.withSubtitles; query != nil {
+		if err := _q.loadSubtitles(ctx, query, nodes,
+			func(n *Media) { n.Edges.Subtitles = []*Subtitle{} },
+			func(n *Media, e *Subtitle) { n.Edges.Subtitles = append(n.Edges.Subtitles, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withArticles; query != nil {
 		if err := _q.loadArticles(ctx, query, nodes,
 			func(n *Media) { n.Edges.Articles = []*Article{} },
@@ -845,6 +926,13 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		if err := _q.loadReports(ctx, query, nodes,
 			func(n *Media) { n.Edges.Reports = []*MediaReport{} },
 			func(n *Media, e *MediaReport) { n.Edges.Reports = append(n.Edges.Reports, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDrmPolicies; query != nil {
+		if err := _q.loadDrmPolicies(ctx, query, nodes,
+			func(n *Media) { n.Edges.DrmPolicies = []*MediaDrmPolicy{} },
+			func(n *Media, e *MediaDrmPolicy) { n.Edges.DrmPolicies = append(n.Edges.DrmPolicies, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1010,7 +1098,9 @@ func (_q *MediaQuery) loadTagsRel(ctx context.Context, query *MediaTagQuery, nod
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediatag.FieldMediaID)
+	}
 	query.Where(predicate.MediaTag(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.TagsRelColumn), fks...))
 	}))
@@ -1019,13 +1109,10 @@ func (_q *MediaQuery) loadTagsRel(ctx context.Context, query *MediaTagQuery, nod
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_tags_rel
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_tags_rel" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.MediaID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_tags_rel" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1121,6 +1208,36 @@ func (_q *MediaQuery) loadReviewLogs(ctx context.Context, query *MediaReviewLogQ
 	}
 	return nil
 }
+func (_q *MediaQuery) loadSubtitles(ctx context.Context, query *SubtitleQuery, nodes []*Media, init func(*Media), assign func(*Media, *Subtitle)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Media)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(subtitle.FieldMediaID)
+	}
+	query.Where(predicate.Subtitle(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(media.SubtitlesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MediaID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (_q *MediaQuery) loadArticles(ctx context.Context, query *ArticleQuery, nodes []*Media, init func(*Media), assign func(*Media, *Article)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Media)
@@ -1167,6 +1284,36 @@ func (_q *MediaQuery) loadReports(ctx context.Context, query *MediaReportQuery, 
 	}
 	query.Where(predicate.MediaReport(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(media.ReportsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.MediaID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "media_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *MediaQuery) loadDrmPolicies(ctx context.Context, query *MediaDrmPolicyQuery, nodes []*Media, init func(*Media), assign func(*Media, *MediaDrmPolicy)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Media)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediadrmpolicy.FieldMediaID)
+	}
+	query.Where(predicate.MediaDrmPolicy(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(media.DrmPoliciesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

@@ -5,258 +5,230 @@ import (
 	"log/slog"
 
 	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/category"
+	"origadmin/application/origstudio/internal/dal/entity/tag"
 )
 
+// catSpec describes a category to seed: a module root (ParentID nil) or a
+// video-genre child (ParentID = video root id).
+type catSpec struct {
+	Name        string
+	Slug        string
+	Icon        string
+	Color       string
+	Sequence    int
+	Description string
+	NameI18n    map[string]string
+	IsGlobal    bool
+	ParentID    *int64 // nil => module root (parent_id IS NULL)
+}
+
+// SeedCategories builds the shared taxonomy from taxonomy.yaml (D3):
+//   - three module roots (video / music / article) as anchors. The category
+//     table is shared across modules (edges to Media/Article/Channel), so each
+//     module gets a root and a category is anchored to its module by tree
+//     position — not by any media.type field.
+//   - the video root carries the genre/form subtree (教程/游戏/连续剧/电影/…/其他),
+//     including the §4.2 additions (drama/movie/variety/anime/mv).
+//
+// Idempotent by slug: re-running never duplicates rows, and a stale live DB is
+// reconciled to the taxonomy (legacy slugs education→tutorial, technology→tech
+// are renamed BEFORE the tree upsert so the new slug never collides).
 func SeedCategories(ctx context.Context, client *entity.Client) error {
-	count, err := client.Category.Query().Count(ctx)
+	spec, err := seedTaxonomy()
 	if err != nil {
 		return err
 	}
 
-	if count > 0 {
-		slog.Info("Categories already seeded, skipping")
-		return nil
-	}
-
-	categories := []struct {
-		Name        string
-		Slug        string
-		Icon        string
-		Color       string
-		Sequence    int
-		Description string
-		NameI18n    map[string]string
-		IsGlobal    bool
-	}{
-		{
-			Name:       "音乐",
-			Slug:       "music",
-			Icon:       "music",
-			Color:      "#E74C3C",
-			Sequence:   1,
-			Description: "音乐视频 - Music videos",
-			NameI18n:  map[string]string{"en": "Music", "ja": "音楽"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "游戏",
-			Slug:       "gaming",
-			Icon:       "gamepad-2",
-			Color:      "#8E44AD",
-			Sequence:   2,
-			Description: "游戏内容 - Gaming content",
-			NameI18n:  map[string]string{"en": "Gaming", "ja": "ゲーム"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "教育",
-			Slug:       "education",
-			Icon:       "graduation-cap",
-			Color:      "#2980B9",
-			Sequence:   3,
-			Description: "教育内容 - Educational content",
-			NameI18n:  map[string]string{"en": "Education", "ja": "教育"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "科技",
-			Slug:       "technology",
-			Icon:       "cpu",
-			Color:      "#16A085",
-			Sequence:   4,
-			Description: "科技内容 - Technology & science",
-			NameI18n:  map[string]string{"en": "Technology", "ja": "テクノロジー"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "生活",
-			Slug:       "lifestyle",
-			Icon:       "heart",
-			Color:      "#F39C12",
-			Sequence:   5,
-			Description: "生活方式 - Lifestyle & vlog",
-			NameI18n:  map[string]string{"en": "Lifestyle", "ja": "ライフスタイル"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "体育",
-			Slug:       "sports",
-			Icon:       "trophy",
-			Color:      "#27AE60",
-			Sequence:   6,
-			Description: "体育内容 - Sports content",
-			NameI18n:  map[string]string{"en": "Sports", "ja": "スポーツ"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "娱乐",
-			Slug:       "entertainment",
-			Icon:       "sparkles",
-			Color:      "#E67E22",
-			Sequence:   7,
-			Description: "娱乐内容 - Entertainment",
-			NameI18n:  map[string]string{"en": "Entertainment", "ja": "エンターテイメント"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "纪录片",
-			Slug:       "documentary",
-			Icon:       "film",
-			Color:      "#2C3E50",
-			Sequence:   8,
-			Description: "纪录片 - Documentary films",
-			NameI18n:  map[string]string{"en": "Documentary", "ja": "ドキュメンタリー"},
-			IsGlobal:  true,
-		},
-		{
-			Name:       "其他",
-			Slug:       "other",
-			Icon:       "ellipsis",
-			Color:      "#95A5A6",
-			Sequence:   99,
-			Description: "其他分类 - Other categories",
-			NameI18n:  map[string]string{"en": "Other", "ja": "その他"},
-			IsGlobal:  true,
-		},
-	}
-
-	for _, c := range categories {
-		create := client.Category.Create().
-			SetName(c.Name).
-			SetSlug(c.Slug).
-			SetIcon(c.Icon).
-			SetColor(c.Color).
-			SetSequence(c.Sequence).
-			SetIsGlobal(c.IsGlobal)
-
-		if c.Description != "" {
-			create.SetDescription(c.Description)
-		}
-		if c.NameI18n != nil {
-			create.SetNameI18n(c.NameI18n)
-		}
-
-		if _, err := create.Save(ctx); err != nil {
-			slog.Error("failed to seed category", "name", c.Name, "err", err)
+	// Legacy slug migration FIRST: on a live DB the video root already exists,
+	// so we can rename education→tutorial / technology→tech before the tree
+	// upsert creates those slugs (avoiding a unique-slug collision). No-op on a
+	// fresh DB (video root absent → IsNotFound → skip).
+	if videoID, err := client.Category.Query().Where(category.SlugEQ("video")).OnlyID(ctx); err == nil {
+		if err := renameLegacyCategory(ctx, client, "education", "tutorial", "教程", videoID); err != nil {
 			return err
 		}
+		if err := renameLegacyCategory(ctx, client, "technology", "tech", "科技", videoID); err != nil {
+			return err
+		}
+	} else if !entity.IsNotFound(err) {
+		return err
 	}
 
-	slog.Info("Successfully seeded categories", "count", len(categories))
+	var seeded int
+	if err := upsertCategoryTree(ctx, client, spec.Categories, nil, &seeded); err != nil {
+		return err
+	}
+
+	slog.Info("Successfully seeded category taxonomy from taxonomy.yaml", "categories", seeded)
 	return nil
 }
 
+// upsertCategoryTree recursively upserts a taxonomy subtree. Roots pass nil
+// ParentID (module anchors), children pass their parent's DB id (tree position
+// is the module anchor, see BUG-145).
+func upsertCategoryTree(ctx context.Context, client *entity.Client, nodes []*catSpecNode, parentID *int64, counter *int) error {
+	for _, n := range nodes {
+		isGlobal := true
+		if n.IsGlobal != nil {
+			isGlobal = *n.IsGlobal
+		}
+		id, err := upsertCategory(ctx, client, catSpec{
+			Name: n.Name, Slug: n.Slug, Icon: n.Icon, Color: n.Color,
+			Sequence: n.Sequence, Description: n.Description,
+			IsGlobal: isGlobal, ParentID: parentID,
+		})
+		if err != nil {
+			return err
+		}
+		*counter++
+		childID := id
+		if err := upsertCategoryTree(ctx, client, n.Children, &childID, counter); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// upsertCategory creates or updates a category by slug. Safe to call on every
+// startup: existing rows are reconciled to the target state, missing rows are
+// created. Never duplicates.
+func upsertCategory(ctx context.Context, client *entity.Client, spec catSpec) (int64, error) {
+	existing, err := client.Category.Query().Where(category.SlugEQ(spec.Slug)).Only(ctx)
+	if entity.IsNotFound(err) {
+		create := client.Category.Create().
+			SetName(spec.Name).
+			SetSlug(spec.Slug).
+			SetIcon(spec.Icon).
+			SetColor(spec.Color).
+			SetSequence(spec.Sequence).
+			SetIsGlobal(spec.IsGlobal)
+		if spec.Description != "" {
+			create.SetDescription(spec.Description)
+		}
+		if spec.NameI18n != nil {
+			create.SetNameI18n(spec.NameI18n)
+		}
+		if spec.ParentID != nil {
+			create.SetParentID(*spec.ParentID)
+		}
+		c, err := create.Save(ctx)
+		if err != nil {
+			return 0, err
+		}
+		return c.ID, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	upd := existing.Update().
+		SetName(spec.Name).
+		SetIcon(spec.Icon).
+		SetColor(spec.Color).
+		SetSequence(spec.Sequence).
+		SetIsGlobal(spec.IsGlobal)
+	if spec.Description != "" {
+		upd.SetDescription(spec.Description)
+	}
+	if spec.NameI18n != nil {
+		upd.SetNameI18n(spec.NameI18n)
+	}
+	if spec.ParentID != nil {
+		upd.SetParentID(*spec.ParentID)
+	} else {
+		// Module root: parent_id must be NULL. It carries an FK to
+		// content_categories(id), so writing 0 would violate the constraint.
+		upd.ClearParent()
+	}
+	if _, err := upd.Save(ctx); err != nil {
+		return 0, err
+	}
+	return existing.ID, nil
+}
+
+// renameLegacyCategory migrates an old slug to the agreed taxonomy on an
+// existing DB. It is a no-op when the old slug is absent (fresh DB), so the
+// seed stays idempotent regardless of run order.
+func renameLegacyCategory(ctx context.Context, client *entity.Client, oldSlug, newSlug, newName string, parentID int64) error {
+	old, err := client.Category.Query().Where(category.SlugEQ(oldSlug)).Only(ctx)
+	if entity.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	// If the target slug (or a row already carrying the target name) already
+	// exists, the legacy row is redundant — delete it instead of renaming.
+	// Renaming would collide with content_categories_name_key / slug unique
+	// constraints on a DB where both old and new slugs coexist (e.g. a
+	// partially-seeded taxonomy), crashing startup.
+	exists, err := client.Category.Query().
+		Where(category.Or(category.SlugEQ(newSlug), category.NameEQ(newName))).
+		Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return client.Category.DeleteOne(old).Exec(ctx)
+	}
+	_, err = old.Update().
+		SetSlug(newSlug).
+		SetName(newName).
+		SetParentID(parentID).
+		Save(ctx)
+	return err
+}
+
+// SeedTags seeds tags from taxonomy.yaml by slug upsert (D4). The old
+// `count>0 → skip` first-run logic is gone: taxonomy.yaml is the source of
+// truth and tags are corrected on every startup (rows not listed are kept).
 func SeedTags(ctx context.Context, client *entity.Client) error {
-	count, err := client.Tag.Query().Count(ctx)
+	spec, err := seedTaxonomy()
 	if err != nil {
 		return err
 	}
 
-	if count > 0 {
-		slog.Info("Tags already seeded, skipping")
-		return nil
-	}
-
-	tags := []struct {
-		Title       string
-		Slug        string
-		Color       string
-		Description string
-		TitleI18n   map[string]string
-	}{
-		{
-			Title:       "热门",
-			Slug:        "trending",
-			Color:       "#E74C3C",
-			Description: "热门内容 - Trending content",
-			TitleI18n:   map[string]string{"en": "Trending", "ja": "トレンド"},
-		},
-		{
-			Title:       "推荐",
-			Slug:        "recommended",
-			Color:       "#3498DB",
-			Description: "编辑推荐 - Editor's picks",
-			TitleI18n:   map[string]string{"en": "Recommended", "ja": "おすすめ"},
-		},
-		{
-			Title:       "原创",
-			Slug:        "original",
-			Color:       "#2ECC71",
-			Description: "原创内容 - Original content",
-			TitleI18n:   map[string]string{"en": "Original", "ja": "オリジナル"},
-		},
-		{
-			Title:       "转载",
-			Slug:        "repost",
-			Color:       "#95A5A6",
-			Description: "转载内容 - Reposted content",
-			TitleI18n:   map[string]string{"en": "Repost", "ja": "転載"},
-		},
-		{
-			Title:       "4K",
-			Slug:        "4k",
-			Color:       "#F39C12",
-			Description: "4K 分辨率 - 4K resolution",
-			TitleI18n:   map[string]string{"en": "4K", "ja": "4K"},
-		},
-		{
-			Title:       "高清",
-			Slug:        "hd",
-			Color:       "#E67E22",
-			Description: "高清画质 - HD quality",
-			TitleI18n:   map[string]string{"en": "HD", "ja": "HD"},
-		},
-		{
-			Title:       "中文字幕",
-			Slug:        "zh-subtitle",
-			Color:       "#1ABC9C",
-			Description: "包含中文字幕 - With Chinese subtitles",
-			TitleI18n:   map[string]string{"en": "Chinese Subtitles", "ja": "中国語字幕"},
-		},
-		{
-			Title:       "英文字幕",
-			Slug:        "en-subtitle",
-			Color:       "#9B59B6",
-			Description: "包含英文字幕 - With English subtitles",
-			TitleI18n:   map[string]string{"en": "English Subtitles", "ja": "英語字幕"},
-		},
-		{
-			Title:       "直播",
-			Slug:        "live",
-			Color:       "#E74C3C",
-			Description: "直播内容 - Live content",
-			TitleI18n:   map[string]string{"en": "Live", "ja": "ライブ"},
-		},
-		{
-			Title:       "短视频",
-			Slug:        "short",
-			Color:       "#F1C40F",
-			Description: "短视频 - Short videos",
-			TitleI18n:   map[string]string{"en": "Short", "ja": "ショート"},
-		},
-	}
-
-	for _, t := range tags {
-		create := client.Tag.Create().
-			SetTitle(t.Title).
-			SetSlug(t.Slug)
-
-		if t.Color != "" {
-			create.SetColor(t.Color)
-		}
-		if t.Description != "" {
-			create.SetDescription(t.Description)
-		}
-		if t.TitleI18n != nil {
-			create.SetTitleI18n(t.TitleI18n)
-		}
-
-		if _, err := create.Save(ctx); err != nil {
+	for _, t := range spec.Tags {
+		if err := upsertTag(ctx, client, *t); err != nil {
 			slog.Error("failed to seed tag", "title", t.Title, "err", err)
 			return err
 		}
 	}
 
-	slog.Info("Successfully seeded tags", "count", len(tags))
+	slog.Info("Successfully seeded tags from taxonomy.yaml", "tags", len(spec.Tags))
 	return nil
+}
+
+// upsertTag creates or updates a tag by slug. Idempotent: missing rows are
+// created, existing rows are reconciled to the taxonomy (title/color/
+// description). Status is left untouched (rows not in the config are kept).
+func upsertTag(ctx context.Context, client *entity.Client, spec tagSpec) error {
+	existing, err := client.Tag.Query().Where(tag.SlugEQ(spec.Slug)).Only(ctx)
+	if entity.IsNotFound(err) {
+		create := client.Tag.Create().
+			SetTitle(spec.Title).
+			SetSlug(spec.Slug)
+		if spec.Color != "" {
+			create.SetColor(spec.Color)
+		}
+		if spec.Description != "" {
+			create.SetDescription(spec.Description)
+		}
+		_, err = create.Save(ctx)
+		return err
+	}
+	if err != nil {
+		return err
+	}
+
+	upd := existing.Update().SetTitle(spec.Title)
+	if spec.Color != "" {
+		upd.SetColor(spec.Color)
+	}
+	if spec.Description != "" {
+		upd.SetDescription(spec.Description)
+	}
+	_, err = upd.Save(ctx)
+	return err
 }

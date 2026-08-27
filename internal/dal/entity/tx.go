@@ -12,6 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Ad is the client for interacting with the Ad builders.
+	Ad *AdClient
+	// AdClickLog is the client for interacting with the AdClickLog builders.
+	AdClickLog *AdClickLogClient
+	// AdCreative is the client for interacting with the AdCreative builders.
+	AdCreative *AdCreativeClient
+	// AdPlacement is the client for interacting with the AdPlacement builders.
+	AdPlacement *AdPlacementClient
 	// Article is the client for interacting with the Article builders.
 	Article *ArticleClient
 	// Category is the client for interacting with the Category builders.
@@ -26,6 +34,12 @@ type Tx struct {
 	CommentLike *CommentLikeClient
 	// CommentReport is the client for interacting with the CommentReport builders.
 	CommentReport *CommentReportClient
+	// DrmKey is the client for interacting with the DrmKey builders.
+	DrmKey *DrmKeyClient
+	// DrmLicense is the client for interacting with the DrmLicense builders.
+	DrmLicense *DrmLicenseClient
+	// DrmPolicy is the client for interacting with the DrmPolicy builders.
+	DrmPolicy *DrmPolicyClient
 	// EncodeProfile is the client for interacting with the EncodeProfile builders.
 	EncodeProfile *EncodeProfileClient
 	// EncodingTask is the client for interacting with the EncodingTask builders.
@@ -38,10 +52,22 @@ type Tx struct {
 	History *HistoryClient
 	// Like is the client for interacting with the Like builders.
 	Like *LikeClient
+	// LiveChatMessage is the client for interacting with the LiveChatMessage builders.
+	LiveChatMessage *LiveChatMessageClient
+	// LiveRecording is the client for interacting with the LiveRecording builders.
+	LiveRecording *LiveRecordingClient
+	// LiveRoom is the client for interacting with the LiveRoom builders.
+	LiveRoom *LiveRoomClient
+	// LiveSchedule is the client for interacting with the LiveSchedule builders.
+	LiveSchedule *LiveScheduleClient
+	// LiveStream is the client for interacting with the LiveStream builders.
+	LiveStream *LiveStreamClient
 	// Media is the client for interacting with the Media builders.
 	Media *MediaClient
 	// MediaCategory is the client for interacting with the MediaCategory builders.
 	MediaCategory *MediaCategoryClient
+	// MediaDrmPolicy is the client for interacting with the MediaDrmPolicy builders.
+	MediaDrmPolicy *MediaDrmPolicyClient
 	// MediaPlaylist is the client for interacting with the MediaPlaylist builders.
 	MediaPlaylist *MediaPlaylistClient
 	// MediaReport is the client for interacting with the MediaReport builders.
@@ -52,6 +78,10 @@ type Tx struct {
 	MediaTag *MediaTagClient
 	// Notification is the client for interacting with the Notification builders.
 	Notification *NotificationClient
+	// Order is the client for interacting with the Order builders.
+	Order *OrderClient
+	// Payment is the client for interacting with the Payment builders.
+	Payment *PaymentClient
 	// PermissionGroup is the client for interacting with the PermissionGroup builders.
 	PermissionGroup *PermissionGroupClient
 	// Playlist is the client for interacting with the Playlist builders.
@@ -62,18 +92,42 @@ type Tx struct {
 	PortalCustomPage *PortalCustomPageClient
 	// PortalNavItem is the client for interacting with the PortalNavItem builders.
 	PortalNavItem *PortalNavItemClient
+	// PromotionChannel is the client for interacting with the PromotionChannel builders.
+	PromotionChannel *PromotionChannelClient
+	// PromotionLog is the client for interacting with the PromotionLog builders.
+	PromotionLog *PromotionLogClient
+	// PromotionSubscription is the client for interacting with the PromotionSubscription builders.
+	PromotionSubscription *PromotionSubscriptionClient
+	// PromotionTask is the client for interacting with the PromotionTask builders.
+	PromotionTask *PromotionTaskClient
+	// PromotionTemplate is the client for interacting with the PromotionTemplate builders.
+	PromotionTemplate *PromotionTemplateClient
+	// Refund is the client for interacting with the Refund builders.
+	Refund *RefundClient
 	// Setting is the client for interacting with the Setting builders.
 	Setting *SettingClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// SubscriptionPlan is the client for interacting with the SubscriptionPlan builders.
+	SubscriptionPlan *SubscriptionPlanClient
+	// Subtitle is the client for interacting with the Subtitle builders.
+	Subtitle *SubtitleClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// TagName is the client for interacting with the TagName builders.
 	TagName *TagNameClient
+	// Tenant is the client for interacting with the Tenant builders.
+	Tenant *TenantClient
 	// UploadSession is the client for interacting with the UploadSession builders.
 	UploadSession *UploadSessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserSubscription is the client for interacting with the UserSubscription builders.
+	UserSubscription *UserSubscriptionClient
+	// Wallet is the client for interacting with the Wallet builders.
+	Wallet *WalletClient
+	// WalletTransaction is the client for interacting with the WalletTransaction builders.
+	WalletTransaction *WalletTransactionClient
 
 	// lazily loaded.
 	client     *Client
@@ -205,6 +259,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Ad = NewAdClient(tx.config)
+	tx.AdClickLog = NewAdClickLogClient(tx.config)
+	tx.AdCreative = NewAdCreativeClient(tx.config)
+	tx.AdPlacement = NewAdPlacementClient(tx.config)
 	tx.Article = NewArticleClient(tx.config)
 	tx.Category = NewCategoryClient(tx.config)
 	tx.Channel = NewChannelClient(tx.config)
@@ -212,30 +270,53 @@ func (tx *Tx) init() {
 	tx.Comment = NewCommentClient(tx.config)
 	tx.CommentLike = NewCommentLikeClient(tx.config)
 	tx.CommentReport = NewCommentReportClient(tx.config)
+	tx.DrmKey = NewDrmKeyClient(tx.config)
+	tx.DrmLicense = NewDrmLicenseClient(tx.config)
+	tx.DrmPolicy = NewDrmPolicyClient(tx.config)
 	tx.EncodeProfile = NewEncodeProfileClient(tx.config)
 	tx.EncodingTask = NewEncodingTaskClient(tx.config)
 	tx.Favorite = NewFavoriteClient(tx.config)
 	tx.GroupMember = NewGroupMemberClient(tx.config)
 	tx.History = NewHistoryClient(tx.config)
 	tx.Like = NewLikeClient(tx.config)
+	tx.LiveChatMessage = NewLiveChatMessageClient(tx.config)
+	tx.LiveRecording = NewLiveRecordingClient(tx.config)
+	tx.LiveRoom = NewLiveRoomClient(tx.config)
+	tx.LiveSchedule = NewLiveScheduleClient(tx.config)
+	tx.LiveStream = NewLiveStreamClient(tx.config)
 	tx.Media = NewMediaClient(tx.config)
 	tx.MediaCategory = NewMediaCategoryClient(tx.config)
+	tx.MediaDrmPolicy = NewMediaDrmPolicyClient(tx.config)
 	tx.MediaPlaylist = NewMediaPlaylistClient(tx.config)
 	tx.MediaReport = NewMediaReportClient(tx.config)
 	tx.MediaReviewLog = NewMediaReviewLogClient(tx.config)
 	tx.MediaTag = NewMediaTagClient(tx.config)
 	tx.Notification = NewNotificationClient(tx.config)
+	tx.Order = NewOrderClient(tx.config)
+	tx.Payment = NewPaymentClient(tx.config)
 	tx.PermissionGroup = NewPermissionGroupClient(tx.config)
 	tx.Playlist = NewPlaylistClient(tx.config)
 	tx.PortalBanner = NewPortalBannerClient(tx.config)
 	tx.PortalCustomPage = NewPortalCustomPageClient(tx.config)
 	tx.PortalNavItem = NewPortalNavItemClient(tx.config)
+	tx.PromotionChannel = NewPromotionChannelClient(tx.config)
+	tx.PromotionLog = NewPromotionLogClient(tx.config)
+	tx.PromotionSubscription = NewPromotionSubscriptionClient(tx.config)
+	tx.PromotionTask = NewPromotionTaskClient(tx.config)
+	tx.PromotionTemplate = NewPromotionTemplateClient(tx.config)
+	tx.Refund = NewRefundClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
+	tx.SubscriptionPlan = NewSubscriptionPlanClient(tx.config)
+	tx.Subtitle = NewSubtitleClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.TagName = NewTagNameClient(tx.config)
+	tx.Tenant = NewTenantClient(tx.config)
 	tx.UploadSession = NewUploadSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserSubscription = NewUserSubscriptionClient(tx.config)
+	tx.Wallet = NewWalletClient(tx.config)
+	tx.WalletTransaction = NewWalletTransactionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -245,7 +326,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Article.QueryXXX(), the query will be executed
+// applies a query, for example: Ad.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

@@ -41,6 +41,10 @@ func DefaultAsynqWorkerConfig() AsynqWorkerConfig {
 	}
 }
 
+type MediaEventPublisher interface {
+	Publish(mediaID string, event *EncodingEvent)
+}
+
 type AsynqWorker struct {
 	client        *asynq.Client
 	mux           *asynq.ServeMux

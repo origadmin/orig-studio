@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
 	"time"
@@ -47,6 +48,20 @@ func (_c *SubscriptionCreate) SetNillableCreateTime(v *time.Time) *SubscriptionC
 	return _c
 }
 
+// SetNotificationPreference sets the "notification_preference" field.
+func (_c *SubscriptionCreate) SetNotificationPreference(v subscription.NotificationPreference) *SubscriptionCreate {
+	_c.mutation.SetNotificationPreference(v)
+	return _c
+}
+
+// SetNillableNotificationPreference sets the "notification_preference" field if the given value is not nil.
+func (_c *SubscriptionCreate) SetNillableNotificationPreference(v *subscription.NotificationPreference) *SubscriptionCreate {
+	if v != nil {
+		_c.SetNotificationPreference(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SubscriptionCreate) SetID(v string) *SubscriptionCreate {
 	_c.mutation.SetID(v)
@@ -66,8 +81,8 @@ func (_c *SubscriptionCreate) SetSubscriber(v *User) *SubscriptionCreate {
 	return _c.SetSubscriberID(v.ID)
 }
 
-// SetChannel sets the "channel" edge to the User entity.
-func (_c *SubscriptionCreate) SetChannel(v *User) *SubscriptionCreate {
+// SetChannel sets the "channel" edge to the Channel entity.
+func (_c *SubscriptionCreate) SetChannel(v *Channel) *SubscriptionCreate {
 	return _c.SetChannelID(v.ID)
 }
 
@@ -110,6 +125,10 @@ func (_c *SubscriptionCreate) defaults() {
 		v := subscription.DefaultCreateTime()
 		_c.mutation.SetCreateTime(v)
 	}
+	if _, ok := _c.mutation.NotificationPreference(); !ok {
+		v := subscription.DefaultNotificationPreference
+		_c.mutation.SetNotificationPreference(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := subscription.DefaultID()
 		_c.mutation.SetID(v)
@@ -126,6 +145,14 @@ func (_c *SubscriptionCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`entity: missing required field "Subscription.create_time"`)}
+	}
+	if _, ok := _c.mutation.NotificationPreference(); !ok {
+		return &ValidationError{Name: "notification_preference", err: errors.New(`entity: missing required field "Subscription.notification_preference"`)}
+	}
+	if v, ok := _c.mutation.NotificationPreference(); ok {
+		if err := subscription.NotificationPreferenceValidator(v); err != nil {
+			return &ValidationError{Name: "notification_preference", err: fmt.Errorf(`entity: validator failed for field "Subscription.notification_preference": %w`, err)}
+		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := subscription.IDValidator(v); err != nil {
@@ -177,6 +204,10 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 		_spec.SetField(subscription.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
+	if value, ok := _c.mutation.NotificationPreference(); ok {
+		_spec.SetField(subscription.FieldNotificationPreference, field.TypeEnum, value)
+		_node.NotificationPreference = value
+	}
 	if nodes := _c.mutation.SubscriberIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -202,7 +233,7 @@ func (_c *SubscriptionCreate) createSpec() (*Subscription, *sqlgraph.CreateSpec)
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

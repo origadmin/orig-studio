@@ -8,11 +8,15 @@ import (
 	"context"
 	"sync"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/entity/category"
+	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
@@ -103,11 +107,38 @@ func (r *categoryRepo) ListAll(ctx context.Context) ([]*biz.Category, error) {
 	return res, nil
 }
 
+func (r *categoryRepo) ListActive(ctx context.Context) ([]*biz.Category, error) {
+	ents, err := r.data.db.Category.Query().
+		Where(category.StatusEQ(category.StatusACTIVE)).
+		Order(entity.Asc(category.FieldSequence), entity.Desc(category.FieldCreateTime)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*biz.Category, len(ents))
+	for i, ent := range ents {
+		res[i] = mapCategory(ent)
+	}
+	return res, nil
+}
+
 func (r *tagRepo) Create(ctx context.Context, t *biz.Tag) (*biz.Tag, error) {
+	// BUG-180 (visibility): tags created through the public TagService
+	// (POST /api/v1/tags, the only write path that survives the gateway) arrive
+	// without an explicit status, so they defaulted to UNSPECIFIED and were
+	// hidden by any ACTIVE filter / sorted to the bottom of the list. Default
+	// new tags to ACTIVE so they show up immediately.
 	builder := r.data.db.Tag.Create().
-		SetTitle(t.Title)
+		SetTitle(t.Title).
+		SetStatus(tag.StatusACTIVE)
 	if t.Slug != "" {
 		builder = builder.SetSlug(t.Slug)
+	}
+	if t.Description != "" {
+		builder = builder.SetDescription(t.Description)
+	}
+	if t.Color != "" {
+		builder = builder.SetColor(t.Color)
 	}
 	ent, err := builder.Save(ctx)
 	if err != nil {
@@ -127,12 +158,27 @@ func (r *tagRepo) Create(ctx context.Context, t *biz.Tag) (*biz.Tag, error) {
 	return tag, nil
 }
 
+// withMediaCount returns a shallow copy of t carrying the live media count.
+//
+// BUG-180: the cached *biz.Tag holds the dead content_tags.media_count column.
+// Copying keeps the shared cache entry immutable (no data race between
+// concurrent readers) while still handing callers an accurate count derived
+// from content_media.tags (the same source the tag detail page reads).
+func (r *tagRepo) withMediaCount(ctx context.Context, t *biz.Tag) *biz.Tag {
+	if t == nil {
+		return nil
+	}
+	out := *t
+	out.MediaCount = r.countMediaByTag(ctx, t.Title)
+	return &out
+}
+
 func (r *tagRepo) Get(ctx context.Context, id int) (*biz.Tag, error) {
 	// Check cache first
 	r.cacheMutex.RLock()
 	if tag, ok := r.tagCache[id]; ok {
 		r.cacheMutex.RUnlock()
-		return tag, nil
+		return r.withMediaCount(ctx, tag), nil
 	}
 	r.cacheMutex.RUnlock()
 	
@@ -149,7 +195,7 @@ func (r *tagRepo) Get(ctx context.Context, id int) (*biz.Tag, error) {
 	r.tagByName[tag.Title] = tag
 	r.cacheMutex.Unlock()
 	
-	return tag, nil
+	return r.withMediaCount(ctx, tag), nil
 }
 
 func (r *tagRepo) GetByName(ctx context.Context, name string) (*biz.Tag, error) {
@@ -157,7 +203,7 @@ func (r *tagRepo) GetByName(ctx context.Context, name string) (*biz.Tag, error) 
 	r.cacheMutex.RLock()
 	if tag, ok := r.tagByName[name]; ok {
 		r.cacheMutex.RUnlock()
-		return tag, nil
+		return r.withMediaCount(ctx, tag), nil
 	}
 	r.cacheMutex.RUnlock()
 	
@@ -177,7 +223,7 @@ func (r *tagRepo) GetByName(ctx context.Context, name string) (*biz.Tag, error) 
 	}
 	r.cacheMutex.Unlock()
 	
-	return tag, nil
+	return r.withMediaCount(ctx, tag), nil
 }
 
 func (r *tagRepo) GetBySlug(ctx context.Context, slug string) (*biz.Tag, error) {
@@ -185,7 +231,7 @@ func (r *tagRepo) GetBySlug(ctx context.Context, slug string) (*biz.Tag, error) 
 	r.cacheMutex.RLock()
 	if tag, ok := r.tagBySlug[slug]; ok {
 		r.cacheMutex.RUnlock()
-		return tag, nil
+		return r.withMediaCount(ctx, tag), nil
 	}
 	r.cacheMutex.RUnlock()
 
@@ -205,7 +251,7 @@ func (r *tagRepo) GetBySlug(ctx context.Context, slug string) (*biz.Tag, error) 
 	}
 	r.cacheMutex.Unlock()
 
-	return tag, nil
+	return r.withMediaCount(ctx, tag), nil
 }
 
 func (r *tagRepo) Update(ctx context.Context, t *biz.Tag) (*biz.Tag, error) {
@@ -213,6 +259,12 @@ func (r *tagRepo) Update(ctx context.Context, t *biz.Tag) (*biz.Tag, error) {
 		SetTitle(t.Title)
 	if t.Slug != "" {
 		builder = builder.SetSlug(t.Slug)
+	}
+	if t.Description != "" {
+		builder = builder.SetDescription(t.Description)
+	}
+	if t.Color != "" {
+		builder = builder.SetColor(t.Color)
 	}
 	ent, err := builder.Save(ctx)
 	if err != nil {
@@ -269,9 +321,18 @@ func (r *tagRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.Tag, 
 		return nil, 0, err
 	}
 	ents, err := query.
-		Order(entity.Desc(tag.FieldCreateTime)).
+		// BUG-180: seed tags were inserted with a NULL create_time, and
+		// `ORDER BY create_time DESC` puts NULLs FIRST — so freshly created
+		// tags (which DO carry a timestamp) sank to the last page and looked
+		// "invisible". NULLS LAST keeps newest tags at the top of "latest".
+		// The secondary id DESC tie-break keeps cross-page ordering stable
+		// when many tags share the same create_time.
+		Order(
+			sql.OrderByField(tag.FieldCreateTime, sql.OrderDesc(), sql.OrderNullsLast()).ToFunc(),
+			sql.OrderByField(tag.FieldID, sql.OrderDesc()).ToFunc(),
+		).
 		Limit(pageSize).
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -280,7 +341,48 @@ func (r *tagRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.Tag, 
 	for i, ent := range ents {
 		res[i] = mapTag(ent)
 	}
+	r.fillMediaCounts(ctx, res)
 	return res, total, nil
+}
+
+// fillMediaCounts replaces the denormalized content_tags.media_count value with
+// the live count derived from content_media.tags.
+//
+// BUG-180 (same class as BUG-128 on playlists): the previous implementation
+// counted rows in the content_media_tags pivot, which no write path kept in
+// sync, so the portal reported "0 videos" for almost every tag while the tag
+// detail page (which filters content_media.tags directly) showed the real
+// videos. Both now read the SAME source — content_media.tags — so a tag's
+// listed count always matches what its detail page actually displays.
+func (r *tagRepo) fillMediaCounts(ctx context.Context, tags []*biz.Tag) {
+	for _, t := range tags {
+		if t != nil {
+			t.MediaCount = r.countMediaByTag(ctx, t.Title)
+		}
+	}
+}
+
+// countMediaByTag returns the number of media whose `tags` jsonb array contains
+// the given tag title. This mirrors exactly the predicate the public media list
+// uses for the ?tags= filter (sqljson.ValueContains(media.FieldTags, tag)), so
+// the count shown in tag lists is always identical to the tag detail page.
+//
+// The previous pivot-based count (content_media_tags) was stale for most tags;
+// content_media.tags is the authoritative, live relationship.
+func (r *tagRepo) countMediaByTag(ctx context.Context, title string) int {
+	if title == "" {
+		return 0
+	}
+	count, err := r.data.db.Media.Query().
+		Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueContains(media.FieldTags, title))
+		}).
+		Count(ctx)
+	if err != nil {
+		r.log.Warnf("tag %q: count media by tags jsonb failed: %v", title, err)
+		return 0
+	}
+	return count
 }
 
 func mapCategory(ent *entity.Category) *biz.Category {
@@ -300,10 +402,27 @@ func mapCategory(ent *entity.Category) *biz.Category {
 
 func mapTag(ent *entity.Tag) *biz.Tag {
 	return &biz.Tag{
-		ID:         ent.ID,
-		Title:      ent.Title,
-		Slug:       ent.Slug,
-		MediaCount: ent.MediaCount,
+		ID:          ent.ID,
+		Title:       ent.Title,
+		Slug:        ent.Slug,
+		Description: ent.Description,
+		Color:       ent.Color,
+		Status:      tagStatusToInt(ent.Status),
+		MediaCount:  ent.MediaCount,
+		CreateTime:  ent.CreateTime,
+	}
+}
+
+// tagStatusToInt maps the ent string enum ("ACTIVE"/"INACTIVE") to the proto
+// TagStatus int values (0=UNSPECIFIED, 1=INACTIVE, 2=ACTIVE).
+func tagStatusToInt(status tag.Status) int {
+	switch status {
+	case tag.StatusACTIVE:
+		return 2
+	case tag.StatusINACTIVE:
+		return 1
+	default:
+		return 0
 	}
 }
 

@@ -6,6 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origstudio/internal/dal/entity/ad"
+	"origadmin/application/origstudio/internal/dal/entity/adclicklog"
+	"origadmin/application/origstudio/internal/dal/entity/adcreative"
+	"origadmin/application/origstudio/internal/dal/entity/adplacement"
 	"origadmin/application/origstudio/internal/dal/entity/article"
 	"origadmin/application/origstudio/internal/dal/entity/category"
 	"origadmin/application/origstudio/internal/dal/entity/channel"
@@ -13,30 +17,53 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/comment"
 	"origadmin/application/origstudio/internal/dal/entity/commentlike"
 	"origadmin/application/origstudio/internal/dal/entity/commentreport"
+	"origadmin/application/origstudio/internal/dal/entity/drmkey"
+	"origadmin/application/origstudio/internal/dal/entity/drmlicense"
+	"origadmin/application/origstudio/internal/dal/entity/drmpolicy"
 	"origadmin/application/origstudio/internal/dal/entity/encodeprofile"
 	"origadmin/application/origstudio/internal/dal/entity/encodingtask"
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/groupmember"
 	"origadmin/application/origstudio/internal/dal/entity/history"
 	"origadmin/application/origstudio/internal/dal/entity/like"
+	"origadmin/application/origstudio/internal/dal/entity/livechatmessage"
+	"origadmin/application/origstudio/internal/dal/entity/liverecording"
+	"origadmin/application/origstudio/internal/dal/entity/liveroom"
+	"origadmin/application/origstudio/internal/dal/entity/liveschedule"
+	"origadmin/application/origstudio/internal/dal/entity/livestream"
 	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/mediacategory"
+	"origadmin/application/origstudio/internal/dal/entity/mediadrmpolicy"
 	"origadmin/application/origstudio/internal/dal/entity/mediaplaylist"
 	"origadmin/application/origstudio/internal/dal/entity/mediareport"
 	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/dal/entity/mediatag"
 	"origadmin/application/origstudio/internal/dal/entity/notification"
+	"origadmin/application/origstudio/internal/dal/entity/order"
+	"origadmin/application/origstudio/internal/dal/entity/payment"
 	"origadmin/application/origstudio/internal/dal/entity/permissiongroup"
 	"origadmin/application/origstudio/internal/dal/entity/playlist"
 	"origadmin/application/origstudio/internal/dal/entity/portalbanner"
 	"origadmin/application/origstudio/internal/dal/entity/portalcustompage"
 	"origadmin/application/origstudio/internal/dal/entity/portalnavitem"
+	"origadmin/application/origstudio/internal/dal/entity/promotionchannel"
+	"origadmin/application/origstudio/internal/dal/entity/promotionlog"
+	"origadmin/application/origstudio/internal/dal/entity/promotionsubscription"
+	"origadmin/application/origstudio/internal/dal/entity/promotiontask"
+	"origadmin/application/origstudio/internal/dal/entity/promotiontemplate"
+	"origadmin/application/origstudio/internal/dal/entity/refund"
 	"origadmin/application/origstudio/internal/dal/entity/setting"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
+	"origadmin/application/origstudio/internal/dal/entity/subscriptionplan"
+	"origadmin/application/origstudio/internal/dal/entity/subtitle"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"origadmin/application/origstudio/internal/dal/entity/tagname"
+	"origadmin/application/origstudio/internal/dal/entity/tenant"
 	"origadmin/application/origstudio/internal/dal/entity/uploadsession"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity/usersubscription"
+	"origadmin/application/origstudio/internal/dal/entity/wallet"
+	"origadmin/application/origstudio/internal/dal/entity/wallettransaction"
 	"reflect"
 	"sync"
 
@@ -103,37 +130,64 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			article.Table:          article.ValidColumn,
-			category.Table:         category.ValidColumn,
-			channel.Table:          channel.ValidColumn,
-			channeltag.Table:       channeltag.ValidColumn,
-			comment.Table:          comment.ValidColumn,
-			commentlike.Table:      commentlike.ValidColumn,
-			commentreport.Table:    commentreport.ValidColumn,
-			encodeprofile.Table:    encodeprofile.ValidColumn,
-			encodingtask.Table:     encodingtask.ValidColumn,
-			favorite.Table:         favorite.ValidColumn,
-			groupmember.Table:      groupmember.ValidColumn,
-			history.Table:          history.ValidColumn,
-			like.Table:             like.ValidColumn,
-			media.Table:            media.ValidColumn,
-			mediacategory.Table:    mediacategory.ValidColumn,
-			mediaplaylist.Table:    mediaplaylist.ValidColumn,
-			mediareport.Table:      mediareport.ValidColumn,
-			mediareviewlog.Table:   mediareviewlog.ValidColumn,
-			mediatag.Table:         mediatag.ValidColumn,
-			notification.Table:     notification.ValidColumn,
-			permissiongroup.Table:  permissiongroup.ValidColumn,
-			playlist.Table:         playlist.ValidColumn,
-			portalbanner.Table:     portalbanner.ValidColumn,
-			portalcustompage.Table: portalcustompage.ValidColumn,
-			portalnavitem.Table:    portalnavitem.ValidColumn,
-			setting.Table:          setting.ValidColumn,
-			subscription.Table:     subscription.ValidColumn,
-			tag.Table:              tag.ValidColumn,
-			tagname.Table:          tagname.ValidColumn,
-			uploadsession.Table:    uploadsession.ValidColumn,
-			user.Table:             user.ValidColumn,
+			ad.Table:                    ad.ValidColumn,
+			adclicklog.Table:            adclicklog.ValidColumn,
+			adcreative.Table:            adcreative.ValidColumn,
+			adplacement.Table:           adplacement.ValidColumn,
+			article.Table:               article.ValidColumn,
+			category.Table:              category.ValidColumn,
+			channel.Table:               channel.ValidColumn,
+			channeltag.Table:            channeltag.ValidColumn,
+			comment.Table:               comment.ValidColumn,
+			commentlike.Table:           commentlike.ValidColumn,
+			commentreport.Table:         commentreport.ValidColumn,
+			drmkey.Table:                drmkey.ValidColumn,
+			drmlicense.Table:            drmlicense.ValidColumn,
+			drmpolicy.Table:             drmpolicy.ValidColumn,
+			encodeprofile.Table:         encodeprofile.ValidColumn,
+			encodingtask.Table:          encodingtask.ValidColumn,
+			favorite.Table:              favorite.ValidColumn,
+			groupmember.Table:           groupmember.ValidColumn,
+			history.Table:               history.ValidColumn,
+			like.Table:                  like.ValidColumn,
+			livechatmessage.Table:       livechatmessage.ValidColumn,
+			liverecording.Table:         liverecording.ValidColumn,
+			liveroom.Table:              liveroom.ValidColumn,
+			liveschedule.Table:          liveschedule.ValidColumn,
+			livestream.Table:            livestream.ValidColumn,
+			media.Table:                 media.ValidColumn,
+			mediacategory.Table:         mediacategory.ValidColumn,
+			mediadrmpolicy.Table:        mediadrmpolicy.ValidColumn,
+			mediaplaylist.Table:         mediaplaylist.ValidColumn,
+			mediareport.Table:           mediareport.ValidColumn,
+			mediareviewlog.Table:        mediareviewlog.ValidColumn,
+			mediatag.Table:              mediatag.ValidColumn,
+			notification.Table:          notification.ValidColumn,
+			order.Table:                 order.ValidColumn,
+			payment.Table:               payment.ValidColumn,
+			permissiongroup.Table:       permissiongroup.ValidColumn,
+			playlist.Table:              playlist.ValidColumn,
+			portalbanner.Table:          portalbanner.ValidColumn,
+			portalcustompage.Table:      portalcustompage.ValidColumn,
+			portalnavitem.Table:         portalnavitem.ValidColumn,
+			promotionchannel.Table:      promotionchannel.ValidColumn,
+			promotionlog.Table:          promotionlog.ValidColumn,
+			promotionsubscription.Table: promotionsubscription.ValidColumn,
+			promotiontask.Table:         promotiontask.ValidColumn,
+			promotiontemplate.Table:     promotiontemplate.ValidColumn,
+			refund.Table:                refund.ValidColumn,
+			setting.Table:               setting.ValidColumn,
+			subscription.Table:          subscription.ValidColumn,
+			subscriptionplan.Table:      subscriptionplan.ValidColumn,
+			subtitle.Table:              subtitle.ValidColumn,
+			tag.Table:                   tag.ValidColumn,
+			tagname.Table:               tagname.ValidColumn,
+			tenant.Table:                tenant.ValidColumn,
+			uploadsession.Table:         uploadsession.ValidColumn,
+			user.Table:                  user.ValidColumn,
+			usersubscription.Table:      usersubscription.ValidColumn,
+			wallet.Table:                wallet.ValidColumn,
+			wallettransaction.Table:     wallettransaction.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -8,6 +8,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,20 +18,30 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/dal/enums"
 )
 
-// S3Storage implements the Storage interface using S3-compatible object storage.
-// It supports AWS S3, MinIO, and any S3-compatible service.
+var s3PublicURL = func() string {
+	if v := os.Getenv("S3_PUBLIC_URL"); v != "" {
+		return v
+	}
+	if v := os.Getenv("CDN_BASE_URL"); v != "" {
+		return v
+	}
+	return ""
+}()
+
 type S3Storage struct {
 	client    *s3.Client
 	presigner *s3.PresignClient
 	uploader  *manager.Uploader
 	bucket    string
 	presign   time.Duration
+	urlPrefix string
 	logger    *log.Helper
 }
 
@@ -62,12 +75,18 @@ func NewS3Storage(cfg *conf.S3Config, logger log.Logger) (*S3Storage, error) {
 		presignExpiry = 15 * time.Minute
 	}
 
+	urlPrefix := s3PublicURL
+	if urlPrefix == "" {
+		urlPrefix = "/files"
+	}
+
 	return &S3Storage{
 		client:    client,
 		presigner: s3.NewPresignClient(client),
 		uploader:  manager.NewUploader(client),
 		bucket:    cfg.Bucket,
 		presign:   presignExpiry,
+		urlPrefix: urlPrefix,
 		logger:    log.NewHelper(log.With(logger, "module", "storage.s3")),
 	}, nil
 }
@@ -117,26 +136,29 @@ func (s *S3Storage) Delete(ctx context.Context, key string) error {
 
 // GetURL returns a presigned URL for the given key.
 func (s *S3Storage) GetURL(ctx context.Context, key string) (string, error) {
-	req, err := s.presigner.PresignGetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(s.bucket),
-		Key:    aws.String(key),
-	}, func(opts *s3.PresignOptions) {
-		opts.Expires = s.presign
-	})
-	if err != nil {
-		return "", fmt.Errorf("S3 presign key=%s: %w", key, err)
+	return s.urlPrefix + "/" + key, nil
+}
+
+func s3KeyToRoute(key string) (string, bool) {
+	switch {
+	case strings.HasPrefix(key, "originals/"),
+		strings.HasPrefix(key, "thumbnails/"),
+		strings.HasPrefix(key, "hls/"),
+		strings.HasPrefix(key, "sprites/"),
+		strings.HasPrefix(key, "previews/"):
+		return "/files/" + key, true
 	}
-	return req.URL, nil
+	return "", false
 }
 
 // StorePart stores a single upload part in S3.
 // For S3, we store parts as individual objects under a parts prefix.
-func (s *S3Storage) StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
+func (s *S3Storage) StorePart(ctx context.Context, uploadID string, partNumber int, r io.Reader, size int64) (string, error) {
 	key := fmt.Sprintf("temp/parts/%s/part_%05d", uploadID, partNumber)
 	input := &s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(key),
-		Body:   bytesReader(data),
+		Body:   r,
 	}
 
 	_, err := s.client.PutObject(ctx, input)
@@ -287,4 +309,106 @@ func (r *bytesReaderWrapper) Read(p []byte) (int, error) {
 	n := copy(p, r.data[r.pos:])
 	r.pos += n
 	return n, nil
+}
+
+func (s *S3Storage) DownloadToFile(ctx context.Context, key string, localPath string) error {
+	if err := os.MkdirAll(filepath.Dir(localPath), 0o755); err != nil {
+		return fmt.Errorf("mkdir for download key=%s: %w", key, err)
+	}
+	reader, err := s.Download(ctx, key)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	f, err := os.Create(localPath)
+	if err != nil {
+		return fmt.Errorf("create local file key=%s: %w", key, err)
+	}
+	defer f.Close()
+	if _, err := io.Copy(f, reader); err != nil {
+		return fmt.Errorf("download key=%s to %s: %w", key, localPath, err)
+	}
+	return nil
+}
+
+func (s *S3Storage) UploadDir(ctx context.Context, localDir string, keyPrefix string) error {
+	return filepath.Walk(localDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(localDir, path)
+		if err != nil {
+			return err
+		}
+		s3Key := keyPrefix + "/" + filepath.ToSlash(rel)
+		f, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("open %s: %w", path, err)
+		}
+		defer f.Close()
+		ct := detectContentTypeByExt(path)
+		_, err = s.Upload(ctx, s3Key, f, info.Size(), ct)
+		if err != nil {
+			return fmt.Errorf("upload %s → %s: %w", path, s3Key, err)
+		}
+		s.logger.Infof("uploaded %s → %s", path, s3Key)
+		return nil
+	})
+}
+
+func (s *S3Storage) DeletePrefix(ctx context.Context, keyPrefix string) error {
+	paginator := s3.NewListObjectsV2Paginator(s.client, &s3.ListObjectsV2Input{
+		Bucket: aws.String(s.bucket),
+		Prefix: aws.String(keyPrefix),
+	})
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return fmt.Errorf("list objects prefix=%s: %w", keyPrefix, err)
+		}
+		var objects []types.ObjectIdentifier
+		for _, obj := range page.Contents {
+			objects = append(objects, types.ObjectIdentifier{Key: obj.Key})
+		}
+		if len(objects) == 0 {
+			continue
+		}
+		_, err = s.client.DeleteObjects(ctx, &s3.DeleteObjectsInput{
+			Bucket: aws.String(s.bucket),
+			Delete: &types.Delete{Objects: objects, Quiet: aws.Bool(true)},
+		})
+		if err != nil {
+			return fmt.Errorf("delete objects prefix=%s: %w", keyPrefix, err)
+		}
+	}
+	return nil
+}
+
+func detectContentTypeByExt(path string) string {
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".mp4":
+		return "video/mp4"
+	case ".m3u8":
+		return "application/vnd.apple.mpegurl"
+	case ".ts":
+		return "video/mp2t"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	case ".webp":
+		return "image/webp"
+	case ".vtt":
+		return "text/vtt"
+	case ".webm":
+		return "video/webm"
+	default:
+		return "application/octet-stream"
+	}
 }

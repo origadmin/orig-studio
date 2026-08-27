@@ -14,6 +14,7 @@ type EncodingTask struct {
 	MediaId      string                   `json:"media_id"`
 	ProfileId    int                      `json:"profile_id"`
 	Status       enums.EncodingTaskStatus `json:"status"` // pending, processing, success, failed
+	Progress     int                      `json:"progress"`
 	OutputPath   string                   `json:"output_path"`
 	ErrorMessage string                   `json:"error_message"`
 	Chunk        bool                     `json:"chunk"` // is chunk? (视频分段转码标识)

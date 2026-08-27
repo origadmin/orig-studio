@@ -7,6 +7,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"mime"
 	"os"
@@ -14,13 +15,13 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/origadmin/runtime/log"
-	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/frontend"
 	"origadmin/application/origstudio/internal/infra/auth"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/server/middleware"
-	"origadmin/application/origstudio/web"
 )
 
 // Module defines the interface for route registration.
@@ -33,6 +34,7 @@ type Module = http2.Module
 type Server struct {
 	modules      []Module
 	entityClient *entity.Client
+	sqlDB        *sql.DB
 	jwtMgr       *auth.Manager
 	paths        *conf.StoragePaths
 	settingUC    SettingProvider
@@ -59,6 +61,10 @@ func NewServer(
 
 func (s *Server) SetSettingProvider(uc SettingProvider) {
 	s.settingUC = uc
+}
+
+func (s *Server) SetSQLDB(db *sql.DB) {
+	s.sqlDB = db
 }
 
 func (s *Server) SetRateLimiter(rl interface{ Middleware() gin.HandlerFunc; Stop() }) {
@@ -105,7 +111,11 @@ func (s *Server) Start(addr string) error {
 		}
 
 		c.Writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		// Only set Allow-Credentials when origin is specific (not wildcard)
+		// W3C spec: Allow-Origin: * and Allow-Credentials: true is invalid
+		if allowedOrigin != "*" {
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, Range")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
 
@@ -116,6 +126,9 @@ func (s *Server) Start(addr string) error {
 
 		c.Next()
 	})
+
+	// Request ID middleware — propagate request ID for tracing
+	r.Use(middleware.RequestID())
 
 	// Rate limiting (applied to all routes)
 	if s.rateLimiter != nil {
@@ -134,7 +147,7 @@ func (s *Server) Start(addr string) error {
 	s.RegisterRoutes(r)
 
 	// Register frontend SPA routes (auto-detect: serves embedded dist if present)
-	web.RegisterRoutes(r)
+	frontend.RegisterGinRoutes(r)
 
 	// Print access URLs
 	displayAddr := addr
@@ -146,7 +159,7 @@ func (s *Server) Start(addr string) error {
 	log.Infof("  OrigStudio Server Started")
 	log.Infof("=")
 
-	if !web.IsDistEmpty() {
+	if !frontend.IsDistEmpty() {
 		log.Infof("  -> Web UI (Embedded): http://%s", displayAddr)
 	} else {
 		log.Infof("  -> Backend API Only")
@@ -163,15 +176,16 @@ func (s *Server) Start(addr string) error {
 
 // RegisterRoutes registers all routes for the server.
 func (s *Server) RegisterRoutes(r *gin.Engine) {
-	// Health check
 	r.GET("/health", HealthHandler)
+	r.GET("/health/detail", s.DetailedHealthHandler)
 
 	// API v1 routes — adapt *gin.RouterGroup to http2.Router
 	apiV1 := r.Group("/api/v1")
-	router := ginadapter.NewRouterAdapter(apiV1)
 
-	// Deprecated path redirects (301 Moved Permanently)
+	// Deprecated route redirects (301) — must be before route registration
 	apiV1.Use(middleware.DeprecatedRedirects())
+
+	router := ginadapter.NewRouterAdapter(apiV1)
 
 	// Register all handler modules
 	for _, mod := range s.modules {

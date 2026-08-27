@@ -11,6 +11,7 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/portalbanner"
 	"origadmin/application/origstudio/internal/dal/entity/portalcustompage"
 	"origadmin/application/origstudio/internal/dal/entity/portalnavitem"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/content/dto"
 )
@@ -56,6 +57,7 @@ func entityToPortalBannerDTO(e *entity.PortalBanner) *dto.PortalBannerDTO {
 		BadgeText:         e.BadgeText,
 		ImageURL:          e.ImageURL,
 		ImageMobileURL:    e.ImageMobileURL,
+		VideoURL:          e.VideoURL,
 		BgColorStart:      e.BgColorStart,
 		BgColorEnd:        e.BgColorEnd,
 		BgOverlayOpacity:  e.BgOverlayOpacity,
@@ -256,6 +258,9 @@ func (r *portalRepo) CreateBanner(ctx context.Context, b *dto.PortalBannerDTO) (
 	if b.ImageMobileURL != "" {
 		builder.SetImageMobileURL(b.ImageMobileURL)
 	}
+	if b.VideoURL != "" {
+		builder.SetVideoURL(b.VideoURL)
+	}
 	if b.BgColorStart != "" {
 		builder.SetBgColorStart(b.BgColorStart)
 	}
@@ -308,6 +313,7 @@ func (r *portalRepo) UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (
 	builder.SetBadgeText(b.BadgeText)
 	builder.SetImageURL(b.ImageURL)
 	builder.SetImageMobileURL(b.ImageMobileURL)
+	builder.SetVideoURL(b.VideoURL)
 	builder.SetBgColorStart(b.BgColorStart)
 	builder.SetBgColorEnd(b.BgColorEnd)
 	builder.SetBgOverlayOpacity(b.BgOverlayOpacity)
@@ -331,6 +337,14 @@ func (r *portalRepo) UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (
 
 func (r *portalRepo) DeleteBanner(ctx context.Context, id string) error {
 	return r.data.db.PortalBanner.DeleteOneID(id).Exec(ctx)
+}
+
+func (r *portalRepo) GetBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error) {
+	ent, err := r.data.db.PortalBanner.Get(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get banner: %w", err)
+	}
+	return entityToPortalBannerDTO(ent), nil
 }
 
 func (r *portalRepo) ToggleBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error) {
@@ -387,7 +401,7 @@ func (r *portalRepo) ListCustomPages(ctx context.Context, page, pageSize int) ([
 
 	items, err := query.
 		Order(entity.Desc(portalcustompage.FieldID)).
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		Limit(pageSize).
 		All(ctx)
 	if err != nil {

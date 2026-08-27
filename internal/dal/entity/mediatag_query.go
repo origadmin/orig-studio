@@ -4,7 +4,6 @@ package entity
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 	"origadmin/application/origstudio/internal/dal/entity/media"
@@ -28,7 +27,6 @@ type MediaTagQuery struct {
 	predicates []predicate.MediaTag
 	withMedia  *MediaQuery
 	withTag    *TagQuery
-	withFKs    bool
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -80,7 +78,7 @@ func (_q *MediaTagQuery) QueryMedia() *MediaQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(mediatag.Table, mediatag.FieldID, selector),
 			sqlgraph.To(media.Table, media.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, mediatag.MediaTable, mediatag.MediaColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediatag.MediaTable, mediatag.MediaColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +100,7 @@ func (_q *MediaTagQuery) QueryTag() *TagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(mediatag.Table, mediatag.FieldID, selector),
 			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, mediatag.TagTable, mediatag.TagColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, mediatag.TagTable, mediatag.TagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -335,6 +333,18 @@ func (_q *MediaTagQuery) WithTag(opts ...func(*TagQuery)) *MediaTagQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		MediaID string `json:"media_id,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.MediaTag.Query().
+//		GroupBy(mediatag.FieldMediaID).
+//		Aggregate(entity.Count()).
+//		Scan(ctx, &v)
 func (_q *MediaTagQuery) GroupBy(field string, fields ...string) *MediaTagGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &MediaTagGroupBy{build: _q}
@@ -346,6 +356,16 @@ func (_q *MediaTagQuery) GroupBy(field string, fields ...string) *MediaTagGroupB
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		MediaID string `json:"media_id,omitempty"`
+//	}
+//
+//	client.MediaTag.Query().
+//		Select(mediatag.FieldMediaID).
+//		Scan(ctx, &v)
 func (_q *MediaTagQuery) Select(fields ...string) *MediaTagSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
 	sbuild := &MediaTagSelect{MediaTagQuery: _q}
@@ -388,16 +408,12 @@ func (_q *MediaTagQuery) prepareQuery(ctx context.Context) error {
 func (_q *MediaTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*MediaTag, error) {
 	var (
 		nodes       = []*MediaTag{}
-		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
 			_q.withMedia != nil,
 			_q.withTag != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, mediatag.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*MediaTag).scanValues(nil, columns)
 	}
@@ -420,16 +436,14 @@ func (_q *MediaTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Med
 		return nodes, nil
 	}
 	if query := _q.withMedia; query != nil {
-		if err := _q.loadMedia(ctx, query, nodes,
-			func(n *MediaTag) { n.Edges.Media = []*Media{} },
-			func(n *MediaTag, e *Media) { n.Edges.Media = append(n.Edges.Media, e) }); err != nil {
+		if err := _q.loadMedia(ctx, query, nodes, nil,
+			func(n *MediaTag, e *Media) { n.Edges.Media = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withTag; query != nil {
-		if err := _q.loadTag(ctx, query, nodes,
-			func(n *MediaTag) { n.Edges.Tag = []*Tag{} },
-			func(n *MediaTag, e *Tag) { n.Edges.Tag = append(n.Edges.Tag, e) }); err != nil {
+		if err := _q.loadTag(ctx, query, nodes, nil,
+			func(n *MediaTag, e *Tag) { n.Edges.Tag = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -437,64 +451,60 @@ func (_q *MediaTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Med
 }
 
 func (_q *MediaTagQuery) loadMedia(ctx context.Context, query *MediaQuery, nodes []*MediaTag, init func(*MediaTag), assign func(*MediaTag, *Media)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*MediaTag)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*MediaTag)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].MediaID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Media(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(mediatag.MediaColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(media.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_tag_media
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_tag_media" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_tag_media" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "media_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
 func (_q *MediaTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*MediaTag, init func(*MediaTag), assign func(*MediaTag, *Tag)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*MediaTag)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*MediaTag)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].TagID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(mediatag.TagColumn), fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tag.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.media_tag_tag
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "media_tag_tag" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "media_tag_tag" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -526,6 +536,12 @@ func (_q *MediaTagQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != mediatag.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withMedia != nil {
+			_spec.Node.AddColumnOnce(mediatag.FieldMediaID)
+		}
+		if _q.withTag != nil {
+			_spec.Node.AddColumnOnce(mediatag.FieldTagID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

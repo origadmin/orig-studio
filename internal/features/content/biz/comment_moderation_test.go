@@ -51,7 +51,7 @@ func (m *mockCommentModerationRepo) ListByMedia(ctx context.Context, mediaID str
 	return nil, 0, nil
 }
 
-func (m *mockCommentModerationRepo) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*CommentModerationItem, int, error) {
+func (m *mockCommentModerationRepo) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, keyword string, page, pageSize int) ([]*CommentModerationItem, int, error) {
 	return nil, 0, nil
 }
 

@@ -17,7 +17,8 @@ func NewSpriteUseCaseWithConfig(
 	mediaRepo MediaRepo,
 	settingUC *systembiz.SettingUseCase,
 	sp *conf.StoragePaths,
+	storage Storage,
 	logger log.Logger,
 ) *SpriteUseCase {
-	return NewSpriteUseCase(mediaRepo, settingUC, sp, logger)
+	return NewSpriteUseCase(mediaRepo, settingUC, sp, storage, logger)
 }

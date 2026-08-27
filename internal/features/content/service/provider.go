@@ -6,8 +6,8 @@ package service
 
 import "github.com/google/wire"
 
-// ProviderSet is the wire provider set for the content service layer.
 var ProviderSet = wire.NewSet(
+	NewContentService,
 	NewCategoryHandler,
 	NewTagHandler,
 	NewArticleHandler,
@@ -16,9 +16,23 @@ var ProviderSet = wire.NewSet(
 	NewFeedHandler,
 	NewChannelHandler,
 	NewPlaylistHandler,
+	NewPlaylistServiceServer,
 	NewInteractionHandler,
 	NewNotificationHandler,
 	NewShareHandler,
 	NewExploreHandler,
 	NewPortalHandler,
+	NewAdHandler,
+)
+
+var MicroserviceProviderSet = wire.NewSet(
+	NewContentService,
+	NewChannelServiceServer,
+	NewPlaylistServiceServer,
+	NewCategoryServiceServer,
+	NewTagServiceServer,
+	NewCommentHandler,
+	NewCommentModerationHandler,
+	NewInteractionHandler,
+	NewNotificationHandler,
 )

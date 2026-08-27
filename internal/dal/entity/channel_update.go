@@ -12,8 +12,9 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/channeltag"
 	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
-	"origadmin/application/origstudio/internal/dal/entity/schema"
+	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity/schema"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -495,6 +496,21 @@ func (_u *ChannelUpdate) AddTagsRel(v ...*ChannelTag) *ChannelUpdate {
 	return _u.AddTagsRelIDs(ids...)
 }
 
+// AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
+func (_u *ChannelUpdate) AddSubscriberIDs(ids ...string) *ChannelUpdate {
+	_u.mutation.AddSubscriberIDs(ids...)
+	return _u
+}
+
+// AddSubscribers adds the "subscribers" edges to the Subscription entity.
+func (_u *ChannelUpdate) AddSubscribers(v ...*Subscription) *ChannelUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubscriberIDs(ids...)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_u *ChannelUpdate) Mutation() *ChannelMutation {
 	return _u.mutation
@@ -573,6 +589,27 @@ func (_u *ChannelUpdate) RemoveTagsRel(v ...*ChannelTag) *ChannelUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveTagsRelIDs(ids...)
+}
+
+// ClearSubscribers clears all "subscribers" edges to the Subscription entity.
+func (_u *ChannelUpdate) ClearSubscribers() *ChannelUpdate {
+	_u.mutation.ClearSubscribers()
+	return _u
+}
+
+// RemoveSubscriberIDs removes the "subscribers" edge to Subscription entities by IDs.
+func (_u *ChannelUpdate) RemoveSubscriberIDs(ids ...string) *ChannelUpdate {
+	_u.mutation.RemoveSubscriberIDs(ids...)
+	return _u
+}
+
+// RemoveSubscribers removes "subscribers" edges to Subscription entities.
+func (_u *ChannelUpdate) RemoveSubscribers(v ...*Subscription) *ChannelUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubscriberIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -988,6 +1025,51 @@ func (_u *ChannelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubscribersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubscribersIDs(); len(nodes) > 0 && !_u.mutation.SubscribersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubscribersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1476,6 +1558,21 @@ func (_u *ChannelUpdateOne) AddTagsRel(v ...*ChannelTag) *ChannelUpdateOne {
 	return _u.AddTagsRelIDs(ids...)
 }
 
+// AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
+func (_u *ChannelUpdateOne) AddSubscriberIDs(ids ...string) *ChannelUpdateOne {
+	_u.mutation.AddSubscriberIDs(ids...)
+	return _u
+}
+
+// AddSubscribers adds the "subscribers" edges to the Subscription entity.
+func (_u *ChannelUpdateOne) AddSubscribers(v ...*Subscription) *ChannelUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubscriberIDs(ids...)
+}
+
 // Mutation returns the ChannelMutation object of the builder.
 func (_u *ChannelUpdateOne) Mutation() *ChannelMutation {
 	return _u.mutation
@@ -1554,6 +1651,27 @@ func (_u *ChannelUpdateOne) RemoveTagsRel(v ...*ChannelTag) *ChannelUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveTagsRelIDs(ids...)
+}
+
+// ClearSubscribers clears all "subscribers" edges to the Subscription entity.
+func (_u *ChannelUpdateOne) ClearSubscribers() *ChannelUpdateOne {
+	_u.mutation.ClearSubscribers()
+	return _u
+}
+
+// RemoveSubscriberIDs removes the "subscribers" edge to Subscription entities by IDs.
+func (_u *ChannelUpdateOne) RemoveSubscriberIDs(ids ...string) *ChannelUpdateOne {
+	_u.mutation.RemoveSubscriberIDs(ids...)
+	return _u
+}
+
+// RemoveSubscribers removes "subscribers" edges to Subscription entities.
+func (_u *ChannelUpdateOne) RemoveSubscribers(v ...*Subscription) *ChannelUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubscriberIDs(ids...)
 }
 
 // Where appends a list predicates to the ChannelUpdate builder.
@@ -1999,6 +2117,51 @@ func (_u *ChannelUpdateOne) sqlSave(ctx context.Context) (_node *Channel, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SubscribersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubscribersIDs(); len(nodes) > 0 && !_u.mutation.SubscribersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubscribersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   channel.SubscribersTable,
+			Columns: []string{channel.SubscribersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

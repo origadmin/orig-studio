@@ -47,12 +47,15 @@ type UserRepo interface {
 	// SetUserRole updates a user's role directly via ent.
 	SetUserRole(context.Context, string, string) error
 
+	// SetUserSuperuser updates a user's is_superuser flag directly via ent.
+	SetUserSuperuser(context.Context, string, bool) error
+
 	// Subscription methods
 	IsSubscribed(ctx context.Context, subscriberID, channelID string) (bool, error)
 	GetSubscriberCount(ctx context.Context, channelID string) (int, error)
 	Subscribe(ctx context.Context, subscriberID, channelID string) error
 	Unsubscribe(ctx context.Context, subscriberID, channelID string) error
-	GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.User, int, error)
+	GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.Channel, int, error)
 	GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]*types.User, int, error)
 }
 

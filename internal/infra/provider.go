@@ -4,7 +4,11 @@
 
 package infra
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+
+	"origadmin/application/origstudio/internal/infra/database"
+)
 
 // ProviderSet is the wire provider set for infrastructure components.
 var ProviderSet = wire.NewSet(
@@ -13,4 +17,7 @@ var ProviderSet = wire.NewSet(
 	NewPubSub,
 	NewPublisher,
 	NewRouter,
+	database.NewDatabaseBundle,
+	database.NewEntityClient,
+	database.NewSQLDB,
 )

@@ -13,6 +13,7 @@ import (
 	ginhttp "github.com/gin-gonic/gin"
 
 	http2 "origadmin/application/origstudio/internal/pkg/http"
+	"origadmin/application/origstudio/internal/pkg/http/validate"
 )
 
 type contextKey string
@@ -226,15 +227,23 @@ func handleError(c *ginhttp.Context, err error) {
 // This is the true adapter layer that decouples handler logic from gin.
 
 type contextWrapper struct {
-	ginCtx *ginhttp.Context
+	ginCtx        *ginhttp.Context
+	reqWithGinCtx *http.Request
 }
 
 var _ http2.Context = (*contextWrapper)(nil)
 
-func (c *contextWrapper) Deadline() (time.Time, bool)       { return c.ginCtx.Request.Context().Deadline() }
-func (c *contextWrapper) Done() <-chan struct{}             { return c.ginCtx.Request.Context().Done() }
-func (c *contextWrapper) Err() error                        { return c.ginCtx.Request.Context().Err() }
-func (c *contextWrapper) Value(key interface{}) interface{} { return c.ginCtx.Request.Context().Value(key) }
+func (c *contextWrapper) request() *http.Request {
+	if c.reqWithGinCtx == nil {
+		c.reqWithGinCtx = SetGinContext(c.ginCtx.Request, c.ginCtx)
+	}
+	return c.reqWithGinCtx
+}
+
+func (c *contextWrapper) Deadline() (time.Time, bool)       { return c.request().Context().Deadline() }
+func (c *contextWrapper) Done() <-chan struct{}             { return c.request().Context().Done() }
+func (c *contextWrapper) Err() error                        { return c.request().Context().Err() }
+func (c *contextWrapper) Value(key interface{}) interface{} { return c.request().Context().Value(key) }
 
 func (c *contextWrapper) Vars() url.Values {
 	params := c.ginCtx.Params
@@ -250,27 +259,37 @@ func (c *contextWrapper) Var(name string) string {
 	return val
 }
 
-func (c *contextWrapper) Query() url.Values             { return c.ginCtx.Request.URL.Query() }
+func (c *contextWrapper) Query() url.Values             { return c.request().URL.Query() }
 func (c *contextWrapper) QueryVar(name string) string   { return c.ginCtx.Query(name) }
 func (c *contextWrapper) QueryVarDefault(name, defaultValue string) string {
 	return c.ginCtx.DefaultQuery(name, defaultValue)
 }
 
 func (c *contextWrapper) Form() url.Values {
-	if err := c.ginCtx.Request.ParseForm(); err != nil {
+	if err := c.request().ParseForm(); err != nil {
 		return url.Values{}
 	}
-	return c.ginCtx.Request.Form
+	return c.request().Form
 }
 func (c *contextWrapper) FormVar(name string) string { return c.ginCtx.PostForm(name) }
 
-func (c *contextWrapper) Request() *http.Request        { return c.ginCtx.Request }
+func (c *contextWrapper) Request() *http.Request        { return c.request() }
 func (c *contextWrapper) Response() http.ResponseWriter { return c.ginCtx.Writer }
-func (c *contextWrapper) Header() http.Header           { return c.ginCtx.Request.Header }
+func (c *contextWrapper) Header() http.Header           { return c.request().Header }
 func (c *contextWrapper) GetHeader(name string) string  { return c.ginCtx.GetHeader(name) }
 
-func (c *contextWrapper) Bind(v interface{}) error      { return c.ginCtx.ShouldBindJSON(v) }
-func (c *contextWrapper) BindJSON(v interface{}) error  { return c.ginCtx.ShouldBindJSON(v) }
+func (c *contextWrapper) Bind(v interface{}) error {
+	if err := c.ginCtx.ShouldBindJSON(v); err != nil {
+		return err
+	}
+	return validate.Validate(v)
+}
+func (c *contextWrapper) BindJSON(v interface{}) error {
+	if err := c.ginCtx.ShouldBindJSON(v); err != nil {
+		return err
+	}
+	return validate.Validate(v)
+}
 func (c *contextWrapper) BindVars(v interface{}) error  { return c.ginCtx.ShouldBindUri(v) }
 func (c *contextWrapper) BindQuery(v interface{}) error { return c.ginCtx.ShouldBindQuery(v) }
 func (c *contextWrapper) BindForm(v interface{}) error  { return c.ginCtx.ShouldBind(v) }
@@ -309,6 +328,11 @@ func (c *contextWrapper) GetString(key string) string {
 		return str
 	}
 	return ""
+}
+
+// ClientIP returns the real client IP, delegating to gin's ClientIP() method.
+func (c *contextWrapper) ClientIP() string {
+	return c.ginCtx.ClientIP()
 }
 
 func (c *contextWrapper) Returns(v interface{}, err error) error {
@@ -352,6 +376,7 @@ func (c *contextWrapper) File(path string) error {
 func (c *contextWrapper) Reset(res http.ResponseWriter, req *http.Request) {
 	c.ginCtx.Request = req
 	c.ginCtx.Writer = &ginResponseWriterAdapter{w: res}
+	c.reqWithGinCtx = nil
 }
 
 // GinContext returns the underlying *gin.Context.

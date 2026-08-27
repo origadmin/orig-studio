@@ -4,6 +4,7 @@ package entity
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/mediatag"
@@ -20,34 +21,26 @@ type MediaTagCreate struct {
 	hooks    []Hook
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_c *MediaTagCreate) AddMediumIDs(ids ...string) *MediaTagCreate {
-	_c.mutation.AddMediumIDs(ids...)
+// SetMediaID sets the "media_id" field.
+func (_c *MediaTagCreate) SetMediaID(v string) *MediaTagCreate {
+	_c.mutation.SetMediaID(v)
 	return _c
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_c *MediaTagCreate) AddMedia(v ...*Media) *MediaTagCreate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddMediumIDs(ids...)
-}
-
-// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
-func (_c *MediaTagCreate) AddTagIDs(ids ...int) *MediaTagCreate {
-	_c.mutation.AddTagIDs(ids...)
+// SetTagID sets the "tag_id" field.
+func (_c *MediaTagCreate) SetTagID(v int) *MediaTagCreate {
+	_c.mutation.SetTagID(v)
 	return _c
 }
 
-// AddTag adds the "tag" edges to the Tag entity.
-func (_c *MediaTagCreate) AddTag(v ...*Tag) *MediaTagCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddTagIDs(ids...)
+// SetMedia sets the "media" edge to the Media entity.
+func (_c *MediaTagCreate) SetMedia(v *Media) *MediaTagCreate {
+	return _c.SetMediaID(v.ID)
+}
+
+// SetTag sets the "tag" edge to the Tag entity.
+func (_c *MediaTagCreate) SetTag(v *Tag) *MediaTagCreate {
+	return _c.SetTagID(v.ID)
 }
 
 // Mutation returns the MediaTagMutation object of the builder.
@@ -84,6 +77,23 @@ func (_c *MediaTagCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *MediaTagCreate) check() error {
+	if _, ok := _c.mutation.MediaID(); !ok {
+		return &ValidationError{Name: "media_id", err: errors.New(`entity: missing required field "MediaTag.media_id"`)}
+	}
+	if v, ok := _c.mutation.MediaID(); ok {
+		if err := mediatag.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "MediaTag.media_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TagID(); !ok {
+		return &ValidationError{Name: "tag_id", err: errors.New(`entity: missing required field "MediaTag.tag_id"`)}
+	}
+	if len(_c.mutation.MediaIDs()) == 0 {
+		return &ValidationError{Name: "media", err: errors.New(`entity: missing required edge "MediaTag.media"`)}
+	}
+	if len(_c.mutation.TagIDs()) == 0 {
+		return &ValidationError{Name: "tag", err: errors.New(`entity: missing required edge "MediaTag.tag"`)}
+	}
 	return nil
 }
 
@@ -112,8 +122,8 @@ func (_c *MediaTagCreate) createSpec() (*MediaTag, *sqlgraph.CreateSpec) {
 	)
 	if nodes := _c.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.MediaTable,
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
@@ -124,12 +134,13 @@ func (_c *MediaTagCreate) createSpec() (*MediaTag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.MediaID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.TagTable,
 			Columns: []string{mediatag.TagColumn},
 			Bidi:    false,
@@ -140,6 +151,7 @@ func (_c *MediaTagCreate) createSpec() (*MediaTag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.TagID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

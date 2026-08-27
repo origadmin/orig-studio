@@ -25,6 +25,8 @@ const (
 	FieldImageURL = "image_url"
 	// FieldImageMobileURL holds the string denoting the image_mobile_url field in the database.
 	FieldImageMobileURL = "image_mobile_url"
+	// FieldVideoURL holds the string denoting the video_url field in the database.
+	FieldVideoURL = "video_url"
 	// FieldBgColorStart holds the string denoting the bg_color_start field in the database.
 	FieldBgColorStart = "bg_color_start"
 	// FieldBgColorEnd holds the string denoting the bg_color_end field in the database.
@@ -49,6 +51,14 @@ const (
 	FieldEndAt = "end_at"
 	// FieldAutoSlideInterval holds the string denoting the auto_slide_interval field in the database.
 	FieldAutoSlideInterval = "auto_slide_interval"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldCount holds the string denoting the count field in the database.
+	FieldCount = "count"
+	// FieldCategoryID holds the string denoting the category_id field in the database.
+	FieldCategoryID = "category_id"
+	// FieldDisplayMode holds the string denoting the display_mode field in the database.
+	FieldDisplayMode = "display_mode"
 	// Table holds the table name of the portalbanner in the database.
 	Table = "portal_banners"
 )
@@ -63,6 +73,7 @@ var Columns = []string{
 	FieldBadgeText,
 	FieldImageURL,
 	FieldImageMobileURL,
+	FieldVideoURL,
 	FieldBgColorStart,
 	FieldBgColorEnd,
 	FieldBgOverlayOpacity,
@@ -75,6 +86,10 @@ var Columns = []string{
 	FieldStartAt,
 	FieldEndAt,
 	FieldAutoSlideInterval,
+	FieldType,
+	FieldCount,
+	FieldCategoryID,
+	FieldDisplayMode,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -98,6 +113,8 @@ var (
 	ImageURLValidator func(string) error
 	// ImageMobileURLValidator is a validator for the "image_mobile_url" field. It is called by the builders before save.
 	ImageMobileURLValidator func(string) error
+	// VideoURLValidator is a validator for the "video_url" field. It is called by the builders before save.
+	VideoURLValidator func(string) error
 	// BgColorStartValidator is a validator for the "bg_color_start" field. It is called by the builders before save.
 	BgColorStartValidator func(string) error
 	// BgColorEndValidator is a validator for the "bg_color_end" field. It is called by the builders before save.
@@ -118,6 +135,18 @@ var (
 	DefaultIsActive bool
 	// DefaultAutoSlideInterval holds the default value on creation for the "auto_slide_interval" field.
 	DefaultAutoSlideInterval int
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType string
+	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	TypeValidator func(string) error
+	// DefaultCount holds the default value on creation for the "count" field.
+	DefaultCount int
+	// CategoryIDValidator is a validator for the "category_id" field. It is called by the builders before save.
+	CategoryIDValidator func(string) error
+	// DefaultDisplayMode holds the default value on creation for the "display_mode" field.
+	DefaultDisplayMode string
+	// DisplayModeValidator is a validator for the "display_mode" field. It is called by the builders before save.
+	DisplayModeValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -155,6 +184,11 @@ func ByImageURL(opts ...sql.OrderTermOption) OrderOption {
 // ByImageMobileURL orders the results by the image_mobile_url field.
 func ByImageMobileURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldImageMobileURL, opts...).ToFunc()
+}
+
+// ByVideoURL orders the results by the video_url field.
+func ByVideoURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVideoURL, opts...).ToFunc()
 }
 
 // ByBgColorStart orders the results by the bg_color_start field.
@@ -215,4 +249,24 @@ func ByEndAt(opts ...sql.OrderTermOption) OrderOption {
 // ByAutoSlideInterval orders the results by the auto_slide_interval field.
 func ByAutoSlideInterval(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAutoSlideInterval, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByCount orders the results by the count field.
+func ByCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCount, opts...).ToFunc()
+}
+
+// ByCategoryID orders the results by the category_id field.
+func ByCategoryID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCategoryID, opts...).ToFunc()
+}
+
+// ByDisplayMode orders the results by the display_mode field.
+func ByDisplayMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayMode, opts...).ToFunc()
 }

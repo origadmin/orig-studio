@@ -8,13 +8,9 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/server"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
@@ -46,127 +42,39 @@ func NewSystemHandler(
 func (h *SystemHandler) RegisterRoutes(r http2.Router) {
 	system := r.Group("/system")
 	{
-		h.registerStats(system)
 		h.registerSettings(system)
 	}
 
 	config := r.Group("/config")
 	{
-		config.GET("", server.HTTPToHandlerFunc(h.getPublicConfig()))
-	}
-}
-
-func (h *SystemHandler) registerStats(g http2.Router) {
-	stats := g.Group("/stats")
-	{
-		stats.GET("/dashboard", server.HTTPToHandlerFunc(h.getDashboardStats()))
-		stats.GET("/media", server.HTTPToHandlerFunc(h.getMediaStats()))
-		stats.GET("/traffic", server.HTTPToHandlerFunc(h.getTrafficStats()))
-		stats.GET("/users", server.HTTPToHandlerFunc(h.getUserStats()))
+		config.GET("", h.getPublicConfig())
 	}
 }
 
 func (h *SystemHandler) registerSettings(g http2.Router) {
 	settings := g.Group("/settings")
 	{
-		settings.GET("", server.HTTPToHandlerFunc(h.getSettings()))
-		settings.PUT("", server.HTTPToHandlerFunc(h.updateSettings()))
-		settings.GET("/:key", server.HTTPToHandlerFunc(h.getSettingByKey()))
-		settings.POST("/:key/reset", server.HTTPToHandlerFunc(h.resetSetting()))
-		settings.GET("/storage/capabilities", server.HTTPToHandlerFunc(h.getStorageCapabilities()))
-		settings.GET("/email/status", server.HTTPToHandlerFunc(h.getEmailStatus()))
-		settings.POST("/email/test", server.HTTPToHandlerFunc(h.sendTestEmail()))
-	}
-}
-
-// ==================== Stats Handlers ====================
-
-func (h *SystemHandler) getDashboardStats() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		if h.statsRepo == nil {
-			server.Fail(gc, server.ErrInternal, "stats service not available")
-			return
-		}
-
-		stats, err := h.statsRepo.GetDashboardStats(r.Context())
-		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
-		}
-
-		server.OK(gc, stats)
-	}
-}
-
-func (h *SystemHandler) getMediaStats() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		if h.statsRepo == nil {
-			server.Fail(gc, server.ErrInternal, "stats service not available")
-			return
-		}
-
-		stats, err := h.statsRepo.GetMediaStats(r.Context())
-		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
-		}
-
-		server.OK(gc, stats)
-	}
-}
-
-func (h *SystemHandler) getUserStats() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		if h.statsRepo == nil {
-			server.Fail(gc, server.ErrInternal, "stats service not available")
-			return
-		}
-
-		stats, err := h.statsRepo.GetUserStats(r.Context())
-		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
-		}
-
-		server.OK(gc, stats)
-	}
-}
-
-func (h *SystemHandler) getTrafficStats() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
-
-		_ = page
-		_ = pageSize
-
-		server.OK(gc, gin.H{
-			"items":     []interface{}{},
-			"total":     0,
-			"page":      page,
-			"page_size": pageSize,
-		})
+		settings.GET("", h.getSettings())
+		settings.PUT("", h.updateSettings())
+		settings.GET("/:key", h.getSettingByKey())
+		settings.POST("/:key/reset", h.resetSetting())
+		settings.GET("/storage/capabilities", h.getStorageCapabilities())
+		settings.GET("/email/status", h.getEmailStatus())
+		settings.POST("/email/test", h.sendTestEmail())
 	}
 }
 
 // ==================== Settings Handlers ====================
 
-func (h *SystemHandler) getSettings() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) getSettings() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
-		items, err := h.settingUC.ListAll(r.Context())
+		items, err := h.settingUC.ListAll(ctx.Request().Context())
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
 		grouped := make(map[string][]*systemdto.SettingDTO)
@@ -176,16 +84,14 @@ func (h *SystemHandler) getSettings() http.HandlerFunc {
 			grouped[cat] = append(grouped[cat], masked)
 		}
 
-		server.OK(gc, grouped)
+		return server.OKCtx(ctx, grouped)
 	}
 }
 
-func (h *SystemHandler) updateSettings() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) updateSettings() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
 		var req struct {
@@ -195,29 +101,25 @@ func (h *SystemHandler) updateSettings() http.HandlerFunc {
 			} `json:"settings" binding:"required"`
 		}
 
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		var updated []*systemdto.SettingDTO
 		for _, item := range req.Settings {
-			existing, err := h.settingUC.GetByKey(r.Context(), item.Key)
+			existing, err := h.settingUC.GetByKey(ctx.Request().Context(), item.Key)
 			if err != nil {
-				server.Fail(gc, server.ErrNotFound, "setting not found: "+item.Key)
-				return
+				return server.FailCtx(ctx, server.ErrNotFound, "setting not found: "+item.Key)
 			}
 
 			if err := ValidateSettingValue(item.Value, existing.Type); err != nil {
-				server.Fail(gc, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
-				return
+				return server.FailCtx(ctx, server.ErrBadRequest, "invalid value for "+item.Key+": "+err.Error())
 			}
 
 			if item.Key == "homepage_layout" {
 				validLayouts := map[string]bool{"auto": true, "video": true, "article": true, "mixed": true, "welcome": true, "doc": true}
 				if !validLayouts[item.Value] {
-					server.Fail(gc, server.ErrBadRequest, "invalid value for homepage_layout: must be one of: auto, video, article, mixed, doc, welcome")
-					return
+					return server.FailCtx(ctx, server.ErrBadRequest, "invalid value for homepage_layout: must be one of: auto, video, article, mixed, doc, welcome")
 				}
 			}
 
@@ -231,80 +133,69 @@ func (h *SystemHandler) updateSettings() http.HandlerFunc {
 				FallbackValue: existing.FallbackValue,
 				IsBuiltin:     existing.IsBuiltin,
 			}
-			result, err := h.settingUC.Upsert(r.Context(), s)
+			result, err := h.settingUC.Upsert(ctx.Request().Context(), s)
 			if err != nil {
-				server.Fail(gc, server.ErrInternal, err.Error())
-				return
+				return server.FailCtx(ctx, server.ErrInternal, err.Error())
 			}
 			updated = append(updated, result)
 		}
 
-		server.OK(gc, updated)
+		return server.OKCtx(ctx, updated)
 	}
 }
 
-func (h *SystemHandler) getSettingByKey() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) getSettingByKey() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
-		key := gc.Param("key")
+		key := ctx.Var("key")
 		if key == "" {
-			server.Fail(gc, server.ErrBadRequest, "key is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "key is required")
 		}
 
-		s, err := h.settingUC.GetByKey(r.Context(), key)
+		s, err := h.settingUC.GetByKey(ctx.Request().Context(), key)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "setting not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "setting not found")
 		}
 
 		masked := h.settingUC.MaskSensitive(s)
-		server.OK(gc, masked)
+		return server.OKCtx(ctx, masked)
 	}
 }
 
-func (h *SystemHandler) resetSetting() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) resetSetting() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
-		key := gc.Param("key")
+		key := ctx.Var("key")
 		if key == "" {
-			server.Fail(gc, server.ErrBadRequest, "key is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "key is required")
 		}
 
-		s, err := h.settingUC.ResetToDefault(r.Context(), key)
+		s, err := h.settingUC.ResetToDefault(ctx.Request().Context(), key)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "setting not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "setting not found")
 		}
 
 		masked := h.settingUC.MaskSensitive(s)
-		server.OK(gc, masked)
+		return server.OKCtx(ctx, masked)
 	}
 }
 
 // ==================== Public Config Endpoint ====================
 
-func (h *SystemHandler) getPublicConfig() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) getPublicConfig() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
-		publicSettings := h.settingUC.GetPublicSettings(r.Context())
-		server.OK(gc, publicSettings)
+		publicSettings := h.settingUC.GetPublicSettings(ctx.Request().Context())
+		return server.OKCtx(ctx, publicSettings)
 	}
 }
 
@@ -321,6 +212,7 @@ type portalSiteConfig struct {
 	SiteDescription   string   `json:"site_description"`
 	PrimaryURL        string   `json:"primary_url"`
 	AllowedURLs       []string `json:"allowed_urls"`
+	SiteLogoURL       string   `json:"site_logo_url"`
 	AllowRegistration bool     `json:"allow_registration"`
 	AllowUpload       bool     `json:"allow_upload"`
 }
@@ -329,47 +221,74 @@ type portalConfigResponse struct {
 	Modules portalModuleConfig `json:"modules"`
 	Layout  string             `json:"layout"`
 	Site    portalSiteConfig   `json:"site"`
+	Share   map[string]bool    `json:"share"`
 }
 
-func (h *SystemHandler) getPortalConfig() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) getPortalConfig() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
-		ctx := r.Context()
+		rctx := ctx.Request().Context()
 
 		modules := portalModuleConfig{
-			Articles: getBoolWithDefault(h.settingUC, ctx, "module_articles", true),
-			Videos:   getBoolWithDefault(h.settingUC, ctx, "module_videos", true),
-			Music:    getBoolWithDefault(h.settingUC, ctx, "module_music", false),
+			Articles: getBoolWithDefault(h.settingUC, rctx, "module_articles", true),
+			Videos:   getBoolWithDefault(h.settingUC, rctx, "module_videos", true),
+			Music:    getBoolWithDefault(h.settingUC, rctx, "module_music", false),
 		}
 
-		configuredLayout := h.settingUC.Get(ctx, "homepage_layout")
+		configuredLayout := h.settingUC.Get(rctx, "homepage_layout")
 		if configuredLayout == "" {
 			configuredLayout = "auto"
 		}
 		layout := resolveLayout(modules, configuredLayout)
 
 		site := portalSiteConfig{
-			SiteName:          h.settingUC.Get(ctx, "site_name"),
-			SiteDescription:   h.settingUC.Get(ctx, "site_description"),
-			PrimaryURL:        h.settingUC.Get(ctx, "primary_url"),
-			AllowRegistration: getBoolWithDefault(h.settingUC, ctx, "allow_registration", true),
-			AllowUpload:       getBoolWithDefault(h.settingUC, ctx, "allow_upload", true),
+			SiteName:          h.settingUC.Get(rctx, "site_name"),
+			SiteDescription:   h.settingUC.Get(rctx, "site_description"),
+			PrimaryURL:        h.settingUC.Get(rctx, "primary_url"),
+			SiteLogoURL:       h.settingUC.Get(rctx, "site_logo_url"),
+			AllowRegistration: getBoolWithDefault(h.settingUC, rctx, "allow_registration", true),
+			AllowUpload:       getBoolWithDefault(h.settingUC, rctx, "allow_upload", true),
 		}
-		if urls := h.settingUC.Get(ctx, "base_urls"); urls != "" {
+		if urls := h.settingUC.Get(rctx, "base_urls"); urls != "" {
 			_ = json.Unmarshal([]byte(urls), &site.AllowedURLs)
 		}
 
-		server.OK(gc, portalConfigResponse{
+		return server.OKCtx(ctx, portalConfigResponse{
 			Modules: modules,
 			Layout:  layout,
 			Site:    site,
+			Share:   parseSharePlatforms(h.settingUC, rctx),
 		})
 	}
+}
+
+// sharePlatformKeys is the canonical set of link-based share platforms.
+var sharePlatformKeys = []string{"twitter", "facebook", "whatsapp", "telegram", "linkedin", "weibo"}
+
+// parseSharePlatforms reads the share_platforms setting (JSON map of
+// platform->enabled) and returns a map containing every known platform key,
+// defaulting missing/unparseable entries to enabled so the share dialog never
+// silently drops a platform.
+func parseSharePlatforms(uc *systembiz.SettingUseCase, ctx context.Context) map[string]bool {
+	out := make(map[string]bool, len(sharePlatformKeys))
+	for _, k := range sharePlatformKeys {
+		out[k] = true
+	}
+	raw := uc.Get(ctx, "share_platforms")
+	if raw == "" {
+		return out
+	}
+	var cfg map[string]bool
+	if err := json.Unmarshal([]byte(raw), &cfg); err != nil {
+		return out
+	}
+	for k, v := range cfg {
+		out[k] = v
+	}
+	return out
 }
 
 func getBoolWithDefault(uc *systembiz.SettingUseCase, ctx context.Context, key string, defaultValue bool) bool {
@@ -426,25 +345,23 @@ func resolveLayout(modules portalModuleConfig, configuredLayout string) string {
 
 // ==================== Storage & Email Handlers ====================
 
-func (h *SystemHandler) getStorageCapabilities() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) getStorageCapabilities() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.settingUC == nil {
-			server.Fail(gc, server.ErrInternal, "settings service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "settings service not available")
 		}
 
-		ctx := r.Context()
-		s3Configured := h.settingUC.Get(ctx, "s3_endpoint") != "" &&
-			h.settingUC.Get(ctx, "s3_bucket") != "" &&
-			h.settingUC.Get(ctx, "s3_access_key") != ""
+		rctx := ctx.Request().Context()
+		s3Configured := h.settingUC.Get(rctx, "s3_endpoint") != "" &&
+			h.settingUC.Get(rctx, "s3_bucket") != "" &&
+			h.settingUC.Get(rctx, "s3_access_key") != ""
 
-		currentType := h.settingUC.Get(ctx, "storage_type")
+		currentType := h.settingUC.Get(rctx, "storage_type")
 		if currentType == "" {
 			currentType = "local"
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"current_type":     currentType,
 			"available_types":  []string{"local"},
 			"s3_configured":    s3Configured,
@@ -454,39 +371,33 @@ func (h *SystemHandler) getStorageCapabilities() http.HandlerFunc {
 	}
 }
 
-func (h *SystemHandler) getEmailStatus() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) getEmailStatus() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.emailUC == nil {
-			server.OK(gc, gin.H{"configured": false})
-			return
+			return server.OKCtx(ctx, map[string]any{"configured": false})
 		}
-		cfg := h.emailUC.GetSMTPConfig(r.Context())
-		server.OK(gc, cfg)
+		cfg := h.emailUC.GetSMTPConfig(ctx.Request().Context())
+		return server.OKCtx(ctx, cfg)
 	}
 }
 
-func (h *SystemHandler) sendTestEmail() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
+func (h *SystemHandler) sendTestEmail() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		if h.emailUC == nil {
-			server.Fail(gc, server.ErrInternal, "email service not available")
-			return
+			return server.FailCtx(ctx, server.ErrInternal, "email service not available")
 		}
 
 		var req struct {
 			To string `json:"to" binding:"required,email"`
 		}
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		if err := h.emailUC.SendTestEmail(r.Context(), req.To); err != nil {
-			server.Fail(gc, server.ErrInternal, "Failed to send test email: "+err.Error())
-			return
+		if err := h.emailUC.SendTestEmail(ctx.Request().Context(), req.To); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, "Failed to send test email: "+err.Error())
 		}
-		server.OK(gc, gin.H{"message": "Test email sent"})
+		return server.OKCtx(ctx, map[string]any{"message": "Test email sent"})
 	}
 }
 

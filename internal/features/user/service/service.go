@@ -12,13 +12,23 @@ import (
 // ProviderSet is the wire provider set for the service layer (monolith mode).
 var ProviderSet = wire.NewSet(
 	NewUserService,
+	NewMediaServiceClient,
+	NewAuthHandler,
 	NewUserHandler,
 	NewMeHandler,
+	NewAdminUserService,
+	NewPermissionService,
+	NewSystemConfigService,
 )
 
 // MicroserviceProviderSet is the wire provider set for standalone microservice mode.
-// Excludes Gin-based handlers (UserHandler, MeHandler) that depend on
-// cross-feature use cases only available in monolith mode.
 var MicroserviceProviderSet = wire.NewSet(
 	NewUserService,
+	NewMediaServiceClient,
+	NewAuthHandler,
+	NewUserHandler,
+	NewMeHandler,
+	NewAdminUserService,
+	NewPermissionService,
+	NewSystemConfigService,
 )

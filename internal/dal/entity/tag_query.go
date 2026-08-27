@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"origadmin/application/origstudio/internal/dal/entity/channeltag"
+	"origadmin/application/origstudio/internal/dal/entity/mediatag"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"origadmin/application/origstudio/internal/dal/entity/tagname"
@@ -30,7 +31,7 @@ type TagQuery struct {
 	withUser        *UserQuery
 	withNames       *TagNameQuery
 	withChannelTags *ChannelTagQuery
-	withFKs         bool
+	withMediaTags   *MediaTagQuery
 	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -127,6 +128,28 @@ func (_q *TagQuery) QueryChannelTags() *ChannelTagQuery {
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(channeltag.Table, channeltag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, tag.ChannelTagsTable, tag.ChannelTagsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMediaTags chains the current query on the "media_tags" edge.
+func (_q *TagQuery) QueryMediaTags() *MediaTagQuery {
+	query := (&MediaTagClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tag.Table, tag.FieldID, selector),
+			sqlgraph.To(mediatag.Table, mediatag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tag.MediaTagsTable, tag.MediaTagsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -329,6 +352,7 @@ func (_q *TagQuery) Clone() *TagQuery {
 		withUser:        _q.withUser.Clone(),
 		withNames:       _q.withNames.Clone(),
 		withChannelTags: _q.withChannelTags.Clone(),
+		withMediaTags:   _q.withMediaTags.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -366,6 +390,17 @@ func (_q *TagQuery) WithChannelTags(opts ...func(*ChannelTagQuery)) *TagQuery {
 		opt(query)
 	}
 	_q.withChannelTags = query
+	return _q
+}
+
+// WithMediaTags tells the query-builder to eager-load the nodes that are connected to
+// the "media_tags" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TagQuery) WithMediaTags(opts ...func(*MediaTagQuery)) *TagQuery {
+	query := (&MediaTagClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMediaTags = query
 	return _q
 }
 
@@ -446,17 +481,14 @@ func (_q *TagQuery) prepareQuery(ctx context.Context) error {
 func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, error) {
 	var (
 		nodes       = []*Tag{}
-		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			_q.withUser != nil,
 			_q.withNames != nil,
 			_q.withChannelTags != nil,
+			_q.withMediaTags != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, tag.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Tag).scanValues(nil, columns)
 	}
@@ -496,6 +528,13 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		if err := _q.loadChannelTags(ctx, query, nodes,
 			func(n *Tag) { n.Edges.ChannelTags = []*ChannelTag{} },
 			func(n *Tag, e *ChannelTag) { n.Edges.ChannelTags = append(n.Edges.ChannelTags, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMediaTags; query != nil {
+		if err := _q.loadMediaTags(ctx, query, nodes,
+			func(n *Tag) { n.Edges.MediaTags = []*MediaTag{} },
+			func(n *Tag, e *MediaTag) { n.Edges.MediaTags = append(n.Edges.MediaTags, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -619,6 +658,36 @@ func (_q *TagQuery) loadChannelTags(ctx context.Context, query *ChannelTagQuery,
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "tag_channel_tags" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *TagQuery) loadMediaTags(ctx context.Context, query *MediaTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *MediaTag)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tag)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(mediatag.FieldTagID)
+	}
+	query.Where(predicate.MediaTag(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tag.MediaTagsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.TagID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tag_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

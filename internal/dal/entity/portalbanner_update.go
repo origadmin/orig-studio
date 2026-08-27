@@ -147,6 +147,26 @@ func (_u *PortalBannerUpdate) ClearImageMobileURL() *PortalBannerUpdate {
 	return _u
 }
 
+// SetVideoURL sets the "video_url" field.
+func (_u *PortalBannerUpdate) SetVideoURL(v string) *PortalBannerUpdate {
+	_u.mutation.SetVideoURL(v)
+	return _u
+}
+
+// SetNillableVideoURL sets the "video_url" field if the given value is not nil.
+func (_u *PortalBannerUpdate) SetNillableVideoURL(v *string) *PortalBannerUpdate {
+	if v != nil {
+		_u.SetVideoURL(*v)
+	}
+	return _u
+}
+
+// ClearVideoURL clears the value of the "video_url" field.
+func (_u *PortalBannerUpdate) ClearVideoURL() *PortalBannerUpdate {
+	_u.mutation.ClearVideoURL()
+	return _u
+}
+
 // SetBgColorStart sets the "bg_color_start" field.
 func (_u *PortalBannerUpdate) SetBgColorStart(v string) *PortalBannerUpdate {
 	_u.mutation.SetBgColorStart(v)
@@ -384,6 +404,75 @@ func (_u *PortalBannerUpdate) AddAutoSlideInterval(v int) *PortalBannerUpdate {
 	return _u
 }
 
+// SetType sets the "type" field.
+func (_u *PortalBannerUpdate) SetType(v string) *PortalBannerUpdate {
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *PortalBannerUpdate) SetNillableType(v *string) *PortalBannerUpdate {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// SetCount sets the "count" field.
+func (_u *PortalBannerUpdate) SetCount(v int) *PortalBannerUpdate {
+	_u.mutation.ResetCount()
+	_u.mutation.SetCount(v)
+	return _u
+}
+
+// SetNillableCount sets the "count" field if the given value is not nil.
+func (_u *PortalBannerUpdate) SetNillableCount(v *int) *PortalBannerUpdate {
+	if v != nil {
+		_u.SetCount(*v)
+	}
+	return _u
+}
+
+// AddCount adds value to the "count" field.
+func (_u *PortalBannerUpdate) AddCount(v int) *PortalBannerUpdate {
+	_u.mutation.AddCount(v)
+	return _u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_u *PortalBannerUpdate) SetCategoryID(v string) *PortalBannerUpdate {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *PortalBannerUpdate) SetNillableCategoryID(v *string) *PortalBannerUpdate {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *PortalBannerUpdate) ClearCategoryID() *PortalBannerUpdate {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetDisplayMode sets the "display_mode" field.
+func (_u *PortalBannerUpdate) SetDisplayMode(v string) *PortalBannerUpdate {
+	_u.mutation.SetDisplayMode(v)
+	return _u
+}
+
+// SetNillableDisplayMode sets the "display_mode" field if the given value is not nil.
+func (_u *PortalBannerUpdate) SetNillableDisplayMode(v *string) *PortalBannerUpdate {
+	if v != nil {
+		_u.SetDisplayMode(*v)
+	}
+	return _u
+}
+
 // Mutation returns the PortalBannerMutation object of the builder.
 func (_u *PortalBannerUpdate) Mutation() *PortalBannerMutation {
 	return _u.mutation
@@ -443,6 +532,11 @@ func (_u *PortalBannerUpdate) check() error {
 			return &ValidationError{Name: "image_mobile_url", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.image_mobile_url": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.VideoURL(); ok {
+		if err := portalbanner.VideoURLValidator(v); err != nil {
+			return &ValidationError{Name: "video_url", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.video_url": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.BgColorStart(); ok {
 		if err := portalbanner.BgColorStartValidator(v); err != nil {
 			return &ValidationError{Name: "bg_color_start", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.bg_color_start": %w`, err)}
@@ -471,6 +565,21 @@ func (_u *PortalBannerUpdate) check() error {
 	if v, ok := _u.mutation.SecondaryBtnURL(); ok {
 		if err := portalbanner.SecondaryBtnURLValidator(v); err != nil {
 			return &ValidationError{Name: "secondary_btn_url", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.secondary_btn_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.GetType(); ok {
+		if err := portalbanner.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.type": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CategoryID(); ok {
+		if err := portalbanner.CategoryIDValidator(v); err != nil {
+			return &ValidationError{Name: "category_id", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.category_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayMode(); ok {
+		if err := portalbanner.DisplayModeValidator(v); err != nil {
+			return &ValidationError{Name: "display_mode", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.display_mode": %w`, err)}
 		}
 	}
 	return nil
@@ -532,6 +641,12 @@ func (_u *PortalBannerUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if _u.mutation.ImageMobileURLCleared() {
 		_spec.ClearField(portalbanner.FieldImageMobileURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.VideoURL(); ok {
+		_spec.SetField(portalbanner.FieldVideoURL, field.TypeString, value)
+	}
+	if _u.mutation.VideoURLCleared() {
+		_spec.ClearField(portalbanner.FieldVideoURL, field.TypeString)
 	}
 	if value, ok := _u.mutation.BgColorStart(); ok {
 		_spec.SetField(portalbanner.FieldBgColorStart, field.TypeString, value)
@@ -601,6 +716,24 @@ func (_u *PortalBannerUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.AddedAutoSlideInterval(); ok {
 		_spec.AddField(portalbanner.FieldAutoSlideInterval, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(portalbanner.FieldType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Count(); ok {
+		_spec.SetField(portalbanner.FieldCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCount(); ok {
+		_spec.AddField(portalbanner.FieldCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CategoryID(); ok {
+		_spec.SetField(portalbanner.FieldCategoryID, field.TypeString, value)
+	}
+	if _u.mutation.CategoryIDCleared() {
+		_spec.ClearField(portalbanner.FieldCategoryID, field.TypeString)
+	}
+	if value, ok := _u.mutation.DisplayMode(); ok {
+		_spec.SetField(portalbanner.FieldDisplayMode, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -739,6 +872,26 @@ func (_u *PortalBannerUpdateOne) SetNillableImageMobileURL(v *string) *PortalBan
 // ClearImageMobileURL clears the value of the "image_mobile_url" field.
 func (_u *PortalBannerUpdateOne) ClearImageMobileURL() *PortalBannerUpdateOne {
 	_u.mutation.ClearImageMobileURL()
+	return _u
+}
+
+// SetVideoURL sets the "video_url" field.
+func (_u *PortalBannerUpdateOne) SetVideoURL(v string) *PortalBannerUpdateOne {
+	_u.mutation.SetVideoURL(v)
+	return _u
+}
+
+// SetNillableVideoURL sets the "video_url" field if the given value is not nil.
+func (_u *PortalBannerUpdateOne) SetNillableVideoURL(v *string) *PortalBannerUpdateOne {
+	if v != nil {
+		_u.SetVideoURL(*v)
+	}
+	return _u
+}
+
+// ClearVideoURL clears the value of the "video_url" field.
+func (_u *PortalBannerUpdateOne) ClearVideoURL() *PortalBannerUpdateOne {
+	_u.mutation.ClearVideoURL()
 	return _u
 }
 
@@ -979,6 +1132,75 @@ func (_u *PortalBannerUpdateOne) AddAutoSlideInterval(v int) *PortalBannerUpdate
 	return _u
 }
 
+// SetType sets the "type" field.
+func (_u *PortalBannerUpdateOne) SetType(v string) *PortalBannerUpdateOne {
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *PortalBannerUpdateOne) SetNillableType(v *string) *PortalBannerUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// SetCount sets the "count" field.
+func (_u *PortalBannerUpdateOne) SetCount(v int) *PortalBannerUpdateOne {
+	_u.mutation.ResetCount()
+	_u.mutation.SetCount(v)
+	return _u
+}
+
+// SetNillableCount sets the "count" field if the given value is not nil.
+func (_u *PortalBannerUpdateOne) SetNillableCount(v *int) *PortalBannerUpdateOne {
+	if v != nil {
+		_u.SetCount(*v)
+	}
+	return _u
+}
+
+// AddCount adds value to the "count" field.
+func (_u *PortalBannerUpdateOne) AddCount(v int) *PortalBannerUpdateOne {
+	_u.mutation.AddCount(v)
+	return _u
+}
+
+// SetCategoryID sets the "category_id" field.
+func (_u *PortalBannerUpdateOne) SetCategoryID(v string) *PortalBannerUpdateOne {
+	_u.mutation.SetCategoryID(v)
+	return _u
+}
+
+// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
+func (_u *PortalBannerUpdateOne) SetNillableCategoryID(v *string) *PortalBannerUpdateOne {
+	if v != nil {
+		_u.SetCategoryID(*v)
+	}
+	return _u
+}
+
+// ClearCategoryID clears the value of the "category_id" field.
+func (_u *PortalBannerUpdateOne) ClearCategoryID() *PortalBannerUpdateOne {
+	_u.mutation.ClearCategoryID()
+	return _u
+}
+
+// SetDisplayMode sets the "display_mode" field.
+func (_u *PortalBannerUpdateOne) SetDisplayMode(v string) *PortalBannerUpdateOne {
+	_u.mutation.SetDisplayMode(v)
+	return _u
+}
+
+// SetNillableDisplayMode sets the "display_mode" field if the given value is not nil.
+func (_u *PortalBannerUpdateOne) SetNillableDisplayMode(v *string) *PortalBannerUpdateOne {
+	if v != nil {
+		_u.SetDisplayMode(*v)
+	}
+	return _u
+}
+
 // Mutation returns the PortalBannerMutation object of the builder.
 func (_u *PortalBannerUpdateOne) Mutation() *PortalBannerMutation {
 	return _u.mutation
@@ -1051,6 +1273,11 @@ func (_u *PortalBannerUpdateOne) check() error {
 			return &ValidationError{Name: "image_mobile_url", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.image_mobile_url": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.VideoURL(); ok {
+		if err := portalbanner.VideoURLValidator(v); err != nil {
+			return &ValidationError{Name: "video_url", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.video_url": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.BgColorStart(); ok {
 		if err := portalbanner.BgColorStartValidator(v); err != nil {
 			return &ValidationError{Name: "bg_color_start", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.bg_color_start": %w`, err)}
@@ -1079,6 +1306,21 @@ func (_u *PortalBannerUpdateOne) check() error {
 	if v, ok := _u.mutation.SecondaryBtnURL(); ok {
 		if err := portalbanner.SecondaryBtnURLValidator(v); err != nil {
 			return &ValidationError{Name: "secondary_btn_url", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.secondary_btn_url": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.GetType(); ok {
+		if err := portalbanner.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.type": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.CategoryID(); ok {
+		if err := portalbanner.CategoryIDValidator(v); err != nil {
+			return &ValidationError{Name: "category_id", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.category_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayMode(); ok {
+		if err := portalbanner.DisplayModeValidator(v); err != nil {
+			return &ValidationError{Name: "display_mode", err: fmt.Errorf(`entity: validator failed for field "PortalBanner.display_mode": %w`, err)}
 		}
 	}
 	return nil
@@ -1158,6 +1400,12 @@ func (_u *PortalBannerUpdateOne) sqlSave(ctx context.Context) (_node *PortalBann
 	if _u.mutation.ImageMobileURLCleared() {
 		_spec.ClearField(portalbanner.FieldImageMobileURL, field.TypeString)
 	}
+	if value, ok := _u.mutation.VideoURL(); ok {
+		_spec.SetField(portalbanner.FieldVideoURL, field.TypeString, value)
+	}
+	if _u.mutation.VideoURLCleared() {
+		_spec.ClearField(portalbanner.FieldVideoURL, field.TypeString)
+	}
 	if value, ok := _u.mutation.BgColorStart(); ok {
 		_spec.SetField(portalbanner.FieldBgColorStart, field.TypeString, value)
 	}
@@ -1226,6 +1474,24 @@ func (_u *PortalBannerUpdateOne) sqlSave(ctx context.Context) (_node *PortalBann
 	}
 	if value, ok := _u.mutation.AddedAutoSlideInterval(); ok {
 		_spec.AddField(portalbanner.FieldAutoSlideInterval, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(portalbanner.FieldType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Count(); ok {
+		_spec.SetField(portalbanner.FieldCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCount(); ok {
+		_spec.AddField(portalbanner.FieldCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CategoryID(); ok {
+		_spec.SetField(portalbanner.FieldCategoryID, field.TypeString, value)
+	}
+	if _u.mutation.CategoryIDCleared() {
+		_spec.ClearField(portalbanner.FieldCategoryID, field.TypeString)
+	}
+	if value, ok := _u.mutation.DisplayMode(); ok {
+		_spec.SetField(portalbanner.FieldDisplayMode, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &PortalBanner{config: _u.config}

@@ -2,7 +2,6 @@ package dal
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"origadmin/application/origstudio/internal/dal/entity"
@@ -43,7 +42,8 @@ func (r *encodingTaskRepo) Update(
 	task *dto.EncodingTask,
 ) (*dto.EncodingTask, error) {
 	update := r.db.EncodingTask.UpdateOneID(task.Id).
-		SetStatus(task.Status)
+		SetStatus(task.Status).
+		SetProgress(task.Progress)
 
 	if task.OutputPath != "" {
 		update = update.SetOutputPath(task.OutputPath)
@@ -172,6 +172,7 @@ func convertEncodingTaskToDto(m *entity.EncodingTask) *dto.EncodingTask {
 		MediaId:      m.MediaID,
 		ProfileId:    m.ProfileID,
 		Status:       enums.EncodingTaskStatus(m.Status),
+		Progress:     m.Progress,
 		OutputPath:   m.OutputPath,
 		ErrorMessage: m.ErrorMessage,
 		Chunk:        m.Chunk,
@@ -226,10 +227,6 @@ func (r *encodingTaskRepo) CountByStatusWithFilter(
 	chunkFilter string,
 	searchQuery string,
 ) (*dto.StatusCounts, error) {
-	// Log the profileFilter to debug
-	if profileFilter != "" {
-		fmt.Printf("CountByStatusWithFilter: profileFilter=%s\n", profileFilter)
-	}
 	type countRow struct {
 		Status string `json:"status"`
 		Count  int    `json:"count"`

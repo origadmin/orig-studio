@@ -4,7 +4,9 @@ package entity
 
 import (
 	"fmt"
+	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/mediatag"
+	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"strings"
 
 	"entgo.io/ent"
@@ -13,41 +15,48 @@ import (
 
 // MediaTag is the model entity for the MediaTag schema.
 type MediaTag struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// MediaID holds the value of the "media_id" field.
+	MediaID string `json:"media_id,omitempty"`
+	// TagID holds the value of the "tag_id" field.
+	TagID int `json:"tag_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MediaTagQuery when eager-loading is set.
-	Edges          MediaTagEdges `json:"edges"`
-	media_tags_rel *string
-	selectValues   sql.SelectValues
+	Edges        MediaTagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // MediaTagEdges holds the relations/edges for other nodes in the graph.
 type MediaTagEdges struct {
 	// Media holds the value of the media edge.
-	Media []*Media `json:"media,omitempty"`
+	Media *Media `json:"media,omitempty"`
 	// Tag holds the value of the tag edge.
-	Tag []*Tag `json:"tag,omitempty"`
+	Tag *Tag `json:"tag,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
-// was not loaded in eager-loading.
-func (e MediaTagEdges) MediaOrErr() ([]*Media, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaTagEdges) MediaOrErr() (*Media, error) {
+	if e.Media != nil {
 		return e.Media, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: media.Label}
 	}
 	return nil, &NotLoadedError{edge: "media"}
 }
 
 // TagOrErr returns the Tag value or an error if the edge
-// was not loaded in eager-loading.
-func (e MediaTagEdges) TagOrErr() ([]*Tag, error) {
-	if e.loadedTypes[1] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MediaTagEdges) TagOrErr() (*Tag, error) {
+	if e.Tag != nil {
 		return e.Tag, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: tag.Label}
 	}
 	return nil, &NotLoadedError{edge: "tag"}
 }
@@ -57,9 +66,9 @@ func (*MediaTag) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case mediatag.FieldID:
+		case mediatag.FieldID, mediatag.FieldTagID:
 			values[i] = new(sql.NullInt64)
-		case mediatag.ForeignKeys[0]: // media_tags_rel
+		case mediatag.FieldMediaID:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -82,12 +91,17 @@ func (_m *MediaTag) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case mediatag.ForeignKeys[0]:
+		case mediatag.FieldMediaID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field media_tags_rel", values[i])
+				return fmt.Errorf("unexpected type %T for field media_id", values[i])
 			} else if value.Valid {
-				_m.media_tags_rel = new(string)
-				*_m.media_tags_rel = value.String
+				_m.MediaID = value.String
+			}
+		case mediatag.FieldTagID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field tag_id", values[i])
+			} else if value.Valid {
+				_m.TagID = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -134,7 +148,12 @@ func (_m *MediaTag) Unwrap() *MediaTag {
 func (_m *MediaTag) String() string {
 	var builder strings.Builder
 	builder.WriteString("MediaTag(")
-	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
+	builder.WriteString("media_id=")
+	builder.WriteString(_m.MediaID)
+	builder.WriteString(", ")
+	builder.WriteString("tag_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TagID))
 	builder.WriteByte(')')
 	return builder.String()
 }

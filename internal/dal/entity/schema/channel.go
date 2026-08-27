@@ -107,5 +107,6 @@ func (Channel) Edges() []ent.Edge {
 		edge.To("articles", Article.Type),
 		edge.From("category", Category.Type).Ref("channels").Field("category_id").Unique(),
 		edge.To("tags_rel", ChannelTag.Type),
+		edge.To("subscribers", Subscription.Type),
 	}
 }

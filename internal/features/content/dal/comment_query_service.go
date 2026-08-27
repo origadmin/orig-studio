@@ -8,10 +8,12 @@ package dal
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
-	"origadmin/application/origstudio/internal/data/entity"
-	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/comment"
+	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/features/content/dto"
 )
 
@@ -26,11 +28,46 @@ func NewCommentQueryService(db *entity.Client) *CommentQueryService {
 	return &CommentQueryService{db: db}
 }
 
+// ResolveMediaID resolves a media identifier (either UUID or short_token) to the internal UUID.
+// If the input is already a valid UUID format, it returns it as-is.
+// If it's a short_token, it looks up the media by short_token and returns its UUID.
+// If lookup fails, returns the original idOrToken as-is.
+func (s *CommentQueryService) ResolveMediaID(ctx context.Context, idOrToken string) string {
+	// If it looks like a UUID (contains hyphens and is 36 chars), return as-is
+	if strings.Contains(idOrToken, "-") && len(idOrToken) >= 36 {
+		return idOrToken
+	}
+
+	// Try to look up by short_token
+	m, err := s.db.Media.Query().
+		Where(media.ShortTokenEQ(idOrToken)).
+		Only(ctx)
+	if err != nil {
+		return idOrToken
+	}
+	return m.ID
+}
+
+// CheckMediaExists checks if a media exists by its UUID.
+func (s *CommentQueryService) CheckMediaExists(ctx context.Context, mediaID string) error {
+	_, err := s.db.Media.Get(ctx, mediaID)
+	return err
+}
+
+// IncrementCommentCount increments the comment count for a media by delta.
+func (s *CommentQueryService) IncrementCommentCount(ctx context.Context, mediaID string, delta int) error {
+	_, err := s.db.Media.UpdateOneID(mediaID).
+		AddCommentCount(int64(delta)).
+		Save(ctx)
+	return err
+}
+
 // CommentListParams holds parameters for listing comments.
 type CommentListParams struct {
 	MediaID  string
 	UserID   string
 	ParentID string
+	RootOnly bool
 	Status   string
 	SortBy   string
 	Order    string
@@ -68,6 +105,10 @@ func (s *CommentQueryService) ListComments(ctx context.Context, params CommentLi
 	}
 	if params.ParentID != "" {
 		query = query.Where(comment.HasParentWith(comment.ID(params.ParentID)))
+	}
+	if params.RootOnly {
+		// 仅返回根评论（无父级），用于首屏懒加载：点击根评论再按 parent_id 拉回复
+		query = query.Where(comment.Not(comment.HasParent()))
 	}
 
 	// Status filtering

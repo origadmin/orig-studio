@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/domain/types"
 )
@@ -36,12 +35,11 @@ type Section struct {
 
 func (h *FeedHandler) getFeed() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		page, _ := strconv.Atoi(gc.Query("page"))
+		page, _ := strconv.Atoi(ctx.QueryVar("page"))
 		if page == 0 {
 			page = 1
 		}
-		pageSize, _ := strconv.Atoi(gc.Query("page_size"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVar("page_size"))
 		if pageSize == 0 {
 			pageSize = 20
 		}

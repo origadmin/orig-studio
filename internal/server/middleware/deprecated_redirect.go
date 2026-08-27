@@ -6,13 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DeprecatedRedirects returns a middleware that sends 301 Moved Permanently
-// responses for deprecated API paths, redirecting callers to the current
-// equivalent endpoint.
 func DeprecatedRedirects() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
+
 		newPath := ""
 		switch {
 		case matchPrefix(path, "/api/v1/users/username/"):
@@ -23,12 +21,15 @@ func DeprecatedRedirects() gin.HandlerFunc {
 			} else {
 				query = "username=" + username
 			}
+
 		case matchPrefix(path, "/api/v1/users/slug/"):
 			slug := trimPrefix(path, "/api/v1/users/slug/")
 			newPath = "/api/v1/users/" + slug
+
 		case matchPrefix(path, "/api/v1/articles/slug/"):
 			slug := trimPrefix(path, "/api/v1/articles/slug/")
 			newPath = "/api/v1/articles/" + slug
+
 		case matchPrefix(path, "/api/v1/ads/placement/"):
 			slug := trimPrefix(path, "/api/v1/ads/placement/")
 			newPath = "/api/v1/ads"
@@ -37,6 +38,7 @@ func DeprecatedRedirects() gin.HandlerFunc {
 			} else {
 				query = "placement=" + slug
 			}
+
 		case matchPrefix(path, "/api/v1/resolve/@"):
 			handle := trimPrefix(path, "/api/v1/resolve/@")
 			newPath = "/api/v1/resolve"
@@ -46,6 +48,7 @@ func DeprecatedRedirects() gin.HandlerFunc {
 				query = "handle=" + handle
 			}
 		}
+
 		if newPath != "" {
 			redirectURL := newPath
 			if query != "" {
@@ -55,6 +58,7 @@ func DeprecatedRedirects() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
 		c.Next()
 	}
 }

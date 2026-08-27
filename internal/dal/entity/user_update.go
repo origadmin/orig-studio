@@ -12,20 +12,27 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/comment"
 	"origadmin/application/origstudio/internal/dal/entity/commentlike"
 	"origadmin/application/origstudio/internal/dal/entity/commentreport"
+	"origadmin/application/origstudio/internal/dal/entity/drmlicense"
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/groupmember"
 	"origadmin/application/origstudio/internal/dal/entity/history"
 	"origadmin/application/origstudio/internal/dal/entity/like"
+	"origadmin/application/origstudio/internal/dal/entity/livechatmessage"
+	"origadmin/application/origstudio/internal/dal/entity/liveroom"
 	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/mediareport"
 	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/dal/entity/notification"
+	"origadmin/application/origstudio/internal/dal/entity/order"
 	"origadmin/application/origstudio/internal/dal/entity/permissiongroup"
 	"origadmin/application/origstudio/internal/dal/entity/playlist"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
+	"origadmin/application/origstudio/internal/dal/entity/promotionsubscription"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity/usersubscription"
+	"origadmin/application/origstudio/internal/dal/entity/wallet"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -173,20 +180,6 @@ func (_u *UserUpdate) SetStatus(v user.Status) *UserUpdate {
 func (_u *UserUpdate) SetNillableStatus(v *user.Status) *UserUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
-	}
-	return _u
-}
-
-// SetIsStaff sets the "is_staff" field.
-func (_u *UserUpdate) SetIsStaff(v bool) *UserUpdate {
-	_u.mutation.SetIsStaff(v)
-	return _u
-}
-
-// SetNillableIsStaff sets the "is_staff" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableIsStaff(v *bool) *UserUpdate {
-	if v != nil {
-		_u.SetIsStaff(*v)
 	}
 	return _u
 }
@@ -820,21 +813,6 @@ func (_u *UserUpdate) AddSubscriptions(v ...*Subscription) *UserUpdate {
 	return _u.AddSubscriptionIDs(ids...)
 }
 
-// AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
-func (_u *UserUpdate) AddSubscriberIDs(ids ...string) *UserUpdate {
-	_u.mutation.AddSubscriberIDs(ids...)
-	return _u
-}
-
-// AddSubscribers adds the "subscribers" edges to the Subscription entity.
-func (_u *UserUpdate) AddSubscribers(v ...*Subscription) *UserUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddSubscriberIDs(ids...)
-}
-
 // AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
 func (_u *UserUpdate) AddReviewLogIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddReviewLogIDs(ids...)
@@ -938,6 +916,111 @@ func (_u *UserUpdate) AddHistory(v ...*History) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddHistoryIDs(ids...)
+}
+
+// AddLiveRoomIDs adds the "live_rooms" edge to the LiveRoom entity by IDs.
+func (_u *UserUpdate) AddLiveRoomIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddLiveRoomIDs(ids...)
+	return _u
+}
+
+// AddLiveRooms adds the "live_rooms" edges to the LiveRoom entity.
+func (_u *UserUpdate) AddLiveRooms(v ...*LiveRoom) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLiveRoomIDs(ids...)
+}
+
+// AddLiveChatMessageIDs adds the "live_chat_messages" edge to the LiveChatMessage entity by IDs.
+func (_u *UserUpdate) AddLiveChatMessageIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddLiveChatMessageIDs(ids...)
+	return _u
+}
+
+// AddLiveChatMessages adds the "live_chat_messages" edges to the LiveChatMessage entity.
+func (_u *UserUpdate) AddLiveChatMessages(v ...*LiveChatMessage) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLiveChatMessageIDs(ids...)
+}
+
+// AddPaymentSubscriptionIDs adds the "payment_subscriptions" edge to the UserSubscription entity by IDs.
+func (_u *UserUpdate) AddPaymentSubscriptionIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddPaymentSubscriptionIDs(ids...)
+	return _u
+}
+
+// AddPaymentSubscriptions adds the "payment_subscriptions" edges to the UserSubscription entity.
+func (_u *UserUpdate) AddPaymentSubscriptions(v ...*UserSubscription) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPaymentSubscriptionIDs(ids...)
+}
+
+// AddPaymentOrderIDs adds the "payment_orders" edge to the Order entity by IDs.
+func (_u *UserUpdate) AddPaymentOrderIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddPaymentOrderIDs(ids...)
+	return _u
+}
+
+// AddPaymentOrders adds the "payment_orders" edges to the Order entity.
+func (_u *UserUpdate) AddPaymentOrders(v ...*Order) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPaymentOrderIDs(ids...)
+}
+
+// AddPaymentWalletIDs adds the "payment_wallet" edge to the Wallet entity by IDs.
+func (_u *UserUpdate) AddPaymentWalletIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddPaymentWalletIDs(ids...)
+	return _u
+}
+
+// AddPaymentWallet adds the "payment_wallet" edges to the Wallet entity.
+func (_u *UserUpdate) AddPaymentWallet(v ...*Wallet) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPaymentWalletIDs(ids...)
+}
+
+// AddDrmLicenseIDs adds the "drm_licenses" edge to the DrmLicense entity by IDs.
+func (_u *UserUpdate) AddDrmLicenseIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddDrmLicenseIDs(ids...)
+	return _u
+}
+
+// AddDrmLicenses adds the "drm_licenses" edges to the DrmLicense entity.
+func (_u *UserUpdate) AddDrmLicenses(v ...*DrmLicense) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDrmLicenseIDs(ids...)
+}
+
+// AddPromotionSubscriptionIDs adds the "promotion_subscriptions" edge to the PromotionSubscription entity by IDs.
+func (_u *UserUpdate) AddPromotionSubscriptionIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddPromotionSubscriptionIDs(ids...)
+	return _u
+}
+
+// AddPromotionSubscriptions adds the "promotion_subscriptions" edges to the PromotionSubscription entity.
+func (_u *UserUpdate) AddPromotionSubscriptions(v ...*PromotionSubscription) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPromotionSubscriptionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -1197,27 +1280,6 @@ func (_u *UserUpdate) RemoveSubscriptions(v ...*Subscription) *UserUpdate {
 	return _u.RemoveSubscriptionIDs(ids...)
 }
 
-// ClearSubscribers clears all "subscribers" edges to the Subscription entity.
-func (_u *UserUpdate) ClearSubscribers() *UserUpdate {
-	_u.mutation.ClearSubscribers()
-	return _u
-}
-
-// RemoveSubscriberIDs removes the "subscribers" edge to Subscription entities by IDs.
-func (_u *UserUpdate) RemoveSubscriberIDs(ids ...string) *UserUpdate {
-	_u.mutation.RemoveSubscriberIDs(ids...)
-	return _u
-}
-
-// RemoveSubscribers removes "subscribers" edges to Subscription entities.
-func (_u *UserUpdate) RemoveSubscribers(v ...*Subscription) *UserUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveSubscriberIDs(ids...)
-}
-
 // ClearReviewLogs clears all "review_logs" edges to the MediaReviewLog entity.
 func (_u *UserUpdate) ClearReviewLogs() *UserUpdate {
 	_u.mutation.ClearReviewLogs()
@@ -1363,6 +1425,153 @@ func (_u *UserUpdate) RemoveHistory(v ...*History) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveHistoryIDs(ids...)
+}
+
+// ClearLiveRooms clears all "live_rooms" edges to the LiveRoom entity.
+func (_u *UserUpdate) ClearLiveRooms() *UserUpdate {
+	_u.mutation.ClearLiveRooms()
+	return _u
+}
+
+// RemoveLiveRoomIDs removes the "live_rooms" edge to LiveRoom entities by IDs.
+func (_u *UserUpdate) RemoveLiveRoomIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveLiveRoomIDs(ids...)
+	return _u
+}
+
+// RemoveLiveRooms removes "live_rooms" edges to LiveRoom entities.
+func (_u *UserUpdate) RemoveLiveRooms(v ...*LiveRoom) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLiveRoomIDs(ids...)
+}
+
+// ClearLiveChatMessages clears all "live_chat_messages" edges to the LiveChatMessage entity.
+func (_u *UserUpdate) ClearLiveChatMessages() *UserUpdate {
+	_u.mutation.ClearLiveChatMessages()
+	return _u
+}
+
+// RemoveLiveChatMessageIDs removes the "live_chat_messages" edge to LiveChatMessage entities by IDs.
+func (_u *UserUpdate) RemoveLiveChatMessageIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveLiveChatMessageIDs(ids...)
+	return _u
+}
+
+// RemoveLiveChatMessages removes "live_chat_messages" edges to LiveChatMessage entities.
+func (_u *UserUpdate) RemoveLiveChatMessages(v ...*LiveChatMessage) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLiveChatMessageIDs(ids...)
+}
+
+// ClearPaymentSubscriptions clears all "payment_subscriptions" edges to the UserSubscription entity.
+func (_u *UserUpdate) ClearPaymentSubscriptions() *UserUpdate {
+	_u.mutation.ClearPaymentSubscriptions()
+	return _u
+}
+
+// RemovePaymentSubscriptionIDs removes the "payment_subscriptions" edge to UserSubscription entities by IDs.
+func (_u *UserUpdate) RemovePaymentSubscriptionIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemovePaymentSubscriptionIDs(ids...)
+	return _u
+}
+
+// RemovePaymentSubscriptions removes "payment_subscriptions" edges to UserSubscription entities.
+func (_u *UserUpdate) RemovePaymentSubscriptions(v ...*UserSubscription) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePaymentSubscriptionIDs(ids...)
+}
+
+// ClearPaymentOrders clears all "payment_orders" edges to the Order entity.
+func (_u *UserUpdate) ClearPaymentOrders() *UserUpdate {
+	_u.mutation.ClearPaymentOrders()
+	return _u
+}
+
+// RemovePaymentOrderIDs removes the "payment_orders" edge to Order entities by IDs.
+func (_u *UserUpdate) RemovePaymentOrderIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemovePaymentOrderIDs(ids...)
+	return _u
+}
+
+// RemovePaymentOrders removes "payment_orders" edges to Order entities.
+func (_u *UserUpdate) RemovePaymentOrders(v ...*Order) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePaymentOrderIDs(ids...)
+}
+
+// ClearPaymentWallet clears all "payment_wallet" edges to the Wallet entity.
+func (_u *UserUpdate) ClearPaymentWallet() *UserUpdate {
+	_u.mutation.ClearPaymentWallet()
+	return _u
+}
+
+// RemovePaymentWalletIDs removes the "payment_wallet" edge to Wallet entities by IDs.
+func (_u *UserUpdate) RemovePaymentWalletIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemovePaymentWalletIDs(ids...)
+	return _u
+}
+
+// RemovePaymentWallet removes "payment_wallet" edges to Wallet entities.
+func (_u *UserUpdate) RemovePaymentWallet(v ...*Wallet) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePaymentWalletIDs(ids...)
+}
+
+// ClearDrmLicenses clears all "drm_licenses" edges to the DrmLicense entity.
+func (_u *UserUpdate) ClearDrmLicenses() *UserUpdate {
+	_u.mutation.ClearDrmLicenses()
+	return _u
+}
+
+// RemoveDrmLicenseIDs removes the "drm_licenses" edge to DrmLicense entities by IDs.
+func (_u *UserUpdate) RemoveDrmLicenseIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveDrmLicenseIDs(ids...)
+	return _u
+}
+
+// RemoveDrmLicenses removes "drm_licenses" edges to DrmLicense entities.
+func (_u *UserUpdate) RemoveDrmLicenses(v ...*DrmLicense) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDrmLicenseIDs(ids...)
+}
+
+// ClearPromotionSubscriptions clears all "promotion_subscriptions" edges to the PromotionSubscription entity.
+func (_u *UserUpdate) ClearPromotionSubscriptions() *UserUpdate {
+	_u.mutation.ClearPromotionSubscriptions()
+	return _u
+}
+
+// RemovePromotionSubscriptionIDs removes the "promotion_subscriptions" edge to PromotionSubscription entities by IDs.
+func (_u *UserUpdate) RemovePromotionSubscriptionIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemovePromotionSubscriptionIDs(ids...)
+	return _u
+}
+
+// RemovePromotionSubscriptions removes "promotion_subscriptions" edges to PromotionSubscription entities.
+func (_u *UserUpdate) RemovePromotionSubscriptions(v ...*PromotionSubscription) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePromotionSubscriptionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1541,9 +1750,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.IsStaff(); ok {
-		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
@@ -2205,51 +2411,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SubscribersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.SubscribersTable,
-			Columns: []string{user.SubscribersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedSubscribersIDs(); len(nodes) > 0 && !_u.mutation.SubscribersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.SubscribersTable,
-			Columns: []string{user.SubscribersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.SubscribersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.SubscribersTable,
-			Columns: []string{user.SubscribersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if _u.mutation.ReviewLogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -2565,6 +2726,321 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.LiveRoomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveRoomsTable,
+			Columns: []string{user.LiveRoomsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(liveroom.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLiveRoomsIDs(); len(nodes) > 0 && !_u.mutation.LiveRoomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveRoomsTable,
+			Columns: []string{user.LiveRoomsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(liveroom.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LiveRoomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveRoomsTable,
+			Columns: []string{user.LiveRoomsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(liveroom.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LiveChatMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveChatMessagesTable,
+			Columns: []string{user.LiveChatMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(livechatmessage.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLiveChatMessagesIDs(); len(nodes) > 0 && !_u.mutation.LiveChatMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveChatMessagesTable,
+			Columns: []string{user.LiveChatMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(livechatmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LiveChatMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveChatMessagesTable,
+			Columns: []string{user.LiveChatMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(livechatmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PaymentSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentSubscriptionsTable,
+			Columns: []string{user.PaymentSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usersubscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPaymentSubscriptionsIDs(); len(nodes) > 0 && !_u.mutation.PaymentSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentSubscriptionsTable,
+			Columns: []string{user.PaymentSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usersubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PaymentSubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentSubscriptionsTable,
+			Columns: []string{user.PaymentSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usersubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PaymentOrdersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentOrdersTable,
+			Columns: []string{user.PaymentOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPaymentOrdersIDs(); len(nodes) > 0 && !_u.mutation.PaymentOrdersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentOrdersTable,
+			Columns: []string{user.PaymentOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PaymentOrdersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentOrdersTable,
+			Columns: []string{user.PaymentOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PaymentWalletCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentWalletTable,
+			Columns: []string{user.PaymentWalletColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPaymentWalletIDs(); len(nodes) > 0 && !_u.mutation.PaymentWalletCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentWalletTable,
+			Columns: []string{user.PaymentWalletColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PaymentWalletIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentWalletTable,
+			Columns: []string{user.PaymentWalletColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DrmLicensesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DrmLicensesTable,
+			Columns: []string{user.DrmLicensesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(drmlicense.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDrmLicensesIDs(); len(nodes) > 0 && !_u.mutation.DrmLicensesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DrmLicensesTable,
+			Columns: []string{user.DrmLicensesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(drmlicense.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DrmLicensesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DrmLicensesTable,
+			Columns: []string{user.DrmLicensesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(drmlicense.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PromotionSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PromotionSubscriptionsTable,
+			Columns: []string{user.PromotionSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(promotionsubscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPromotionSubscriptionsIDs(); len(nodes) > 0 && !_u.mutation.PromotionSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PromotionSubscriptionsTable,
+			Columns: []string{user.PromotionSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(promotionsubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PromotionSubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PromotionSubscriptionsTable,
+			Columns: []string{user.PromotionSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(promotionsubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -2713,20 +3189,6 @@ func (_u *UserUpdateOne) SetStatus(v user.Status) *UserUpdateOne {
 func (_u *UserUpdateOne) SetNillableStatus(v *user.Status) *UserUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
-	}
-	return _u
-}
-
-// SetIsStaff sets the "is_staff" field.
-func (_u *UserUpdateOne) SetIsStaff(v bool) *UserUpdateOne {
-	_u.mutation.SetIsStaff(v)
-	return _u
-}
-
-// SetNillableIsStaff sets the "is_staff" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableIsStaff(v *bool) *UserUpdateOne {
-	if v != nil {
-		_u.SetIsStaff(*v)
 	}
 	return _u
 }
@@ -3360,21 +3822,6 @@ func (_u *UserUpdateOne) AddSubscriptions(v ...*Subscription) *UserUpdateOne {
 	return _u.AddSubscriptionIDs(ids...)
 }
 
-// AddSubscriberIDs adds the "subscribers" edge to the Subscription entity by IDs.
-func (_u *UserUpdateOne) AddSubscriberIDs(ids ...string) *UserUpdateOne {
-	_u.mutation.AddSubscriberIDs(ids...)
-	return _u
-}
-
-// AddSubscribers adds the "subscribers" edges to the Subscription entity.
-func (_u *UserUpdateOne) AddSubscribers(v ...*Subscription) *UserUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddSubscriberIDs(ids...)
-}
-
 // AddReviewLogIDs adds the "review_logs" edge to the MediaReviewLog entity by IDs.
 func (_u *UserUpdateOne) AddReviewLogIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddReviewLogIDs(ids...)
@@ -3478,6 +3925,111 @@ func (_u *UserUpdateOne) AddHistory(v ...*History) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddHistoryIDs(ids...)
+}
+
+// AddLiveRoomIDs adds the "live_rooms" edge to the LiveRoom entity by IDs.
+func (_u *UserUpdateOne) AddLiveRoomIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddLiveRoomIDs(ids...)
+	return _u
+}
+
+// AddLiveRooms adds the "live_rooms" edges to the LiveRoom entity.
+func (_u *UserUpdateOne) AddLiveRooms(v ...*LiveRoom) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLiveRoomIDs(ids...)
+}
+
+// AddLiveChatMessageIDs adds the "live_chat_messages" edge to the LiveChatMessage entity by IDs.
+func (_u *UserUpdateOne) AddLiveChatMessageIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddLiveChatMessageIDs(ids...)
+	return _u
+}
+
+// AddLiveChatMessages adds the "live_chat_messages" edges to the LiveChatMessage entity.
+func (_u *UserUpdateOne) AddLiveChatMessages(v ...*LiveChatMessage) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLiveChatMessageIDs(ids...)
+}
+
+// AddPaymentSubscriptionIDs adds the "payment_subscriptions" edge to the UserSubscription entity by IDs.
+func (_u *UserUpdateOne) AddPaymentSubscriptionIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddPaymentSubscriptionIDs(ids...)
+	return _u
+}
+
+// AddPaymentSubscriptions adds the "payment_subscriptions" edges to the UserSubscription entity.
+func (_u *UserUpdateOne) AddPaymentSubscriptions(v ...*UserSubscription) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPaymentSubscriptionIDs(ids...)
+}
+
+// AddPaymentOrderIDs adds the "payment_orders" edge to the Order entity by IDs.
+func (_u *UserUpdateOne) AddPaymentOrderIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddPaymentOrderIDs(ids...)
+	return _u
+}
+
+// AddPaymentOrders adds the "payment_orders" edges to the Order entity.
+func (_u *UserUpdateOne) AddPaymentOrders(v ...*Order) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPaymentOrderIDs(ids...)
+}
+
+// AddPaymentWalletIDs adds the "payment_wallet" edge to the Wallet entity by IDs.
+func (_u *UserUpdateOne) AddPaymentWalletIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddPaymentWalletIDs(ids...)
+	return _u
+}
+
+// AddPaymentWallet adds the "payment_wallet" edges to the Wallet entity.
+func (_u *UserUpdateOne) AddPaymentWallet(v ...*Wallet) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPaymentWalletIDs(ids...)
+}
+
+// AddDrmLicenseIDs adds the "drm_licenses" edge to the DrmLicense entity by IDs.
+func (_u *UserUpdateOne) AddDrmLicenseIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddDrmLicenseIDs(ids...)
+	return _u
+}
+
+// AddDrmLicenses adds the "drm_licenses" edges to the DrmLicense entity.
+func (_u *UserUpdateOne) AddDrmLicenses(v ...*DrmLicense) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDrmLicenseIDs(ids...)
+}
+
+// AddPromotionSubscriptionIDs adds the "promotion_subscriptions" edge to the PromotionSubscription entity by IDs.
+func (_u *UserUpdateOne) AddPromotionSubscriptionIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddPromotionSubscriptionIDs(ids...)
+	return _u
+}
+
+// AddPromotionSubscriptions adds the "promotion_subscriptions" edges to the PromotionSubscription entity.
+func (_u *UserUpdateOne) AddPromotionSubscriptions(v ...*PromotionSubscription) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPromotionSubscriptionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -3737,27 +4289,6 @@ func (_u *UserUpdateOne) RemoveSubscriptions(v ...*Subscription) *UserUpdateOne 
 	return _u.RemoveSubscriptionIDs(ids...)
 }
 
-// ClearSubscribers clears all "subscribers" edges to the Subscription entity.
-func (_u *UserUpdateOne) ClearSubscribers() *UserUpdateOne {
-	_u.mutation.ClearSubscribers()
-	return _u
-}
-
-// RemoveSubscriberIDs removes the "subscribers" edge to Subscription entities by IDs.
-func (_u *UserUpdateOne) RemoveSubscriberIDs(ids ...string) *UserUpdateOne {
-	_u.mutation.RemoveSubscriberIDs(ids...)
-	return _u
-}
-
-// RemoveSubscribers removes "subscribers" edges to Subscription entities.
-func (_u *UserUpdateOne) RemoveSubscribers(v ...*Subscription) *UserUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveSubscriberIDs(ids...)
-}
-
 // ClearReviewLogs clears all "review_logs" edges to the MediaReviewLog entity.
 func (_u *UserUpdateOne) ClearReviewLogs() *UserUpdateOne {
 	_u.mutation.ClearReviewLogs()
@@ -3903,6 +4434,153 @@ func (_u *UserUpdateOne) RemoveHistory(v ...*History) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveHistoryIDs(ids...)
+}
+
+// ClearLiveRooms clears all "live_rooms" edges to the LiveRoom entity.
+func (_u *UserUpdateOne) ClearLiveRooms() *UserUpdateOne {
+	_u.mutation.ClearLiveRooms()
+	return _u
+}
+
+// RemoveLiveRoomIDs removes the "live_rooms" edge to LiveRoom entities by IDs.
+func (_u *UserUpdateOne) RemoveLiveRoomIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveLiveRoomIDs(ids...)
+	return _u
+}
+
+// RemoveLiveRooms removes "live_rooms" edges to LiveRoom entities.
+func (_u *UserUpdateOne) RemoveLiveRooms(v ...*LiveRoom) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLiveRoomIDs(ids...)
+}
+
+// ClearLiveChatMessages clears all "live_chat_messages" edges to the LiveChatMessage entity.
+func (_u *UserUpdateOne) ClearLiveChatMessages() *UserUpdateOne {
+	_u.mutation.ClearLiveChatMessages()
+	return _u
+}
+
+// RemoveLiveChatMessageIDs removes the "live_chat_messages" edge to LiveChatMessage entities by IDs.
+func (_u *UserUpdateOne) RemoveLiveChatMessageIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveLiveChatMessageIDs(ids...)
+	return _u
+}
+
+// RemoveLiveChatMessages removes "live_chat_messages" edges to LiveChatMessage entities.
+func (_u *UserUpdateOne) RemoveLiveChatMessages(v ...*LiveChatMessage) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLiveChatMessageIDs(ids...)
+}
+
+// ClearPaymentSubscriptions clears all "payment_subscriptions" edges to the UserSubscription entity.
+func (_u *UserUpdateOne) ClearPaymentSubscriptions() *UserUpdateOne {
+	_u.mutation.ClearPaymentSubscriptions()
+	return _u
+}
+
+// RemovePaymentSubscriptionIDs removes the "payment_subscriptions" edge to UserSubscription entities by IDs.
+func (_u *UserUpdateOne) RemovePaymentSubscriptionIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemovePaymentSubscriptionIDs(ids...)
+	return _u
+}
+
+// RemovePaymentSubscriptions removes "payment_subscriptions" edges to UserSubscription entities.
+func (_u *UserUpdateOne) RemovePaymentSubscriptions(v ...*UserSubscription) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePaymentSubscriptionIDs(ids...)
+}
+
+// ClearPaymentOrders clears all "payment_orders" edges to the Order entity.
+func (_u *UserUpdateOne) ClearPaymentOrders() *UserUpdateOne {
+	_u.mutation.ClearPaymentOrders()
+	return _u
+}
+
+// RemovePaymentOrderIDs removes the "payment_orders" edge to Order entities by IDs.
+func (_u *UserUpdateOne) RemovePaymentOrderIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemovePaymentOrderIDs(ids...)
+	return _u
+}
+
+// RemovePaymentOrders removes "payment_orders" edges to Order entities.
+func (_u *UserUpdateOne) RemovePaymentOrders(v ...*Order) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePaymentOrderIDs(ids...)
+}
+
+// ClearPaymentWallet clears all "payment_wallet" edges to the Wallet entity.
+func (_u *UserUpdateOne) ClearPaymentWallet() *UserUpdateOne {
+	_u.mutation.ClearPaymentWallet()
+	return _u
+}
+
+// RemovePaymentWalletIDs removes the "payment_wallet" edge to Wallet entities by IDs.
+func (_u *UserUpdateOne) RemovePaymentWalletIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemovePaymentWalletIDs(ids...)
+	return _u
+}
+
+// RemovePaymentWallet removes "payment_wallet" edges to Wallet entities.
+func (_u *UserUpdateOne) RemovePaymentWallet(v ...*Wallet) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePaymentWalletIDs(ids...)
+}
+
+// ClearDrmLicenses clears all "drm_licenses" edges to the DrmLicense entity.
+func (_u *UserUpdateOne) ClearDrmLicenses() *UserUpdateOne {
+	_u.mutation.ClearDrmLicenses()
+	return _u
+}
+
+// RemoveDrmLicenseIDs removes the "drm_licenses" edge to DrmLicense entities by IDs.
+func (_u *UserUpdateOne) RemoveDrmLicenseIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveDrmLicenseIDs(ids...)
+	return _u
+}
+
+// RemoveDrmLicenses removes "drm_licenses" edges to DrmLicense entities.
+func (_u *UserUpdateOne) RemoveDrmLicenses(v ...*DrmLicense) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDrmLicenseIDs(ids...)
+}
+
+// ClearPromotionSubscriptions clears all "promotion_subscriptions" edges to the PromotionSubscription entity.
+func (_u *UserUpdateOne) ClearPromotionSubscriptions() *UserUpdateOne {
+	_u.mutation.ClearPromotionSubscriptions()
+	return _u
+}
+
+// RemovePromotionSubscriptionIDs removes the "promotion_subscriptions" edge to PromotionSubscription entities by IDs.
+func (_u *UserUpdateOne) RemovePromotionSubscriptionIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemovePromotionSubscriptionIDs(ids...)
+	return _u
+}
+
+// RemovePromotionSubscriptions removes "promotion_subscriptions" edges to PromotionSubscription entities.
+func (_u *UserUpdateOne) RemovePromotionSubscriptions(v ...*PromotionSubscription) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePromotionSubscriptionIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -4111,9 +4789,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.IsStaff(); ok {
-		_spec.SetField(user.FieldIsStaff, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
@@ -4775,51 +5450,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SubscribersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.SubscribersTable,
-			Columns: []string{user.SubscribersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedSubscribersIDs(); len(nodes) > 0 && !_u.mutation.SubscribersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.SubscribersTable,
-			Columns: []string{user.SubscribersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.SubscribersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.SubscribersTable,
-			Columns: []string{user.SubscribersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if _u.mutation.ReviewLogsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -5128,6 +5758,321 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(history.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LiveRoomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveRoomsTable,
+			Columns: []string{user.LiveRoomsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(liveroom.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLiveRoomsIDs(); len(nodes) > 0 && !_u.mutation.LiveRoomsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveRoomsTable,
+			Columns: []string{user.LiveRoomsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(liveroom.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LiveRoomsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveRoomsTable,
+			Columns: []string{user.LiveRoomsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(liveroom.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LiveChatMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveChatMessagesTable,
+			Columns: []string{user.LiveChatMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(livechatmessage.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLiveChatMessagesIDs(); len(nodes) > 0 && !_u.mutation.LiveChatMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveChatMessagesTable,
+			Columns: []string{user.LiveChatMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(livechatmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LiveChatMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LiveChatMessagesTable,
+			Columns: []string{user.LiveChatMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(livechatmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PaymentSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentSubscriptionsTable,
+			Columns: []string{user.PaymentSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usersubscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPaymentSubscriptionsIDs(); len(nodes) > 0 && !_u.mutation.PaymentSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentSubscriptionsTable,
+			Columns: []string{user.PaymentSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usersubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PaymentSubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentSubscriptionsTable,
+			Columns: []string{user.PaymentSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usersubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PaymentOrdersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentOrdersTable,
+			Columns: []string{user.PaymentOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPaymentOrdersIDs(); len(nodes) > 0 && !_u.mutation.PaymentOrdersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentOrdersTable,
+			Columns: []string{user.PaymentOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PaymentOrdersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentOrdersTable,
+			Columns: []string{user.PaymentOrdersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PaymentWalletCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentWalletTable,
+			Columns: []string{user.PaymentWalletColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPaymentWalletIDs(); len(nodes) > 0 && !_u.mutation.PaymentWalletCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentWalletTable,
+			Columns: []string{user.PaymentWalletColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PaymentWalletIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PaymentWalletTable,
+			Columns: []string{user.PaymentWalletColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DrmLicensesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DrmLicensesTable,
+			Columns: []string{user.DrmLicensesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(drmlicense.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDrmLicensesIDs(); len(nodes) > 0 && !_u.mutation.DrmLicensesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DrmLicensesTable,
+			Columns: []string{user.DrmLicensesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(drmlicense.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DrmLicensesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DrmLicensesTable,
+			Columns: []string{user.DrmLicensesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(drmlicense.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.PromotionSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PromotionSubscriptionsTable,
+			Columns: []string{user.PromotionSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(promotionsubscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPromotionSubscriptionsIDs(); len(nodes) > 0 && !_u.mutation.PromotionSubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PromotionSubscriptionsTable,
+			Columns: []string{user.PromotionSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(promotionsubscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PromotionSubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PromotionSubscriptionsTable,
+			Columns: []string{user.PromotionSubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(promotionsubscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -47,8 +47,9 @@ func NewUploadConfigFromDefaults() *UploadConfig {
 }
 
 // NewStoragePathsFromConfig creates StoragePaths from StorageConfig.
+// Passes overrides map for per-dir path customization.
 func NewStoragePathsFromConfig(cfg *StorageConfig) *StoragePaths {
-	return NewStoragePaths(cfg.BasePath)
+	return NewStoragePathsWithOverrides(cfg.BasePath, cfg.Overrides)
 }
 
 // NewTranscodeConfigFromDefaults creates transcode config from defaults.
@@ -57,9 +58,10 @@ func NewTranscodeConfigFromDefaults() *TranscodeConfig {
 }
 
 // NewRateLimiterConfig creates a rate limiter with rpm from settings.
-// Upload endpoints are excluded from rate limiting to prevent upload failures.
-func NewRateLimiterConfig(settingUC *systembiz.SettingUseCase) (rpm int, excludePrefix string) {
-	defaultRPM := 60
+// Static asset paths and health endpoints are excluded from rate limiting
+// to prevent chunk load failures (ChunkLoadError) and video streaming interruptions.
+func NewRateLimiterConfig(settingUC *systembiz.SettingUseCase) (rpm int, excludePrefixes []string) {
+	defaultRPM := 600
 	if settingUC != nil {
 		if val := settingUC.Get(context.Background(), "api_rate_limit"); val != "" {
 			var rpmVal int
@@ -68,5 +70,19 @@ func NewRateLimiterConfig(settingUC *systembiz.SettingUseCase) (rpm int, exclude
 			}
 		}
 	}
-	return defaultRPM, "/api/v1/uploads"
+	return defaultRPM, []string{
+		"/api/v1/uploads",
+		"/api/v1/admin/medias/transcoding/events",
+		"/static",
+		"/assets",
+		"/locales",
+		"/themes",
+		"/files",
+		"/health",
+		"/favicon.ico",
+		"/robots.txt",
+		"/manifest.json",
+		"/logo",
+		"/banner",
+	}
 }

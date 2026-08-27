@@ -27,6 +27,10 @@ func (Subscription) Fields() []ent.Field {
 		field.String("subscriber_id"),
 		field.String("channel_id"),
 		field.Time("create_time").Default(time.Now),
+		// 订阅者通知偏好：全部(all)/个性化(personalized)/无(none)。BUG-198 真功能重建。
+		field.Enum("notification_preference").
+			Values("all", "personalized", "none").
+			Default("all"),
 	}
 }
 
@@ -54,7 +58,7 @@ func (Subscription) Edges() []ent.Edge {
 			Field("subscriber_id").
 			Unique().
 			Required(),
-		edge.From("channel", User.Type).
+		edge.From("channel", Channel.Type).
 			Ref("subscribers").
 			Field("channel_id").
 			Unique().

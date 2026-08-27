@@ -8,10 +8,7 @@ package service
 import (
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/features/content/biz"
@@ -84,7 +81,7 @@ func (h *InteractionHandler) registerShares(r http2.Router) {
 
 func (h *InteractionHandler) getLikes() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{
+		http2.OK(ctx, map[string]any{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      1,
@@ -96,21 +93,21 @@ func (h *InteractionHandler) getLikes() http2.HandlerFunc {
 
 func (h *InteractionHandler) toggleLike() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"success": true})
+		http2.OK(ctx, map[string]any{"success": true})
 		return nil
 	}
 }
 
 func (h *InteractionHandler) getLikeStatusBatch() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"status": map[string]bool{}})
+		http2.OK(ctx, map[string]any{"status": map[string]bool{}})
 		return nil
 	}
 }
 
 func (h *InteractionHandler) getFavorites() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{
+		http2.OK(ctx, map[string]any{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      1,
@@ -122,37 +119,36 @@ func (h *InteractionHandler) getFavorites() http2.HandlerFunc {
 
 func (h *InteractionHandler) toggleFavorite() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"success": true})
+		http2.OK(ctx, map[string]any{"success": true})
 		return nil
 	}
 }
 
 func (h *InteractionHandler) checkFavorite() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"is_favorite": false})
+		http2.OK(ctx, map[string]any{"is_favorite": false})
 		return nil
 	}
 }
 
 func (h *InteractionHandler) getSubscriptions() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		val, exists := gc.Get("claims")
+		val, exists := ctx.Get("claims")
 		if !exists {
 			http2.Fail(ctx, http2.ErrUnauthorized, "unauthorized")
 			return nil
 		}
 		claims := val.(*auth.Claims)
 
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		_ = claims
 		_ = page
 		_ = pageSize
 
-		http2.OK(ctx, gin.H{
+		http2.OK(ctx, map[string]any{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
@@ -164,30 +160,29 @@ func (h *InteractionHandler) getSubscriptions() http2.HandlerFunc {
 
 func (h *InteractionHandler) getSubscriptionCount() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"count": 0})
+		http2.OK(ctx, map[string]any{"count": 0})
 		return nil
 	}
 }
 
 func (h *InteractionHandler) getFollowers() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		val, exists := gc.Get("claims")
+		val, exists := ctx.Get("claims")
 		if !exists {
 			http2.Fail(ctx, http2.ErrUnauthorized, "unauthorized")
 			return nil
 		}
 		claims := val.(*auth.Claims)
 
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		_ = claims
 		_ = page
 		_ = pageSize
 
-		http2.OK(ctx, gin.H{
+		http2.OK(ctx, map[string]any{
 			"items":     []interface{}{},
 			"total":     0,
 			"page":      page,
@@ -199,14 +194,14 @@ func (h *InteractionHandler) getFollowers() http2.HandlerFunc {
 
 func (h *InteractionHandler) getFollowerCount() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"count": 0})
+		http2.OK(ctx, map[string]any{"count": 0})
 		return nil
 	}
 }
 
 func (h *InteractionHandler) createShare() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"success": true})
+		http2.OK(ctx, map[string]any{"success": true})
 		return nil
 	}
 }

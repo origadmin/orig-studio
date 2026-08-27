@@ -18,13 +18,13 @@ type MediaUseCaseInterface interface {
 
 // MediaInfo is a minimal media record for dependency injection and feeds.
 type MediaInfo struct {
-	ID          int64  `json:"id"`
+	ID          string `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Thumbnail   string `json:"thumbnail"`
 	Duration    int    `json:"duration"`
 	ViewCount   int64  `json:"view_count"`
-	UserID      int    `json:"user_id"`
+	UserID      string `json:"user_id"`
 	Username    string `json:"username"`
 	Type        string `json:"type"`
 	URL         string `json:"url"`

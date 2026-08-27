@@ -1,12 +1,10 @@
 package service
 
 import (
-	"net/http"
 	"strings"
 
 	"origadmin/application/origstudio/internal/infra/auth"
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/server"
 )
@@ -24,7 +22,7 @@ func NewMediaReportHandler(mediaReportUC *contentbiz.MediaReportUseCase, jwtMgr 
 }
 
 func (h *MediaReportHandler) RegisterRoutes(r http2.Router) {
-	r.POST("/medias/:token/report", server.WithJWTCtx(h.jwtMgr, server.HTTPToHandlerFunc(h.reportMedia())))
+	r.POST("/medias/:token/report", server.WithJWTCtx(h.jwtMgr, h.reportMedia()))
 }
 
 type MediaReportRequest struct {
@@ -38,54 +36,43 @@ type MediaReportResultDTO struct {
 	Status      string `json:"status"`
 }
 
-func (h *MediaReportHandler) reportMedia() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("token")
+func (h *MediaReportHandler) reportMedia() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("token")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "media ID is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "media ID is required")
 		}
 
-		claims, ok := server.GetClaims(gc)
+		claims, ok := server.GetClaimsCtx(ctx)
 		if !ok {
-			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
-			return
+			return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 		}
 		userID := claims.GetUserID()
 
 		var req MediaReportRequest
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		if req.Reason == "" {
-			server.Fail(gc, server.ErrBadRequest, "reason is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "reason is required")
 		}
 
 		reportCount, status, err := h.mediaReportUC.ReportMedia(ctx, id, userID, req.Reason, req.Description)
 		if err != nil {
 			if strings.Contains(err.Error(), "already reported") {
-				server.Fail(gc, server.ErrConflict, err.Error())
-				return
+				return server.FailCtx(ctx, server.ErrConflict, err.Error())
 			}
 			if strings.Contains(err.Error(), "cannot report your own") {
-				server.Fail(gc, server.ErrBadRequest, err.Error())
-				return
+				return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 			}
 			if strings.Contains(err.Error(), "failed to get media") {
-				server.Fail(gc, server.ErrBadRequest, "media not found")
-				return
+				return server.FailCtx(ctx, server.ErrBadRequest, "media not found")
 			}
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, MediaReportResultDTO{
+		return server.OKCtx(ctx, MediaReportResultDTO{
 			Message:     "report submitted",
 			ReportCount: reportCount,
 			Status:      status,

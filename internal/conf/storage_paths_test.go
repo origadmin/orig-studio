@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package conf
 
 import (
@@ -12,404 +8,324 @@ import (
 	"time"
 )
 
-func TestNewStoragePaths(t *testing.T) {
+func TestStoragePaths_RelativePaths(t *testing.T) {
 	tmpDir := t.TempDir()
 	sp := NewStoragePaths(tmpDir)
 
-	if sp.BasePath() == "" {
-		t.Fatal("BasePath should not be empty")
-	}
-
-	// Verify absolute path resolution
-	if !filepath.IsAbs(sp.BasePath()) {
-		t.Fatalf("BasePath should be absolute, got: %s", sp.BasePath())
-	}
-
-	// Verify all directories are created
-	for _, dir := range []string{
-		sp.OriginalsDir,
-		sp.TempDir,
-		sp.ThumbnailsDir,
-		sp.HLSDir,
-		sp.PreviewsDir,
-		sp.SpritesDir,
-	} {
-		if _, err := os.Stat(dir); os.IsNotExist(err) {
-			t.Errorf("directory should exist: %s", dir)
-		}
-	}
-}
-
-func TestOriginalPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.OriginalPath("user123", "abc-def.mp4")
-
-	// Should contain originals/user123/yyyy/MM/abc-def.mp4
-	if !strings.Contains(path, "originals") {
-		t.Errorf("path should contain 'originals': %s", path)
-	}
-	if !strings.Contains(path, "user123") {
-		t.Errorf("path should contain user ID: %s", path)
-	}
-	if !strings.Contains(path, "abc-def.mp4") {
-		t.Errorf("path should contain filename: %s", path)
-	}
-	if !filepath.IsAbs(path) {
-		t.Errorf("path should be absolute: %s", path)
-	}
-}
-
-func TestOriginalPathAt(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	tm := time.Date(2026, 5, 7, 10, 0, 0, 0, time.UTC)
-	path := sp.OriginalPathAt("user123", "test.mp4", tm)
-
-	expected := filepath.Join(sp.OriginalsDir, "user123", "2026", "05", "test.mp4")
-	if path != expected {
-		t.Errorf("expected %s, got %s", expected, path)
-	}
-}
-
-func TestTempUploadDir(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.TempUploadDir("user123", "upload-abc")
-
-	if !strings.Contains(path, "temp") {
-		t.Errorf("path should contain 'temp': %s", path)
-	}
-	if !strings.Contains(path, "user123") {
-		t.Errorf("path should contain user ID: %s", path)
-	}
-	if !strings.Contains(path, "upload-abc") {
-		t.Errorf("path should contain upload ID: %s", path)
-	}
-	if !filepath.IsAbs(path) {
-		t.Errorf("path should be absolute: %s", path)
-	}
-}
-
-func TestTempPartPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.TempPartPath("user123", "upload-abc", 1)
-
-	if !strings.Contains(path, "part_00001") {
-		t.Errorf("path should contain 'part_00001': %s", path)
-	}
-}
-
-func TestTempMergedPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.TempMergedPath("user123", "upload-abc.mp4")
-
-	if !strings.Contains(path, "temp") {
-		t.Errorf("path should contain 'temp': %s", path)
-	}
-	if !strings.Contains(path, "upload-abc.mp4") {
-		t.Errorf("path should contain filename: %s", path)
-	}
-
-	// Merged file should be a sibling of the parts directory, not inside it
-	partsDir := sp.TempUploadDir("user123", "upload-abc")
-	if strings.HasPrefix(path, partsDir+string(filepath.Separator)) {
-		t.Errorf("merged file should NOT be inside parts directory: %s", path)
-	}
-}
-
-func TestRelativeOriginal(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	rel := sp.RelativeOriginal("user123", "test.mp4")
-
-	if !strings.HasPrefix(rel, "originals/user123/") {
-		t.Errorf("relative path should start with 'originals/user123/': %s", rel)
-	}
-	if !strings.HasSuffix(rel, "/test.mp4") {
-		t.Errorf("relative path should end with '/test.mp4': %s", rel)
-	}
-}
-
-func TestRelativeOriginalAt(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	tm := time.Date(2026, 5, 7, 10, 0, 0, 0, time.UTC)
-	rel := sp.RelativeOriginalAt("user123", "test.mp4", tm)
-
-	expected := "originals/user123/2026/05/test.mp4"
-	if rel != expected {
-		t.Errorf("expected %s, got %s", expected, rel)
-	}
-}
-
-func TestRelativeTemp(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	rel := sp.RelativeTemp("user123", "test.mp4")
-
-	if !strings.HasPrefix(rel, "temp/user123/") {
-		t.Errorf("relative path should start with 'temp/user123/': %s", rel)
-	}
-	if !strings.HasSuffix(rel, "/test.mp4") {
-		t.Errorf("relative path should end with '/test.mp4': %s", rel)
-	}
-}
-
-func TestFullPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	absPath := sp.FullPath("originals/user123/2026/05/test.mp4")
-
-	expected := filepath.Join(sp.BasePath(), "originals/user123/2026/05/test.mp4")
-	if absPath != expected {
-		t.Errorf("expected %s, got %s", expected, absPath)
-	}
-}
-
-func TestFullPathBackwardCompatibility(t *testing.T) {
-	// Old data stored as bare filenames like "abc123.mp4" should still resolve
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	absPath := sp.FullPath("abc123.mp4")
-	expected := filepath.Join(sp.BasePath(), "abc123.mp4")
-	if absPath != expected {
-		t.Errorf("backward compat: expected %s, got %s", expected, absPath)
-	}
-}
-
-func TestPromoteToOriginal(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	// Create a temp file to promote
-	filename := "test-upload.mp4"
-	userID := "user123"
-
-	tempPath := sp.TempMergedPath(userID, filename)
-	if err := os.MkdirAll(filepath.Dir(tempPath), 0755); err != nil {
-		t.Fatalf("failed to create temp dir: %v", err)
-	}
-	if err := os.WriteFile(tempPath, []byte("test content"), 0644); err != nil {
-		t.Fatalf("failed to write temp file: %v", err)
-	}
-
-	// Promote
-	relPath, err := sp.PromoteToOriginal(userID, filename)
-	if err != nil {
-		t.Fatalf("PromoteToOriginal failed: %v", err)
-	}
-
-	// Verify relative path format
-	if !strings.HasPrefix(relPath, "originals/user123/") {
-		t.Errorf("relative path should start with 'originals/user123/': %s", relPath)
-	}
-
-	// Verify file moved to originals
-	originalAbsPath := sp.FullPath(relPath)
-	data, err := os.ReadFile(originalAbsPath)
-	if err != nil {
-		t.Fatalf("failed to read promoted file: %v", err)
-	}
-	if string(data) != "test content" {
-		t.Errorf("file content mismatch: expected 'test content', got '%s'", string(data))
-	}
-
-	// Verify temp file no longer exists
-	if _, err := os.Stat(tempPath); !os.IsNotExist(err) {
-		t.Error("temp file should have been removed after promotion")
-	}
-}
-
-func TestCleanupTempParts(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	userID := "user123"
-	uploadID := "upload-abc"
-
-	// Create parts directory with a part file
-	partsDir := sp.TempUploadDir(userID, uploadID)
-	if err := os.MkdirAll(partsDir, 0755); err != nil {
-		t.Fatalf("failed to create parts dir: %v", err)
-	}
-	partPath := filepath.Join(partsDir, "part_00001")
-	if err := os.WriteFile(partPath, []byte("part data"), 0644); err != nil {
-		t.Fatalf("failed to write part file: %v", err)
-	}
-
-	// Cleanup
-	if err := sp.CleanupTempParts(userID, uploadID); err != nil {
-		t.Fatalf("CleanupTempParts failed: %v", err)
-	}
-
-	// Verify parts directory removed
-	if _, err := os.Stat(partsDir); !os.IsNotExist(err) {
-		t.Error("parts directory should have been removed")
-	}
-}
-
-func TestThumbnailAbsPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.ThumbnailAbsPath("media-uuid-123")
-	expected := filepath.Join(sp.ThumbnailsDir, "media-uuid-123.jpg")
-	if path != expected {
-		t.Errorf("expected %s, got %s", expected, path)
-	}
-}
-
-func TestHLSDirForMedia(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.HLSDirForMedia("media-uuid-123")
-	expected := filepath.Join(sp.HLSDir, "media-uuid-123")
-	if path != expected {
-		t.Errorf("expected %s, got %s", expected, path)
-	}
-}
-
-func TestPreviewAbsPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.PreviewAbsPath("media-uuid-123")
-	expected := filepath.Join(sp.PreviewsDir, "media-uuid-123.gif")
-	if path != expected {
-		t.Errorf("expected %s, got %s", expected, path)
-	}
-}
-
-func TestSpriteImageAbsPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.SpriteImageAbsPath("media-uuid-123")
-	expected := filepath.Join(sp.SpritesDir, "media-uuid-123", "sprite.jpg")
-	if path != expected {
-		t.Errorf("expected %s, got %s", expected, path)
-	}
-}
-
-func TestSpriteVTTAbsPath(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	path := sp.SpriteVTTAbsPath("media-uuid-123")
-	expected := filepath.Join(sp.SpritesDir, "media-uuid-123", "sprite.vtt")
-	if path != expected {
-		t.Errorf("expected %s, got %s", expected, path)
-	}
-}
-
-func TestStaticRouteMap(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
-
-	routes := sp.StaticRouteMap()
-
-	expectedRoutes := map[string]string{
-		"/uploads":    sp.OriginalsDir,
-		"/thumbnails": sp.ThumbnailsDir,
-		"/hls":        sp.HLSDir,
-		"/sprites":    sp.SpritesDir,
-		"/previews":   sp.PreviewsDir,
-	}
-
-	for prefix, expectedDir := range expectedRoutes {
-		if routes[prefix] != expectedDir {
-			t.Errorf("route %s: expected %s, got %s", prefix, expectedDir, routes[prefix])
-		}
-	}
-}
-
-func TestRelativePaths(t *testing.T) {
-	tmpDir := t.TempDir()
-	sp := NewStoragePaths(tmpDir)
+	refTime := time.Date(2026, 6, 25, 10, 30, 0, 0, time.UTC)
 
 	tests := []struct {
 		name     string
 		got      string
 		expected string
 	}{
-		{"RelativeThumbnail", sp.RelativeThumbnail("uuid1"), "thumbnails/uuid1.jpg"},
-		{"RelativeHLSMaster", sp.RelativeHLSMaster("uuid1"), "hls/uuid1/master.m3u8"},
-		{"RelativeHLSProfile", sp.RelativeHLSProfile("uuid1", "720p"), "hls/uuid1/720p/index.m3u8"},
-		{"RelativePreview", sp.RelativePreview("uuid1"), "previews/uuid1.gif"},
-		{"RelativeSpriteImage", sp.RelativeSpriteImage("uuid1"), "sprites/uuid1/sprite.jpg"},
-		{"RelativeSpriteVTT", sp.RelativeSpriteVTT("uuid1"), "sprites/uuid1/sprite.vtt"},
+		{
+			name:     "RelativeOriginalAt",
+			got:      sp.RelativeOriginalAt("admin", "abc123.mp4", refTime),
+			expected: "originals/admin/2026/06/abc123.mp4",
+		},
+		{
+			name:     "RelativeTempAt",
+			got:      sp.RelativeTempAt("admin", "abc123.mp4", refTime),
+			expected: "temp/admin/2026/06/abc123.mp4",
+		},
+		{
+			name:     "RelativeThumbnail",
+			got:      sp.RelativeThumbnail("media-uuid"),
+			expected: "thumbnails/media-uuid.jpg",
+		},
+		{
+			name:     "RelativeHLSMaster",
+			got:      sp.RelativeHLSMaster("media-uuid"),
+			expected: "hls/media-uuid/master.m3u8",
+		},
+		{
+			name:     "RelativeSpriteVTT",
+			got:      sp.RelativeSpriteVTT("media-uuid"),
+			expected: "sprites/media-uuid/sprite.vtt",
+		},
+		{
+			name:     "RelativeSpriteImage",
+			got:      sp.RelativeSpriteImage("media-uuid"),
+			expected: "sprites/media-uuid/sprite.jpg",
+		},
+		{
+			name:     "RelativePreview",
+			got:      sp.RelativePreview("media-uuid"),
+			expected: "previews/media-uuid.gif",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.got != tt.expected {
-				t.Errorf("expected %s, got %s", tt.expected, tt.got)
+				t.Errorf("expected %q, got %q", tt.expected, tt.got)
 			}
 		})
 	}
 }
 
-func TestFullPathRoundTrip(t *testing.T) {
-	// Verify that FullPath(RelativeXxx(...)) == XxxAbsPath(...)
+func TestStoragePaths_TempUploadDirAt(t *testing.T) {
 	tmpDir := t.TempDir()
 	sp := NewStoragePaths(tmpDir)
 
-	// Thumbnail
-	rel := sp.RelativeThumbnail("uuid1")
-	abs := sp.FullPath(rel)
-	expected := sp.ThumbnailAbsPath("uuid1")
-	if abs != expected {
-		t.Errorf("thumbnail round-trip: expected %s, got %s", expected, abs)
-	}
+	refTime := time.Date(2026, 6, 30, 23, 59, 0, 0, time.UTC)
+	got := sp.TempUploadDirAt("admin", "upload-xyz", refTime)
+	gotSlash := filepath.ToSlash(got)
 
-	// Preview
-	rel = sp.RelativePreview("uuid1")
-	abs = sp.FullPath(rel)
-	expected = sp.PreviewAbsPath("uuid1")
-	if abs != expected {
-		t.Errorf("preview round-trip: expected %s, got %s", expected, abs)
-	}
-
-	// Sprite image
-	rel = sp.RelativeSpriteImage("uuid1")
-	abs = sp.FullPath(rel)
-	expected = sp.SpriteImageAbsPath("uuid1")
-	if abs != expected {
-		t.Errorf("sprite image round-trip: expected %s, got %s", expected, abs)
+	// Must contain year/month from refTime, not current time
+	expectedSuffix := "temp/admin/2026/06/upload-xyz"
+	if !strings.HasSuffix(gotSlash, expectedSuffix) {
+		t.Errorf("TempUploadDirAt expected suffix %q, got %q", expectedSuffix, gotSlash)
 	}
 }
 
-func TestUserIDIsolation(t *testing.T) {
+func TestStoragePaths_TempPartPathAt(t *testing.T) {
 	tmpDir := t.TempDir()
 	sp := NewStoragePaths(tmpDir)
 
-	path1 := sp.OriginalPath("user_a", "file.mp4")
-	path2 := sp.OriginalPath("user_b", "file.mp4")
+	refTime := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
+	got := sp.TempPartPathAt("user1", "up-1", 1, refTime)
+	gotSlash := filepath.ToSlash(got)
 
-	// Different users should have different paths
-	if path1 == path2 {
-		t.Error("different users should have different paths")
+	expectedSuffix := "temp/user1/2026/01/up-1/part_00001"
+	if !strings.HasSuffix(gotSlash, expectedSuffix) {
+		t.Errorf("TempPartPathAt expected suffix %q, got %q", expectedSuffix, gotSlash)
+	}
+}
+
+func TestPromoteToOriginal_CrossMonth(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	// Simulate a file created in June, promoted in July (cross-month scenario)
+	juneTime := time.Date(2026, 6, 30, 23, 59, 0, 0, time.UTC)
+	tempPath := sp.RelativeTempAt("admin", "cross-month.mp4", juneTime)
+
+	// Write a test file to the temp location
+	srcFull := sp.FullPath(tempPath)
+	if err := os.MkdirAll(filepath.Dir(srcFull), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(srcFull, []byte("test content"), 0644); err != nil {
+		t.Fatal(err)
 	}
 
-	// Paths should contain respective user IDs
-	if !strings.Contains(path1, "user_a") {
-		t.Errorf("path1 should contain 'user_a': %s", path1)
+	// PromoteToOriginal must preserve the original June path, not use July (current time)
+	promotedPath, err := sp.PromoteToOriginal(tempPath)
+	if err != nil {
+		t.Fatalf("PromoteToOriginal failed: %v", err)
 	}
-	if !strings.Contains(path2, "user_b") {
-		t.Errorf("path2 should contain 'user_b': %s", path2)
+
+	// The promoted path must be originals/admin/2026/06/... (June), not 07 (July)
+	expected := "originals/admin/2026/06/cross-month.mp4"
+	if promotedPath != expected {
+		t.Errorf("PromoteToOriginal cross-month: expected %q, got %q", expected, promotedPath)
 	}
+
+	// Verify temp file no longer exists
+	if _, err := os.Stat(srcFull); !os.IsNotExist(err) {
+		t.Error("temp file should be removed after promotion")
+	}
+
+	// Verify original file exists
+	dstFull := sp.FullPath(promotedPath)
+	data, err := os.ReadFile(dstFull)
+	if err != nil {
+		t.Fatalf("promoted file not found: %v", err)
+	}
+	if string(data) != "test content" {
+		t.Errorf("promoted file content mismatch")
+	}
+}
+
+func TestPromoteToOriginal_InvalidPath(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	tests := []struct {
+		name    string
+		path    string
+		wantErr bool
+	}{
+		{name: "not temp prefix", path: "originals/admin/2026/06/x.mp4", wantErr: true},
+		{name: "too few parts", path: "temp/admin", wantErr: true},
+		{name: "empty", path: "", wantErr: true},
+		{name: "valid temp path", path: "temp/admin/2026/06/test.mp4", wantErr: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if !tt.wantErr {
+				// Create the temp file first
+				srcFull := sp.FullPath(tt.path)
+				if err := os.MkdirAll(filepath.Dir(srcFull), 0755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(srcFull, []byte("x"), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			_, err := sp.PromoteToOriginal(tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PromoteToOriginal(%q) error = %v, wantErr %v", tt.path, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestStoragePaths_FullPath(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	relKey := "originals/admin/2026/06/video.mp4"
+	full := sp.FullPath(relKey)
+	expected := filepath.Join(tmpDir, filepath.FromSlash(relKey))
+	if full != expected {
+		t.Errorf("FullPath: expected %q, got %q", expected, full)
+	}
+}
+
+// TestStoragePaths_RegistryAutoRegister verifies that NewStoragePaths auto-registers
+// all expected directories (video, assets, gallery).
+func TestStoragePaths_RegistryAutoRegister(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	// All auto-registered dirs must be accessible via Dir() without panic.
+	expectedDirs := []string{
+		"originals", "temp", "thumbnails", "hls", "previews", "sprites",
+		"assets/avatars", "assets/ads", "assets/banners", "assets/covers",
+		"assets/channels", "assets/categories", "assets/articles", "assets/misc",
+		"gallery",
+	}
+
+	for _, name := range expectedDirs {
+		t.Run("Dir/"+name, func(t *testing.T) {
+			dir := sp.Dir(name)
+			if dir == "" {
+				t.Errorf("Dir(%q) returned empty", name)
+			}
+			// Verify the directory exists on filesystem
+			if _, err := os.Stat(dir); err != nil {
+				t.Errorf("Dir(%q) path %q does not exist: %v", name, dir, err)
+			}
+		})
+	}
+}
+
+// TestStoragePaths_GalleryRegistered verifies gallery dir is registered
+// (P0 fix: previously gallery was never registered, causing panic).
+func TestStoragePaths_GalleryRegistered(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	// Relative("gallery", ...) must not panic
+	rel := sp.Relative("gallery", "uuid-123", "cover.jpg")
+	expected := "gallery/uuid-123/cover.jpg"
+	if rel != expected {
+		t.Errorf("gallery Relative: expected %q, got %q", expected, rel)
+	}
+
+	// Dir("gallery") must return existing path
+	dir := sp.Dir("gallery")
+	if _, err := os.Stat(dir); err != nil {
+		t.Errorf("gallery dir does not exist: %v", err)
+	}
+}
+
+// TestStoragePaths_RegisterCustom verifies custom dir registration via Register().
+func TestStoragePaths_RegisterCustom(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	// Register a custom dir (e.g. future "document" type)
+	err := sp.Register(PathSpec{
+		Name:        "document",
+		DefaultDir:  "document",
+		Description: "document content",
+	})
+	if err != nil {
+		t.Fatalf("Register failed: %v", err)
+	}
+
+	// Dir must work
+	dir := sp.Dir("document")
+	if _, err := os.Stat(dir); err != nil {
+		t.Errorf("document dir does not exist: %v", err)
+	}
+
+	// Relative must work
+	rel := sp.Relative("document", "pdf", "file.pdf")
+	expected := "document/pdf/file.pdf"
+	if rel != expected {
+		t.Errorf("document Relative: expected %q, got %q", expected, rel)
+	}
+}
+
+// TestStoragePaths_StaticRouteMap verifies that StaticRouteMap generates
+// /files/{dir} routes for all registered dirs.
+func TestStoragePaths_StaticRouteMap(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	routes := sp.StaticRouteMap()
+
+	// Must include video dirs
+	expectedRoutes := []string{
+		"/files/originals", "/files/temp", "/files/thumbnails",
+		"/files/hls", "/files/previews", "/files/sprites",
+	}
+	for _, route := range expectedRoutes {
+		if _, ok := routes[route]; !ok {
+			t.Errorf("StaticRouteMap missing route %q", route)
+		}
+	}
+
+	// Must include gallery (P0 fix)
+	if _, ok := routes["/files/gallery"]; !ok {
+		t.Errorf("StaticRouteMap missing /files/gallery (gallery should be auto-registered)")
+	}
+
+	// Must include at least one asset route
+	if _, ok := routes["/files/assets/avatars"]; !ok {
+		t.Errorf("StaticRouteMap missing /files/assets/avatars")
+	}
+}
+
+// TestStoragePaths_Overrides verifies per-dir path override.
+func TestStoragePaths_Overrides(t *testing.T) {
+	tmpDir := t.TempDir()
+	overrideDir := t.TempDir()
+
+	overrides := map[string]string{
+		"gallery": overrideDir, // put gallery on a different path
+	}
+	sp := NewStoragePathsWithOverrides(tmpDir, overrides)
+
+	// Dir("gallery") must return the override path, not basePath/gallery
+	galleryDir := sp.Dir("gallery")
+	if galleryDir != overrideDir {
+		t.Errorf("gallery Dir with override: expected %q, got %q", overrideDir, galleryDir)
+	}
+
+	// Relative("gallery", ...) still uses DefaultDir for the relative key
+	// (relative keys are for DB storage, not filesystem paths)
+	rel := sp.Relative("gallery", "img.jpg")
+	if rel != "gallery/img.jpg" {
+		t.Errorf("gallery Relative with override: expected %q, got %q", "gallery/img.jpg", rel)
+	}
+}
+
+// TestStoragePaths_DirPanicsOnUnregistered verifies Dir() panics for unregistered names.
+func TestStoragePaths_DirPanicsOnUnregistered(t *testing.T) {
+	tmpDir := t.TempDir()
+	sp := NewStoragePaths(tmpDir)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Dir() with unregistered name should panic")
+		}
+	}()
+	_ = sp.Dir("nonexistent-dir")
 }

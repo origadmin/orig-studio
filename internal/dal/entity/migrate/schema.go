@@ -9,6 +9,159 @@ import (
 )
 
 var (
+	// AdsColumns holds the columns for the "ads" table.
+	AdsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "placement_id", Type: field.TypeString, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 255},
+		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "image_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "image_mobile_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "link_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "link_target", Type: field.TypeString, Size: 16, Default: "_blank"},
+		{Name: "badge_text", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "priority", Type: field.TypeInt, Default: 0},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "start_at", Type: field.TypeTime, Nullable: true},
+		{Name: "end_at", Type: field.TypeTime, Nullable: true},
+		{Name: "impressions", Type: field.TypeInt64, Default: 0},
+		{Name: "clicks", Type: field.TypeInt64, Default: 0},
+	}
+	// AdsTable holds the schema information for the "ads" table.
+	AdsTable = &schema.Table{
+		Name:       "ads",
+		Columns:    AdsColumns,
+		PrimaryKey: []*schema.Column{AdsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ad_placement_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdsColumns[1]},
+			},
+			{
+				Name:    "ad_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{AdsColumns[10]},
+			},
+			{
+				Name:    "ad_priority",
+				Unique:  false,
+				Columns: []*schema.Column{AdsColumns[9]},
+			},
+			{
+				Name:    "ad_start_at_end_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdsColumns[11], AdsColumns[12]},
+			},
+		},
+	}
+	// AdClickLogsColumns holds the columns for the "ad_click_logs" table.
+	AdClickLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "ad_id", Type: field.TypeString, Size: 36},
+		{Name: "placement_id", Type: field.TypeString, Size: 36},
+		{Name: "ip", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "referer", Type: field.TypeString, Nullable: true, Size: 512},
+	}
+	// AdClickLogsTable holds the schema information for the "ad_click_logs" table.
+	AdClickLogsTable = &schema.Table{
+		Name:       "ad_click_logs",
+		Columns:    AdClickLogsColumns,
+		PrimaryKey: []*schema.Column{AdClickLogsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adclicklog_ad_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdClickLogsColumns[1]},
+			},
+			{
+				Name:    "adclicklog_placement_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdClickLogsColumns[2]},
+			},
+			{
+				Name:    "adclicklog_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdClickLogsColumns[5]},
+			},
+		},
+	}
+	// AdCreativesColumns holds the columns for the "ad_creatives" table.
+	AdCreativesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 255},
+		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "image_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "image_mobile_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "link_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "link_target", Type: field.TypeString, Size: 16, Default: "_blank"},
+		{Name: "badge_text", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "priority", Type: field.TypeInt, Default: 0},
+		{Name: "impressions", Type: field.TypeInt64, Default: 0},
+		{Name: "clicks", Type: field.TypeInt64, Default: 0},
+	}
+	// AdCreativesTable holds the schema information for the "ad_creatives" table.
+	AdCreativesTable = &schema.Table{
+		Name:       "ad_creatives",
+		Columns:    AdCreativesColumns,
+		PrimaryKey: []*schema.Column{AdCreativesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adcreative_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{AdCreativesColumns[8]},
+			},
+			{
+				Name:    "adcreative_priority",
+				Unique:  false,
+				Columns: []*schema.Column{AdCreativesColumns[9]},
+			},
+		},
+	}
+	// AdPlacementsColumns holds the columns for the "ad_placements" table.
+	AdPlacementsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "slug", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "type", Type: field.TypeString, Size: 32},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "width", Type: field.TypeInt, Default: 0},
+		{Name: "height", Type: field.TypeInt, Default: 0},
+		{Name: "max_ads", Type: field.TypeInt, Default: 1},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "sequence", Type: field.TypeInt, Default: 0},
+	}
+	// AdPlacementsTable holds the schema information for the "ad_placements" table.
+	AdPlacementsTable = &schema.Table{
+		Name:       "ad_placements",
+		Columns:    AdPlacementsColumns,
+		PrimaryKey: []*schema.Column{AdPlacementsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adplacement_slug",
+				Unique:  false,
+				Columns: []*schema.Column{AdPlacementsColumns[2]},
+			},
+			{
+				Name:    "adplacement_type",
+				Unique:  false,
+				Columns: []*schema.Column{AdPlacementsColumns[3]},
+			},
+			{
+				Name:    "adplacement_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{AdPlacementsColumns[8]},
+			},
+			{
+				Name:    "adplacement_sequence",
+				Unique:  false,
+				Columns: []*schema.Column{AdPlacementsColumns[9]},
+			},
+		},
+	}
 	// ContentArticlesColumns holds the columns for the "content_articles" table.
 	ContentArticlesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -501,6 +654,162 @@ var (
 			},
 		},
 	}
+	// DrmKeysColumns holds the columns for the "drm_keys" table.
+	DrmKeysColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "content_id", Type: field.TypeString, Size: 36},
+		{Name: "key_value", Type: field.TypeString, Size: 512},
+		{Name: "key_id", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "iv", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "policy_id", Type: field.TypeString, Size: 36},
+	}
+	// DrmKeysTable holds the schema information for the "drm_keys" table.
+	DrmKeysTable = &schema.Table{
+		Name:       "drm_keys",
+		Columns:    DrmKeysColumns,
+		PrimaryKey: []*schema.Column{DrmKeysColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "drm_keys_drm_policies_keys",
+				Columns:    []*schema.Column{DrmKeysColumns[7]},
+				RefColumns: []*schema.Column{DrmPoliciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "drmkey_content_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmKeysColumns[1]},
+			},
+			{
+				Name:    "drmkey_key_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmKeysColumns[3]},
+			},
+			{
+				Name:    "drmkey_policy_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmKeysColumns[7]},
+			},
+			{
+				Name:    "drmkey_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{DrmKeysColumns[6]},
+			},
+			{
+				Name:    "drmkey_content_id_policy_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmKeysColumns[1], DrmKeysColumns[7]},
+			},
+		},
+	}
+	// DrmLicensesColumns holds the columns for the "drm_licenses" table.
+	DrmLicensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "expired", "revoked"}, Default: "active"},
+		{Name: "device_id", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "device_info", Type: field.TypeJSON, Nullable: true},
+		{Name: "issued_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "key_id", Type: field.TypeString, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// DrmLicensesTable holds the schema information for the "drm_licenses" table.
+	DrmLicensesTable = &schema.Table{
+		Name:       "drm_licenses",
+		Columns:    DrmLicensesColumns,
+		PrimaryKey: []*schema.Column{DrmLicensesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "drm_licenses_drm_keys_licenses",
+				Columns:    []*schema.Column{DrmLicensesColumns[6]},
+				RefColumns: []*schema.Column{DrmKeysColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "drm_licenses_users_drm_licenses",
+				Columns:    []*schema.Column{DrmLicensesColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "drmlicense_status",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[1]},
+			},
+			{
+				Name:    "drmlicense_device_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[2]},
+			},
+			{
+				Name:    "drmlicense_key_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[6]},
+			},
+			{
+				Name:    "drmlicense_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[7]},
+			},
+			{
+				Name:    "drmlicense_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[5]},
+			},
+			{
+				Name:    "drmlicense_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[7], DrmLicensesColumns[1]},
+			},
+			{
+				Name:    "drmlicense_user_id_key_id",
+				Unique:  false,
+				Columns: []*schema.Column{DrmLicensesColumns[7], DrmLicensesColumns[6]},
+			},
+		},
+	}
+	// DrmPoliciesColumns holds the columns for the "drm_policies" table.
+	DrmPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"hls_aes128", "widevine", "fairplay", "multi"}, Default: "hls_aes128"},
+		{Name: "hls_key_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "widevine_pssh", Type: field.TypeString, Nullable: true, Size: 2048},
+		{Name: "fairplay_cert_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+	}
+	// DrmPoliciesTable holds the schema information for the "drm_policies" table.
+	DrmPoliciesTable = &schema.Table{
+		Name:       "drm_policies",
+		Columns:    DrmPoliciesColumns,
+		PrimaryKey: []*schema.Column{DrmPoliciesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "drmpolicy_type",
+				Unique:  false,
+				Columns: []*schema.Column{DrmPoliciesColumns[2]},
+			},
+			{
+				Name:    "drmpolicy_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{DrmPoliciesColumns[6]},
+			},
+			{
+				Name:    "drmpolicy_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{DrmPoliciesColumns[8]},
+			},
+		},
+	}
 	// SystemEncodeProfilesColumns holds the columns for the "system_encode_profiles" table.
 	SystemEncodeProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -732,6 +1041,293 @@ var (
 			},
 		},
 	}
+	// LiveChatMessagesColumns holds the columns for the "live_chat_messages" table.
+	LiveChatMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "content", Type: field.TypeString, Size: 500},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"text", "system", "gift"}, Default: "text"},
+		{Name: "sent_at", Type: field.TypeTime},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "room_id", Type: field.TypeString, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 36},
+	}
+	// LiveChatMessagesTable holds the schema information for the "live_chat_messages" table.
+	LiveChatMessagesTable = &schema.Table{
+		Name:       "live_chat_messages",
+		Columns:    LiveChatMessagesColumns,
+		PrimaryKey: []*schema.Column{LiveChatMessagesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "live_chat_messages_live_rooms_chat_messages",
+				Columns:    []*schema.Column{LiveChatMessagesColumns[6]},
+				RefColumns: []*schema.Column{LiveRoomsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "live_chat_messages_users_live_chat_messages",
+				Columns:    []*schema.Column{LiveChatMessagesColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livechatmessage_room_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveChatMessagesColumns[6]},
+			},
+			{
+				Name:    "livechatmessage_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveChatMessagesColumns[7]},
+			},
+			{
+				Name:    "livechatmessage_type",
+				Unique:  false,
+				Columns: []*schema.Column{LiveChatMessagesColumns[2]},
+			},
+			{
+				Name:    "livechatmessage_sent_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveChatMessagesColumns[3]},
+			},
+			{
+				Name:    "livechatmessage_room_id_sent_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveChatMessagesColumns[6], LiveChatMessagesColumns[3]},
+			},
+		},
+	}
+	// LiveRecordingsColumns holds the columns for the "live_recordings" table.
+	LiveRecordingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "storage_url", Type: field.TypeString, Size: 512},
+		{Name: "duration", Type: field.TypeInt64, Default: 0},
+		{Name: "file_size", Type: field.TypeInt64, Default: 0},
+		{Name: "format", Type: field.TypeString, Size: 32, Default: "mp4"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"recording", "processing", "completed", "failed"}, Default: "recording"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "stream_id", Type: field.TypeString, Size: 36},
+	}
+	// LiveRecordingsTable holds the schema information for the "live_recordings" table.
+	LiveRecordingsTable = &schema.Table{
+		Name:       "live_recordings",
+		Columns:    LiveRecordingsColumns,
+		PrimaryKey: []*schema.Column{LiveRecordingsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "live_recordings_live_streams_recordings",
+				Columns:    []*schema.Column{LiveRecordingsColumns[8]},
+				RefColumns: []*schema.Column{LiveStreamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "liverecording_stream_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRecordingsColumns[8]},
+			},
+			{
+				Name:    "liverecording_status",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRecordingsColumns[5]},
+			},
+			{
+				Name:    "liverecording_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRecordingsColumns[6]},
+			},
+			{
+				Name:    "liverecording_stream_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRecordingsColumns[8], LiveRecordingsColumns[5]},
+			},
+		},
+	}
+	// LiveRoomsColumns holds the columns for the "live_rooms" table.
+	LiveRoomsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 256},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2000},
+		{Name: "stream_key", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "rtmp_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "hls_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"idle", "preparing", "live", "ended", "offline"}, Default: "idle"},
+		{Name: "scheduled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "max_viewers", Type: field.TypeInt, Default: 0},
+		{Name: "current_viewers", Type: field.TypeInt, Default: 0},
+		{Name: "peak_viewers", Type: field.TypeInt, Default: 0},
+		{Name: "thumbnail", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "category", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// LiveRoomsTable holds the schema information for the "live_rooms" table.
+	LiveRoomsTable = &schema.Table{
+		Name:       "live_rooms",
+		Columns:    LiveRoomsColumns,
+		PrimaryKey: []*schema.Column{LiveRoomsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "live_rooms_users_live_rooms",
+				Columns:    []*schema.Column{LiveRoomsColumns[18]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "liveroom_status",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRoomsColumns[6]},
+			},
+			{
+				Name:    "liveroom_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRoomsColumns[18]},
+			},
+			{
+				Name:    "liveroom_stream_key",
+				Unique:  true,
+				Columns: []*schema.Column{LiveRoomsColumns[3]},
+			},
+			{
+				Name:    "liveroom_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRoomsColumns[7]},
+			},
+			{
+				Name:    "liveroom_category",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRoomsColumns[14]},
+			},
+			{
+				Name:    "liveroom_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRoomsColumns[16]},
+			},
+			{
+				Name:    "liveroom_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{LiveRoomsColumns[18], LiveRoomsColumns[6]},
+			},
+		},
+	}
+	// LiveSchedulesColumns holds the columns for the "live_schedules" table.
+	LiveSchedulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "title", Type: field.TypeString, Size: 256},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "scheduled_at", Type: field.TypeTime},
+		{Name: "duration", Type: field.TypeInt, Default: 3600},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "room_id", Type: field.TypeString, Size: 36},
+	}
+	// LiveSchedulesTable holds the schema information for the "live_schedules" table.
+	LiveSchedulesTable = &schema.Table{
+		Name:       "live_schedules",
+		Columns:    LiveSchedulesColumns,
+		PrimaryKey: []*schema.Column{LiveSchedulesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "live_schedules_live_rooms_schedules",
+				Columns:    []*schema.Column{LiveSchedulesColumns[7]},
+				RefColumns: []*schema.Column{LiveRoomsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "liveschedule_room_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSchedulesColumns[7]},
+			},
+			{
+				Name:    "liveschedule_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSchedulesColumns[3]},
+			},
+			{
+				Name:    "liveschedule_room_id_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSchedulesColumns[7], LiveSchedulesColumns[3]},
+			},
+			{
+				Name:    "liveschedule_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{LiveSchedulesColumns[5]},
+			},
+		},
+	}
+	// LiveStreamsColumns holds the columns for the "live_streams" table.
+	LiveStreamsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "stream_key", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "rtmp_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "hls_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "live", "ended"}, Default: "pending"},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "ended_at", Type: field.TypeTime, Nullable: true},
+		{Name: "peak_viewers", Type: field.TypeInt, Default: 0},
+		{Name: "duration", Type: field.TypeInt64, Default: 0},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "room_id", Type: field.TypeString, Size: 36},
+	}
+	// LiveStreamsTable holds the schema information for the "live_streams" table.
+	LiveStreamsTable = &schema.Table{
+		Name:       "live_streams",
+		Columns:    LiveStreamsColumns,
+		PrimaryKey: []*schema.Column{LiveStreamsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "live_streams_live_rooms_streams",
+				Columns:    []*schema.Column{LiveStreamsColumns[11]},
+				RefColumns: []*schema.Column{LiveRoomsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "livestream_stream_key",
+				Unique:  true,
+				Columns: []*schema.Column{LiveStreamsColumns[1]},
+			},
+			{
+				Name:    "livestream_status",
+				Unique:  false,
+				Columns: []*schema.Column{LiveStreamsColumns[4]},
+			},
+			{
+				Name:    "livestream_room_id",
+				Unique:  false,
+				Columns: []*schema.Column{LiveStreamsColumns[11]},
+			},
+			{
+				Name:    "livestream_started_at",
+				Unique:  false,
+				Columns: []*schema.Column{LiveStreamsColumns[5]},
+			},
+			{
+				Name:    "livestream_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{LiveStreamsColumns[9]},
+			},
+			{
+				Name:    "livestream_room_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{LiveStreamsColumns[11], LiveStreamsColumns[4]},
+			},
+		},
+	}
 	// ContentMediaColumns holds the columns for the "content_media" table.
 	ContentMediaColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -749,7 +1345,7 @@ var (
 		{Name: "width", Type: field.TypeInt, Default: 0},
 		{Name: "height", Type: field.TypeInt, Default: 0},
 		{Name: "mime_type", Type: field.TypeString, Nullable: true, Size: 128},
-		{Name: "md5sum", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "sha256", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "extension", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "privacy", Type: field.TypeEnum, Enums: []string{"PUBLIC", "PRIVATE", "UNLISTED", "PAID"}, Default: "PUBLIC"},
 		{Name: "encoding_status", Type: field.TypeString, Size: 20, Default: "pending"},
@@ -761,18 +1357,18 @@ var (
 		{Name: "favorite_count", Type: field.TypeInt64, Default: 0},
 		{Name: "download_count", Type: field.TypeInt64, Default: 0},
 		{Name: "share_count", Type: field.TypeInt64, Default: 0},
-		{Name: "uuid", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "allow_download", Type: field.TypeBool, Default: true},
 		{Name: "enable_comments", Type: field.TypeBool, Default: true},
 		{Name: "featured", Type: field.TypeBool, Default: false},
 		{Name: "review_status", Type: field.TypeString, Size: 20, Default: "pending_review"},
 		{Name: "listable", Type: field.TypeBool, Default: false},
 		{Name: "reported_times", Type: field.TypeInt, Default: 0},
-		{Name: "sprite_status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "sprite_status", Type: field.TypeString, Size: 20, Default: "none"},
 		{Name: "sprite_path", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "vtt_path", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "thumbnail_time", Type: field.TypeFloat64, Nullable: true},
 		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "title_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "description_i18n", Type: field.TypeJSON, Nullable: true},
 		{Name: "sync_status", Type: field.TypeString, Nullable: true, Size: 20, Default: "local_only"},
@@ -785,7 +1381,6 @@ var (
 		{Name: "category_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "channel_id", Type: field.TypeString, Nullable: true, Size: 36},
 		{Name: "media_category_media", Type: field.TypeInt, Nullable: true},
-		{Name: "media_tag_media", Type: field.TypeInt, Nullable: true},
 		{Name: "user_id", Type: field.TypeString, Size: 36},
 	}
 	// ContentMediaTable holds the schema information for the "content_media" table.
@@ -813,14 +1408,8 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "content_media_content_media_tags_media",
-				Columns:    []*schema.Column{ContentMediaColumns[51]},
-				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:     "content_media_users_media",
-				Columns:    []*schema.Column{ContentMediaColumns[52]},
+				Columns:    []*schema.Column{ContentMediaColumns[51]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -849,7 +1438,7 @@ var (
 			{
 				Name:    "media_featured",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[30]},
+				Columns: []*schema.Column{ContentMediaColumns[29]},
 			},
 			{
 				Name:    "media_view_count",
@@ -864,7 +1453,7 @@ var (
 			{
 				Name:    "media_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[52]},
+				Columns: []*schema.Column{ContentMediaColumns[51]},
 			},
 			{
 				Name:    "media_short_token",
@@ -874,17 +1463,17 @@ var (
 			{
 				Name:    "media_review_status_listable_state",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[31], ContentMediaColumns[32], ContentMediaColumns[19]},
+				Columns: []*schema.Column{ContentMediaColumns[30], ContentMediaColumns[31], ContentMediaColumns[19]},
 			},
 			{
 				Name:    "media_listable",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[32]},
+				Columns: []*schema.Column{ContentMediaColumns[31]},
 			},
 			{
 				Name:    "media_sprite_status",
 				Unique:  false,
-				Columns: []*schema.Column{ContentMediaColumns[34]},
+				Columns: []*schema.Column{ContentMediaColumns[33]},
 			},
 		},
 	}
@@ -897,6 +1486,50 @@ var (
 		Name:       "content_media_categories",
 		Columns:    ContentMediaCategoriesColumns,
 		PrimaryKey: []*schema.Column{ContentMediaCategoriesColumns[0]},
+	}
+	// MediaDrmPoliciesColumns holds the columns for the "media_drm_policies" table.
+	MediaDrmPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "policy_id", Type: field.TypeString, Size: 36},
+		{Name: "media_id", Type: field.TypeString, Size: 36},
+	}
+	// MediaDrmPoliciesTable holds the schema information for the "media_drm_policies" table.
+	MediaDrmPoliciesTable = &schema.Table{
+		Name:       "media_drm_policies",
+		Columns:    MediaDrmPoliciesColumns,
+		PrimaryKey: []*schema.Column{MediaDrmPoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "media_drm_policies_drm_policies_media_policies",
+				Columns:    []*schema.Column{MediaDrmPoliciesColumns[2]},
+				RefColumns: []*schema.Column{DrmPoliciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "media_drm_policies_content_media_drm_policies",
+				Columns:    []*schema.Column{MediaDrmPoliciesColumns[3]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "mediadrmpolicy_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{MediaDrmPoliciesColumns[3]},
+			},
+			{
+				Name:    "mediadrmpolicy_policy_id",
+				Unique:  false,
+				Columns: []*schema.Column{MediaDrmPoliciesColumns[2]},
+			},
+			{
+				Name:    "mediadrmpolicy_media_id_policy_id",
+				Unique:  true,
+				Columns: []*schema.Column{MediaDrmPoliciesColumns[3], MediaDrmPoliciesColumns[2]},
+			},
+		},
 	}
 	// ContentPlaylistMediaColumns holds the columns for the "content_playlist_media" table.
 	ContentPlaylistMediaColumns = []*schema.Column{
@@ -1041,7 +1674,8 @@ var (
 	// ContentMediaTagsColumns holds the columns for the "content_media_tags" table.
 	ContentMediaTagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "media_tags_rel", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "media_id", Type: field.TypeString, Size: 36},
+		{Name: "tag_id", Type: field.TypeInt},
 	}
 	// ContentMediaTagsTable holds the schema information for the "content_media_tags" table.
 	ContentMediaTagsTable = &schema.Table{
@@ -1053,7 +1687,30 @@ var (
 				Symbol:     "content_media_tags_content_media_tags_rel",
 				Columns:    []*schema.Column{ContentMediaTagsColumns[1]},
 				RefColumns: []*schema.Column{ContentMediaColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "content_media_tags_content_tags_media_tags",
+				Columns:    []*schema.Column{ContentMediaTagsColumns[2]},
+				RefColumns: []*schema.Column{ContentTagsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "mediatag_media_id_tag_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContentMediaTagsColumns[1], ContentMediaTagsColumns[2]},
+			},
+			{
+				Name:    "mediatag_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentMediaTagsColumns[1]},
+			},
+			{
+				Name:    "mediatag_tag_id",
+				Unique:  false,
+				Columns: []*schema.Column{ContentMediaTagsColumns[2]},
 			},
 		},
 	}
@@ -1099,6 +1756,150 @@ var (
 				Name:    "notification_is_read",
 				Unique:  false,
 				Columns: []*schema.Column{UserNotificationsColumns[7]},
+			},
+		},
+	}
+	// PaymentOrdersColumns holds the columns for the "payment_orders" table.
+	PaymentOrdersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "order_no", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "currency", Type: field.TypeString, Size: 3, Default: "USD"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "paid", "completed", "refunded", "expired", "cancelled"}, Default: "pending"},
+		{Name: "payment_method", Type: field.TypeString, Nullable: true, Size: 32},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "plan_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+		{Name: "user_subscription_orders", Type: field.TypeString, Nullable: true, Size: 36},
+	}
+	// PaymentOrdersTable holds the schema information for the "payment_orders" table.
+	PaymentOrdersTable = &schema.Table{
+		Name:       "payment_orders",
+		Columns:    PaymentOrdersColumns,
+		PrimaryKey: []*schema.Column{PaymentOrdersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payment_orders_payment_subscription_plans_plan_orders",
+				Columns:    []*schema.Column{PaymentOrdersColumns[10]},
+				RefColumns: []*schema.Column{PaymentSubscriptionPlansColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "payment_orders_users_payment_orders",
+				Columns:    []*schema.Column{PaymentOrdersColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "payment_orders_payment_user_subscriptions_orders",
+				Columns:    []*schema.Column{PaymentOrdersColumns[12]},
+				RefColumns: []*schema.Column{PaymentUserSubscriptionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "order_order_no",
+				Unique:  true,
+				Columns: []*schema.Column{PaymentOrdersColumns[1]},
+			},
+			{
+				Name:    "order_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[11]},
+			},
+			{
+				Name:    "order_plan_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[10]},
+			},
+			{
+				Name:    "order_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[4]},
+			},
+			{
+				Name:    "order_payment_method",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[5]},
+			},
+			{
+				Name:    "order_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[8]},
+			},
+			{
+				Name:    "order_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[11], PaymentOrdersColumns[4]},
+			},
+			{
+				Name:    "order_expired_at",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentOrdersColumns[7]},
+			},
+		},
+	}
+	// PaymentPaymentsColumns holds the columns for the "payment_payments" table.
+	PaymentPaymentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "channel", Type: field.TypeEnum, Enums: []string{"stripe", "paypal", "alipay", "wallet"}},
+		{Name: "transaction_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 256},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "currency", Type: field.TypeString, Size: 3, Default: "USD"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "success", "failed", "refunded"}, Default: "pending"},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "order_id", Type: field.TypeString, Size: 36},
+	}
+	// PaymentPaymentsTable holds the schema information for the "payment_payments" table.
+	PaymentPaymentsTable = &schema.Table{
+		Name:       "payment_payments",
+		Columns:    PaymentPaymentsColumns,
+		PrimaryKey: []*schema.Column{PaymentPaymentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payment_payments_payment_orders_payments",
+				Columns:    []*schema.Column{PaymentPaymentsColumns[10]},
+				RefColumns: []*schema.Column{PaymentOrdersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "payment_transaction_id",
+				Unique:  true,
+				Columns: []*schema.Column{PaymentPaymentsColumns[2]},
+			},
+			{
+				Name:    "payment_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentPaymentsColumns[10]},
+			},
+			{
+				Name:    "payment_channel",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentPaymentsColumns[1]},
+			},
+			{
+				Name:    "payment_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentPaymentsColumns[5]},
+			},
+			{
+				Name:    "payment_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentPaymentsColumns[8]},
+			},
+			{
+				Name:    "payment_channel_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentPaymentsColumns[1], PaymentPaymentsColumns[5]},
 			},
 		},
 	}
@@ -1193,6 +1994,7 @@ var (
 		{Name: "badge_text", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "image_url", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "image_mobile_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "video_url", Type: field.TypeString, Nullable: true, Size: 512},
 		{Name: "bg_color_start", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "bg_color_end", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "bg_overlay_opacity", Type: field.TypeFloat64, Default: 0},
@@ -1205,6 +2007,10 @@ var (
 		{Name: "start_at", Type: field.TypeTime, Nullable: true},
 		{Name: "end_at", Type: field.TypeTime, Nullable: true},
 		{Name: "auto_slide_interval", Type: field.TypeInt, Default: 5000},
+		{Name: "type", Type: field.TypeString, Size: 32, Default: "custom"},
+		{Name: "count", Type: field.TypeInt, Default: 5},
+		{Name: "category_id", Type: field.TypeString, Nullable: true, Size: 36},
+		{Name: "display_mode", Type: field.TypeString, Size: 16, Default: "wide"},
 	}
 	// PortalBannersTable holds the schema information for the "portal_banners" table.
 	PortalBannersTable = &schema.Table{
@@ -1215,12 +2021,17 @@ var (
 			{
 				Name:    "portalbanner_sequence",
 				Unique:  false,
-				Columns: []*schema.Column{PortalBannersColumns[15]},
+				Columns: []*schema.Column{PortalBannersColumns[16]},
 			},
 			{
 				Name:    "portalbanner_is_active",
 				Unique:  false,
-				Columns: []*schema.Column{PortalBannersColumns[16]},
+				Columns: []*schema.Column{PortalBannersColumns[17]},
+			},
+			{
+				Name:    "portalbanner_type",
+				Unique:  false,
+				Columns: []*schema.Column{PortalBannersColumns[21]},
 			},
 		},
 	}
@@ -1293,13 +2104,334 @@ var (
 			},
 		},
 	}
+	// PromotionChannelsColumns holds the columns for the "promotion_channels" table.
+	PromotionChannelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "slug", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "platform", Type: field.TypeEnum, Enums: []string{"telegram", "discord", "slack", "twitter", "youtube", "mastodon", "wechat", "weibo", "email", "webhook", "rss"}, Default: "telegram"},
+		{Name: "push_mode", Type: field.TypeEnum, Enums: []string{"realtime", "daily_digest", "manual"}, Default: "realtime"},
+		{Name: "config", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "is_active", Type: field.TypeBool, Default: false},
+		{Name: "daily_limit", Type: field.TypeInt, Default: 0},
+		{Name: "sent_today", Type: field.TypeInt, Default: 0},
+		{Name: "limit_reset_at", Type: field.TypeTime, Nullable: true},
+		{Name: "rate_limit", Type: field.TypeJSON, Nullable: true},
+		{Name: "sequence", Type: field.TypeInt, Default: 0},
+		{Name: "tenant_id", Type: field.TypeString, Size: 36, Default: "default"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+	}
+	// PromotionChannelsTable holds the schema information for the "promotion_channels" table.
+	PromotionChannelsTable = &schema.Table{
+		Name:       "promotion_channels",
+		Columns:    PromotionChannelsColumns,
+		PrimaryKey: []*schema.Column{PromotionChannelsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "promotionchannel_slug",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionChannelsColumns[2]},
+			},
+			{
+				Name:    "promotionchannel_platform",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionChannelsColumns[3]},
+			},
+			{
+				Name:    "promotionchannel_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionChannelsColumns[6]},
+			},
+			{
+				Name:    "promotionchannel_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionChannelsColumns[12]},
+			},
+		},
+	}
+	// PromotionLogsColumns holds the columns for the "promotion_logs" table.
+	PromotionLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "platform", Type: field.TypeString, Size: 32},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"success", "failed", "rate_limited", "skipped"}, Default: "success"},
+		{Name: "platform_message_id", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "request_payload", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "response_body", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "http_status", Type: field.TypeInt, Default: 0},
+		{Name: "error_message", Type: field.TypeString, Nullable: true},
+		{Name: "duration_ms", Type: field.TypeInt, Default: 0},
+		{Name: "tenant_id", Type: field.TypeString, Size: 36, Default: "default"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "channel_id", Type: field.TypeString, Size: 36},
+		{Name: "task_id", Type: field.TypeString, Size: 36},
+	}
+	// PromotionLogsTable holds the schema information for the "promotion_logs" table.
+	PromotionLogsTable = &schema.Table{
+		Name:       "promotion_logs",
+		Columns:    PromotionLogsColumns,
+		PrimaryKey: []*schema.Column{PromotionLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "promotion_logs_promotion_channels_logs",
+				Columns:    []*schema.Column{PromotionLogsColumns[11]},
+				RefColumns: []*schema.Column{PromotionChannelsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "promotion_logs_promotion_tasks_logs",
+				Columns:    []*schema.Column{PromotionLogsColumns[12]},
+				RefColumns: []*schema.Column{PromotionTasksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "promotionlog_task_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionLogsColumns[12]},
+			},
+			{
+				Name:    "promotionlog_channel_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionLogsColumns[11]},
+			},
+			{
+				Name:    "promotionlog_platform",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionLogsColumns[1]},
+			},
+			{
+				Name:    "promotionlog_status",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionLogsColumns[2]},
+			},
+			{
+				Name:    "promotionlog_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionLogsColumns[10]},
+			},
+			{
+				Name:    "promotionlog_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionLogsColumns[9]},
+			},
+		},
+	}
+	// PromotionSubscriptionsColumns holds the columns for the "promotion_subscriptions" table.
+	PromotionSubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "channel_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "tag_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "platforms", Type: field.TypeJSON, Nullable: true},
+		{Name: "frequency", Type: field.TypeEnum, Enums: []string{"realtime", "daily", "weekly"}, Default: "daily"},
+		{Name: "quiet_hours", Type: field.TypeJSON, Nullable: true},
+		{Name: "daily_limit", Type: field.TypeInt, Default: 20},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "tenant_id", Type: field.TypeString, Size: 36, Default: "default"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// PromotionSubscriptionsTable holds the schema information for the "promotion_subscriptions" table.
+	PromotionSubscriptionsTable = &schema.Table{
+		Name:       "promotion_subscriptions",
+		Columns:    PromotionSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{PromotionSubscriptionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "promotion_subscriptions_users_promotion_subscriptions",
+				Columns:    []*schema.Column{PromotionSubscriptionsColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "promotionsubscription_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{PromotionSubscriptionsColumns[11]},
+			},
+			{
+				Name:    "promotionsubscription_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionSubscriptionsColumns[7]},
+			},
+			{
+				Name:    "promotionsubscription_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionSubscriptionsColumns[8]},
+			},
+		},
+	}
+	// PromotionTasksColumns holds the columns for the "promotion_tasks" table.
+	PromotionTasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "task_type", Type: field.TypeEnum, Enums: []string{"single", "digest", "scheduled"}, Default: "single"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "completed", "failed", "cancelled"}, Default: "pending"},
+		{Name: "media_ids", Type: field.TypeJSON, Nullable: true},
+		{Name: "payload", Type: field.TypeJSON, Nullable: true},
+		{Name: "rendered_subject", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "rendered_body", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "retry_count", Type: field.TypeInt, Default: 0},
+		{Name: "max_retries", Type: field.TypeInt, Default: 3},
+		{Name: "error_message", Type: field.TypeString, Nullable: true},
+		{Name: "scheduled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "tenant_id", Type: field.TypeString, Size: 36, Default: "default"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "channel_id", Type: field.TypeString, Size: 36},
+		{Name: "template_id", Type: field.TypeString, Nullable: true, Size: 36},
+	}
+	// PromotionTasksTable holds the schema information for the "promotion_tasks" table.
+	PromotionTasksTable = &schema.Table{
+		Name:       "promotion_tasks",
+		Columns:    PromotionTasksColumns,
+		PrimaryKey: []*schema.Column{PromotionTasksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "promotion_tasks_promotion_channels_tasks",
+				Columns:    []*schema.Column{PromotionTasksColumns[16]},
+				RefColumns: []*schema.Column{PromotionChannelsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "promotion_tasks_promotion_templates_tasks",
+				Columns:    []*schema.Column{PromotionTasksColumns[17]},
+				RefColumns: []*schema.Column{PromotionTemplatesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "promotiontask_channel_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTasksColumns[16]},
+			},
+			{
+				Name:    "promotiontask_status",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTasksColumns[2]},
+			},
+			{
+				Name:    "promotiontask_task_type",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTasksColumns[1]},
+			},
+			{
+				Name:    "promotiontask_scheduled_at",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTasksColumns[10]},
+			},
+			{
+				Name:    "promotiontask_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTasksColumns[13]},
+			},
+		},
+	}
+	// PromotionTemplatesColumns holds the columns for the "promotion_templates" table.
+	PromotionTemplatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "trigger_type", Type: field.TypeEnum, Enums: []string{"media_published", "media_reviewed", "article_published", "daily_digest", "manual"}, Default: "media_published"},
+		{Name: "subject_tpl", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "body_tpl", Type: field.TypeString, Size: 2147483647},
+		{Name: "subject_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "body_i18n", Type: field.TypeJSON, Nullable: true},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "tenant_id", Type: field.TypeString, Size: 36, Default: "default"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "channel_id", Type: field.TypeString, Size: 36},
+	}
+	// PromotionTemplatesTable holds the schema information for the "promotion_templates" table.
+	PromotionTemplatesTable = &schema.Table{
+		Name:       "promotion_templates",
+		Columns:    PromotionTemplatesColumns,
+		PrimaryKey: []*schema.Column{PromotionTemplatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "promotion_templates_promotion_channels_templates",
+				Columns:    []*schema.Column{PromotionTemplatesColumns[12]},
+				RefColumns: []*schema.Column{PromotionChannelsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "promotiontemplate_channel_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTemplatesColumns[12]},
+			},
+			{
+				Name:    "promotiontemplate_trigger_type",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTemplatesColumns[2]},
+			},
+			{
+				Name:    "promotiontemplate_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTemplatesColumns[7]},
+			},
+			{
+				Name:    "promotiontemplate_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{PromotionTemplatesColumns[9]},
+			},
+		},
+	}
+	// PaymentRefundsColumns holds the columns for the "payment_refunds" table.
+	PaymentRefundsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "reason", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "rejected", "completed"}, Default: "pending"},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "order_id", Type: field.TypeString, Size: 36},
+	}
+	// PaymentRefundsTable holds the schema information for the "payment_refunds" table.
+	PaymentRefundsTable = &schema.Table{
+		Name:       "payment_refunds",
+		Columns:    PaymentRefundsColumns,
+		PrimaryKey: []*schema.Column{PaymentRefundsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payment_refunds_payment_orders_refunds",
+				Columns:    []*schema.Column{PaymentRefundsColumns[6]},
+				RefColumns: []*schema.Column{PaymentOrdersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "refund_order_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentRefundsColumns[6]},
+			},
+			{
+				Name:    "refund_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentRefundsColumns[3]},
+			},
+			{
+				Name:    "refund_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentRefundsColumns[4]},
+			},
+		},
+	}
 	// SystemSettingsColumns holds the columns for the "system_settings" table.
 	SystemSettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "key", Type: field.TypeString, Unique: true, Size: 200},
 		{Name: "value", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"string", "int", "bool", "json"}, Default: "string"},
-		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "upload", "review", "email", "module", "storage", "security", "advanced", "portal"}, Default: "general"},
+		{Name: "category", Type: field.TypeEnum, Enums: []string{"general", "storage", "email", "security", "advanced", "portal", "feature"}, Default: "general"},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "is_sensitive", Type: field.TypeBool, Default: false},
 		{Name: "fallback_value", Type: field.TypeString, Nullable: true, Size: 2147483647},
@@ -1329,8 +2461,9 @@ var (
 	UserSubscriptionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
 		{Name: "create_time", Type: field.TypeTime},
-		{Name: "subscriber_id", Type: field.TypeString, Size: 36},
+		{Name: "notification_preference", Type: field.TypeEnum, Enums: []string{"all", "personalized", "none"}, Default: "all"},
 		{Name: "channel_id", Type: field.TypeString, Size: 36},
+		{Name: "subscriber_id", Type: field.TypeString, Size: 36},
 	}
 	// UserSubscriptionsTable holds the schema information for the "user_subscriptions" table.
 	UserSubscriptionsTable = &schema.Table{
@@ -1339,14 +2472,14 @@ var (
 		PrimaryKey: []*schema.Column{UserSubscriptionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_subscriptions_users_subscriptions",
-				Columns:    []*schema.Column{UserSubscriptionsColumns[2]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				Symbol:     "user_subscriptions_user_channels_subscribers",
+				Columns:    []*schema.Column{UserSubscriptionsColumns[3]},
+				RefColumns: []*schema.Column{UserChannelsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "user_subscriptions_users_subscribers",
-				Columns:    []*schema.Column{UserSubscriptionsColumns[3]},
+				Symbol:     "user_subscriptions_users_subscriptions",
+				Columns:    []*schema.Column{UserSubscriptionsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -1355,12 +2488,12 @@ var (
 			{
 				Name:    "subscription_subscriber_id_channel_id",
 				Unique:  true,
-				Columns: []*schema.Column{UserSubscriptionsColumns[2], UserSubscriptionsColumns[3]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[4], UserSubscriptionsColumns[3]},
 			},
 			{
 				Name:    "subscription_subscriber_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserSubscriptionsColumns[2]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[4]},
 			},
 			{
 				Name:    "subscription_channel_id",
@@ -1371,6 +2504,84 @@ var (
 				Name:    "subscription_create_time",
 				Unique:  false,
 				Columns: []*schema.Column{UserSubscriptionsColumns[1]},
+			},
+		},
+	}
+	// PaymentSubscriptionPlansColumns holds the columns for the "payment_subscription_plans" table.
+	PaymentSubscriptionPlansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 150},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "price", Type: field.TypeFloat64},
+		{Name: "currency", Type: field.TypeString, Size: 3, Default: "USD"},
+		{Name: "duration_days", Type: field.TypeInt},
+		{Name: "features", Type: field.TypeJSON, Nullable: true},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "sort_order", Type: field.TypeInt, Default: 0},
+	}
+	// PaymentSubscriptionPlansTable holds the schema information for the "payment_subscription_plans" table.
+	PaymentSubscriptionPlansTable = &schema.Table{
+		Name:       "payment_subscription_plans",
+		Columns:    PaymentSubscriptionPlansColumns,
+		PrimaryKey: []*schema.Column{PaymentSubscriptionPlansColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subscriptionplan_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentSubscriptionPlansColumns[7]},
+			},
+			{
+				Name:    "subscriptionplan_sort_order",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentSubscriptionPlansColumns[8]},
+			},
+			{
+				Name:    "subscriptionplan_duration_days",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentSubscriptionPlansColumns[5]},
+			},
+		},
+	}
+	// SubtitlesColumns holds the columns for the "subtitles" table.
+	SubtitlesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "language", Type: field.TypeString, Size: 16},
+		{Name: "label", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "file_url", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "processing"},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 512},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "media_id", Type: field.TypeString, Size: 36},
+	}
+	// SubtitlesTable holds the schema information for the "subtitles" table.
+	SubtitlesTable = &schema.Table{
+		Name:       "subtitles",
+		Columns:    SubtitlesColumns,
+		PrimaryKey: []*schema.Column{SubtitlesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subtitles_content_media_subtitles",
+				Columns:    []*schema.Column{SubtitlesColumns[8]},
+				RefColumns: []*schema.Column{ContentMediaColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "subtitle_media_id",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitlesColumns[8]},
+			},
+			{
+				Name:    "subtitle_language",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitlesColumns[1]},
+			},
+			{
+				Name:    "subtitle_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{SubtitlesColumns[6]},
 			},
 		},
 	}
@@ -1389,21 +2600,12 @@ var (
 		{Name: "color", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "media_tag_tag", Type: field.TypeInt, Nullable: true},
 	}
 	// ContentTagsTable holds the schema information for the "content_tags" table.
 	ContentTagsTable = &schema.Table{
 		Name:       "content_tags",
 		Columns:    ContentTagsColumns,
 		PrimaryKey: []*schema.Column{ContentTagsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "content_tags_content_media_tags_tag",
-				Columns:    []*schema.Column{ContentTagsColumns[13]},
-				RefColumns: []*schema.Column{ContentMediaTagsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "tag_title",
@@ -1459,6 +2661,46 @@ var (
 				Name:    "tagname_language_text",
 				Unique:  false,
 				Columns: []*schema.Column{ContentTagNamesColumns[1], ContentTagNamesColumns[2]},
+			},
+		},
+	}
+	// SystemTenantsColumns holds the columns for the "system_tenants" table.
+	SystemTenantsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "name", Type: field.TypeString, Size: 200},
+		{Name: "slug", Type: field.TypeString, Unique: true, Size: 100},
+		{Name: "domain", Type: field.TypeString, Nullable: true, Size: 255},
+		{Name: "logo", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "suspended", "pending", "deleted"}, Default: "active"},
+		{Name: "plan", Type: field.TypeEnum, Enums: []string{"free", "pro", "enterprise"}, Default: "free"},
+		{Name: "max_users", Type: field.TypeInt, Default: 10},
+		{Name: "max_storage_mb", Type: field.TypeInt, Default: 1024},
+		{Name: "config", Type: field.TypeJSON, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+	}
+	// SystemTenantsTable holds the schema information for the "system_tenants" table.
+	SystemTenantsTable = &schema.Table{
+		Name:       "system_tenants",
+		Columns:    SystemTenantsColumns,
+		PrimaryKey: []*schema.Column{SystemTenantsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "tenant_slug",
+				Unique:  true,
+				Columns: []*schema.Column{SystemTenantsColumns[2]},
+			},
+			{
+				Name:    "tenant_domain",
+				Unique:  false,
+				Columns: []*schema.Column{SystemTenantsColumns[3]},
+			},
+			{
+				Name:    "tenant_status",
+				Unique:  false,
+				Columns: []*schema.Column{SystemTenantsColumns[6]},
 			},
 		},
 	}
@@ -1525,7 +2767,6 @@ var (
 		{Name: "first_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "last_name", Type: field.TypeString, Nullable: true, Size: 150},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED"}, Default: "ACTIVE"},
-		{Name: "is_staff", Type: field.TypeBool, Default: false},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "editor"}, Default: "user"},
 		{Name: "is_superuser", Type: field.TypeBool, Default: false},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
@@ -1581,14 +2822,181 @@ var (
 				Columns: []*schema.Column{UsersColumns[8]},
 			},
 			{
-				Name:    "user_is_staff",
+				Name:    "user_role",
 				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[9]},
 			},
 			{
 				Name:    "user_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[24]},
+				Columns: []*schema.Column{UsersColumns[23]},
+			},
+		},
+	}
+	// PaymentUserSubscriptionsColumns holds the columns for the "payment_user_subscriptions" table.
+	PaymentUserSubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "expired", "cancelled", "past_due"}, Default: "active"},
+		{Name: "started_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "auto_renew", Type: field.TypeBool, Default: true},
+		{Name: "cancelled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "plan_id", Type: field.TypeString, Size: 36},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// PaymentUserSubscriptionsTable holds the schema information for the "payment_user_subscriptions" table.
+	PaymentUserSubscriptionsTable = &schema.Table{
+		Name:       "payment_user_subscriptions",
+		Columns:    PaymentUserSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{PaymentUserSubscriptionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payment_user_subscriptions_payment_subscription_plans_subscriptions",
+				Columns:    []*schema.Column{PaymentUserSubscriptionsColumns[8]},
+				RefColumns: []*schema.Column{PaymentSubscriptionPlansColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "payment_user_subscriptions_users_payment_subscriptions",
+				Columns:    []*schema.Column{PaymentUserSubscriptionsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "usersubscription_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentUserSubscriptionsColumns[9]},
+			},
+			{
+				Name:    "usersubscription_plan_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentUserSubscriptionsColumns[8]},
+			},
+			{
+				Name:    "usersubscription_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentUserSubscriptionsColumns[1]},
+			},
+			{
+				Name:    "usersubscription_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentUserSubscriptionsColumns[3]},
+			},
+			{
+				Name:    "usersubscription_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentUserSubscriptionsColumns[9], PaymentUserSubscriptionsColumns[1]},
+			},
+		},
+	}
+	// PaymentWalletsColumns holds the columns for the "payment_wallets" table.
+	PaymentWalletsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "balance", Type: field.TypeFloat64, Default: 0},
+		{Name: "frozen", Type: field.TypeFloat64, Default: 0},
+		{Name: "currency", Type: field.TypeString, Size: 3, Default: "USD"},
+		{Name: "user_id", Type: field.TypeString, Size: 36},
+	}
+	// PaymentWalletsTable holds the schema information for the "payment_wallets" table.
+	PaymentWalletsTable = &schema.Table{
+		Name:       "payment_wallets",
+		Columns:    PaymentWalletsColumns,
+		PrimaryKey: []*schema.Column{PaymentWalletsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payment_wallets_users_payment_wallet",
+				Columns:    []*schema.Column{PaymentWalletsColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "wallet_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{PaymentWalletsColumns[4]},
+			},
+		},
+	}
+	// PaymentWalletTransactionsColumns holds the columns for the "payment_wallet_transactions" table.
+	PaymentWalletTransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"deposit", "withdraw", "consume", "refund", "freeze", "unfreeze"}},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "balance_before", Type: field.TypeFloat64},
+		{Name: "balance_after", Type: field.TypeFloat64},
+		{Name: "reference", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "wallet_id", Type: field.TypeString, Size: 36},
+	}
+	// PaymentWalletTransactionsTable holds the schema information for the "payment_wallet_transactions" table.
+	PaymentWalletTransactionsTable = &schema.Table{
+		Name:       "payment_wallet_transactions",
+		Columns:    PaymentWalletTransactionsColumns,
+		PrimaryKey: []*schema.Column{PaymentWalletTransactionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "payment_wallet_transactions_payment_wallets_transactions",
+				Columns:    []*schema.Column{PaymentWalletTransactionsColumns[8]},
+				RefColumns: []*schema.Column{PaymentWalletsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "wallettransaction_wallet_id",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentWalletTransactionsColumns[8]},
+			},
+			{
+				Name:    "wallettransaction_type",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentWalletTransactionsColumns[1]},
+			},
+			{
+				Name:    "wallettransaction_reference",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentWalletTransactionsColumns[5]},
+			},
+			{
+				Name:    "wallettransaction_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentWalletTransactionsColumns[7]},
+			},
+			{
+				Name:    "wallettransaction_wallet_id_type",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentWalletTransactionsColumns[8], PaymentWalletTransactionsColumns[1]},
+			},
+		},
+	}
+	// AdPlacementCreativesColumns holds the columns for the "ad_placement_creatives" table.
+	AdPlacementCreativesColumns = []*schema.Column{
+		{Name: "ad_placement_id", Type: field.TypeString, Size: 36},
+		{Name: "ad_creative_id", Type: field.TypeString, Size: 36},
+	}
+	// AdPlacementCreativesTable holds the schema information for the "ad_placement_creatives" table.
+	AdPlacementCreativesTable = &schema.Table{
+		Name:       "ad_placement_creatives",
+		Columns:    AdPlacementCreativesColumns,
+		PrimaryKey: []*schema.Column{AdPlacementCreativesColumns[0], AdPlacementCreativesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ad_placement_creatives_ad_placement_id",
+				Columns:    []*schema.Column{AdPlacementCreativesColumns[0]},
+				RefColumns: []*schema.Column{AdPlacementsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "ad_placement_creatives_ad_creative_id",
+				Columns:    []*schema.Column{AdPlacementCreativesColumns[1]},
+				RefColumns: []*schema.Column{AdCreativesColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -1644,6 +3052,10 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AdsTable,
+		AdClickLogsTable,
+		AdCreativesTable,
+		AdPlacementsTable,
 		ContentArticlesTable,
 		ContentCategoriesTable,
 		UserChannelsTable,
@@ -1651,36 +3063,72 @@ var (
 		ContentCommentsTable,
 		ContentCommentLikesTable,
 		ContentCommentReportsTable,
+		DrmKeysTable,
+		DrmLicensesTable,
+		DrmPoliciesTable,
 		SystemEncodeProfilesTable,
 		SystemEncodingTasksTable,
 		ContentFavoritesTable,
 		AuthGroupMembersTable,
 		UserHistoryTable,
 		ContentLikesTable,
+		LiveChatMessagesTable,
+		LiveRecordingsTable,
+		LiveRoomsTable,
+		LiveSchedulesTable,
+		LiveStreamsTable,
 		ContentMediaTable,
 		ContentMediaCategoriesTable,
+		MediaDrmPoliciesTable,
 		ContentPlaylistMediaTable,
 		ContentMediaReportsTable,
 		ContentMediaReviewLogsTable,
 		ContentMediaTagsTable,
 		UserNotificationsTable,
+		PaymentOrdersTable,
+		PaymentPaymentsTable,
 		AuthPermissionGroupsTable,
 		ContentPlaylistsTable,
 		PortalBannersTable,
 		PortalCustomPagesTable,
 		PortalNavItemsTable,
+		PromotionChannelsTable,
+		PromotionLogsTable,
+		PromotionSubscriptionsTable,
+		PromotionTasksTable,
+		PromotionTemplatesTable,
+		PaymentRefundsTable,
 		SystemSettingsTable,
 		UserSubscriptionsTable,
+		PaymentSubscriptionPlansTable,
+		SubtitlesTable,
 		ContentTagsTable,
 		ContentTagNamesTable,
+		SystemTenantsTable,
 		SystemUploadSessionsTable,
 		UsersTable,
+		PaymentUserSubscriptionsTable,
+		PaymentWalletsTable,
+		PaymentWalletTransactionsTable,
+		AdPlacementCreativesTable,
 		UserPlaylistsTable,
 		UserTagsTable,
 	}
 )
 
 func init() {
+	AdsTable.Annotation = &entsql.Annotation{
+		Table: "ads",
+	}
+	AdClickLogsTable.Annotation = &entsql.Annotation{
+		Table: "ad_click_logs",
+	}
+	AdCreativesTable.Annotation = &entsql.Annotation{
+		Table: "ad_creatives",
+	}
+	AdPlacementsTable.Annotation = &entsql.Annotation{
+		Table: "ad_placements",
+	}
 	ContentArticlesTable.ForeignKeys[0].RefTable = ContentCategoriesTable
 	ContentArticlesTable.ForeignKeys[1].RefTable = UserChannelsTable
 	ContentArticlesTable.ForeignKeys[2].RefTable = ContentMediaTable
@@ -1722,6 +3170,18 @@ func init() {
 	ContentCommentReportsTable.Annotation = &entsql.Annotation{
 		Table: "content_comment_reports",
 	}
+	DrmKeysTable.ForeignKeys[0].RefTable = DrmPoliciesTable
+	DrmKeysTable.Annotation = &entsql.Annotation{
+		Table: "drm_keys",
+	}
+	DrmLicensesTable.ForeignKeys[0].RefTable = DrmKeysTable
+	DrmLicensesTable.ForeignKeys[1].RefTable = UsersTable
+	DrmLicensesTable.Annotation = &entsql.Annotation{
+		Table: "drm_licenses",
+	}
+	DrmPoliciesTable.Annotation = &entsql.Annotation{
+		Table: "drm_policies",
+	}
 	SystemEncodeProfilesTable.Annotation = &entsql.Annotation{
 		Table: "system_encode_profiles",
 	}
@@ -1747,16 +3207,41 @@ func init() {
 	ContentLikesTable.Annotation = &entsql.Annotation{
 		Table: "content_likes",
 	}
+	LiveChatMessagesTable.ForeignKeys[0].RefTable = LiveRoomsTable
+	LiveChatMessagesTable.ForeignKeys[1].RefTable = UsersTable
+	LiveChatMessagesTable.Annotation = &entsql.Annotation{
+		Table: "live_chat_messages",
+	}
+	LiveRecordingsTable.ForeignKeys[0].RefTable = LiveStreamsTable
+	LiveRecordingsTable.Annotation = &entsql.Annotation{
+		Table: "live_recordings",
+	}
+	LiveRoomsTable.ForeignKeys[0].RefTable = UsersTable
+	LiveRoomsTable.Annotation = &entsql.Annotation{
+		Table: "live_rooms",
+	}
+	LiveSchedulesTable.ForeignKeys[0].RefTable = LiveRoomsTable
+	LiveSchedulesTable.Annotation = &entsql.Annotation{
+		Table: "live_schedules",
+	}
+	LiveStreamsTable.ForeignKeys[0].RefTable = LiveRoomsTable
+	LiveStreamsTable.Annotation = &entsql.Annotation{
+		Table: "live_streams",
+	}
 	ContentMediaTable.ForeignKeys[0].RefTable = ContentCategoriesTable
 	ContentMediaTable.ForeignKeys[1].RefTable = UserChannelsTable
 	ContentMediaTable.ForeignKeys[2].RefTable = ContentMediaCategoriesTable
-	ContentMediaTable.ForeignKeys[3].RefTable = ContentMediaTagsTable
-	ContentMediaTable.ForeignKeys[4].RefTable = UsersTable
+	ContentMediaTable.ForeignKeys[3].RefTable = UsersTable
 	ContentMediaTable.Annotation = &entsql.Annotation{
 		Table: "content_media",
 	}
 	ContentMediaCategoriesTable.Annotation = &entsql.Annotation{
 		Table: "content_media_categories",
+	}
+	MediaDrmPoliciesTable.ForeignKeys[0].RefTable = DrmPoliciesTable
+	MediaDrmPoliciesTable.ForeignKeys[1].RefTable = ContentMediaTable
+	MediaDrmPoliciesTable.Annotation = &entsql.Annotation{
+		Table: "media_drm_policies",
 	}
 	ContentPlaylistMediaTable.ForeignKeys[0].RefTable = ContentMediaTable
 	ContentPlaylistMediaTable.ForeignKeys[1].RefTable = ContentMediaTable
@@ -1775,12 +3260,23 @@ func init() {
 		Table: "content_media_review_logs",
 	}
 	ContentMediaTagsTable.ForeignKeys[0].RefTable = ContentMediaTable
+	ContentMediaTagsTable.ForeignKeys[1].RefTable = ContentTagsTable
 	ContentMediaTagsTable.Annotation = &entsql.Annotation{
 		Table: "content_media_tags",
 	}
 	UserNotificationsTable.ForeignKeys[0].RefTable = UsersTable
 	UserNotificationsTable.Annotation = &entsql.Annotation{
 		Table: "user_notifications",
+	}
+	PaymentOrdersTable.ForeignKeys[0].RefTable = PaymentSubscriptionPlansTable
+	PaymentOrdersTable.ForeignKeys[1].RefTable = UsersTable
+	PaymentOrdersTable.ForeignKeys[2].RefTable = PaymentUserSubscriptionsTable
+	PaymentOrdersTable.Annotation = &entsql.Annotation{
+		Table: "payment_orders",
+	}
+	PaymentPaymentsTable.ForeignKeys[0].RefTable = PaymentOrdersTable
+	PaymentPaymentsTable.Annotation = &entsql.Annotation{
+		Table: "payment_payments",
 	}
 	AuthPermissionGroupsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthPermissionGroupsTable.Annotation = &entsql.Annotation{
@@ -1798,15 +3294,46 @@ func init() {
 	PortalNavItemsTable.Annotation = &entsql.Annotation{
 		Table: "portal_nav_items",
 	}
+	PromotionChannelsTable.Annotation = &entsql.Annotation{
+		Table: "promotion_channels",
+	}
+	PromotionLogsTable.ForeignKeys[0].RefTable = PromotionChannelsTable
+	PromotionLogsTable.ForeignKeys[1].RefTable = PromotionTasksTable
+	PromotionLogsTable.Annotation = &entsql.Annotation{
+		Table: "promotion_logs",
+	}
+	PromotionSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
+	PromotionSubscriptionsTable.Annotation = &entsql.Annotation{
+		Table: "promotion_subscriptions",
+	}
+	PromotionTasksTable.ForeignKeys[0].RefTable = PromotionChannelsTable
+	PromotionTasksTable.ForeignKeys[1].RefTable = PromotionTemplatesTable
+	PromotionTasksTable.Annotation = &entsql.Annotation{
+		Table: "promotion_tasks",
+	}
+	PromotionTemplatesTable.ForeignKeys[0].RefTable = PromotionChannelsTable
+	PromotionTemplatesTable.Annotation = &entsql.Annotation{
+		Table: "promotion_templates",
+	}
+	PaymentRefundsTable.ForeignKeys[0].RefTable = PaymentOrdersTable
+	PaymentRefundsTable.Annotation = &entsql.Annotation{
+		Table: "payment_refunds",
+	}
 	SystemSettingsTable.Annotation = &entsql.Annotation{
 		Table: "system_settings",
 	}
-	UserSubscriptionsTable.ForeignKeys[0].RefTable = UsersTable
+	UserSubscriptionsTable.ForeignKeys[0].RefTable = UserChannelsTable
 	UserSubscriptionsTable.ForeignKeys[1].RefTable = UsersTable
 	UserSubscriptionsTable.Annotation = &entsql.Annotation{
 		Table: "user_subscriptions",
 	}
-	ContentTagsTable.ForeignKeys[0].RefTable = ContentMediaTagsTable
+	PaymentSubscriptionPlansTable.Annotation = &entsql.Annotation{
+		Table: "payment_subscription_plans",
+	}
+	SubtitlesTable.ForeignKeys[0].RefTable = ContentMediaTable
+	SubtitlesTable.Annotation = &entsql.Annotation{
+		Table: "subtitles",
+	}
 	ContentTagsTable.Annotation = &entsql.Annotation{
 		Table: "content_tags",
 	}
@@ -1814,12 +3341,30 @@ func init() {
 	ContentTagNamesTable.Annotation = &entsql.Annotation{
 		Table: "content_tag_names",
 	}
+	SystemTenantsTable.Annotation = &entsql.Annotation{
+		Table: "system_tenants",
+	}
 	SystemUploadSessionsTable.Annotation = &entsql.Annotation{
 		Table: "system_upload_sessions",
 	}
 	UsersTable.Annotation = &entsql.Annotation{
 		Table: "users",
 	}
+	PaymentUserSubscriptionsTable.ForeignKeys[0].RefTable = PaymentSubscriptionPlansTable
+	PaymentUserSubscriptionsTable.ForeignKeys[1].RefTable = UsersTable
+	PaymentUserSubscriptionsTable.Annotation = &entsql.Annotation{
+		Table: "payment_user_subscriptions",
+	}
+	PaymentWalletsTable.ForeignKeys[0].RefTable = UsersTable
+	PaymentWalletsTable.Annotation = &entsql.Annotation{
+		Table: "payment_wallets",
+	}
+	PaymentWalletTransactionsTable.ForeignKeys[0].RefTable = PaymentWalletsTable
+	PaymentWalletTransactionsTable.Annotation = &entsql.Annotation{
+		Table: "payment_wallet_transactions",
+	}
+	AdPlacementCreativesTable.ForeignKeys[0].RefTable = AdPlacementsTable
+	AdPlacementCreativesTable.ForeignKeys[1].RefTable = AdCreativesTable
 	UserPlaylistsTable.ForeignKeys[0].RefTable = UsersTable
 	UserPlaylistsTable.ForeignKeys[1].RefTable = ContentPlaylistsTable
 	UserTagsTable.ForeignKeys[0].RefTable = UsersTable

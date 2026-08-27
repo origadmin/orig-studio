@@ -19,6 +19,7 @@ type PortalRepo interface {
 
 	ListBanners(ctx context.Context) ([]*dto.PortalBannerDTO, error)
 	CreateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error)
+	GetBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error)
 	UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error)
 	DeleteBanner(ctx context.Context, id string) error
 	ToggleBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error)
@@ -56,6 +57,7 @@ type PortalSite struct {
 	AllowUpload       bool     `json:"allow_upload"`
 	PrimaryURL        string   `json:"primary_url"`
 	AllowedURLs       []string `json:"allowed_urls"`
+	SiteLogoURL       string   `json:"site_logo_url"`
 }
 
 type PortalUseCase struct {
@@ -102,6 +104,10 @@ func (uc *PortalUseCase) ListBanners(ctx context.Context) ([]*dto.PortalBannerDT
 
 func (uc *PortalUseCase) CreateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error) {
 	return uc.repo.CreateBanner(ctx, b)
+}
+
+func (uc *PortalUseCase) GetBanner(ctx context.Context, id string) (*dto.PortalBannerDTO, error) {
+	return uc.repo.GetBanner(ctx, id)
 }
 
 func (uc *PortalUseCase) UpdateBanner(ctx context.Context, b *dto.PortalBannerDTO) (*dto.PortalBannerDTO, error) {

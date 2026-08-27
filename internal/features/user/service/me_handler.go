@@ -5,11 +5,15 @@
 package service
 
 import (
-	"fmt"
+	"image"
+	"io"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 
-	"github.com/gin-gonic/gin"
-
+	apitypes "origadmin/application/origstudio/api/gen/v1/types"
+	"origadmin/application/origstudio/internal/conf"
 	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/domain/types"
@@ -25,6 +29,7 @@ type MeHandler struct {
 	playlistUC     *contentbiz.PlaylistChannelUseCase
 	historyUC      *contentbiz.HistoryUseCase
 	jwt            *auth.Manager
+	paths          *conf.StoragePaths
 }
 
 // NewMeHandler creates a new MeHandler.
@@ -34,6 +39,7 @@ func NewMeHandler(
 	playlistUC *contentbiz.PlaylistChannelUseCase,
 	historyUC *contentbiz.HistoryUseCase,
 	jwt *auth.Manager,
+	paths *conf.StoragePaths,
 ) *MeHandler {
 	return &MeHandler{
 		userUC:         userUC,
@@ -41,6 +47,7 @@ func NewMeHandler(
 		playlistUC:     playlistUC,
 		historyUC:      historyUC,
 		jwt:            jwt,
+		paths:          paths,
 	}
 }
 
@@ -52,103 +59,132 @@ func (h *MeHandler) RegisterRoutes(r http2.Router) {
 		// ================================
 		// 1. CURRENT USER PROFILE
 		// ================================
-		me.GET("", server.GinHandlerToHandlerFunc(h.GetMe))
-		me.PUT("", server.GinHandlerToHandlerFunc(h.UpdateMe))
-		me.PUT("/password", server.GinHandlerToHandlerFunc(h.UpdatePassword))
+		me.GET("", h.GetMe)
+		me.PUT("", h.UpdateMe)
+		me.PUT("/password", h.UpdatePassword)
+
+		me.GET("/profile", h.GetProfile)
+		me.PUT("/profile", h.UpdateProfile)
+		me.POST("/avatar", h.UploadAvatar)
+		me.GET("/setting", h.GetSetting)
+		me.PUT("/setting", h.UpdateSetting)
 
 		// ================================
 		// 2. CURRENT USER RESOURCES
 		// ================================
-		me.GET("/playlists", server.GinHandlerToHandlerFunc(h.GetPlaylists))
-		me.POST("/playlists", server.GinHandlerToHandlerFunc(h.CreatePlaylist))
-		me.PATCH("/playlists/:id", server.GinHandlerToHandlerFunc(h.UpdatePlaylist))
-		me.DELETE("/playlists/:id", server.GinHandlerToHandlerFunc(h.DeletePlaylist))
-		me.POST("/playlists/:id/media", server.GinHandlerToHandlerFunc(h.AddMediaToPlaylist))
-		me.DELETE("/playlists/:id/media/:mediaId", server.GinHandlerToHandlerFunc(h.RemoveMediaFromPlaylist))
-		me.GET("/favorites", server.GinHandlerToHandlerFunc(h.GetFavorites))
-		me.DELETE("/favorites/:id", server.GinHandlerToHandlerFunc(h.RemoveFavorite))
-		me.GET("/likes", server.GinHandlerToHandlerFunc(h.GetLikes))
-		me.GET("/subscriptions", server.GinHandlerToHandlerFunc(h.GetSubscriptions))
-		me.GET("/followers", server.GinHandlerToHandlerFunc(h.GetFollowers))
+		me.GET("/playlists", h.GetPlaylists)
+		me.POST("/playlists", h.CreatePlaylist)
+		me.PATCH("/playlists/:id", h.UpdatePlaylist)
+		me.DELETE("/playlists/:id", h.DeletePlaylist)
+		me.POST("/playlists/:id/media", h.AddMediaToPlaylist)
+		me.DELETE("/playlists/:id/media/:mediaId", h.RemoveMediaFromPlaylist)
+		me.GET("/favorites", h.GetFavorites)
+		me.DELETE("/favorites/:id", h.RemoveFavorite)
+		me.GET("/likes", h.GetLikes)
+		me.GET("/subscriptions", h.GetSubscriptions)
+		me.GET("/followers", h.GetFollowers)
 
 		// ================================
 		// 3. WATCH HISTORY (independent from favorites/likes)
 		// ================================
-		me.GET("/history", server.GinHandlerToHandlerFunc(h.GetHistory))
-		me.POST("/history", server.GinHandlerToHandlerFunc(h.UpsertHistory))
-		me.POST("/history/sync", server.GinHandlerToHandlerFunc(h.SyncHistory))
-		me.DELETE("/history", server.GinHandlerToHandlerFunc(h.ClearHistory))
-		me.DELETE("/history/:id", server.GinHandlerToHandlerFunc(h.RemoveHistoryItem))
+		me.GET("/history", h.GetHistory)
+		me.POST("/history", h.UpsertHistory)
+		me.POST("/history/sync", h.SyncHistory)
+		me.DELETE("/history", h.ClearHistory)
+		me.DELETE("/history/:id", h.RemoveHistoryItem)
 
-		me.GET("/stats", server.GinHandlerToHandlerFunc(h.GetStats))
-		me.PUT("/slug", server.GinHandlerToHandlerFunc(h.UpdateSlug))
-		me.GET("/channels", server.GinHandlerToHandlerFunc(h.GetChannels))
+		me.GET("/stats", h.GetStats)
+		me.PUT("/slug", h.UpdateSlug)
+		me.GET("/channels", h.GetChannels)
 	}
 }
 
 // GetMe returns the current user's information.
-func (h *MeHandler) GetMe(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetMe(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	user, err := h.userUC.GetUser(c.Request.Context(), claims.GetUserID())
+	user, err := h.userUC.GetUser(ctx, claims.GetUserID())
 	if err != nil {
-		server.Fail(c, server.ErrUserNotFound, "User not found")
-		return
+		return server.FailCtx(ctx, server.ErrUserNotFound, "User not found")
 	}
 
-	server.OK(c, user)
+	return server.OKCtx(ctx, user)
 }
 
 // UpdateMe updates the current user's information.
-func (h *MeHandler) UpdateMe(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) UpdateMe(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
 	var input struct {
 		Nickname string `json:"nickname"`
 		Email    string `json:"email" binding:"omitempty,email"`
+		Phone    string `json:"phone"`
+		Bio      string `json:"bio"`
+		Location string `json:"location"`
+		Avatar   string `json:"avatar"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
-	user, err := h.userUC.GetUser(c.Request.Context(), claims.GetUserID())
+	user, err := h.userUC.GetUser(ctx, claims.GetUserID())
 	if err != nil {
-		server.Fail(c, server.ErrUserNotFound, "User not found")
-		return
+		return server.FailCtx(ctx, server.ErrUserNotFound, "User not found")
 	}
 
+	userChanged := false
 	if input.Nickname != "" {
 		user.Nickname = input.Nickname
+		userChanged = true
 	}
 	if input.Email != "" {
 		user.Email = input.Email
+		userChanged = true
+	}
+	if input.Phone != "" {
+		user.Phone = input.Phone
+		userChanged = true
+	}
+	if input.Avatar != "" {
+		user.Avatar = input.Avatar
+		userChanged = true
 	}
 
-	updated, err := h.userUC.UpdateUser(c.Request.Context(), user)
-	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+	if userChanged {
+		user, err = h.userUC.UpdateUser(ctx, user)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
+		}
 	}
 
-	server.OK(c, updated)
+	profileChanged := input.Bio != "" || input.Location != ""
+	if profileChanged {
+		profile := &apitypes.UserProfile{
+			Name:     user.Nickname,
+			Bio:      input.Bio,
+			Location: input.Location,
+			Avatar:   user.Avatar,
+		}
+		if err := h.userUC.UpdateUserProfile(ctx, claims.GetUserID(), profile); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
+		}
+	}
+
+	return server.OKCtx(ctx, user)
 }
 
 // UpdatePassword updates the current user's password.
-func (h *MeHandler) UpdatePassword(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) UpdatePassword(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
 	var input struct {
@@ -156,41 +192,265 @@ func (h *MeHandler) UpdatePassword(c *gin.Context) {
 		NewPassword string `json:"new_password" binding:"required,min=6"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
 	// Verify old password
-	if err := h.userUC.VerifyPassword(c.Request.Context(), claims.GetUserID(), input.OldPassword); err != nil {
-		server.Fail(c, server.ErrPasswordWrong, "Invalid old password")
-		return
+	if err := h.userUC.VerifyPassword(ctx, claims.GetUserID(), input.OldPassword); err != nil {
+		return server.FailCtx(ctx, server.ErrPasswordWrong, "Invalid old password")
 	}
 
-	// TODO: Implement UpdatePassword in UserUseCase
-	server.OK(c, gin.H{"message": "Password updated"})
+	hashedPassword, err := h.userUC.HashPassword(input.NewPassword)
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, "password update failed")
+	}
+
+	if err := h.userUC.UpdateUserPassword(ctx, claims.GetUserID(), hashedPassword); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, "password update failed")
+	}
+
+	return server.OKCtx(ctx, map[string]any{"message": "Password updated"})
+}
+
+func (h *MeHandler) GetProfile(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+
+	profile, err := h.userUC.GetUserProfile(ctx, claims.GetUserID())
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
+	}
+
+	return server.OKCtx(ctx, profile)
+}
+
+func (h *MeHandler) UpdateProfile(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+
+	var input struct {
+		Nickname string `json:"nickname"`
+		Email    string `json:"email" binding:"omitempty,email"`
+		Phone    string `json:"phone"`
+		Bio      string `json:"bio"`
+		Location string `json:"location"`
+	}
+
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+	}
+
+	user, err := h.userUC.GetUser(ctx, claims.GetUserID())
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrUserNotFound, "User not found")
+	}
+
+	userChanged := false
+	if input.Nickname != "" {
+		user.Nickname = input.Nickname
+		userChanged = true
+	}
+	if input.Email != "" {
+		user.Email = input.Email
+		userChanged = true
+	}
+	if input.Phone != "" {
+		user.Phone = input.Phone
+		userChanged = true
+	}
+
+	if userChanged {
+		user, err = h.userUC.UpdateUser(ctx, user)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
+		}
+	}
+
+	profileChanged := input.Bio != "" || input.Location != ""
+	if profileChanged {
+		profile := &apitypes.UserProfile{
+			Name:     user.Nickname,
+			Bio:      input.Bio,
+			Location: input.Location,
+			Avatar:   user.Avatar,
+		}
+		if err := h.userUC.UpdateUserProfile(ctx, claims.GetUserID(), profile); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
+		}
+	}
+
+	return server.OKCtx(ctx, user)
+}
+
+func (h *MeHandler) UploadAvatar(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+
+	file, header, err := ctx.FormFile("avatar")
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, "avatar file is required")
+	}
+	defer file.Close()
+
+	const maxAvatarSize = 5 * 1024 * 1024 // 5MB
+	if header.Size > maxAvatarSize {
+		return server.FailCtx(ctx, server.ErrPayloadTooLarge, "avatar file too large, max 5MB")
+	}
+
+	contentType := header.Header.Get("Content-Type")
+	if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/webp" {
+		return server.FailCtx(ctx, server.ErrUnsupportedMediaType, "unsupported media type, use jpg/png/webp")
+	}
+
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		switch contentType {
+		case "image/jpeg":
+			ext = ".jpg"
+		case "image/png":
+			ext = ".png"
+		case "image/webp":
+			ext = ".webp"
+		}
+	}
+
+	// Use StoragePaths registry for avatar storage path
+	avatarDir := h.paths.Dir("assets/avatars")
+	if err := os.MkdirAll(avatarDir, 0755); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, "failed to create avatar directory")
+	}
+
+	now := time.Now()
+	yearMonth := strconv.Itoa(now.Year()) + strconv.Itoa(int(now.Month()))
+	filename := claims.GetUserID() + "_" + yearMonth + ext
+	dst := filepath.Join(avatarDir, filename)
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, "failed to save avatar file")
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, file); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, "failed to write avatar file")
+	}
+
+	imgFile, err := os.Open(dst)
+	if err != nil {
+		os.Remove(dst)
+		return server.FailCtx(ctx, server.ErrInternal, "failed to read avatar file")
+	}
+	defer imgFile.Close()
+
+	imgConfig, _, err := image.DecodeConfig(imgFile)
+	if err != nil {
+		os.Remove(dst)
+		return server.FailCtx(ctx, server.ErrBadRequest, "invalid image file")
+	}
+
+	const minDimension = 200
+	const maxDimension = 4000
+	if imgConfig.Width < minDimension || imgConfig.Height < minDimension {
+		os.Remove(dst)
+		return server.FailCtx(ctx, server.ErrBadRequest, "image too small, min 200x200")
+	}
+	if imgConfig.Width > maxDimension || imgConfig.Height > maxDimension {
+		os.Remove(dst)
+		return server.FailCtx(ctx, server.ErrBadRequest, "image too large, max 4000x4000")
+	}
+
+	// URL via gateway /files/ prefix
+	avatarURL := "/files/assets/avatars/" + filename
+
+	user, err := h.userUC.GetUser(ctx, claims.GetUserID())
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrUserNotFound, "User not found")
+	}
+	user.Avatar = avatarURL
+
+	updated, err := h.userUC.UpdateUser(ctx, user)
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
+	}
+
+	return server.OKCtx(ctx, map[string]any{"avatar_url": updated.Avatar})
+}
+
+func (h *MeHandler) GetSetting(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+
+	setting, err := h.userUC.GetUserSetting(ctx, claims.GetUserID())
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
+	}
+
+	return server.OKCtx(ctx, setting)
+}
+
+func (h *MeHandler) UpdateSetting(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+
+	var input struct {
+		Theme       string            `json:"theme"`
+		Language    string            `json:"language"`
+		Timezone    string            `json:"timezone"`
+		Preferences map[string]string `json:"preferences"`
+	}
+
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+	}
+
+	setting := &apitypes.UserSetting{
+		Theme:       input.Theme,
+		Language:    input.Language,
+		Timezone:    input.Timezone,
+		Preferences: input.Preferences,
+	}
+
+	if err := h.userUC.UpdateUserSetting(ctx, claims.GetUserID(), setting); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
+	}
+
+	setting, err := h.userUC.GetUserSetting(ctx, claims.GetUserID())
+	if err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
+	}
+
+	return server.OKCtx(ctx, setting)
 }
 
 // GetPlaylists returns the current user's playlists.
-func (h *MeHandler) GetPlaylists(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetPlaylists(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 	// Normalize pagination parameters
 	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
-	list, total, err := h.playlistUC.ListUserPlaylists(c.Request.Context(), claims.GetUserID(), page, pageSize)
+	list, total, err := h.playlistUC.ListUserPlaylists(ctx, claims.GetUserID(), page, pageSize)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":     list,
 		"total":     total,
 		"page":      page,
@@ -199,11 +459,10 @@ func (h *MeHandler) GetPlaylists(c *gin.Context) {
 }
 
 // CreatePlaylist creates a new playlist for the current user.
-func (h *MeHandler) CreatePlaylist(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) CreatePlaylist(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
 	var input struct {
@@ -211,14 +470,12 @@ func (h *MeHandler) CreatePlaylist(c *gin.Context) {
 		Description string `json:"description"`
 		IsPublic    *bool  `json:"is_public"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
 	if input.Title == "" {
-		server.Fail(c, server.ErrBadRequest, "title is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "title is required")
 	}
 
 	if input.Description == "" {
@@ -233,68 +490,59 @@ func (h *MeHandler) CreatePlaylist(c *gin.Context) {
 		isPublic = *input.IsPublic
 	}
 
-	p, err := h.playlistUC.CreatePlaylist(c.Request.Context(), &contentbiz.Playlist{
+	p, err := h.playlistUC.CreatePlaylist(ctx, &contentbiz.Playlist{
 		Title:       input.Title,
 		Description: input.Description,
 		UserID:      claims.GetUserID(),
 		IsPublic:    isPublic,
 	})
 	if err != nil {
-		_ = c.Error(fmt.Errorf("CreatePlaylist failed: userID=%q title=%q err=%w", claims.GetUserID(), input.Title, err))
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"playlist": p})
+	return server.OKCtx(ctx, map[string]any{"playlist": p})
 }
 
 // AddMediaToPlaylist adds a media item to a playlist.
-func (h *MeHandler) AddMediaToPlaylist(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) AddMediaToPlaylist(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	playlistID := c.Param("id")
+	playlistID := ctx.Var("id")
 	if playlistID == "" {
-		server.Fail(c, server.ErrBadRequest, "playlist id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "playlist id is required")
 	}
 
 	var input struct {
 		MediaID string `json:"media_id"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
 	if input.MediaID == "" {
-		server.Fail(c, server.ErrBadRequest, "media_id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "media_id is required")
 	}
 
-	if err := h.playlistUC.AddMediaToPlaylist(c.Request.Context(), playlistID, input.MediaID, claims.GetUserID(), false); err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+	if err := h.playlistUC.AddMediaToPlaylist(ctx, playlistID, input.MediaID, claims.GetUserID(), false); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"message": "media added to playlist"})
+	return server.OKCtx(ctx, map[string]any{"message": "media added to playlist"})
 }
 
 // UpdatePlaylist updates a playlist's title (and optionally description/is_public).
-func (h *MeHandler) UpdatePlaylist(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) UpdatePlaylist(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	playlistID := c.Param("id")
+	playlistID := ctx.Var("id")
 	if playlistID == "" {
-		server.Fail(c, server.ErrBadRequest, "playlist id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "playlist id is required")
 	}
 
 	var input struct {
@@ -302,15 +550,13 @@ func (h *MeHandler) UpdatePlaylist(c *gin.Context) {
 		Description string `json:"description"`
 		IsPublic    *bool  `json:"is_public"`
 	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
-	existing, err := h.playlistUC.GetPlaylist(c.Request.Context(), playlistID)
+	existing, err := h.playlistUC.GetPlaylist(ctx, playlistID)
 	if err != nil {
-		server.Fail(c, server.ErrNotFound, "playlist not found")
-		return
+		return server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
 	}
 
 	if input.Title != "" {
@@ -323,79 +569,70 @@ func (h *MeHandler) UpdatePlaylist(c *gin.Context) {
 		existing.IsPublic = *input.IsPublic
 	}
 
-	updated, err := h.playlistUC.UpdatePlaylist(c.Request.Context(), existing, claims.GetUserID(), false)
+	updated, err := h.playlistUC.UpdatePlaylist(ctx, existing, claims.GetUserID(), false)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"playlist": updated})
+	return server.OKCtx(ctx, map[string]any{"playlist": updated})
 }
 
 // DeletePlaylist deletes a playlist owned by the current user.
-func (h *MeHandler) DeletePlaylist(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) DeletePlaylist(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	playlistID := c.Param("id")
+	playlistID := ctx.Var("id")
 	if playlistID == "" {
-		server.Fail(c, server.ErrBadRequest, "playlist id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "playlist id is required")
 	}
 
-	if err := h.playlistUC.DeletePlaylist(c.Request.Context(), playlistID, claims.GetUserID(), false); err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+	if err := h.playlistUC.DeletePlaylist(ctx, playlistID, claims.GetUserID(), false); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"message": "playlist deleted successfully"})
+	return server.OKCtx(ctx, map[string]any{"message": "playlist deleted successfully"})
 }
 
 // RemoveMediaFromPlaylist removes a media item from a playlist.
-func (h *MeHandler) RemoveMediaFromPlaylist(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) RemoveMediaFromPlaylist(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	playlistID := c.Param("id")
-	mediaID := c.Param("mediaId")
+	playlistID := ctx.Var("id")
+	mediaID := ctx.Var("mediaId")
 	if playlistID == "" || mediaID == "" {
-		server.Fail(c, server.ErrBadRequest, "playlist id and media id are required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "playlist id and media id are required")
 	}
 
-	if err := h.playlistUC.RemoveMediaFromPlaylist(c.Request.Context(), playlistID, mediaID, claims.GetUserID(), false); err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+	if err := h.playlistUC.RemoveMediaFromPlaylist(ctx, playlistID, mediaID, claims.GetUserID(), false); err != nil {
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"message": "media removed from playlist"})
+	return server.OKCtx(ctx, map[string]any{"message": "media removed from playlist"})
 }
 
-func (h *MeHandler) GetFavorites(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetFavorites(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 	// Normalize pagination parameters
 	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
-	favorites, total, err := h.likeFavoriteUC.ListUserFavoritesPaginated(c.Request.Context(), claims.GetUserID(), page, pageSize)
+	favorites, total, err := h.likeFavoriteUC.ListUserFavoritesPaginated(ctx, claims.GetUserID(), page, pageSize)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":     favorites,
 		"total":     total,
 		"page":      page,
@@ -404,20 +641,18 @@ func (h *MeHandler) GetFavorites(c *gin.Context) {
 }
 
 // GetLikes returns the current user's likes.
-func (h *MeHandler) GetLikes(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetLikes(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	likes, err := h.likeFavoriteUC.ListUserLikes(c.Request.Context(), claims.GetUserID())
+	likes, err := h.likeFavoriteUC.ListUserLikes(ctx, claims.GetUserID())
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":     likes,
 		"total":     len(likes),
 		"page":      1,
@@ -426,30 +661,28 @@ func (h *MeHandler) GetLikes(c *gin.Context) {
 }
 
 // GetSubscriptions returns the current user's subscriptions.
-func (h *MeHandler) GetSubscriptions(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetSubscriptions(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 	// Normalize pagination parameters
 	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.userUC.GetSubscriptions(
-		c.Request.Context(),
+		ctx,
 		claims.GetUserID(),
 		page,
 		pageSize,
 	)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":     list,
 		"total":     total,
 		"page":      page,
@@ -459,26 +692,24 @@ func (h *MeHandler) GetSubscriptions(c *gin.Context) {
 
 // GetHistory returns the current user's watch history from the user_history table.
 // This replaces the old implementation that incorrectly used favorites+likes.
-func (h *MeHandler) GetHistory(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetHistory(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
-	contentType := c.DefaultQuery("content_type", "")
+	contentType := ctx.QueryVarDefault("content_type", "")
 
-	items, total, err := h.historyUC.List(c.Request.Context(), claims.GetUserID(), contentType, page, pageSize)
+	items, total, err := h.historyUC.List(ctx, claims.GetUserID(), contentType, page, pageSize)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":     items,
 		"total":     total,
 		"page":      page,
@@ -486,12 +717,49 @@ func (h *MeHandler) GetHistory(c *gin.Context) {
 	})
 }
 
-// UpsertHistory creates or updates a history record (progress reporting).
-func (h *MeHandler) UpsertHistory(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) UpdateSlug(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+
+	var input struct {
+		Slug string `json:"slug" binding:"required,min=3,max=64"`
+	}
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+	}
+
+	if err := h.userUC.UpdateUserSlug(ctx, claims.GetUserID(), input.Slug); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
+	}
+
+	u, _ := h.userUC.GetUser(ctx, claims.GetUserID())
+	return server.OKCtx(ctx, u)
+}
+
+func (h *MeHandler) GetChannels(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
+	}
+	_ = claims
+	page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
+	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
+	return server.OKCtx(ctx, map[string]any{
+		"channels":  []interface{}{},
+		"total":     0,
+		"page":      page,
+		"page_size": pageSize,
+	})
+}
+
+// UpsertHistory creates or updates a history record (progress reporting).
+func (h *MeHandler) UpsertHistory(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
+	if !ok {
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
 	var input struct {
@@ -504,17 +772,15 @@ func (h *MeHandler) UpsertHistory(c *gin.Context) {
 		ShortToken      string `json:"short_token"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
 	if input.ContentID == "" {
-		server.Fail(c, server.ErrBadRequest, "content_id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "content_id is required")
 	}
 
-	result, err := h.historyUC.Upsert(c.Request.Context(), &contentbiz.History{
+	result, err := h.historyUC.Upsert(ctx, &contentbiz.History{
 		UserID:          claims.GetUserID(),
 		ContentID:       input.ContentID,
 		ContentType:     input.ContentType,
@@ -526,22 +792,19 @@ func (h *MeHandler) UpsertHistory(c *gin.Context) {
 	})
 	if err != nil {
 		if err.Error() == "invalid content_type: "+input.ContentType {
-			server.Fail(c, server.ErrBadRequest, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"item": result})
+	return server.OKCtx(ctx, map[string]any{"item": result})
 }
 
 // SyncHistory batch-syncs history records (login merge).
-func (h *MeHandler) SyncHistory(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) SyncHistory(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
 	var input struct {
@@ -557,9 +820,8 @@ func (h *MeHandler) SyncHistory(c *gin.Context) {
 		} `json:"items"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
+	if err := ctx.BindJSON(&input); err != nil {
+		return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 	}
 
 	items := make([]*contentbiz.History, len(input.Items))
@@ -576,13 +838,12 @@ func (h *MeHandler) SyncHistory(c *gin.Context) {
 		}
 	}
 
-	result, mergedCount, err := h.historyUC.Sync(c.Request.Context(), claims.GetUserID(), items)
+	result, mergedCount, err := h.historyUC.Sync(ctx, claims.GetUserID(), items)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":        result,
 		"merged_count": mergedCount,
 	})
@@ -590,151 +851,97 @@ func (h *MeHandler) SyncHistory(c *gin.Context) {
 
 // ClearHistory clears all watch history for the current user.
 // This only deletes from the user_history table and does NOT touch favorites or likes.
-func (h *MeHandler) ClearHistory(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) ClearHistory(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	deletedCount, err := h.historyUC.ClearAll(c.Request.Context(), claims.GetUserID())
+	deletedCount, err := h.historyUC.ClearAll(ctx, claims.GetUserID())
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"deleted_count": deletedCount})
+	return server.OKCtx(ctx, map[string]any{"deleted_count": deletedCount})
 }
 
 // RemoveHistoryItem removes a single history item by its ID.
 // This only deletes from the user_history table and does NOT touch favorites or likes.
-func (h *MeHandler) RemoveHistoryItem(c *gin.Context) {
-	_, ok := server.GetClaims(c)
+func (h *MeHandler) RemoveHistoryItem(ctx http2.Context) error {
+	_, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	itemID := c.Param("id")
+	itemID := ctx.Var("id")
 	if itemID == "" {
-		server.Fail(c, server.ErrBadRequest, "item id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "item id is required")
 	}
 
-	err := h.historyUC.Remove(c.Request.Context(), itemID)
+	err := h.historyUC.Remove(ctx, itemID)
 	if err != nil {
-		server.Fail(c, server.ErrNotFound, "History item not found")
-		return
+		return server.FailCtx(ctx, server.ErrNotFound, "History item not found")
 	}
 
-	server.OK(c, gin.H{"message": "History item removed"})
+	return server.OKCtx(ctx, map[string]any{"message": "History item removed"})
 }
 
 // GetStats returns the current user's statistics.
-func (h *MeHandler) GetStats(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetStats(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
 	// TODO: Implement user stats
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"user_id": claims.GetUserID(),
-		"stats":   gin.H{},
+		"stats":   map[string]any{},
 	})
-}
-
-func (h *MeHandler) UpdateSlug(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
-	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
-	}
-
-	var input struct {
-		Slug string `json:"slug" binding:"required,min=3,max=64"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
-
-	if err := h.userUC.UpdateUserSlug(c.Request.Context(), claims.GetUserID(), input.Slug); err != nil {
-		server.Fail(c, server.ErrBadRequest, err.Error())
-		return
-	}
-
-	u, _ := h.userUC.GetUser(c.Request.Context(), claims.GetUserID())
-	server.OK(c, u)
-}
-
-func (h *MeHandler) GetChannels(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
-	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
-	}
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
-	server.OK(c, gin.H{
-		"channels":  []interface{}{},
-		"total":     0,
-		"page":      page,
-		"page_size": pageSize,
-	})
-	_ = claims
 }
 
 // RemoveFavorite removes a favorite by its ID.
-func (h *MeHandler) RemoveFavorite(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) RemoveFavorite(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	favoriteID := c.Param("id")
+	favoriteID := ctx.Var("id")
 	if favoriteID == "" {
-		server.Fail(c, server.ErrBadRequest, "favorite id is required")
-		return
+		return server.FailCtx(ctx, server.ErrBadRequest, "favorite id is required")
 	}
 
-	if err := h.likeFavoriteUC.RemoveFavoriteByID(c.Request.Context(), claims.GetUserID(), favoriteID); err != nil {
+	if err := h.likeFavoriteUC.RemoveFavoriteByID(ctx, claims.GetUserID(), favoriteID); err != nil {
 		if err.Error() == "favorite not found" {
-			server.Fail(c, server.ErrNotFound, "Favorite not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "Favorite not found")
 		}
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
-	server.OK(c, gin.H{"message": "Favorite removed"})
+	return server.OKCtx(ctx, map[string]any{"message": "Favorite removed"})
 }
 
 // GetFollowers returns users who follow the current user.
-func (h *MeHandler) GetFollowers(c *gin.Context) {
-	claims, ok := server.GetClaims(c)
+func (h *MeHandler) GetFollowers(ctx http2.Context) error {
+	claims, ok := server.GetClaimsCtx(ctx)
 	if !ok {
-		server.Fail(c, server.ErrUnauthorized, "unauthorized")
-		return
+		return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 	// Normalize pagination parameters
 	page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 	list, total, err := h.userUC.GetSubscribers(
-		c.Request.Context(),
+		ctx,
 		claims.GetUserID(),
 		page,
 		pageSize,
 	)
 	if err != nil {
-		server.Fail(c, server.ErrInternal, err.Error())
-		return
+		return server.FailCtx(ctx, server.ErrInternal, err.Error())
 	}
 
 	items := make([]interface{}, 0, len(list))
@@ -743,7 +950,7 @@ func (h *MeHandler) GetFollowers(c *gin.Context) {
 		if u.CreateTime != nil {
 			createdAt = u.CreateTime.AsTime().Format("2006-01-02T15:04:05Z07:00")
 		}
-		items = append(items, gin.H{
+		items = append(items, map[string]any{
 			"id":            u.Id,
 			"user_id":       u.Id,
 			"username":      u.Username,
@@ -753,7 +960,7 @@ func (h *MeHandler) GetFollowers(c *gin.Context) {
 		})
 	}
 
-	server.OK(c, gin.H{
+	return server.OKCtx(ctx, map[string]any{
 		"items":     items,
 		"total":     total,
 		"page":      page,

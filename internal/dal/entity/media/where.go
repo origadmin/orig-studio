@@ -135,9 +135,9 @@ func MimeType(v string) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldMimeType, v))
 }
 
-// Md5sum applies equality check predicate on the "md5sum" field. It's identical to Md5sumEQ.
-func Md5sum(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldMd5sum, v))
+// Sha256 applies equality check predicate on the "sha256" field. It's identical to Sha256EQ.
+func Sha256(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSha256, v))
 }
 
 // Extension applies equality check predicate on the "extension" field. It's identical to ExtensionEQ.
@@ -188,11 +188,6 @@ func DownloadCount(v int64) predicate.Media {
 // ShareCount applies equality check predicate on the "share_count" field. It's identical to ShareCountEQ.
 func ShareCount(v int64) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldShareCount, v))
-}
-
-// UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
-func UUID(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldUUID, v))
 }
 
 // AllowDownload applies equality check predicate on the "allow_download" field. It's identical to AllowDownloadEQ.
@@ -1200,79 +1195,79 @@ func MimeTypeContainsFold(v string) predicate.Media {
 	return predicate.Media(sql.FieldContainsFold(FieldMimeType, v))
 }
 
-// Md5sumEQ applies the EQ predicate on the "md5sum" field.
-func Md5sumEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldMd5sum, v))
+// Sha256EQ applies the EQ predicate on the "sha256" field.
+func Sha256EQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldEQ(FieldSha256, v))
 }
 
-// Md5sumNEQ applies the NEQ predicate on the "md5sum" field.
-func Md5sumNEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldMd5sum, v))
+// Sha256NEQ applies the NEQ predicate on the "sha256" field.
+func Sha256NEQ(v string) predicate.Media {
+	return predicate.Media(sql.FieldNEQ(FieldSha256, v))
 }
 
-// Md5sumIn applies the In predicate on the "md5sum" field.
-func Md5sumIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldMd5sum, vs...))
+// Sha256In applies the In predicate on the "sha256" field.
+func Sha256In(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldIn(FieldSha256, vs...))
 }
 
-// Md5sumNotIn applies the NotIn predicate on the "md5sum" field.
-func Md5sumNotIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldMd5sum, vs...))
+// Sha256NotIn applies the NotIn predicate on the "sha256" field.
+func Sha256NotIn(vs ...string) predicate.Media {
+	return predicate.Media(sql.FieldNotIn(FieldSha256, vs...))
 }
 
-// Md5sumGT applies the GT predicate on the "md5sum" field.
-func Md5sumGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldMd5sum, v))
+// Sha256GT applies the GT predicate on the "sha256" field.
+func Sha256GT(v string) predicate.Media {
+	return predicate.Media(sql.FieldGT(FieldSha256, v))
 }
 
-// Md5sumGTE applies the GTE predicate on the "md5sum" field.
-func Md5sumGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldMd5sum, v))
+// Sha256GTE applies the GTE predicate on the "sha256" field.
+func Sha256GTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldGTE(FieldSha256, v))
 }
 
-// Md5sumLT applies the LT predicate on the "md5sum" field.
-func Md5sumLT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldMd5sum, v))
+// Sha256LT applies the LT predicate on the "sha256" field.
+func Sha256LT(v string) predicate.Media {
+	return predicate.Media(sql.FieldLT(FieldSha256, v))
 }
 
-// Md5sumLTE applies the LTE predicate on the "md5sum" field.
-func Md5sumLTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldMd5sum, v))
+// Sha256LTE applies the LTE predicate on the "sha256" field.
+func Sha256LTE(v string) predicate.Media {
+	return predicate.Media(sql.FieldLTE(FieldSha256, v))
 }
 
-// Md5sumContains applies the Contains predicate on the "md5sum" field.
-func Md5sumContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldMd5sum, v))
+// Sha256Contains applies the Contains predicate on the "sha256" field.
+func Sha256Contains(v string) predicate.Media {
+	return predicate.Media(sql.FieldContains(FieldSha256, v))
 }
 
-// Md5sumHasPrefix applies the HasPrefix predicate on the "md5sum" field.
-func Md5sumHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldMd5sum, v))
+// Sha256HasPrefix applies the HasPrefix predicate on the "sha256" field.
+func Sha256HasPrefix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasPrefix(FieldSha256, v))
 }
 
-// Md5sumHasSuffix applies the HasSuffix predicate on the "md5sum" field.
-func Md5sumHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldMd5sum, v))
+// Sha256HasSuffix applies the HasSuffix predicate on the "sha256" field.
+func Sha256HasSuffix(v string) predicate.Media {
+	return predicate.Media(sql.FieldHasSuffix(FieldSha256, v))
 }
 
-// Md5sumIsNil applies the IsNil predicate on the "md5sum" field.
-func Md5sumIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldMd5sum))
+// Sha256IsNil applies the IsNil predicate on the "sha256" field.
+func Sha256IsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldSha256))
 }
 
-// Md5sumNotNil applies the NotNil predicate on the "md5sum" field.
-func Md5sumNotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldMd5sum))
+// Sha256NotNil applies the NotNil predicate on the "sha256" field.
+func Sha256NotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldSha256))
 }
 
-// Md5sumEqualFold applies the EqualFold predicate on the "md5sum" field.
-func Md5sumEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldMd5sum, v))
+// Sha256EqualFold applies the EqualFold predicate on the "sha256" field.
+func Sha256EqualFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldEqualFold(FieldSha256, v))
 }
 
-// Md5sumContainsFold applies the ContainsFold predicate on the "md5sum" field.
-func Md5sumContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldMd5sum, v))
+// Sha256ContainsFold applies the ContainsFold predicate on the "sha256" field.
+func Sha256ContainsFold(v string) predicate.Media {
+	return predicate.Media(sql.FieldContainsFold(FieldSha256, v))
 }
 
 // ExtensionEQ applies the EQ predicate on the "extension" field.
@@ -1780,81 +1775,6 @@ func ShareCountLTE(v int64) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldShareCount, v))
 }
 
-// UUIDEQ applies the EQ predicate on the "uuid" field.
-func UUIDEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldUUID, v))
-}
-
-// UUIDNEQ applies the NEQ predicate on the "uuid" field.
-func UUIDNEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldUUID, v))
-}
-
-// UUIDIn applies the In predicate on the "uuid" field.
-func UUIDIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldUUID, vs...))
-}
-
-// UUIDNotIn applies the NotIn predicate on the "uuid" field.
-func UUIDNotIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldUUID, vs...))
-}
-
-// UUIDGT applies the GT predicate on the "uuid" field.
-func UUIDGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldUUID, v))
-}
-
-// UUIDGTE applies the GTE predicate on the "uuid" field.
-func UUIDGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldUUID, v))
-}
-
-// UUIDLT applies the LT predicate on the "uuid" field.
-func UUIDLT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldUUID, v))
-}
-
-// UUIDLTE applies the LTE predicate on the "uuid" field.
-func UUIDLTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldUUID, v))
-}
-
-// UUIDContains applies the Contains predicate on the "uuid" field.
-func UUIDContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldUUID, v))
-}
-
-// UUIDHasPrefix applies the HasPrefix predicate on the "uuid" field.
-func UUIDHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldUUID, v))
-}
-
-// UUIDHasSuffix applies the HasSuffix predicate on the "uuid" field.
-func UUIDHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldUUID, v))
-}
-
-// UUIDIsNil applies the IsNil predicate on the "uuid" field.
-func UUIDIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldUUID))
-}
-
-// UUIDNotNil applies the NotNil predicate on the "uuid" field.
-func UUIDNotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldUUID))
-}
-
-// UUIDEqualFold applies the EqualFold predicate on the "uuid" field.
-func UUIDEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldUUID, v))
-}
-
-// UUIDContainsFold applies the ContainsFold predicate on the "uuid" field.
-func UUIDContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldUUID, v))
-}
-
 // AllowDownloadEQ applies the EQ predicate on the "allow_download" field.
 func AllowDownloadEQ(v bool) predicate.Media {
 	return predicate.Media(sql.FieldEQ(FieldAllowDownload, v))
@@ -2273,6 +2193,16 @@ func TagsIsNil() predicate.Media {
 // TagsNotNil applies the NotNil predicate on the "tags" field.
 func TagsNotNil() predicate.Media {
 	return predicate.Media(sql.FieldNotNull(FieldTags))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Media {
+	return predicate.Media(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Media {
+	return predicate.Media(sql.FieldNotNull(FieldMetadata))
 }
 
 // TitleI18nIsNil applies the IsNil predicate on the "title_i18n" field.
@@ -3057,6 +2987,29 @@ func HasReviewLogsWith(preds ...predicate.MediaReviewLog) predicate.Media {
 	})
 }
 
+// HasSubtitles applies the HasEdge predicate on the "subtitles" edge.
+func HasSubtitles() predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SubtitlesTable, SubtitlesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSubtitlesWith applies the HasEdge predicate on the "subtitles" edge with a given conditions (other predicates).
+func HasSubtitlesWith(preds ...predicate.Subtitle) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := newSubtitlesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasArticles applies the HasEdge predicate on the "articles" edge.
 func HasArticles() predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
@@ -3095,6 +3048,29 @@ func HasReports() predicate.Media {
 func HasReportsWith(preds ...predicate.MediaReport) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		step := newReportsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDrmPolicies applies the HasEdge predicate on the "drm_policies" edge.
+func HasDrmPolicies() predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DrmPoliciesTable, DrmPoliciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDrmPoliciesWith applies the HasEdge predicate on the "drm_policies" edge with a given conditions (other predicates).
+func HasDrmPoliciesWith(preds ...predicate.MediaDrmPolicy) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		step := newDrmPoliciesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

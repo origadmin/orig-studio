@@ -56,17 +56,17 @@ const (
 // ParseEncodingTaskStatus parses encoding task status strings
 func ParseEncodingTaskStatus(from string) EncodingTaskStatus {
 	switch strings.ToLower(from) {
-	case "pending":
+	case string(EncodingTaskStatusPending):
 		return EncodingTaskStatusPending
-	case "processing":
+	case string(EncodingTaskStatusProcessing):
 		return EncodingTaskStatusProcessing
-	case "success":
+	case string(EncodingTaskStatusSuccess):
 		return EncodingTaskStatusSuccess
-	case "failed":
+	case string(EncodingTaskStatusFailed):
 		return EncodingTaskStatusFailed
-	case "skipped":
+	case string(EncodingTaskStatusSkipped):
 		return EncodingTaskStatusSkipped
-	case "partial":
+	case string(EncodingTaskStatusPartial):
 		return EncodingTaskStatusPartial
 	default:
 		return EncodingTaskStatusUnknown
@@ -76,13 +76,13 @@ func ParseEncodingTaskStatus(from string) EncodingTaskStatus {
 // ParseUploadStatus parses upload status strings
 func ParseUploadStatus(from string) UploadStatus {
 	switch strings.ToLower(from) {
-	case "pending":
+	case string(UploadStatusPending):
 		return UploadStatusPending
-	case "uploading":
+	case string(UploadStatusUploading):
 		return UploadStatusUploading
-	case "completed":
+	case string(UploadStatusCompleted):
 		return UploadStatusCompleted
-	case "aborted":
+	case string(UploadStatusAborted):
 		return UploadStatusAborted
 	default:
 		return UploadStatusUnknown
@@ -92,15 +92,15 @@ func ParseUploadStatus(from string) UploadStatus {
 // ParseMediaEncodingStatus parses media encoding status strings
 func ParseMediaEncodingStatus(from string) MediaEncodingStatus {
 	switch strings.ToLower(from) {
-	case "pending":
+	case string(MediaEncodingStatusPending):
 		return MediaEncodingStatusPending
-	case "processing":
+	case string(MediaEncodingStatusProcessing):
 		return MediaEncodingStatusProcessing
-	case "success":
+	case string(MediaEncodingStatusSuccess):
 		return MediaEncodingStatusSuccess
-	case "failed":
+	case string(MediaEncodingStatusFailed):
 		return MediaEncodingStatusFailed
-	case "partial":
+	case string(MediaEncodingStatusPartial):
 		return MediaEncodingStatusPartial
 	default:
 		return MediaEncodingStatusUnknown
@@ -120,13 +120,13 @@ const (
 // ParseSyncStatus parses sync status strings.
 func ParseSyncStatus(from string) SyncStatus {
 	switch strings.ToLower(from) {
-	case "local_only":
+	case string(SyncStatusLocalOnly):
 		return SyncStatusLocalOnly
-	case "syncing":
+	case string(SyncStatusSyncing):
 		return SyncStatusSyncing
-	case "synced":
+	case string(SyncStatusSynced):
 		return SyncStatusSynced
-	case "failed":
+	case string(SyncStatusFailed):
 		return SyncStatusFailed
 	default:
 		return SyncStatusLocalOnly
@@ -150,9 +150,9 @@ func (s SyncStatus) String() string {
 // ParseStatus parses general status strings for enable/disable statuses
 func ParseStatus(from string) Status {
 	switch strings.ToLower(from) {
-	case "enabled":
+	case string(StatusEnabled):
 		return StatusEnabled
-	case "disabled":
+	case string(StatusDisabled):
 		return StatusDisabled
 	default:
 		return StatusUnknown
