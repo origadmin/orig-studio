@@ -9,9 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/pkg/idutil"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,6 +53,12 @@ func (e *Engine) ConnectTarget(ctx context.Context, cfg *TargetConfig) error {
 		return fmt.Errorf("open target db: %w", err)
 	}
 	e.target = entity.NewClient(entity.Driver(drv))
+
+	// Create the target schema (idempotent) so a fresh database can be
+	// migrated without a separate schema-init step.
+	if err := e.target.Schema.Create(ctx); err != nil {
+		return fmt.Errorf("create target schema: %w", err)
+	}
 	return nil
 }
 
@@ -368,6 +376,7 @@ func (e *Engine) phaseChannels(ctx context.Context) error {
 			SetID(targetID).
 			SetUserID(userID).
 			SetName(rec.Name).
+			SetTitle(firstNonEmpty(rec.Title, rec.Name)).
 			SetSlug(rec.Slug).
 			SetHandle(rec.Slug).
 			SetDescription(rec.Description).
@@ -404,6 +413,34 @@ func (e *Engine) phaseMedia(ctx context.Context) error {
 	}
 	defer iter.Close()
 
+	// Batch 2: preload M2M relations and name lookups once, so metadata
+	// assembly inside the loop needs no extra per-row scans beyond the
+	// per-media rating/encoding/permission queries.
+	mediaCatMap, err := e.loadMediaCategoryMap(ctx)
+	if err != nil {
+		return err
+	}
+	mediaTagMap, err := e.loadMediaTagMap(ctx)
+	if err != nil {
+		return err
+	}
+	catNames, err := loadNameMap(ctx, e.source.Categories,
+		func(r *CategoryRecord) string { return r.ID },
+		func(r *CategoryRecord) string { return r.Name })
+	if err != nil {
+		return err
+	}
+	tagNames, err := loadNameMap(ctx, e.source.Tags,
+		func(r *TagRecord) string { return r.ID },
+		func(r *TagRecord) string { return r.Name })
+	if err != nil {
+		return err
+	}
+	licenses, err := e.source.Licenses(ctx)
+	if err != nil {
+		return err
+	}
+
 	var count, failed int64
 	for iter.Next(ctx) {
 		rec := iter.Item()
@@ -431,36 +468,159 @@ func (e *Engine) phaseMedia(ctx context.Context) error {
 			mediaType = "audio"
 		}
 
+		// M2M: primary category -> category_id; the rest + all tags -> metadata.
+		var (
+			primaryCatID     string
+			additionalCats   []string
+			tagNamesForMedia []string
+		)
+		if catIDs := mediaCatMap[rec.ID]; len(catIDs) > 0 {
+			primaryCatID = catIDs[0]
+			for _, cid := range catIDs[1:] {
+				if name, ok := catNames[cid]; ok {
+					additionalCats = append(additionalCats, name)
+				}
+			}
+		}
+		for _, tid := range mediaTagMap[rec.ID] {
+			if name, ok := tagNames[tid]; ok {
+				tagNamesForMedia = append(tagNamesForMedia, name)
+			}
+		}
+
+		// Metadata: all A-side data that has no B-side entity, stored in full.
+		metadata := map[string]interface{}{
+			"source_uid":   rec.UID,
+			"source_state": rec.State,
+			"media_info":   rec.MediaInfo,
+			"md5sum":       rec.Md5sum,
+		}
+		if rec.LicenseID != "" {
+			if lic, ok := licenses[rec.LicenseID]; ok {
+				metadata["license"] = lic
+			}
+		}
+		if ratings, err := e.source.RatingsByMedia(ctx, rec.ID); err == nil && len(ratings) > 0 {
+			metadata["ratings"] = ratings
+		}
+		if encodings, err := e.source.EncodingsByMedia(ctx, rec.ID); err == nil && len(encodings) > 0 {
+			metadata["encodings"] = encodings
+		}
+		if perms, err := e.source.MediaPermissionsByMedia(ctx, rec.ID); err == nil && len(perms) > 0 {
+			metadata["media_permissions"] = perms
+		}
+		if len(additionalCats) > 0 {
+			metadata["additional_categories"] = additionalCats
+		}
+		if len(tagNamesForMedia) > 0 {
+			metadata["additional_tags"] = tagNamesForMedia
+		}
+		if len(rec.Metadata) > 0 {
+			for k, v := range rec.Metadata {
+				metadata["source_"+k] = v
+			}
+		}
+
+		// Target storage keys: align every DB path field with where phaseFiles
+		// will copy the file, so /files/{key} resolves on the target system.
+		// When no source media dir is configured FileRefs returns nil and the
+		// source-relative paths are kept as-is (metadata-only migration).
+		targetURL, targetThumbnail, targetPoster, targetHLS :=
+			rec.FilePath, rec.Thumbnail, rec.Poster, rec.HLSFile
+		targetVtt, targetSpriteImg := rec.Sprites, ""
+		if rec.Sprites != "" {
+			targetSpriteImg = spriteImagePath(rec.Sprites)
+		}
+		// targetSize prefers the real on-disk source file size (authoritative);
+		// falls back to the parsed DB size field when the file is unavailable.
+		targetSize := rec.FileSize
+		if refs, err := e.source.FileRefs(ctx, rec); err == nil {
+			for _, ref := range refs {
+				switch ref.Kind {
+				case "original":
+					targetURL = ref.TargetPath
+					if fi, err := os.Stat(ref.SourcePath); err == nil && fi.Size() > 0 {
+						targetSize = fi.Size()
+					}
+				case "thumbnail":
+					targetThumbnail = ref.TargetPath
+				case "poster":
+					targetPoster = ref.TargetPath
+				case "sprite_vtt":
+					targetVtt = ref.TargetPath
+				case "sprite_jpg":
+					targetSpriteImg = ref.TargetPath
+				}
+			}
+		}
+
 		builder := e.target.Media.Create().
 			SetID(targetID).
 			SetUserID(userID).
 			SetTitle(rec.Title).
 			SetDescription(rec.Description).
 			SetType(mediaType).
-			SetURL(rec.FilePath).
-			SetSize(fmt.Sprintf("%d", rec.FileSize)).
+			SetURL(targetURL).
+			SetSize(fmt.Sprintf("%d", targetSize)).
 			SetDuration(int(rec.Duration)).
 			SetWidth(rec.Width).
 			SetHeight(rec.Height).
 			SetMimeType(rec.MimeType).
-			SetMd5sum(rec.Checksum).
+			SetSha256(rec.Checksum).
 			SetState("active").
-			SetEncodingStatus("done").
+			SetEncodingStatus(rec.EncodingStatus).
 			SetShortToken(idutil.GenShortID()).
-			SetPrivacy("PUBLIC")
+			SetPrivacy(media.Privacy(rec.Privacy)).
+			SetViewCount(int64(rec.Views)).
+			SetLikeCount(int64(rec.Likes)).
+			SetDislikeCount(int64(rec.Dislikes)).
+			SetAllowDownload(rec.AllowDownload).
+			SetEnableComments(rec.EnableComments).
+			SetFeatured(rec.Featured).
+			SetListable(rec.Listable).
+			SetReportedTimes(rec.ReportedTimes).
+			SetReviewStatus(mapReviewStatus(rec.IsReviewed)).
+			SetTags(tagNamesForMedia).
+			SetMetadata(metadata)
 
-		if rec.Thumbnail != "" {
-			builder.SetThumbnail(rec.Thumbnail)
+		if ext := filepath.Ext(rec.FileName); ext != "" {
+			builder.SetExtension(strings.TrimPrefix(ext, "."))
 		}
-		if rec.CategoryID != "" {
-			if catID, ok := e.mapper.Map("category", rec.CategoryID); ok {
-				catIDInt, _ := strconv.ParseInt(catID, 10, 64)
-				builder.SetCategoryID(catIDInt)
-			}
+		if rec.Thumbnail != "" {
+			builder.SetThumbnail(targetThumbnail)
 		}
 		if rec.ChannelID != "" {
 			if chID, ok := e.mapper.Map("channel", rec.ChannelID); ok {
 				builder.SetChannelID(chID)
+			}
+		}
+		if primaryCatID != "" {
+			if catID, ok := e.mapper.Map("category", primaryCatID); ok {
+				catIDInt, _ := strconv.ParseInt(catID, 10, 64)
+				builder.SetCategoryID(catIDInt)
+			}
+		}
+		if rec.HLSFile != "" {
+			builder.SetHlsFile(targetHLS)
+		}
+		if rec.Poster != "" {
+			builder.SetPoster(targetPoster)
+		}
+		if rec.PreviewFile != "" {
+			builder.SetPreviewFilePath(rec.PreviewFile)
+		}
+		if rec.ThumbnailTime > 0 {
+			builder.SetThumbnailTime(rec.ThumbnailTime)
+		}
+		// Sprites field holds the VTT file; the JPG sprite sheet is derived.
+		if rec.Sprites != "" {
+			builder.SetSpriteStatus("done").
+				SetVttPath(targetVtt).
+				SetSpritePath(targetSpriteImg)
+		}
+		if rec.CreatedAt != "" {
+			if t, err := parseTime(rec.CreatedAt); err == nil {
+				builder.SetPublishedAt(t)
 			}
 		}
 
@@ -482,7 +642,112 @@ func (e *Engine) phaseMedia(ctx context.Context) error {
 	return nil
 }
 
+// loadMediaCategoryMap loads media_id -> ordered category ids from the M2M pivot.
+func (e *Engine) loadMediaCategoryMap(ctx context.Context) (map[string][]string, error) {
+	iter, err := e.source.MediaCategories(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer iter.Close()
+	m := make(map[string][]string)
+	for iter.Next(ctx) {
+		rec := iter.Item()
+		m[rec.MediaID] = append(m[rec.MediaID], rec.CategoryID)
+	}
+	return m, iter.Err()
+}
+
+// loadMediaTagMap loads media_id -> ordered tag ids from the M2M pivot.
+func (e *Engine) loadMediaTagMap(ctx context.Context) (map[string][]string, error) {
+	iter, err := e.source.MediaTags(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer iter.Close()
+	m := make(map[string][]string)
+	for iter.Next(ctx) {
+		rec := iter.Item()
+		m[rec.MediaID] = append(m[rec.MediaID], rec.TagID)
+	}
+	return m, iter.Err()
+}
+
+// loadNameMap builds id -> name lookups from any name-carrying iterator.
+func loadNameMap[T any](ctx context.Context, next func(context.Context) (Iterator[*T], error), id func(*T) string, name func(*T) string) (map[string]string, error) {
+	iter, err := next(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer iter.Close()
+	m := make(map[string]string)
+	for iter.Next(ctx) {
+		r := iter.Item()
+		m[id(r)] = name(r)
+	}
+	return m, iter.Err()
+}
+
+// mapReviewStatus translates the A-side is_reviewed flag into B-side review_status.
+func mapReviewStatus(reviewed bool) string {
+	if reviewed {
+		return "approved"
+	}
+	return "pending_review"
+}
+
+// spriteImagePath derives the sprite JPG path from a sprite VTT path.
+func spriteImagePath(vttPath string) string {
+	ext := filepath.Ext(vttPath)
+	if ext == "" {
+		return vttPath + ".jpg"
+	}
+	return strings.TrimSuffix(vttPath, ext) + ".jpg"
+}
+
+// firstNonEmpty returns the first non-empty string, falling back to the last.
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// parseTime parses PostgreSQL/SQLite timestamp text in the common layouts.
+func parseTime(s string) (time.Time, error) {
+	layouts := []string{
+		time.RFC3339,
+		"2006-01-02 15:04:05.999999-07",
+		"2006-01-02 15:04:05.999999",
+		"2006-01-02 15:04:05-07",
+		"2006-01-02 15:04:05",
+		"2006-01-02",
+	}
+	for _, layout := range layouts {
+		if t, err := time.Parse(layout, s); err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("unparsable time %q", s)
+}
+
 func (e *Engine) phaseComments(ctx context.Context) error {
+	// Pass 1: insert every comment without its parent edge so parent/child
+	// order in the source iterator never matters, and record the source→target
+	// id mapping for pass 2.
+	if err := e.pass1Comments(ctx); err != nil {
+		return err
+	}
+	// Pass 2: wire up the parent edges using the mapping from pass 1.
+	if err := e.pass2CommentParents(ctx); err != nil {
+		return err
+	}
+	e.state.PhaseState[string(PhaseComments)] = string(StatusCompleted)
+	return nil
+}
+
+func (e *Engine) pass1Comments(ctx context.Context) error {
 	iter, err := e.source.Comments(ctx)
 	if err != nil {
 		return err
@@ -496,6 +761,7 @@ func (e *Engine) phaseComments(ctx context.Context) error {
 		e.updatePhaseProgress(count, 0)
 
 		if e.config.DryRun {
+			e.mapper.Set("comment", rec.ID, "dry-run-"+rec.ID)
 			continue
 		}
 
@@ -510,7 +776,7 @@ func (e *Engine) phaseComments(ctx context.Context) error {
 			continue
 		}
 
-		_, err := e.target.Comment.Create().
+		created, err := e.target.Comment.Create().
 			SetID(idutil.GenUUIDv7()).
 			SetMediaID(mediaID).
 			SetUserID(userID).
@@ -522,13 +788,53 @@ func (e *Engine) phaseComments(ctx context.Context) error {
 			e.reporter.ReportError(PhaseComments, rec.ID, err)
 			continue
 		}
+		e.mapper.Set("comment", rec.ID, created.ID)
 	}
 	if iter.Err() != nil {
 		return iter.Err()
 	}
-
 	e.updatePhaseProgress(count, failed)
-	e.state.PhaseState[string(PhaseComments)] = string(StatusCompleted)
+	return nil
+}
+
+func (e *Engine) pass2CommentParents(ctx context.Context) error {
+	iter, err := e.source.Comments(ctx)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	var count, failed int64
+	for iter.Next(ctx) {
+		rec := iter.Item()
+		count++
+		e.updatePhaseProgress(count, 0)
+
+		if rec.ParentID == "" || e.config.DryRun {
+			continue
+		}
+		targetID, ok := e.mapper.Map("comment", rec.ID)
+		if !ok {
+			failed++
+			continue
+		}
+		parentID, ok := e.mapper.Map("comment", rec.ParentID)
+		if !ok {
+			failed++
+			continue
+		}
+		if _, err := e.target.Comment.UpdateOneID(targetID).
+			SetParentID(parentID).
+			Save(ctx); err != nil {
+			failed++
+			e.reporter.ReportError(PhaseComments, rec.ID, err)
+			continue
+		}
+	}
+	if iter.Err() != nil {
+		return iter.Err()
+	}
+	e.updatePhaseProgress(count, failed)
 	return nil
 }
 
@@ -626,22 +932,66 @@ func (e *Engine) phaseFiles(ctx context.Context) error {
 func (e *Engine) phaseVerify(ctx context.Context) error {
 	e.logger.Printf("Verification phase - checking data integrity...")
 
-	userCount, err := e.target.User.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("verify users: %w", err)
+	type entityCount struct {
+		name   string
+		target int64
 	}
-	mediaCount, err := e.target.Media.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("verify media: %w", err)
-	}
-	categoryCount, err := e.target.Category.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("verify categories: %w", err)
+	counts := []entityCount{
+		{"users", mustCount(ctx, e.target.User.Query().Count)},
+		{"channels", mustCount(ctx, e.target.Channel.Query().Count)},
+		{"categories", mustCount(ctx, e.target.Category.Query().Count)},
+		{"tags", mustCount(ctx, e.target.Tag.Query().Count)},
+		{"media", mustCount(ctx, e.target.Media.Query().Count)},
+		{"comments", mustCount(ctx, e.target.Comment.Query().Count)},
+		{"playlists", mustCount(ctx, e.target.Playlist.Query().Count)},
+		{"playlist_media", mustCount(ctx, e.target.MediaPlaylist.Query().Count)},
+		{"subtitles", mustCount(ctx, e.target.Subtitle.Query().Count)},
+		{"subscriptions", mustCount(ctx, e.target.Subscription.Query().Count)},
 	}
 
-	e.logger.Printf("Verification: %d users, %d media, %d categories in target", userCount, mediaCount, categoryCount)
+	// Compare against the source discovery only when the run actually wrote
+	// to the target (dry-run leaves the target empty on purpose).
+	if !e.config.DryRun {
+		stats, err := e.source.Discover(ctx)
+		if err != nil {
+			return fmt.Errorf("verify re-discover source: %w", err)
+		}
+		expect := map[string]int{
+			"users":      stats.Users,
+			"channels":   stats.Channels,
+			"categories": stats.Categories,
+			"tags":       stats.Tags,
+			"media":      stats.Media,
+			"comments":   stats.Comments,
+			"playlists":  stats.Playlists,
+		}
+		for _, c := range counts {
+			if want, ok := expect[c.name]; ok && int(c.target) != want {
+				e.reporter.ReportError(PhaseVerify, c.name,
+					fmt.Errorf("count mismatch: source=%d target=%d", want, c.target))
+			}
+		}
+	}
+
+	var summary strings.Builder
+	summary.WriteString("Verification: ")
+	for i, c := range counts {
+		if i > 0 {
+			summary.WriteString(", ")
+		}
+		fmt.Fprintf(&summary, "%s=%d", c.name, c.target)
+	}
+	e.logger.Printf("%s", summary.String())
 	e.state.PhaseState[string(PhaseVerify)] = string(StatusCompleted)
 	return nil
+}
+
+func mustCount(ctx context.Context, fn func(context.Context) (int, error)) int64 {
+	n, err := fn(ctx)
+	if err != nil {
+		return -1
+	}
+	return int64(n)
 }
 
 func (e *Engine) updatePhase(phase Phase) {
@@ -706,6 +1056,7 @@ func (e *Engine) phasePlaylists(ctx context.Context) error {
 		_, err := e.target.Playlist.Create().
 			SetID(targetID).
 			SetUserID(userID).
+			AddUserIDs(userID). // required edge "user" is a M2M join in this schema
 			SetTitle(rec.Name).
 			SetDescription(rec.Description).
 			SetShortToken(idutil.GenShortID()).
@@ -727,6 +1078,180 @@ func (e *Engine) phasePlaylists(ctx context.Context) error {
 	e.updatePhaseProgress(count, failed)
 	e.state.PhaseState[string(PhasePlaylists)] = string(StatusCompleted)
 	e.logger.Printf("Playlists: migrated %d, failed %d", count, failed)
+	return nil
+}
+
+// phasePlaylistMedia migrates the playlist-media pivot (files_playlistmedia ->
+// content_playlist_media). Batch 3.
+func (e *Engine) phasePlaylistMedia(ctx context.Context) error {
+	iter, err := e.source.PlaylistMedia(ctx)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	var count, failed int64
+	for iter.Next(ctx) {
+		rec := iter.Item()
+		count++
+		e.updatePhaseProgress(count, 0)
+
+		if e.config.DryRun {
+			continue
+		}
+
+		playlistID, ok := e.mapper.Map("playlist", rec.PlaylistID)
+		if !ok {
+			failed++
+			e.reporter.ReportError(PhasePlaylistMedia, rec.PlaylistID, fmt.Errorf("playlist %s not found", rec.PlaylistID))
+			continue
+		}
+		mediaID, ok := e.mapper.Map("media", rec.MediaID)
+		if !ok {
+			failed++
+			e.reporter.ReportError(PhasePlaylistMedia, rec.MediaID, fmt.Errorf("media %s not found", rec.MediaID))
+			continue
+		}
+
+		builder := e.target.MediaPlaylist.Create().
+			SetID(idutil.GenUUIDv7()).
+			SetPlaylistID(playlistID).
+			SetMediaID(mediaID).
+			SetOrdering(rec.Ordering)
+		if rec.ActionDate != "" {
+			if t, err := parseTime(rec.ActionDate); err == nil {
+				builder.SetActionDate(t)
+			}
+		}
+		if _, err := builder.Save(ctx); err != nil {
+			failed++
+			e.reporter.ReportError(PhasePlaylistMedia, rec.PlaylistID, err)
+			continue
+		}
+	}
+	if iter.Err() != nil {
+		return iter.Err()
+	}
+
+	e.updatePhaseProgress(count, failed)
+	e.state.PhaseState[string(PhasePlaylistMedia)] = string(StatusCompleted)
+	e.logger.Printf("PlaylistMedia: migrated %d, failed %d", count, failed)
+	return nil
+}
+
+// phaseSubtitles migrates subtitle tracks (files_subtitle -> subtitles).
+// Language code is flattened from files_language; B-side stores .vtt URLs.
+// Batch 3.
+func (e *Engine) phaseSubtitles(ctx context.Context) error {
+	iter, err := e.source.Subtitles(ctx)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	var count, failed int64
+	for iter.Next(ctx) {
+		rec := iter.Item()
+		count++
+		e.updatePhaseProgress(count, 0)
+
+		if e.config.DryRun {
+			continue
+		}
+
+		mediaID, ok := e.mapper.Map("media", rec.MediaID)
+		if !ok {
+			failed++
+			e.reporter.ReportError(PhaseSubtitles, rec.MediaID, fmt.Errorf("media %s not found", rec.MediaID))
+			continue
+		}
+
+		lang := rec.Language
+		if lang == "" {
+			lang = "und"
+		}
+		builder := e.target.Subtitle.Create().
+			SetID(idutil.GenUUIDv7()).
+			SetMediaID(mediaID).
+			SetLanguage(lang).
+			SetStatus("active")
+		if rec.Label != "" {
+			builder.SetLabel(rec.Label)
+		}
+		// file_url stores the target storage key (originals/subtitles/...),
+		// matching the path phaseFiles copies the subtitle file to.
+		if rec.FileURL != "" {
+			ext := filepath.Ext(rec.FileURL)
+			if ext == "" {
+				ext = ".vtt"
+			}
+			builder.SetFileURL("originals/subtitles/" + rec.MediaID + "/" + lang + ext)
+		}
+		if _, err := builder.Save(ctx); err != nil {
+			failed++
+			e.reporter.ReportError(PhaseSubtitles, rec.MediaID, err)
+			continue
+		}
+	}
+	if iter.Err() != nil {
+		return iter.Err()
+	}
+
+	e.updatePhaseProgress(count, failed)
+	e.state.PhaseState[string(PhaseSubtitles)] = string(StatusCompleted)
+	e.logger.Printf("Subtitles: migrated %d, failed %d", count, failed)
+	return nil
+}
+
+// phaseSubscriptions migrates channel subscriptions
+// (users_channel_subscribers -> user_subscriptions). Batch 3.
+func (e *Engine) phaseSubscriptions(ctx context.Context) error {
+	iter, err := e.source.Subscriptions(ctx)
+	if err != nil {
+		return err
+	}
+	defer iter.Close()
+
+	var count, failed int64
+	for iter.Next(ctx) {
+		rec := iter.Item()
+		count++
+		e.updatePhaseProgress(count, 0)
+
+		if e.config.DryRun {
+			continue
+		}
+
+		channelID, ok := e.mapper.Map("channel", rec.ChannelID)
+		if !ok {
+			failed++
+			e.reporter.ReportError(PhaseSubscriptions, rec.ChannelID, fmt.Errorf("channel %s not found", rec.ChannelID))
+			continue
+		}
+		subscriberID, ok := e.mapper.Map("user", rec.SubscriberID)
+		if !ok {
+			failed++
+			e.reporter.ReportError(PhaseSubscriptions, rec.SubscriberID, fmt.Errorf("subscriber %s not found", rec.SubscriberID))
+			continue
+		}
+
+		if _, err := e.target.Subscription.Create().
+			SetID(idutil.GenUUIDv7()).
+			SetChannelID(channelID).
+			SetSubscriberID(subscriberID).
+			Save(ctx); err != nil {
+			failed++
+			e.reporter.ReportError(PhaseSubscriptions, rec.SubscriberID, err)
+			continue
+		}
+	}
+	if iter.Err() != nil {
+		return iter.Err()
+	}
+
+	e.updatePhaseProgress(count, failed)
+	e.state.PhaseState[string(PhaseSubscriptions)] = string(StatusCompleted)
+	e.logger.Printf("Subscriptions: migrated %d, failed %d", count, failed)
 	return nil
 }
 

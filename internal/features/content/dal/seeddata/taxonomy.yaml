@@ -1,0 +1,492 @@
+# taxonomy.yaml — 分类/标签权威种子数据源（source of truth）
+#
+# GOV-STD-URL D1/D3/D4（portal-filter-url-seed-redesign.md §3）：
+#   - slug 为稳定键（^[a-z0-9_-]+$，§3.7 强制，非 ASCII 直接启动失败）
+#   - DB 是运行时存储，本文件是权威源；启动时按 slug 幂等 upsert（Tags 由 skip 改校正）
+#   - *_i18n 列保留为统一翻译表预留位，本文件不写内联翻译（§9-5）
+#   - 现有 DB 中未列出的分类/tag 保留不删（防误删引用数据）
+#
+# 类别模型（BUG-145 + BUG-162，2026-08-26 最终定稿）：
+#   - 三模块根：video / music / article（共享分类表锚点，靠树位置区分模块）
+#   - 3 级分层（root → L2 分类 → L3 子分类）：
+#       · L1 = 类型：视频 / 音乐 / 文章（主页横条只摆这 3 个，结构简单不溢出）
+#       · L2 = 真实内容分类（连续剧/电影/综艺/动漫/MV/纪录片/游戏/体育/娱乐/
+#             科技/教程/生活/宣传片/UGC/其他），共 15 个
+#       · L3 = 子分类叶子，共 50 个
+#   - 「形式 / 题材」双轴抽象已废弃（2026-08-26 用户拍板）：类型才是真正的"类型"，
+#     分类是真实内容类别，二者都不该作为 UI 轴标签。3 级树只为把长列表收进可展开组，
+#     解决主页/分类页"分类太长显示不下"的核心问题。
+#   - kind 字段已移除：不再有 form/genre 划分，分类纯按树层级组织。
+#     video 根下 L2 分类全量 = 15，每个展开 >=1 L3 叶子（2 展开 3）。任何改动须经
+#     bug/design-change 流程并写追溯日志（AGENTS.md 规则 #10 R-D2）。
+categories:
+  - name: 视频
+    slug: video
+    icon: video
+    color: "#3498DB"
+    sequence: 0
+    is_global: true
+    description: 视频模块 - Video module
+    children:
+      # ── L2 分类（真实内容类别，按序展开 L3 叶子）──
+      - name: 连续剧
+        slug: drama
+        icon: tv
+        color: "#C0392B"
+        sequence: 1
+        description: 连续剧 - Series/Drama
+        children:
+          - name: 国产剧
+            slug: drama-cn
+            icon: tv
+            color: "#C0392B"
+            sequence: 1
+            description: 国产剧 - Chinese drama
+          - name: 美剧
+            slug: drama-us
+            icon: tv
+            color: "#C0392B"
+            sequence: 2
+            description: 美剧 - US drama
+          - name: 韩剧
+            slug: drama-kr
+            icon: tv
+            color: "#C0392B"
+            sequence: 3
+            description: 韩剧 - Korean drama
+          - name: 日剧
+            slug: drama-jp
+            icon: tv
+            color: "#C0392B"
+            sequence: 4
+            description: 日剧 - Japanese drama
+      - name: 电影
+        slug: movie
+        icon: clapperboard
+        color: "#6C3483"
+        sequence: 2
+        description: 电影 - Movies
+        children:
+          - name: 动作片
+            slug: movie-action
+            icon: clapperboard
+            color: "#6C3483"
+            sequence: 1
+            description: 动作片 - Action
+          - name: 喜剧片
+            slug: movie-comedy
+            icon: clapperboard
+            color: "#6C3483"
+            sequence: 2
+            description: 喜剧片 - Comedy
+          - name: 科幻片
+            slug: movie-scifi
+            icon: clapperboard
+            color: "#6C3483"
+            sequence: 3
+            description: 科幻片 - Sci-Fi
+          - name: 剧情片
+            slug: movie-drama
+            icon: clapperboard
+            color: "#6C3483"
+            sequence: 4
+            description: 剧情片 - Drama film
+          - name: 短片
+            slug: movie-short
+            icon: clapperboard
+            color: "#6C3483"
+            sequence: 5
+            description: 短片 - Short film
+      - name: 综艺
+        slug: variety
+        icon: mic-2
+        color: "#D35400"
+        sequence: 3
+        description: 综艺 - Variety shows
+        children:
+          - name: 真人秀
+            slug: variety-reality
+            icon: mic-2
+            color: "#D35400"
+            sequence: 1
+            description: 真人秀 - Reality
+          - name: 访谈
+            slug: variety-talk
+            icon: mic-2
+            color: "#D35400"
+            sequence: 2
+            description: 访谈 - Talk show
+          - name: 选秀
+            slug: variety-talent
+            icon: mic-2
+            color: "#D35400"
+            sequence: 3
+            description: 选秀 - Talent show
+          - name: 音乐综艺
+            slug: variety-music
+            icon: mic-2
+            color: "#D35400"
+            sequence: 4
+            description: 音乐综艺 - Music show
+      - name: 动漫
+        slug: anime
+        icon: palette
+        color: "#148F77"
+        sequence: 4
+        description: 动漫 - Anime
+        children:
+          - name: 国产动画
+            slug: anime-cn
+            icon: palette
+            color: "#148F77"
+            sequence: 1
+            description: 国产动画 - Chinese animation
+          - name: 日番
+            slug: anime-jp
+            icon: palette
+            color: "#148F77"
+            sequence: 2
+            description: 日番 - Anime series
+          - name: 剧场版
+            slug: anime-movie
+            icon: palette
+            color: "#148F77"
+            sequence: 3
+            description: 剧场版 - Anime movie
+      - name: MV
+        slug: mv
+        icon: music-2
+        color: "#7D3C98"
+        sequence: 5
+        description: MV - Music videos
+        children:
+          - name: 官方MV
+            slug: mv-official
+            icon: music-2
+            color: "#7D3C98"
+            sequence: 1
+            description: 官方MV - Official MV
+          - name: 现场版
+            slug: mv-live
+            icon: music-2
+            color: "#7D3C98"
+            sequence: 2
+            description: 现场版 - Live MV
+          - name: 翻唱
+            slug: mv-cover
+            icon: music-2
+            color: "#7D3C98"
+            sequence: 3
+            description: 翻唱 - Cover
+      - name: 纪录片
+        slug: documentary
+        icon: film
+        color: "#2C3E50"
+        sequence: 6
+        description: 纪录片 - Documentary
+        children:
+          - name: 自然
+            slug: doc-nature
+            icon: film
+            color: "#2C3E50"
+            sequence: 1
+            description: 自然 - Nature doc
+          - name: 历史
+            slug: doc-history
+            icon: film
+            color: "#2C3E50"
+            sequence: 2
+            description: 历史 - History doc
+          - name: 社会
+            slug: doc-society
+            icon: film
+            color: "#2C3E50"
+            sequence: 3
+            description: 社会 - Society doc
+          - name: 人文
+            slug: doc-culture
+            icon: film
+            color: "#2C3E50"
+            sequence: 4
+            description: 人文 - Culture doc
+      - name: 游戏
+        slug: gaming
+        icon: gamepad-2
+        color: "#8E44AD"
+        sequence: 7
+        description: 游戏 - Gaming
+        children:
+          - name: 主机游戏
+            slug: gaming-console
+            icon: gamepad-2
+            color: "#8E44AD"
+            sequence: 1
+            description: 主机游戏 - Console
+          - name: PC游戏
+            slug: gaming-pc
+            icon: gamepad-2
+            color: "#8E44AD"
+            sequence: 2
+            description: PC游戏 - PC
+          - name: 手游
+            slug: gaming-mobile
+            icon: gamepad-2
+            color: "#8E44AD"
+            sequence: 3
+            description: 手游 - Mobile
+          - name: 游戏实况
+            slug: gaming-live
+            icon: gamepad-2
+            color: "#8E44AD"
+            sequence: 4
+            description: 游戏实况 - Gameplay
+      - name: 体育
+        slug: sports
+        icon: trophy
+        color: "#27AE60"
+        sequence: 8
+        description: 体育 - Sports
+        children:
+          - name: 足球
+            slug: sports-soccer
+            icon: trophy
+            color: "#27AE60"
+            sequence: 1
+            description: 足球 - Soccer
+          - name: 篮球
+            slug: sports-basketball
+            icon: trophy
+            color: "#27AE60"
+            sequence: 2
+            description: 篮球 - Basketball
+          - name: 电竞
+            slug: sports-ese
+            icon: trophy
+            color: "#27AE60"
+            sequence: 3
+            description: 电竞 - Esports
+          - name: 综合体育
+            slug: sports-general
+            icon: trophy
+            color: "#27AE60"
+            sequence: 4
+            description: 综合体育 - General sports
+      - name: 娱乐
+        slug: entertainment
+        icon: sparkles
+        color: "#E67E22"
+        sequence: 9
+        description: 娱乐 - Entertainment
+        children:
+          - name: 明星
+            slug: ent-celeb
+            icon: sparkles
+            color: "#E67E22"
+            sequence: 1
+            description: 明星 - Celebrity
+          - name: 搞笑
+            slug: ent-funny
+            icon: sparkles
+            color: "#E67E22"
+            sequence: 2
+            description: 搞笑 - Comedy
+          - name: 音乐
+            slug: ent-music
+            icon: sparkles
+            color: "#E67E22"
+            sequence: 3
+            description: 音乐 - Music
+      - name: 科技
+        slug: tech
+        icon: cpu
+        color: "#16A085"
+        sequence: 10
+        description: 科技 - Technology
+        children:
+          - name: 数码
+            slug: tech-digital
+            icon: cpu
+            color: "#16A085"
+            sequence: 1
+            description: 数码 - Digital
+          - name: 评测
+            slug: tech-review
+            icon: cpu
+            color: "#16A085"
+            sequence: 2
+            description: 评测 - Review
+          - name: AI
+            slug: tech-ai
+            icon: cpu
+            color: "#16A085"
+            sequence: 3
+            description: AI - Artificial Intelligence
+          - name: 互联网
+            slug: tech-internet
+            icon: cpu
+            color: "#16A085"
+            sequence: 4
+            description: 互联网 - Internet
+      - name: 教程
+        slug: tutorial
+        icon: graduation-cap
+        color: "#2980B9"
+        sequence: 11
+        description: 教程 - Tutorials
+        children:
+          - name: 编程
+            slug: tutorial-code
+            icon: graduation-cap
+            color: "#2980B9"
+            sequence: 1
+            description: 编程 - Coding
+          - name: 设计
+            slug: tutorial-design
+            icon: graduation-cap
+            color: "#2980B9"
+            sequence: 2
+            description: 设计 - Design
+          - name: 生活技能
+            slug: tutorial-skill
+            icon: graduation-cap
+            color: "#2980B9"
+            sequence: 3
+            description: 生活技能 - Life skills
+      - name: 生活
+        slug: lifestyle
+        icon: heart
+        color: "#F39C12"
+        sequence: 12
+        description: 生活 - Lifestyle
+        children:
+          - name: 美食
+            slug: life-food
+            icon: heart
+            color: "#F39C12"
+            sequence: 1
+            description: 美食 - Food
+          - name: 旅行
+            slug: life-travel
+            icon: heart
+            color: "#F39C12"
+            sequence: 2
+            description: 旅行 - Travel
+          - name: 家居
+            slug: life-home
+            icon: heart
+            color: "#F39C12"
+            sequence: 3
+            description: 家居 - Home
+          - name: 时尚
+            slug: life-fashion
+            icon: heart
+            color: "#F39C12"
+            sequence: 4
+            description: 时尚 - Fashion
+      - name: 宣传片
+        slug: promo
+        icon: megaphone
+        color: "#E67E22"
+        sequence: 13
+        description: 宣传片 - Promotional
+        children:
+          - name: 品牌宣传
+            slug: promo-brand
+            icon: megaphone
+            color: "#E67E22"
+            sequence: 1
+            description: 品牌宣传 - Brand promo
+          - name: 活动宣传
+            slug: promo-event
+            icon: megaphone
+            color: "#E67E22"
+            sequence: 2
+            description: 活动宣传 - Event promo
+      - name: 用户UGC
+        slug: ugc
+        icon: users
+        color: "#16A085"
+        sequence: 14
+        description: 用户 UGC - User generated
+        children:
+          - name: 原创短视频
+            slug: ugc-short
+            icon: users
+            color: "#16A085"
+            sequence: 1
+            description: 原创短视频 - Original short
+          - name: 直播回放
+            slug: ugc-live
+            icon: users
+            color: "#16A085"
+            sequence: 2
+            description: 直播回放 - Live replay
+      - name: 其他
+        slug: other
+        icon: ellipsis
+        color: "#95A5A6"
+        sequence: 99
+        description: 其他 - Other (fallback)
+        children:
+          - name: 未分类
+            slug: other-uncat
+            icon: ellipsis
+            color: "#95A5A6"
+            sequence: 1
+            description: 未分类 - Uncategorized
+  - name: 音乐
+    slug: music
+    icon: music
+    color: "#E74C3C"
+    sequence: 1
+    is_global: true
+    description: 音乐模块 - Music module
+  - name: 文章
+    slug: article
+    icon: file-text
+    color: "#9B59B6"
+    sequence: 2
+    is_global: true
+    description: 文章模块 - Article module
+
+tags:
+  - title: 热门
+    slug: trending
+    color: "#E74C3C"
+    description: 热门内容 - Trending content
+  - title: 推荐
+    slug: recommended
+    color: "#3498DB"
+    description: 编辑推荐 - Editor's picks
+  - title: 原创
+    slug: original
+    color: "#2ECC71"
+    description: 原创内容 - Original content
+  - title: 转载
+    slug: repost
+    color: "#95A5A6"
+    description: 转载内容 - Reposted content
+  - title: 4K
+    slug: 4k
+    color: "#F39C12"
+    description: 4K 分辨率 - 4K resolution
+  - title: 高清
+    slug: hd
+    color: "#E67E22"
+    description: 高清画质 - HD quality
+  - title: 中文字幕
+    slug: zh-subtitle
+    color: "#1ABC9C"
+    description: 包含中文字幕 - With Chinese subtitles
+  - title: 英文字幕
+    slug: en-subtitle
+    color: "#9B59B6"
+    description: 包含英文字幕 - With English subtitles
+  - title: 直播
+    slug: live
+    color: "#E74C3C"
+    description: 直播内容 - Live content
+  - title: 短视频
+    slug: short
+    color: "#F1C40F"
+    description: 短视频 - Short videos

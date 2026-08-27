@@ -30,34 +30,42 @@ func (_u *MediaTagUpdate) Where(ps ...predicate.MediaTag) *MediaTagUpdate {
 	return _u
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *MediaTagUpdate) AddMediumIDs(ids ...string) *MediaTagUpdate {
-	_u.mutation.AddMediumIDs(ids...)
+// SetMediaID sets the "media_id" field.
+func (_u *MediaTagUpdate) SetMediaID(v string) *MediaTagUpdate {
+	_u.mutation.SetMediaID(v)
 	return _u
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_u *MediaTagUpdate) AddMedia(v ...*Media) *MediaTagUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *MediaTagUpdate) SetNillableMediaID(v *string) *MediaTagUpdate {
+	if v != nil {
+		_u.SetMediaID(*v)
 	}
-	return _u.AddMediumIDs(ids...)
-}
-
-// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
-func (_u *MediaTagUpdate) AddTagIDs(ids ...int) *MediaTagUpdate {
-	_u.mutation.AddTagIDs(ids...)
 	return _u
 }
 
-// AddTag adds the "tag" edges to the Tag entity.
-func (_u *MediaTagUpdate) AddTag(v ...*Tag) *MediaTagUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetTagID sets the "tag_id" field.
+func (_u *MediaTagUpdate) SetTagID(v int) *MediaTagUpdate {
+	_u.mutation.SetTagID(v)
+	return _u
+}
+
+// SetNillableTagID sets the "tag_id" field if the given value is not nil.
+func (_u *MediaTagUpdate) SetNillableTagID(v *int) *MediaTagUpdate {
+	if v != nil {
+		_u.SetTagID(*v)
 	}
-	return _u.AddTagIDs(ids...)
+	return _u
+}
+
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *MediaTagUpdate) SetMedia(v *Media) *MediaTagUpdate {
+	return _u.SetMediaID(v.ID)
+}
+
+// SetTag sets the "tag" edge to the Tag entity.
+func (_u *MediaTagUpdate) SetTag(v *Tag) *MediaTagUpdate {
+	return _u.SetTagID(v.ID)
 }
 
 // Mutation returns the MediaTagMutation object of the builder.
@@ -65,46 +73,16 @@ func (_u *MediaTagUpdate) Mutation() *MediaTagMutation {
 	return _u.mutation
 }
 
-// ClearMedia clears all "media" edges to the Media entity.
+// ClearMedia clears the "media" edge to the Media entity.
 func (_u *MediaTagUpdate) ClearMedia() *MediaTagUpdate {
 	_u.mutation.ClearMedia()
 	return _u
 }
 
-// RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *MediaTagUpdate) RemoveMediumIDs(ids ...string) *MediaTagUpdate {
-	_u.mutation.RemoveMediumIDs(ids...)
-	return _u
-}
-
-// RemoveMedia removes "media" edges to Media entities.
-func (_u *MediaTagUpdate) RemoveMedia(v ...*Media) *MediaTagUpdate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveMediumIDs(ids...)
-}
-
-// ClearTag clears all "tag" edges to the Tag entity.
+// ClearTag clears the "tag" edge to the Tag entity.
 func (_u *MediaTagUpdate) ClearTag() *MediaTagUpdate {
 	_u.mutation.ClearTag()
 	return _u
-}
-
-// RemoveTagIDs removes the "tag" edge to Tag entities by IDs.
-func (_u *MediaTagUpdate) RemoveTagIDs(ids ...int) *MediaTagUpdate {
-	_u.mutation.RemoveTagIDs(ids...)
-	return _u
-}
-
-// RemoveTag removes "tag" edges to Tag entities.
-func (_u *MediaTagUpdate) RemoveTag(v ...*Tag) *MediaTagUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTagIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -134,6 +112,22 @@ func (_u *MediaTagUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *MediaTagUpdate) check() error {
+	if v, ok := _u.mutation.MediaID(); ok {
+		if err := mediatag.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "MediaTag.media_id": %w`, err)}
+		}
+	}
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaTag.media"`)
+	}
+	if _u.mutation.TagCleared() && len(_u.mutation.TagIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaTag.tag"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *MediaTagUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MediaTagUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -141,6 +135,9 @@ func (_u *MediaTagUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Media
 }
 
 func (_u *MediaTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(mediatag.Table, mediatag.Columns, sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -151,37 +148,21 @@ func (_u *MediaTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.MediaTable,
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediatag.MediaTable,
-			Columns: []string{mediatag.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.MediaTable,
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
@@ -196,37 +177,21 @@ func (_u *MediaTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.TagTable,
 			Columns: []string{mediatag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTagIDs(); len(nodes) > 0 && !_u.mutation.TagCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediatag.TagTable,
-			Columns: []string{mediatag.TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.TagTable,
 			Columns: []string{mediatag.TagColumn},
 			Bidi:    false,
@@ -261,34 +226,42 @@ type MediaTagUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
-// AddMediumIDs adds the "media" edge to the Media entity by IDs.
-func (_u *MediaTagUpdateOne) AddMediumIDs(ids ...string) *MediaTagUpdateOne {
-	_u.mutation.AddMediumIDs(ids...)
+// SetMediaID sets the "media_id" field.
+func (_u *MediaTagUpdateOne) SetMediaID(v string) *MediaTagUpdateOne {
+	_u.mutation.SetMediaID(v)
 	return _u
 }
 
-// AddMedia adds the "media" edges to the Media entity.
-func (_u *MediaTagUpdateOne) AddMedia(v ...*Media) *MediaTagUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableMediaID sets the "media_id" field if the given value is not nil.
+func (_u *MediaTagUpdateOne) SetNillableMediaID(v *string) *MediaTagUpdateOne {
+	if v != nil {
+		_u.SetMediaID(*v)
 	}
-	return _u.AddMediumIDs(ids...)
-}
-
-// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
-func (_u *MediaTagUpdateOne) AddTagIDs(ids ...int) *MediaTagUpdateOne {
-	_u.mutation.AddTagIDs(ids...)
 	return _u
 }
 
-// AddTag adds the "tag" edges to the Tag entity.
-func (_u *MediaTagUpdateOne) AddTag(v ...*Tag) *MediaTagUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetTagID sets the "tag_id" field.
+func (_u *MediaTagUpdateOne) SetTagID(v int) *MediaTagUpdateOne {
+	_u.mutation.SetTagID(v)
+	return _u
+}
+
+// SetNillableTagID sets the "tag_id" field if the given value is not nil.
+func (_u *MediaTagUpdateOne) SetNillableTagID(v *int) *MediaTagUpdateOne {
+	if v != nil {
+		_u.SetTagID(*v)
 	}
-	return _u.AddTagIDs(ids...)
+	return _u
+}
+
+// SetMedia sets the "media" edge to the Media entity.
+func (_u *MediaTagUpdateOne) SetMedia(v *Media) *MediaTagUpdateOne {
+	return _u.SetMediaID(v.ID)
+}
+
+// SetTag sets the "tag" edge to the Tag entity.
+func (_u *MediaTagUpdateOne) SetTag(v *Tag) *MediaTagUpdateOne {
+	return _u.SetTagID(v.ID)
 }
 
 // Mutation returns the MediaTagMutation object of the builder.
@@ -296,46 +269,16 @@ func (_u *MediaTagUpdateOne) Mutation() *MediaTagMutation {
 	return _u.mutation
 }
 
-// ClearMedia clears all "media" edges to the Media entity.
+// ClearMedia clears the "media" edge to the Media entity.
 func (_u *MediaTagUpdateOne) ClearMedia() *MediaTagUpdateOne {
 	_u.mutation.ClearMedia()
 	return _u
 }
 
-// RemoveMediumIDs removes the "media" edge to Media entities by IDs.
-func (_u *MediaTagUpdateOne) RemoveMediumIDs(ids ...string) *MediaTagUpdateOne {
-	_u.mutation.RemoveMediumIDs(ids...)
-	return _u
-}
-
-// RemoveMedia removes "media" edges to Media entities.
-func (_u *MediaTagUpdateOne) RemoveMedia(v ...*Media) *MediaTagUpdateOne {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveMediumIDs(ids...)
-}
-
-// ClearTag clears all "tag" edges to the Tag entity.
+// ClearTag clears the "tag" edge to the Tag entity.
 func (_u *MediaTagUpdateOne) ClearTag() *MediaTagUpdateOne {
 	_u.mutation.ClearTag()
 	return _u
-}
-
-// RemoveTagIDs removes the "tag" edge to Tag entities by IDs.
-func (_u *MediaTagUpdateOne) RemoveTagIDs(ids ...int) *MediaTagUpdateOne {
-	_u.mutation.RemoveTagIDs(ids...)
-	return _u
-}
-
-// RemoveTag removes "tag" edges to Tag entities.
-func (_u *MediaTagUpdateOne) RemoveTag(v ...*Tag) *MediaTagUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveTagIDs(ids...)
 }
 
 // Where appends a list predicates to the MediaTagUpdate builder.
@@ -378,6 +321,22 @@ func (_u *MediaTagUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *MediaTagUpdateOne) check() error {
+	if v, ok := _u.mutation.MediaID(); ok {
+		if err := mediatag.MediaIDValidator(v); err != nil {
+			return &ValidationError{Name: "media_id", err: fmt.Errorf(`entity: validator failed for field "MediaTag.media_id": %w`, err)}
+		}
+	}
+	if _u.mutation.MediaCleared() && len(_u.mutation.MediaIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaTag.media"`)
+	}
+	if _u.mutation.TagCleared() && len(_u.mutation.TagIDs()) > 0 {
+		return errors.New(`entity: clearing a required unique edge "MediaTag.tag"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *MediaTagUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MediaTagUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -385,6 +344,9 @@ func (_u *MediaTagUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Me
 }
 
 func (_u *MediaTagUpdateOne) sqlSave(ctx context.Context) (_node *MediaTag, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(mediatag.Table, mediatag.Columns, sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -412,37 +374,21 @@ func (_u *MediaTagUpdateOne) sqlSave(ctx context.Context) (_node *MediaTag, err 
 	}
 	if _u.mutation.MediaCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.MediaTable,
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedMediaIDs(); len(nodes) > 0 && !_u.mutation.MediaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediatag.MediaTable,
-			Columns: []string{mediatag.MediaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(media.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.MediaIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.MediaTable,
 			Columns: []string{mediatag.MediaColumn},
 			Bidi:    false,
@@ -457,37 +403,21 @@ func (_u *MediaTagUpdateOne) sqlSave(ctx context.Context) (_node *MediaTag, err 
 	}
 	if _u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.TagTable,
 			Columns: []string{mediatag.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedTagIDs(); len(nodes) > 0 && !_u.mutation.TagCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   mediatag.TagTable,
-			Columns: []string{mediatag.TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   mediatag.TagTable,
 			Columns: []string{mediatag.TagColumn},
 			Bidi:    false,

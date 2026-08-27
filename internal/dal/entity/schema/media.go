@@ -41,7 +41,7 @@ func (Media) Fields() []ent.Field {
 		field.Int("width").Default(0),
 		field.Int("height").Default(0),
 		field.String("mime_type").MaxLen(128).Optional(),
-		field.String("md5sum").MaxLen(64).Optional(),
+		field.String("sha256").MaxLen(64).Optional(),
 		field.String("extension").MaxLen(32).Optional(),
 		field.Enum("privacy").Values("PUBLIC", "PRIVATE", "UNLISTED", "PAID").Default("PUBLIC"),
 		// encoding_status: pending / processing / success / partial / failed
@@ -55,18 +55,24 @@ func (Media) Fields() []ent.Field {
 		field.Int64("favorite_count").Default(0),
 		field.Int64("download_count").Default(0),
 		field.Int64("share_count").Default(0),
-		field.String("uuid").MaxLen(36).Optional(),
 		field.Bool("allow_download").Default(true),
 		field.Bool("enable_comments").Default(true),
 		field.Bool("featured").Default(false),
 		field.String("review_status").MaxLen(20).Default("pending_review"),
 		field.Bool("listable").Default(false),
 		field.Int("reported_times").Default(0),
-		field.String("sprite_status").MaxLen(20).Default("pending"),
+		field.String("sprite_status").MaxLen(20).Default("none"),
 		field.String("sprite_path").MaxLen(512).Optional(),
 		field.String("vtt_path").MaxLen(512).Optional(),
+		// TODO(BUG-087后续): 完整性校验字段 - 尚未实现
+		// 设计文档: docs/ee/modules/media/integrity/01-DATA_MODEL.md
+		// 待实现:
+		//   field.String("integrity_status").MaxLen(20).Default("unchecked"),
+		//   field.JSON("integrity_detail", &IntegrityDetail{}).Optional(),
 		field.Float("thumbnail_time").Optional(),
 		field.JSON("tags", []string{}).Optional(),
+		// metadata 兜底：迁移时保留 A 侧无承接字段全量（license/ratings/encodings/media_permissions/media_info/md5sum/source_* 等）
+		field.JSON("metadata", map[string]any{}).Optional(),
 		field.JSON("title_i18n", map[string]string{}).Optional(),
 		field.JSON("description_i18n", map[string]string{}).Optional(),
 		field.String("sync_status").MaxLen(20).Default("local_only").Optional(),
@@ -113,12 +119,19 @@ func (Media) Edges() []ent.Edge {
 		edge.To("comments", Comment.Type),
 		edge.From("channel", Channel.Type).Ref("media").Field("channel_id").Unique(),
 		edge.To("playlists", MediaPlaylist.Type),
-		edge.To("tags_rel", MediaTag.Type),
+		// BUG-132: OnDelete must live on the ASSOC edge (edge.To). ent's
+		// graph.go skips inverse edges (`if e.IsInverse() { continue }`) when
+		// building foreign keys, so an annotation on MediaTag's edge.From is
+		// silently ignored. Cascade keeps pivot rows from blocking media deletes.
+		edge.To("tags_rel", MediaTag.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("favorites", Favorite.Type),
 		edge.To("likes", Like.Type),
 		edge.To("review_logs", MediaReviewLog.Type),
+		edge.To("subtitles", Subtitle.Type), // BUG-186: subtitle tracks (one row per language)
 		edge.To("articles", Article.Type),
 		edge.To("reports", MediaReport.Type),
+		edge.To("drm_policies", MediaDrmPolicy.Type),
 		// edge.To("tasks", EncodingTask.Type),
 	}
 }

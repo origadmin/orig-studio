@@ -9,7 +9,6 @@ import (
 	"math/rand"
 
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/server"
@@ -79,37 +78,35 @@ func (h *ArticleHandler) RegisterRoutes(r http2.Router) {
 
 func (h *ArticleHandler) listArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
 		req := &types.ListArticlesRequest{
 			Page:     1,
 			PageSize: 20,
 		}
 
-		if page := gc.Query("page"); page != "" {
+		if page := ctx.QueryVar("page"); page != "" {
 			fmt.Sscanf(page, "%d", &req.Page)
 		}
 		if req.Page <= 0 {
 			req.Page = 1
 		}
 
-		if pageSize := gc.Query("page_size"); pageSize != "" {
+		if pageSize := ctx.QueryVar("page_size"); pageSize != "" {
 			fmt.Sscanf(pageSize, "%d", &req.PageSize)
 		}
 		if req.PageSize <= 0 {
 			req.PageSize = 20
 		}
 
-		state := gc.Query("state")
+		state := ctx.QueryVar("state")
 		if state == "" {
 			state = "published"
 		}
 		req.State = state
 
-		if categoryIDStr := gc.Query("category_id"); categoryIDStr != "" {
+		if categoryIDStr := ctx.QueryVar("category_id"); categoryIDStr != "" {
 			fmt.Sscanf(categoryIDStr, "%d", &req.CategoryId)
 		}
-		req.Keyword = gc.Query("keyword")
+		req.Keyword = ctx.QueryVar("keyword")
 
 		resp, err := h.uc.List(ctx.Request().Context(), req)
 		if err != nil {
@@ -124,8 +121,7 @@ func (h *ArticleHandler) listArticles() http2.HandlerFunc {
 
 func (h *ArticleHandler) getArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		slug := gc.Param("slug")
+		slug := ctx.Var("slug")
 		if slug == "" {
 			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
@@ -144,10 +140,8 @@ func (h *ArticleHandler) getArticle() http2.HandlerFunc {
 
 func (h *ArticleHandler) listFeaturedArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
 		limit := 10
-		if limitStr := gc.Query("limit"); limitStr != "" {
+		if limitStr := ctx.QueryVar("limit"); limitStr != "" {
 			fmt.Sscanf(limitStr, "%d", &limit)
 		}
 		if limit <= 0 {
@@ -177,10 +171,8 @@ func (h *ArticleHandler) listFeaturedArticles() http2.HandlerFunc {
 
 func (h *ArticleHandler) listLatestArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
 		limit := 10
-		if limitStr := gc.Query("limit"); limitStr != "" {
+		if limitStr := ctx.QueryVar("limit"); limitStr != "" {
 			fmt.Sscanf(limitStr, "%d", &limit)
 		}
 		if limit <= 0 {
@@ -209,8 +201,6 @@ func (h *ArticleHandler) listLatestArticles() http2.HandlerFunc {
 
 func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
 		var input struct {
 			Title      string   `json:"title" binding:"required"`
 			Slug       string   `json:"slug"`
@@ -224,7 +214,7 @@ func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 			State      string   `json:"state"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
+		if err := ctx.BindJSON(&input); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
@@ -274,9 +264,7 @@ func (h *ArticleHandler) createArticle() http2.HandlerFunc {
 
 func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
-		slug := gc.Param("slug")
+		slug := ctx.Var("slug")
 		if slug == "" {
 			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
@@ -295,7 +283,7 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 			State      string   `json:"state"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
+		if err := ctx.BindJSON(&input); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
@@ -356,9 +344,7 @@ func (h *ArticleHandler) updateArticle() http2.HandlerFunc {
 
 func (h *ArticleHandler) deleteArticle() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
-		slug := gc.Param("slug")
+		slug := ctx.Var("slug")
 		if slug == "" {
 			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
@@ -393,9 +379,7 @@ func (h *ArticleHandler) deleteArticle() http2.HandlerFunc {
 
 func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
-		slug := gc.Param("slug")
+		slug := ctx.Var("slug")
 		if slug == "" {
 			http2.Fail(ctx, server.ErrBadRequest, "article slug is required")
 			return nil
@@ -405,7 +389,7 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 			State string `json:"state" binding:"required"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
+		if err := ctx.BindJSON(&input); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
@@ -433,7 +417,7 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 			return nil
 		}
 
-		updated, err := h.uc.Get(ctx.Request().Context(), article.Id)
+		updated, err := h.uc.GetBySlug(ctx.Request().Context(), slug)
 		if err != nil {
 			http2.OK(ctx, nil)
 			return nil
@@ -447,8 +431,6 @@ func (h *ArticleHandler) updateArticleState() http2.HandlerFunc {
 // listMyArticles returns the current authenticated user's articles (all states).
 func (h *ArticleHandler) listMyArticles() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
 		userID := extractUserIDCtx(ctx)
 		if userID == "" {
 			http2.Fail(ctx, server.ErrBadRequest, "authentication required")
@@ -461,21 +443,21 @@ func (h *ArticleHandler) listMyArticles() http2.HandlerFunc {
 			UserId:   userID,
 		}
 
-		if page := gc.Query("page"); page != "" {
+		if page := ctx.QueryVar("page"); page != "" {
 			fmt.Sscanf(page, "%d", &req.Page)
 		}
 		if req.Page <= 0 {
 			req.Page = 1
 		}
 
-		if pageSize := gc.Query("page_size"); pageSize != "" {
+		if pageSize := ctx.QueryVar("page_size"); pageSize != "" {
 			fmt.Sscanf(pageSize, "%d", &req.PageSize)
 		}
 		if req.PageSize <= 0 {
 			req.PageSize = 20
 		}
 
-		if state := gc.Query("state"); state != "" {
+		if state := ctx.QueryVar("state"); state != "" {
 			req.State = state
 		}
 

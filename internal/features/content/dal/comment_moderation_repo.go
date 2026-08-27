@@ -10,6 +10,7 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/entity/comment"
 	"origadmin/application/origstudio/internal/dal/entity/commentreport"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
@@ -122,7 +123,7 @@ func (r *commentModerationRepo) ListByMedia(ctx context.Context, mediaID string,
 
 	ents, err := query.
 		Limit(pageSize).
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		Order(entity.Desc(comment.FieldAddDate)).
 		WithUser().
 		WithMedia().
@@ -226,7 +227,7 @@ func (r *commentModerationRepo) Delete(ctx context.Context, id string) error {
 // ListAdminComments returns comments with optional tree structure and report status filtering.
 // When tree=true, only root-level comments are paginated, and children are loaded via WithReplies.
 // When reportStatus is set, comments are filtered by their report status.
-func (r *commentModerationRepo) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, page, pageSize int) ([]*biz.CommentModerationItem, int, error) {
+func (r *commentModerationRepo) ListAdminComments(ctx context.Context, mediaID string, status string, reportStatus string, tree bool, keyword string, page, pageSize int) ([]*biz.CommentModerationItem, int, error) {
 	query := r.data.db.Comment.Query()
 
 	// Apply media filter
@@ -261,6 +262,11 @@ func (r *commentModerationRepo) ListAdminComments(ctx context.Context, mediaID s
 	case "no_reports":
 		// Comments with no reports
 		query = query.Where(comment.ReportCountEQ(0))
+	}
+
+	// Apply keyword search (BUG-200: comments search must actually filter)
+	if keyword != "" {
+		query = query.Where(comment.TextContains(keyword))
 	}
 
 	if tree {

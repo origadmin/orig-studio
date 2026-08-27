@@ -28,12 +28,17 @@ type TokenResponse struct {
 	User         *LoginUser `json:"user"`
 }
 
+// ChangePasswordRequest is the DTO for change password requests.
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=6"`
+}
+
 // LoginUser is the DTO for user info in auth responses.
 type LoginUser struct {
 	Id       string `json:"id"`
 	Username string `json:"username"`
 	Nickname string `json:"nickname,omitempty"`
 	Email    string `json:"email,omitempty"`
-	IsStaff  bool   `json:"is_staff"`
 	Role     string `json:"role,omitempty"`
 }

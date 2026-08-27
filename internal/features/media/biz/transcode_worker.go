@@ -34,11 +34,10 @@ type TranscodeJob struct {
 	MediaID      string
 	TaskID       string
 	Profile      *dto.EncodeProfile
-	InputPath    string // source video file path
-	OutputDir    string // final output directory (e.g., hls/{id}/{profile_name}/)
-	UUID         string // media ID for path construction (deprecated, use MediaID instead)
+	InputPath    string
+	OutputDir    string
 	EncodingRepo dto.EncodingTaskRepo
-	MediaUC      *MediaUseCase
+	MediaUC      MediaEventPublisher
 	Logger       *log.Helper
 }
 
@@ -234,6 +233,12 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 		}
 
 		if progress >= 0 && progress <= 100 {
+			// Update progress in DB for persistence across page refreshes
+			task.Progress = progress
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to persist progress for task %s: %v", job.TaskID, err)
+			}
+
 			if job.MediaUC != nil {
 				// Create a copy of the task to avoid modifying the original
 				taskCopy := *task
@@ -270,6 +275,20 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 		return fmt.Errorf("direct HLS transcode failed for profile %s: %w", profile.Name, err)
 	}
 
+	if job.EncodingRepo != nil {
+		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
+		if err == nil && task != nil {
+			task.Status = "success"
+			task.OutputPath = fmt.Sprintf("hls/%s/%s/index.m3u8", job.MediaID, profile.Name)
+			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
+				logger.Warnf("failed to update task %s status to success: %v", job.TaskID, err)
+			}
+			if job.MediaUC != nil {
+				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
+			}
+		}
+	}
+
 	logger.Infof(
 		"[HLS] complete: media=%s profile=%s → %s/index.m3u8",
 		job.MediaID,
@@ -282,7 +301,7 @@ func executeVideoHLSJob(ctx context.Context, job TranscodeJob, logger *log.Helpe
 // executePreviewJob generates an animated GIF preview from the source video.
 // Output: {baseDir}/previews/{id}.gif
 func executePreviewJob(ctx context.Context, job TranscodeJob, logger *log.Helper) error {
-	previewDir := filepath.Join(job.OutputDir, "..", "previews") // up from hls/{id} to base dir
+	previewDir := job.OutputDir
 	if err := os.MkdirAll(previewDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create preview directory: %w", err)
 	}
@@ -293,23 +312,8 @@ func executePreviewJob(ctx context.Context, job TranscodeJob, logger *log.Helper
 
 	logger.Infof("[GIF] generating preview: media=%s → %s", job.MediaID, gifPath)
 
-	// Update task status to processing
-	if job.EncodingRepo != nil {
-		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
-		if err == nil && task != nil {
-			task.Status = "processing"
-			if _, err := job.EncodingRepo.Update(ctx, task); err != nil {
-				logger.Warnf("failed to update task %s status: %v", job.TaskID, err)
-			}
-			if job.MediaUC != nil {
-				job.MediaUC.Publish(job.MediaID, &EncodingEvent{MediaId: job.MediaID, Task: task})
-			}
-		}
-	}
-
 	err := ffmpeg.GenerateGIFPreview(ctx, job.InputPath, gifPath, scale)
 	if err != nil {
-		// Update task status to failed
 		if job.EncodingRepo != nil {
 			task, getErr := job.EncodingRepo.Get(ctx, job.TaskID)
 			if getErr == nil && task != nil {
@@ -326,7 +330,6 @@ func executePreviewJob(ctx context.Context, job TranscodeJob, logger *log.Helper
 		return fmt.Errorf("GIF preview failed for profile %s: %w", job.Profile.Name, err)
 	}
 
-	// Update task status to success
 	if job.EncodingRepo != nil {
 		task, err := job.EncodingRepo.Get(ctx, job.TaskID)
 		if err == nil && task != nil {
@@ -365,6 +368,7 @@ func GenerateMasterPlaylist(hlsBaseDir string, variants []ffmpeg.VariantInfo) (s
 }
 
 // GenerateThumbnail extracts a thumbnail frame from a video file.
+// It tries multiple timestamps to handle short videos and verifies the output file exists with non-zero size.
 func GenerateThumbnail(ctx context.Context, inputPath, outputDir, filename string) (string, error) {
 	if err := os.MkdirAll(outputDir, 0o755); err != nil {
 		return "", fmt.Errorf("failed to create thumbnail directory: %w", err)
@@ -372,19 +376,53 @@ func GenerateThumbnail(ctx context.Context, inputPath, outputDir, filename strin
 
 	thumbPath := filepath.Join(outputDir, filename)
 
-	// Try at 5 seconds first, fallback to 0
-	err := ffmpeg.ExtractThumbnail(ctx, inputPath, thumbPath, "00:00:05")
-	if err != nil {
-		if err2 := ffmpeg.ExtractThumbnail(ctx, inputPath, thumbPath, "00:00:00"); err2 != nil {
-			return "", fmt.Errorf(
-				"thumbnail extraction failed: %w (fallback also failed: %v)",
-				err,
-				err2,
-			)
+	// Get video duration to pick a safe timestamp
+	duration, _ := ffmpeg.GetVideoDuration(ctx, inputPath)
+
+	// Build list of timestamps to try:
+	// 1. 10% into video (avoids black frames at start)
+	// 2. 1 second (good for short videos)
+	// 3. 5 seconds (original default for longer videos)
+	// 4. 0 seconds (frame 0, ultimate fallback)
+	var timestamps []string
+	if duration > 0 {
+		tenPercent := duration / 10
+		if tenPercent > time.Second {
+			tenPercent = time.Second
+		}
+		if tenPercent > 0 {
+			timestamps = append(timestamps, formatTimestamp(tenPercent))
 		}
 	}
+	timestamps = append(timestamps, "00:00:01", "00:00:05", "00:00:00")
 
-	return thumbPath, nil
+	var lastErr error
+	for _, ts := range timestamps {
+		// Remove any existing file first to avoid stale/empty files from failed attempts
+		os.Remove(thumbPath)
+
+		err := ffmpeg.ExtractThumbnail(ctx, inputPath, thumbPath, ts)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		// Verify the output file exists and has non-zero size
+		if fi, statErr := os.Stat(thumbPath); statErr == nil && fi.Size() > 0 {
+			return thumbPath, nil
+		}
+		lastErr = fmt.Errorf("thumbnail at %s produced empty or missing file", ts)
+	}
+
+	return "", fmt.Errorf("thumbnail extraction failed after all attempts: %w", lastErr)
+}
+
+func formatTimestamp(d time.Duration) string {
+	totalSeconds := int(d.Seconds())
+	h := totalSeconds / 3600
+	m := (totalSeconds % 3600) / 60
+	s := totalSeconds % 60
+	return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
 }
 
 // GenerateUUID creates a new UUID string. Extracted as a function for testability.

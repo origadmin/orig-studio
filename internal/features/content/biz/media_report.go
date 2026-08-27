@@ -54,10 +54,14 @@ func NewMediaReportUseCase(
 
 func (uc *MediaReportUseCase) ReportMedia(ctx context.Context, mediaID string, reporterID string, reason string, description string) (int, string, error) {
 	validReasons := map[string]bool{
-		"SPAM":          true,
-		"HARASSMENT":    true,
-		"INAPPROPRIATE": true,
-		"OTHER":         true,
+		"SPAM":            true,
+		"HARASSMENT":      true,
+		"INAPPROPRIATE":   true,
+		"PLAYBACK_ERROR":  true,
+		"SUBTITLE_ERROR":  true,
+		"QUALITY_ISSUE":   true,
+		"BROKEN_LINK":     true,
+		"OTHER":           true,
 	}
 	if !validReasons[reason] {
 		return 0, "", fmt.Errorf("invalid report reason")

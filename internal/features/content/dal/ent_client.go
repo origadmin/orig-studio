@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/dal/entity"
 
 	"github.com/origadmin/runtime/log"
 )

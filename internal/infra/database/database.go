@@ -22,6 +22,7 @@ import (
 	contentdal "origadmin/application/origstudio/internal/features/content/dal"
 	mediadal "origadmin/application/origstudio/internal/features/media/dal"
 	systemdal "origadmin/application/origstudio/internal/features/system/dal"
+	userdal "origadmin/application/origstudio/internal/features/user/dal"
 )
 
 // NewDatabase creates a new database client.
@@ -67,6 +68,10 @@ func NewDatabase(cfg *config.Config, logger log.Logger) (*entity.Client, *sql.DB
 
 	if err := contentdal.SeedTags(ctx, db); err != nil {
 		return nil, nil, err
+	}
+
+	if err := userdal.SeedAdminUser(ctx, db); err != nil {
+		log.Warnf("Seed admin user failed (non-fatal): %v", err)
 	}
 
 	sqlDB, err := openSQLDB(dbSource, dbDialect)

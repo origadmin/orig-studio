@@ -271,11 +271,14 @@ func mergeScopes(existing, newScopes []string) []string {
 
 func (uc *PermissionUseCase) getUserPermissionSet(ctx context.Context, userID string) (map[string]*PermissionSource, error) {
 	if val, ok := uc.cache.Load(userID); ok {
-		entry := val.(*permCacheEntry)
-		if time.Now().Before(entry.expiresAt) {
+		entry, ok := val.(*permCacheEntry)
+		if !ok {
+			uc.cache.Delete(userID)
+		} else if time.Now().Before(entry.expiresAt) {
 			return entry.permissions, nil
+		} else {
+			uc.cache.Delete(userID)
 		}
-		uc.cache.Delete(userID)
 	}
 
 	perms, err := uc.ResolveUserPermissions(ctx, userID)

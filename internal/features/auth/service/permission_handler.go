@@ -8,10 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
 	authbiz "origadmin/application/origstudio/internal/features/auth/biz"
 	"origadmin/application/origstudio/internal/server"
@@ -33,34 +30,31 @@ func (h *PermissionHandler) RegisterRoutes(r http2.Router) {
 	adminPerms := r.Group("/admin/permission-groups")
 	adminPerms.Use(server.AdminMiddlewareCtx(h.jwtMgr))
 	{
-		adminPerms.GET("", server.HTTPToHandlerFunc(h.listGroups()))
-		adminPerms.POST("", server.HTTPToHandlerFunc(h.createGroup()))
-		adminPerms.GET("/:id", server.HTTPToHandlerFunc(h.getGroup()))
-		adminPerms.PUT("/:id", server.HTTPToHandlerFunc(h.updateGroup()))
-		adminPerms.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteGroup()))
-		adminPerms.POST("/:id/toggle", server.HTTPToHandlerFunc(h.toggleGroup()))
-		adminPerms.GET("/:id/members", server.HTTPToHandlerFunc(h.listMembers()))
-		adminPerms.POST("/:id/members", server.HTTPToHandlerFunc(h.addMembers()))
-		adminPerms.DELETE("/:id/members/:user_id", server.HTTPToHandlerFunc(h.removeMember()))
+		adminPerms.GET("", h.listGroups())
+		adminPerms.POST("", h.createGroup())
+		adminPerms.GET("/:id", h.getGroup())
+		adminPerms.PUT("/:id", h.updateGroup())
+		adminPerms.DELETE("/:id", h.deleteGroup())
+		adminPerms.POST("/:id/toggle", h.toggleGroup())
+		adminPerms.GET("/:id/members", h.listMembers())
+		adminPerms.POST("/:id/members", h.addMembers())
+		adminPerms.DELETE("/:id/members/:user_id", h.removeMember())
 	}
 
 	adminUsers := r.Group("/admin/users")
 	adminUsers.Use(server.AdminMiddlewareCtx(h.jwtMgr))
 	{
-		adminUsers.GET("/:id/permissions", server.HTTPToHandlerFunc(h.getUserPermissions()))
+		adminUsers.GET("/:id/permissions", h.getUserPermissions())
 	}
 
 	// Public endpoint
-	r.GET("/permissions", server.HTTPToHandlerFunc(h.listPermissionEnums()))
+	r.GET("/permissions", h.listPermissionEnums())
 }
 
-func (h *PermissionHandler) listGroups() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+func (h *PermissionHandler) listGroups() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 		if page < 1 {
 			page = 1
 		}
@@ -69,7 +63,7 @@ func (h *PermissionHandler) listGroups() http.HandlerFunc {
 		}
 
 		var isActive *bool
-		if v := gc.Query("is_active"); v != "" {
+		if v := ctx.QueryVar("is_active"); v != "" {
 			parsed, err := strconv.ParseBool(v)
 			if err == nil {
 				isActive = &parsed
@@ -78,11 +72,10 @@ func (h *PermissionHandler) listGroups() http.HandlerFunc {
 
 		items, total, err := h.permUC.ListGroup(ctx, isActive, page, pageSize)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"items":     items,
 			"total":     total,
 			"page":      page,
@@ -91,81 +84,64 @@ func (h *PermissionHandler) listGroups() http.HandlerFunc {
 	}
 }
 
-func (h *PermissionHandler) createGroup() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
+func (h *PermissionHandler) createGroup() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var req struct {
 			Name          string   `json:"name"`
 			Description   string   `json:"description"`
 			Permissions   []string `json:"permissions"`
 			CategoryScope []string `json:"category_scope"`
 		}
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		if req.Name == "" {
-			server.Fail(gc, server.ErrBadRequest, "name is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "name is required")
 		}
 
 		for _, perm := range req.Permissions {
 			if !authbiz.IsValidPermission(perm) {
-				server.Fail(gc, server.ErrBadRequest, "invalid permission: "+perm)
-				return
+				return server.FailCtx(ctx, server.ErrBadRequest, "invalid permission: "+perm)
 			}
 		}
 
-		claims, ok := server.GetClaims(gc)
+		claims, ok := server.GetClaimsCtx(ctx)
 		if !ok {
-			server.Fail(gc, server.ErrUnauthorized, "unauthorized")
-			return
+			return server.FailCtx(ctx, server.ErrUnauthorized, "unauthorized")
 		}
 		adminID := claims.GetUserID()
 
 		group, err := h.permUC.CreateGroup(ctx, req.Name, req.Description, req.Permissions, req.CategoryScope, adminID)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		gc.JSON(201, group)
+		return ctx.JSON(http.StatusCreated, group)
 	}
 }
 
-func (h *PermissionHandler) getGroup() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) getGroup() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		group, err := h.permUC.GetGroup(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "permission group not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "permission group not found")
 		}
 
-		server.OK(gc, group)
+		return server.OKCtx(ctx, group)
 	}
 }
 
-func (h *PermissionHandler) updateGroup() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) updateGroup() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		var req struct {
@@ -174,94 +150,76 @@ func (h *PermissionHandler) updateGroup() http.HandlerFunc {
 			Permissions   []string `json:"permissions"`
 			CategoryScope []string `json:"category_scope"`
 		}
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		for _, perm := range req.Permissions {
 			if !authbiz.IsValidPermission(perm) {
-				server.Fail(gc, server.ErrBadRequest, "invalid permission: "+perm)
-				return
+				return server.FailCtx(ctx, server.ErrBadRequest, "invalid permission: "+perm)
 			}
 		}
 
 		group, err := h.permUC.UpdateGroup(ctx, id, req.Name, req.Description, req.Permissions, req.CategoryScope)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, group)
+		return server.OKCtx(ctx, group)
 	}
 }
 
-func (h *PermissionHandler) deleteGroup() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) deleteGroup() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		err := h.permUC.DeleteGroup(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{"message": "permission group deleted"})
+		return server.OKCtx(ctx, map[string]any{"message": "permission group deleted"})
 	}
 }
 
-func (h *PermissionHandler) toggleGroup() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) toggleGroup() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		var req struct {
 			IsActive bool `json:"is_active"`
 		}
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		err := h.permUC.ToggleGroup(ctx, id, req.IsActive)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"id":        id,
 			"is_active": req.IsActive,
 		})
 	}
 }
 
-func (h *PermissionHandler) listMembers() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) listMembers() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "50"))
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "50"))
 		if page < 1 {
 			page = 1
 		}
@@ -271,11 +229,10 @@ func (h *PermissionHandler) listMembers() http.HandlerFunc {
 
 		items, total, err := h.permUC.ListMembers(ctx, id, page, pageSize)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"items":     items,
 			"total":     total,
 			"page":      page,
@@ -284,99 +241,79 @@ func (h *PermissionHandler) listMembers() http.HandlerFunc {
 	}
 }
 
-func (h *PermissionHandler) addMembers() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) addMembers() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		var req struct {
 			UserIDs []string `json:"user_ids"`
 		}
-		if err := gc.ShouldBindJSON(&req); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&req); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		if len(req.UserIDs) == 0 {
-			server.Fail(gc, server.ErrBadRequest, "user_ids is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "user_ids is required")
 		}
 		if len(req.UserIDs) > 100 {
-			server.Fail(gc, server.ErrBadRequest, "user_ids cannot exceed 100")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "user_ids cannot exceed 100")
 		}
 
 		added, skipped, err := h.permUC.AddMembers(ctx, id, req.UserIDs)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"added":   added,
 			"skipped": skipped,
 		})
 	}
 }
 
-func (h *PermissionHandler) removeMember() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) removeMember() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
-		userID := gc.Param("user_id")
+		userID := ctx.Var("user_id")
 		if userID == "" {
-			server.Fail(gc, server.ErrBadRequest, "user_id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "user_id is required")
 		}
 
 		err := h.permUC.RemoveMember(ctx, id, userID)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{"message": "member removed"})
+		return server.OKCtx(ctx, map[string]any{"message": "member removed"})
 	}
 }
 
-func (h *PermissionHandler) getUserPermissions() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
-		id := gc.Param("id")
+func (h *PermissionHandler) getUserPermissions() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		detail, err := h.permUC.GetUserPermissions(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, detail)
+		return server.OKCtx(ctx, detail)
 	}
 }
 
-func (h *PermissionHandler) listPermissionEnums() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		server.OK(gc, gin.H{
+func (h *PermissionHandler) listPermissionEnums() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		return server.OKCtx(ctx, map[string]any{
 			"permissions":   authbiz.AllPermissions,
 			"role_defaults": authbiz.RoleDefaultPermissions,
 		})

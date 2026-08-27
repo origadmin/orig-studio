@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
@@ -25,7 +26,7 @@ type SubscriptionQuery struct {
 	inters         []Interceptor
 	predicates     []predicate.Subscription
 	withSubscriber *UserQuery
-	withChannel    *UserQuery
+	withChannel    *ChannelQuery
 	modifiers      []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -86,8 +87,8 @@ func (_q *SubscriptionQuery) QuerySubscriber() *UserQuery {
 }
 
 // QueryChannel chains the current query on the "channel" edge.
-func (_q *SubscriptionQuery) QueryChannel() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+func (_q *SubscriptionQuery) QueryChannel() *ChannelQuery {
+	query := (&ChannelClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,7 +99,7 @@ func (_q *SubscriptionQuery) QueryChannel() *UserQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(subscription.Table, subscription.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.To(channel.Table, channel.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, subscription.ChannelTable, subscription.ChannelColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -321,8 +322,8 @@ func (_q *SubscriptionQuery) WithSubscriber(opts ...func(*UserQuery)) *Subscript
 
 // WithChannel tells the query-builder to eager-load the nodes that are connected to
 // the "channel" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *SubscriptionQuery) WithChannel(opts ...func(*UserQuery)) *SubscriptionQuery {
-	query := (&UserClient{config: _q.config}).Query()
+func (_q *SubscriptionQuery) WithChannel(opts ...func(*ChannelQuery)) *SubscriptionQuery {
+	query := (&ChannelClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -442,7 +443,7 @@ func (_q *SubscriptionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	}
 	if query := _q.withChannel; query != nil {
 		if err := _q.loadChannel(ctx, query, nodes, nil,
-			func(n *Subscription, e *User) { n.Edges.Channel = e }); err != nil {
+			func(n *Subscription, e *Channel) { n.Edges.Channel = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -478,7 +479,7 @@ func (_q *SubscriptionQuery) loadSubscriber(ctx context.Context, query *UserQuer
 	}
 	return nil
 }
-func (_q *SubscriptionQuery) loadChannel(ctx context.Context, query *UserQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *User)) error {
+func (_q *SubscriptionQuery) loadChannel(ctx context.Context, query *ChannelQuery, nodes []*Subscription, init func(*Subscription), assign func(*Subscription, *Channel)) error {
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*Subscription)
 	for i := range nodes {
@@ -491,7 +492,7 @@ func (_q *SubscriptionQuery) loadChannel(ctx context.Context, query *UserQuery, 
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(channel.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

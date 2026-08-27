@@ -9,337 +9,371 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
-// StoragePaths is a value object that derives all subdirectory paths from a
-// single StorageBasePath. It provides user-isolation and date-sharded path
-// generation for original and temporary files, and flat path generation for
-// thumbnails, HLS, previews, and sprites.
-type StoragePaths struct {
-	basePath      string
-	OriginalsDir  string
-	TempDir       string
-	ThumbnailsDir string
-	HLSDir        string
-	PreviewsDir   string
-	SpritesDir    string
+// PathSpec declares a storage subdirectory's specification.
+// Each feature module registers its own dirs via Register().
+type PathSpec struct {
+	Name        string // registry key, e.g. "gallery", "assets/avatars", "originals"
+	DefaultDir  string // default subdir name under basePath, e.g. "gallery", "assets/avatars"
+	Description string // human-readable description
 }
 
-// NewStoragePaths creates a StoragePaths value object from a base path.
-// It resolves the base path to an absolute path and ensures all
-// subdirectories exist (fail-fast at startup).
+type registeredPath struct {
+	spec      PathSpec
+	actualDir string // resolved absolute path: basePath + DefaultDir, or override
+}
+
+// StoragePaths is the Single Source of Truth (SSOT) for all storage paths.
+//
+// After the Registry refactoring, this struct is the stable core:
+// new feature modules register their dirs via Register() without modifying this file.
+// Existing video paths are auto-registered in the constructor for backward compatibility.
+type StoragePaths struct {
+	basePath  string
+	overrides map[string]string       // config: name → absolute path override
+	registry  map[string]*registeredPath // registered storage dirs
+}
+
+// NewStoragePaths creates a StoragePaths with the given basePath.
+// Video dirs (originals, temp, thumbnails, hls, previews, sprites) are auto-registered
+// for backward compatibility.
 func NewStoragePaths(basePath string) *StoragePaths {
+	return NewStoragePathsWithOverrides(basePath, nil)
+}
+
+// NewStoragePathsWithOverrides creates a StoragePaths with per-dir path overrides.
+// overrides maps a registry name (e.g. "gallery") to an absolute path.
+// If a name in overrides has no matching Register() call, it is logged but ignored.
+func NewStoragePathsWithOverrides(basePath string, overrides map[string]string) *StoragePaths {
 	abs, err := filepath.Abs(basePath)
 	if err != nil {
 		abs = basePath
 	}
 	sp := &StoragePaths{
-		basePath:      abs,
-		OriginalsDir:  filepath.Join(abs, "originals"),
-		TempDir:       filepath.Join(abs, "temp"),
-		ThumbnailsDir: filepath.Join(abs, "thumbnails"),
-		HLSDir:        filepath.Join(abs, "hls"),
-		PreviewsDir:   filepath.Join(abs, "previews"),
-		SpritesDir:    filepath.Join(abs, "sprites"),
+		basePath:  abs,
+		overrides: overrides,
+		registry:  make(map[string]*registeredPath),
 	}
-	if err := sp.EnsureDirs(); err != nil {
-		panic(fmt.Sprintf("failed to create storage directories: %v", err))
+
+	// Auto-register video dirs for backward compatibility.
+	// New modules call Register() themselves; this block only covers existing paths.
+	videoSpecs := []PathSpec{
+		{Name: "originals", DefaultDir: "originals", Description: "video source files"},
+		{Name: "temp", DefaultDir: "temp", Description: "temp upload parts"},
+		{Name: "thumbnails", DefaultDir: "thumbnails", Description: "video thumbnails"},
+		{Name: "hls", DefaultDir: "hls", Description: "HLS segments"},
+		{Name: "previews", DefaultDir: "previews", Description: "GIF previews"},
+		{Name: "sprites", DefaultDir: "sprites", Description: "sprite sheets"},
 	}
+	for _, spec := range videoSpecs {
+		if err := sp.Register(spec); err != nil {
+			panic(fmt.Sprintf("failed to create storage directory %s: %v", spec.Name, err))
+		}
+	}
+
+	// Auto-register business asset dirs (avatars, ads, banners, etc.)
+	// These are existing functionality being migrated from hardcoded paths.
+	assetSubs := []string{"avatars", "ads", "banners", "covers", "channels", "categories", "articles", "misc"}
+	for _, sub := range assetSubs {
+		name := "assets/" + sub
+		if err := sp.Register(PathSpec{
+			Name:        name,
+			DefaultDir:  name,
+			Description: "business asset: " + sub,
+		}); err != nil {
+			panic(fmt.Sprintf("failed to create storage directory %s: %v", name, err))
+		}
+	}
+
+	// Auto-register gallery dir (multi-image content type).
+	if err := sp.Register(PathSpec{
+		Name:        "gallery",
+		DefaultDir:  "gallery",
+		Description: "gallery content (multi-image)",
+	}); err != nil {
+		panic(fmt.Sprintf("failed to create storage directory gallery: %v", err))
+	}
+
 	return sp
 }
 
-// BasePath returns the resolved absolute base path.
-func (sp *StoragePaths) BasePath() string { return sp.basePath }
-
-// EnsureDirs creates all top-level subdirectories if they do not exist.
-func (sp *StoragePaths) EnsureDirs() error {
-	for _, dir := range []string{
-		sp.OriginalsDir,
-		sp.TempDir,
-		sp.ThumbnailsDir,
-		sp.HLSDir,
-		sp.PreviewsDir,
-		sp.SpritesDir,
-	} {
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			return fmt.Errorf("create directory %s: %w", dir, err)
-		}
+// Register declares a storage subdirectory.
+// Called by feature modules to register their own dirs.
+// The core StoragePaths code does not need to know which modules exist.
+func (sp *StoragePaths) Register(spec PathSpec) error {
+	dir := filepath.Join(sp.basePath, spec.DefaultDir)
+	if override, ok := sp.overrides[spec.Name]; ok {
+		dir = override
 	}
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("create directory %s: %w", spec.Name, err)
+	}
+	sp.registry[spec.Name] = &registeredPath{spec: spec, actualDir: dir}
 	return nil
 }
 
-// --- Absolute path generation (for filesystem operations) ---
-
-// OriginalPath returns the absolute filesystem path for an original file.
-// userID: the uploader's user ID
-// filename: the file name including extension (e.g., "{uploadID}.mp4")
-// The file will be stored at: originals/{userID}/{yyyy}/{MM}/{filename}
-func (sp *StoragePaths) OriginalPath(userID, filename string) string {
-	now := time.Now()
-	return filepath.Join(
-		sp.OriginalsDir,
-		userID,
-		fmt.Sprintf("%04d", now.Year()),
-		fmt.Sprintf("%02d", now.Month()),
-		filename,
-	)
+// Dir returns the absolute filesystem path for a registered directory.
+// Panics if the name is not registered — call Register() first.
+func (sp *StoragePaths) Dir(name string) string {
+	if rp, ok := sp.registry[name]; ok {
+		return rp.actualDir
+	}
+	panic(fmt.Sprintf("storage path not registered: %q — did you call Register()?", name))
 }
 
-// OriginalPathAt returns the absolute path for an original file at a specific time.
-// Used when the upload time is known (e.g., from session creation time).
-func (sp *StoragePaths) OriginalPathAt(userID, filename string, t time.Time) string {
-	return filepath.Join(
-		sp.OriginalsDir,
-		userID,
-		fmt.Sprintf("%04d", t.Year()),
-		fmt.Sprintf("%02d", t.Month()),
-		filename,
-	)
+// Relative generates a relative storage key (for DB storage / API responses).
+// segments are the path components after the directory name.
+// Example: Relative("originals", "admin", "2026", "06", "file.mp4") → "originals/admin/2026/06/file.mp4"
+func (sp *StoragePaths) Relative(name string, segments ...string) string {
+	rp, ok := sp.registry[name]
+	if !ok {
+		panic(fmt.Sprintf("storage path not registered: %q", name))
+	}
+	parts := append([]string{rp.spec.DefaultDir}, segments...)
+	return strings.Join(parts, "/")
 }
 
-// TempUploadDir returns the absolute path for an upload session's parts directory.
-// Structure: temp/{userID}/{yyyy}/{MM}/{uploadID}/
-func (sp *StoragePaths) TempUploadDir(userID, uploadID string) string {
-	now := time.Now()
-	return filepath.Join(
-		sp.TempDir,
-		userID,
-		fmt.Sprintf("%04d", now.Year()),
-		fmt.Sprintf("%02d", now.Month()),
-		uploadID,
-	)
-}
-
-// TempUploadDirAt returns the parts directory at a specific time.
-func (sp *StoragePaths) TempUploadDirAt(userID, uploadID string, t time.Time) string {
-	return filepath.Join(
-		sp.TempDir,
-		userID,
-		fmt.Sprintf("%04d", t.Year()),
-		fmt.Sprintf("%02d", t.Month()),
-		uploadID,
-	)
-}
-
-// TempPartPath returns the absolute path for a specific part file.
-func (sp *StoragePaths) TempPartPath(userID, uploadID string, partNumber int) string {
-	return filepath.Join(sp.TempUploadDir(userID, uploadID), fmt.Sprintf("part_%05d", partNumber))
-}
-
-// TempMergedPath returns the absolute path for the merged file in temp.
-// The merged file is a sibling of the parts directory, not inside it.
-// Structure: temp/{userID}/{yyyy}/{MM}/{filename}
-func (sp *StoragePaths) TempMergedPath(userID, filename string) string {
-	now := time.Now()
-	return filepath.Join(
-		sp.TempDir,
-		userID,
-		fmt.Sprintf("%04d", now.Year()),
-		fmt.Sprintf("%02d", now.Month()),
-		filename,
-	)
-}
-
-// TempMergedPathAt returns the merged file path at a specific time.
-func (sp *StoragePaths) TempMergedPathAt(userID, filename string, t time.Time) string {
-	return filepath.Join(
-		sp.TempDir,
-		userID,
-		fmt.Sprintf("%04d", t.Year()),
-		fmt.Sprintf("%02d", t.Month()),
-		filename,
-	)
-}
-
-// ThumbnailAbsPath returns the absolute path for a thumbnail image.
-func (sp *StoragePaths) ThumbnailAbsPath(mediaUUID string) string {
-	return filepath.Join(sp.ThumbnailsDir, fmt.Sprintf("%s.jpg", mediaUUID))
-}
-
-// HLSProfileDir returns the absolute path for an HLS profile directory.
-func (sp *StoragePaths) HLSProfileDir(mediaUUID, profileName string) string {
-	return filepath.Join(sp.HLSDir, mediaUUID, profileName)
-}
-
-// HLSMasterAbsPath returns the absolute path for the HLS master playlist.
-func (sp *StoragePaths) HLSMasterAbsPath(mediaUUID string) string {
-	return filepath.Join(sp.HLSDir, mediaUUID, "master.m3u8")
-}
-
-// HLSDirForMedia returns the absolute HLS directory for a specific media UUID.
-func (sp *StoragePaths) HLSDirForMedia(mediaUUID string) string {
-	return filepath.Join(sp.HLSDir, mediaUUID)
-}
-
-// PreviewAbsPath returns the absolute path for a GIF preview.
-func (sp *StoragePaths) PreviewAbsPath(mediaUUID string) string {
-	return filepath.Join(sp.PreviewsDir, fmt.Sprintf("%s.gif", mediaUUID))
-}
-
-// SpriteDirAbs returns the absolute path for a sprite directory.
-func (sp *StoragePaths) SpriteDirAbs(mediaUUID string) string {
-	return filepath.Join(sp.SpritesDir, mediaUUID)
-}
-
-// SpriteImageAbsPath returns the absolute path for a sprite image.
-func (sp *StoragePaths) SpriteImageAbsPath(mediaUUID string) string {
-	return filepath.Join(sp.SpritesDir, mediaUUID, "sprite.jpg")
-}
-
-// SpriteVTTAbsPath returns the absolute path for a sprite VTT file.
-func (sp *StoragePaths) SpriteVTTAbsPath(mediaUUID string) string {
-	return filepath.Join(sp.SpritesDir, mediaUUID, "sprite.vtt")
-}
-
-// FullPath resolves a relative path (stored in DB) to an absolute filesystem path.
-// Primary method for converting DB-stored paths to filesystem paths.
+// FullPath resolves a relative storage key to an absolute filesystem path.
 func (sp *StoragePaths) FullPath(relativePath string) string {
 	return filepath.Join(sp.basePath, relativePath)
 }
 
+// BasePath returns the storage root directory.
+func (sp *StoragePaths) BasePath() string { return sp.basePath }
+
+// EnsureDirs is a no-op (dirs are created during Register).
+// Kept for backward compatibility.
+func (sp *StoragePaths) EnsureDirs() error { return nil }
+
+// StaticRouteMap auto-generates URL-to-filesystem route mappings for all registered dirs.
+// Used by the server to register Gin static routes (e.g. /files/originals → /data/uploads/originals).
+func (sp *StoragePaths) StaticRouteMap() map[string]string {
+	routes := make(map[string]string)
+	for _, rp := range sp.registry {
+		routes["/files/"+rp.spec.DefaultDir] = rp.actualDir
+	}
+	return routes
+}
+
+// --- Backward compatibility wrappers (video paths) ---
+// These methods preserve the existing API surface.
+// External callers use these methods; they delegate to the registry.
+
+// OriginalsDir returns the absolute path to the originals/ directory.
+func (sp *StoragePaths) OriginalsDir() string  { return sp.Dir("originals") }
+func (sp *StoragePaths) TempDir() string       { return sp.Dir("temp") }
+func (sp *StoragePaths) ThumbnailsDir() string { return sp.Dir("thumbnails") }
+func (sp *StoragePaths) HLSDir() string        { return sp.Dir("hls") }
+func (sp *StoragePaths) PreviewsDir() string   { return sp.Dir("previews") }
+func (sp *StoragePaths) SpritesDir() string    { return sp.Dir("sprites") }
+
+// --- Absolute path generation (for filesystem operations) ---
+
+func (sp *StoragePaths) OriginalPath(userID, filename string) string {
+	return sp.OriginalPathAt(userID, filename, time.Now())
+}
+
+func (sp *StoragePaths) OriginalPathAt(userID, filename string, t time.Time) string {
+	return filepath.Join(
+		sp.OriginalsDir(),
+		userID,
+		fmt.Sprintf("%04d", t.Year()),
+		fmt.Sprintf("%02d", t.Month()),
+		filename,
+	)
+}
+
+func (sp *StoragePaths) TempUploadDir(userID, uploadID string) string {
+	return sp.TempUploadDirAt(userID, uploadID, time.Now())
+}
+
+func (sp *StoragePaths) TempUploadDirAt(userID, uploadID string, t time.Time) string {
+	return filepath.Join(
+		sp.TempDir(),
+		userID,
+		fmt.Sprintf("%04d", t.Year()),
+		fmt.Sprintf("%02d", t.Month()),
+		uploadID,
+	)
+}
+
+func (sp *StoragePaths) TempPartPathAt(userID, uploadID string, partNumber int, t time.Time) string {
+	return filepath.Join(sp.TempUploadDirAt(userID, uploadID, t), fmt.Sprintf("part_%05d", partNumber))
+}
+
+func (sp *StoragePaths) TempPartPath(userID, uploadID string, partNumber int) string {
+	return sp.TempPartPathAt(userID, uploadID, partNumber, time.Now())
+}
+
+func (sp *StoragePaths) TempMergedPath(userID, filename string) string {
+	return sp.TempMergedPathAt(userID, filename, time.Now())
+}
+
+func (sp *StoragePaths) TempMergedPathAt(userID, filename string, t time.Time) string {
+	return filepath.Join(
+		sp.TempDir(),
+		userID,
+		fmt.Sprintf("%04d", t.Year()),
+		fmt.Sprintf("%02d", t.Month()),
+		filename,
+	)
+}
+
+func (sp *StoragePaths) ThumbnailAbsPath(mediaUUID string) string {
+	return filepath.Join(sp.ThumbnailsDir(), fmt.Sprintf("%s.jpg", mediaUUID))
+}
+
+func (sp *StoragePaths) HLSProfileDir(mediaUUID, profileName string) string {
+	return filepath.Join(sp.HLSDir(), mediaUUID, profileName)
+}
+
+func (sp *StoragePaths) HLSMasterAbsPath(mediaUUID string) string {
+	return filepath.Join(sp.HLSDir(), mediaUUID, "master.m3u8")
+}
+
+func (sp *StoragePaths) HLSDirForMedia(mediaUUID string) string {
+	return filepath.Join(sp.HLSDir(), mediaUUID)
+}
+
+func (sp *StoragePaths) PreviewAbsPath(mediaUUID string) string {
+	return filepath.Join(sp.PreviewsDir(), fmt.Sprintf("%s.gif", mediaUUID))
+}
+
+func (sp *StoragePaths) SpriteDirAbs(mediaUUID string) string {
+	return filepath.Join(sp.SpritesDir(), mediaUUID)
+}
+
+func (sp *StoragePaths) SpriteImageAbsPath(mediaUUID string) string {
+	return filepath.Join(sp.SpritesDir(), mediaUUID, "sprite.jpg")
+}
+
+func (sp *StoragePaths) SpriteVTTAbsPath(mediaUUID string) string {
+	return filepath.Join(sp.SpritesDir(), mediaUUID, "sprite.vtt")
+}
+
 // --- Relative path generation (for storing in database / API responses) ---
 
-// RelativeOriginal generates the relative path for an original file.
-// Returns: originals/{userID}/{yyyy}/{MM}/{filename}
 func (sp *StoragePaths) RelativeOriginal(userID, filename string) string {
-	now := time.Now()
-	return fmt.Sprintf("originals/%s/%04d/%02d/%s",
-		userID, now.Year(), now.Month(), filename)
+	return sp.RelativeOriginalAt(userID, filename, time.Now())
 }
 
-// RelativeOriginalAt generates the relative path for an original file at a specific time.
 func (sp *StoragePaths) RelativeOriginalAt(userID, filename string, t time.Time) string {
-	return fmt.Sprintf("originals/%s/%04d/%02d/%s",
-		userID, t.Year(), t.Month(), filename)
+	return sp.Relative("originals", userID,
+		fmt.Sprintf("%04d", t.Year()), fmt.Sprintf("%02d", t.Month()), filename)
 }
 
-// RelativeTemp generates the relative path for a merged file in temp.
 func (sp *StoragePaths) RelativeTemp(userID, filename string) string {
-	now := time.Now()
-	return fmt.Sprintf("temp/%s/%04d/%02d/%s",
-		userID, now.Year(), now.Month(), filename)
+	return sp.RelativeTempAt(userID, filename, time.Now())
 }
 
-// RelativeTempAt generates the relative path for a merged file in temp at a specific time.
 func (sp *StoragePaths) RelativeTempAt(userID, filename string, t time.Time) string {
-	return fmt.Sprintf("temp/%s/%04d/%02d/%s",
-		userID, t.Year(), t.Month(), filename)
+	return sp.Relative("temp", userID,
+		fmt.Sprintf("%04d", t.Year()), fmt.Sprintf("%02d", t.Month()), filename)
 }
 
-// RelativeThumbnail generates the relative path for a thumbnail image.
 func (sp *StoragePaths) RelativeThumbnail(mediaUUID string) string {
-	return fmt.Sprintf("thumbnails/%s.jpg", mediaUUID)
+	return sp.Relative("thumbnails", fmt.Sprintf("%s.jpg", mediaUUID))
 }
 
-// RelativeHLSMaster generates the relative path for the HLS master playlist.
 func (sp *StoragePaths) RelativeHLSMaster(mediaUUID string) string {
-	return fmt.Sprintf("hls/%s/master.m3u8", mediaUUID)
+	return sp.Relative("hls", mediaUUID, "master.m3u8")
 }
 
-// RelativeHLSProfile generates the relative path for an HLS profile playlist.
 func (sp *StoragePaths) RelativeHLSProfile(mediaUUID, profileName string) string {
-	return fmt.Sprintf("hls/%s/%s/index.m3u8", mediaUUID, profileName)
+	return sp.Relative("hls", mediaUUID, profileName, "index.m3u8")
 }
 
-// RelativePreview generates the relative path for a GIF preview.
 func (sp *StoragePaths) RelativePreview(mediaUUID string) string {
-	return fmt.Sprintf("previews/%s.gif", mediaUUID)
+	return sp.Relative("previews", fmt.Sprintf("%s.gif", mediaUUID))
 }
 
-// RelativeSpriteImage generates the relative path for a sprite image.
 func (sp *StoragePaths) RelativeSpriteImage(mediaUUID string) string {
-	return fmt.Sprintf("sprites/%s/sprite.jpg", mediaUUID)
+	return sp.Relative("sprites", mediaUUID, "sprite.jpg")
 }
 
-// RelativeSpriteVTT generates the relative path for a sprite VTT file.
 func (sp *StoragePaths) RelativeSpriteVTT(mediaUUID string) string {
-	return fmt.Sprintf("sprites/%s/sprite.vtt", mediaUUID)
+	return sp.Relative("sprites", mediaUUID, "sprite.vtt")
 }
 
 // --- File promotion and cleanup ---
 
-// PromoteToOriginal moves a file from temp/ to originals/ (same path structure).
-// temp/{uid}/{yyyy}/{MM}/{filename} -> originals/{uid}/{yyyy}/{MM}/{filename}
-// Returns the relative path of the promoted file.
-func (sp *StoragePaths) PromoteToOriginal(userID, filename string) (string, error) {
+// PromoteToOriginal moves a file from temp/ to originals/ using the exact
+// year/month embedded in the tempPath. This avoids time.Now() calls which
+// cause cross-month failures.
+// tempPath format: temp/{userID}/{yyyy}/{MM}/{filename}
+// Returns: originals/{userID}/{yyyy}/{MM}/{filename}
+func (sp *StoragePaths) PromoteToOriginal(tempPath string) (string, error) {
+	if !strings.HasPrefix(tempPath, "temp/") {
+		return "", fmt.Errorf("invalid temp path: must start with 'temp/': %s", tempPath)
+	}
+	parts := strings.SplitN(tempPath, "/", 5)
+	if len(parts) < 5 {
+		return "", fmt.Errorf("invalid temp path format: %s", tempPath)
+	}
+	userID := parts[1]
+	yearMonth := parts[2] + "/" + parts[3]
+	filename := parts[4]
+
+	originalsRelPath := fmt.Sprintf("originals/%s/%s/%s", userID, yearMonth, filename)
+	srcAbs := filepath.Join(sp.basePath, tempPath)
+	dstAbs := filepath.Join(sp.basePath, originalsRelPath)
+
+	if err := os.MkdirAll(filepath.Dir(dstAbs), 0755); err != nil {
+		return "", fmt.Errorf("create originals directory: %w", err)
+	}
+
+	if err := os.Rename(srcAbs, dstAbs); err != nil {
+		if err := copyFile(srcAbs, dstAbs); err != nil {
+			return "", fmt.Errorf("copy temp to originals: %w", err)
+		}
+		_ = os.Remove(srcAbs)
+	}
+
+	return originalsRelPath, nil
+}
+
+// Deprecated: Use PromoteToOriginal(tempPath) instead which is time-safe.
+func (sp *StoragePaths) PromoteToOriginalLegacy(userID, filename string) (string, error) {
 	now := time.Now()
 	yearMonth := fmt.Sprintf("%04d/%02d", now.Year(), now.Month())
-
-	tempFile := filepath.Join(sp.TempDir, userID, yearMonth, filename)
-	originalFile := filepath.Join(sp.OriginalsDir, userID, yearMonth, filename)
-
-	if err := os.MkdirAll(filepath.Dir(originalFile), 0755); err != nil {
-		return "", fmt.Errorf("create originals directory: %w", err)
-	}
-
-	if err := os.Rename(tempFile, originalFile); err != nil {
-		// Cross-device link: fall back to copy+delete
-		if err := copyFile(tempFile, originalFile); err != nil {
-			return "", fmt.Errorf("copy temp to originals: %w", err)
-		}
-		os.Remove(tempFile)
-	}
-
-	return fmt.Sprintf("originals/%s/%s/%s", userID, yearMonth, filename), nil
-}
-
-// PromoteToOriginalAt moves a file from temp/ to originals/ at a specific time.
-func (sp *StoragePaths) PromoteToOriginalAt(userID, filename string, t time.Time) (string, error) {
-	yearMonth := fmt.Sprintf("%04d/%02d", t.Year(), t.Month())
-
-	tempFile := filepath.Join(sp.TempDir, userID, yearMonth, filename)
-	originalFile := filepath.Join(sp.OriginalsDir, userID, yearMonth, filename)
+	tempFile := filepath.Join(sp.TempDir(), userID, yearMonth, filename)
+	originalFile := filepath.Join(sp.OriginalsDir(), userID, yearMonth, filename)
 
 	if err := os.MkdirAll(filepath.Dir(originalFile), 0755); err != nil {
 		return "", fmt.Errorf("create originals directory: %w", err)
 	}
-
 	if err := os.Rename(tempFile, originalFile); err != nil {
 		if err := copyFile(tempFile, originalFile); err != nil {
 			return "", fmt.Errorf("copy temp to originals: %w", err)
 		}
 		os.Remove(tempFile)
 	}
-
 	return fmt.Sprintf("originals/%s/%s/%s", userID, yearMonth, filename), nil
 }
 
-// CleanupTempParts removes the parts directory after promotion.
-// Deletes: temp/{uid}/{yyyy}/{MM}/{uploadID}/ (parts only, merged file already moved)
+// CleanupTempPartsByDir removes the parts directory given an absolute path.
+// This is time-safe when the directory path is derived from the session.
+func (sp *StoragePaths) CleanupTempPartsByDir(partsDirAbs string) error {
+	return os.RemoveAll(partsDirAbs)
+}
+
+// Deprecated: Use CleanupTempPartsByDir with a path derived from session time.
 func (sp *StoragePaths) CleanupTempParts(userID, uploadID string) error {
-	now := time.Now()
-	partsDir := filepath.Join(sp.TempDir, userID,
-		fmt.Sprintf("%04d", now.Year()),
-		fmt.Sprintf("%02d", now.Month()),
-		uploadID)
-	return os.RemoveAll(partsDir)
+	return os.RemoveAll(sp.TempUploadDir(userID, uploadID))
 }
 
 // CleanupTempPartsAt removes the parts directory at a specific time.
 func (sp *StoragePaths) CleanupTempPartsAt(userID, uploadID string, t time.Time) error {
-	partsDir := filepath.Join(sp.TempDir, userID,
-		fmt.Sprintf("%04d", t.Year()),
-		fmt.Sprintf("%02d", t.Month()),
-		uploadID)
-	return os.RemoveAll(partsDir)
+	return os.RemoveAll(sp.TempUploadDirAt(userID, uploadID, t))
 }
 
-// --- Static route mapping (for server.go) ---
+// --- Static route mapping (for StorageProxy) ---
+// StaticRouteMap above is the auto-generated version.
+// The method below is kept for any code that still references it explicitly.
 
-// StaticRouteMap returns a mapping of URL prefixes to filesystem directories
-// for static file serving.
-func (sp *StoragePaths) StaticRouteMap() map[string]string {
-	return map[string]string{
-		"/uploads":    sp.OriginalsDir,
-		"/thumbnails": sp.ThumbnailsDir,
-		"/hls":        sp.HLSDir,
-		"/sprites":    sp.SpritesDir,
-		"/previews":   sp.PreviewsDir,
-	}
-}
-
-// copyFile copies a file from src to dst using a streaming copy.
 func copyFile(src, dst string) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -357,7 +391,6 @@ func copyFile(src, dst string) error {
 		return err
 	}
 
-	// Preserve permissions
 	srcInfo, err := os.Stat(src)
 	if err != nil {
 		return err

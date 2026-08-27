@@ -101,9 +101,33 @@ func (uc *UserUseCase) GetUserByEmail(ctx context.Context, email string) (*types
 	return uc.repo.GetByEmail(ctx, email)
 }
 
-// GetUserBySlug retrieves a user by their public slug.
-func (uc *UserUseCase) GetUserBySlug(ctx context.Context, slug string) (*types.User, error) {
-	return uc.repo.GetBySlug(ctx, slug)
+// GetUserBySlug retrieves a user by slug, with smart fallback: slug -> username -> ID.
+func (uc *UserUseCase) GetUserBySlug(ctx context.Context, identifier string) (*types.User, error) {
+	if identifier == "" {
+		return nil, repotypes.ErrNotFound
+	}
+
+	user, err := uc.repo.GetBySlug(ctx, identifier)
+	if err == nil {
+		return user, nil
+	}
+	if !repotypes.IsNotFound(err) {
+		return nil, err
+	}
+
+	user, err = uc.repo.GetByUsername(ctx, identifier)
+	if err == nil {
+		return user, nil
+	}
+	if !repotypes.IsNotFound(err) {
+		return nil, err
+	}
+
+	user, err = uc.repo.Get(ctx, identifier)
+	if err == nil {
+		return user, nil
+	}
+	return nil, err
 }
 
 // UpdateUserSlug updates a user's slug with validation.
@@ -178,6 +202,11 @@ func (uc *UserUseCase) SetUserRole(ctx context.Context, id string, role string) 
 	return uc.repo.SetUserRole(ctx, id, role)
 }
 
+// SetUserSuperuser updates a user's is_superuser flag.
+func (uc *UserUseCase) SetUserSuperuser(ctx context.Context, id string, isSuperuser bool) error {
+	return uc.repo.SetUserSuperuser(ctx, id, isSuperuser)
+}
+
 func (uc *UserUseCase) CountUsers(ctx context.Context) (int, error) {
 	// For now, list with 0 limit to get count if List returns total
 	_, total, err := uc.repo.List(ctx, &dto.UserQueryOption{QueryOption: repotypes.QueryOption{PageSize: 1}})
@@ -210,11 +239,27 @@ func (uc *UserUseCase) Unsubscribe(ctx context.Context, subscriberID, channelID 
 }
 
 // GetSubscriptions gets all channels a user is subscribed to
-func (uc *UserUseCase) GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.User, int, error) {
+func (uc *UserUseCase) GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.Channel, int, error) {
 	return uc.repo.GetSubscriptions(ctx, subscriberID, page, pageSize)
 }
 
 // GetSubscribers gets all subscribers for a channel
 func (uc *UserUseCase) GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]*types.User, int, error) {
 	return uc.repo.GetSubscribers(ctx, channelID, page, pageSize)
+}
+
+func (uc *UserUseCase) GetUserProfile(ctx context.Context, userID string) (*types.UserProfile, error) {
+	return uc.repo.GetUserProfile(ctx, userID)
+}
+
+func (uc *UserUseCase) UpdateUserProfile(ctx context.Context, userID string, profile *types.UserProfile) error {
+	return uc.repo.UpdateUserProfile(ctx, userID, profile)
+}
+
+func (uc *UserUseCase) GetUserSetting(ctx context.Context, userID string) (*types.UserSetting, error) {
+	return uc.repo.GetUserSetting(ctx, userID)
+}
+
+func (uc *UserUseCase) UpdateUserSetting(ctx context.Context, userID string, setting *types.UserSetting) error {
+	return uc.repo.UpdateUserSetting(ctx, userID, setting)
 }

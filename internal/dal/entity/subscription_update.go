@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
@@ -72,13 +73,27 @@ func (_u *SubscriptionUpdate) SetNillableCreateTime(v *time.Time) *SubscriptionU
 	return _u
 }
 
+// SetNotificationPreference sets the "notification_preference" field.
+func (_u *SubscriptionUpdate) SetNotificationPreference(v subscription.NotificationPreference) *SubscriptionUpdate {
+	_u.mutation.SetNotificationPreference(v)
+	return _u
+}
+
+// SetNillableNotificationPreference sets the "notification_preference" field if the given value is not nil.
+func (_u *SubscriptionUpdate) SetNillableNotificationPreference(v *subscription.NotificationPreference) *SubscriptionUpdate {
+	if v != nil {
+		_u.SetNotificationPreference(*v)
+	}
+	return _u
+}
+
 // SetSubscriber sets the "subscriber" edge to the User entity.
 func (_u *SubscriptionUpdate) SetSubscriber(v *User) *SubscriptionUpdate {
 	return _u.SetSubscriberID(v.ID)
 }
 
-// SetChannel sets the "channel" edge to the User entity.
-func (_u *SubscriptionUpdate) SetChannel(v *User) *SubscriptionUpdate {
+// SetChannel sets the "channel" edge to the Channel entity.
+func (_u *SubscriptionUpdate) SetChannel(v *Channel) *SubscriptionUpdate {
 	return _u.SetChannelID(v.ID)
 }
 
@@ -93,7 +108,7 @@ func (_u *SubscriptionUpdate) ClearSubscriber() *SubscriptionUpdate {
 	return _u
 }
 
-// ClearChannel clears the "channel" edge to the User entity.
+// ClearChannel clears the "channel" edge to the Channel entity.
 func (_u *SubscriptionUpdate) ClearChannel() *SubscriptionUpdate {
 	_u.mutation.ClearChannel()
 	return _u
@@ -128,6 +143,11 @@ func (_u *SubscriptionUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *SubscriptionUpdate) check() error {
+	if v, ok := _u.mutation.NotificationPreference(); ok {
+		if err := subscription.NotificationPreferenceValidator(v); err != nil {
+			return &ValidationError{Name: "notification_preference", err: fmt.Errorf(`entity: validator failed for field "Subscription.notification_preference": %w`, err)}
+		}
+	}
 	if _u.mutation.SubscriberCleared() && len(_u.mutation.SubscriberIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "Subscription.subscriber"`)
 	}
@@ -157,6 +177,9 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 	}
 	if value, ok := _u.mutation.CreateTime(); ok {
 		_spec.SetField(subscription.FieldCreateTime, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.NotificationPreference(); ok {
+		_spec.SetField(subscription.FieldNotificationPreference, field.TypeEnum, value)
 	}
 	if _u.mutation.SubscriberCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -195,7 +218,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -208,7 +231,7 @@ func (_u *SubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err error
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -280,13 +303,27 @@ func (_u *SubscriptionUpdateOne) SetNillableCreateTime(v *time.Time) *Subscripti
 	return _u
 }
 
+// SetNotificationPreference sets the "notification_preference" field.
+func (_u *SubscriptionUpdateOne) SetNotificationPreference(v subscription.NotificationPreference) *SubscriptionUpdateOne {
+	_u.mutation.SetNotificationPreference(v)
+	return _u
+}
+
+// SetNillableNotificationPreference sets the "notification_preference" field if the given value is not nil.
+func (_u *SubscriptionUpdateOne) SetNillableNotificationPreference(v *subscription.NotificationPreference) *SubscriptionUpdateOne {
+	if v != nil {
+		_u.SetNotificationPreference(*v)
+	}
+	return _u
+}
+
 // SetSubscriber sets the "subscriber" edge to the User entity.
 func (_u *SubscriptionUpdateOne) SetSubscriber(v *User) *SubscriptionUpdateOne {
 	return _u.SetSubscriberID(v.ID)
 }
 
-// SetChannel sets the "channel" edge to the User entity.
-func (_u *SubscriptionUpdateOne) SetChannel(v *User) *SubscriptionUpdateOne {
+// SetChannel sets the "channel" edge to the Channel entity.
+func (_u *SubscriptionUpdateOne) SetChannel(v *Channel) *SubscriptionUpdateOne {
 	return _u.SetChannelID(v.ID)
 }
 
@@ -301,7 +338,7 @@ func (_u *SubscriptionUpdateOne) ClearSubscriber() *SubscriptionUpdateOne {
 	return _u
 }
 
-// ClearChannel clears the "channel" edge to the User entity.
+// ClearChannel clears the "channel" edge to the Channel entity.
 func (_u *SubscriptionUpdateOne) ClearChannel() *SubscriptionUpdateOne {
 	_u.mutation.ClearChannel()
 	return _u
@@ -349,6 +386,11 @@ func (_u *SubscriptionUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *SubscriptionUpdateOne) check() error {
+	if v, ok := _u.mutation.NotificationPreference(); ok {
+		if err := subscription.NotificationPreferenceValidator(v); err != nil {
+			return &ValidationError{Name: "notification_preference", err: fmt.Errorf(`entity: validator failed for field "Subscription.notification_preference": %w`, err)}
+		}
+	}
 	if _u.mutation.SubscriberCleared() && len(_u.mutation.SubscriberIDs()) > 0 {
 		return errors.New(`entity: clearing a required unique edge "Subscription.subscriber"`)
 	}
@@ -396,6 +438,9 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 	if value, ok := _u.mutation.CreateTime(); ok {
 		_spec.SetField(subscription.FieldCreateTime, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.NotificationPreference(); ok {
+		_spec.SetField(subscription.FieldNotificationPreference, field.TypeEnum, value)
+	}
 	if _u.mutation.SubscriberCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -433,7 +478,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -446,7 +491,7 @@ func (_u *SubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *Subscripti
 			Columns: []string{subscription.ChannelColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(channel.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -7,6 +7,7 @@ package dal
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -15,8 +16,10 @@ import (
 	"origadmin/application/origstudio/api/gen/v1/types"
 	"origadmin/application/origstudio/internal/dal/convpb"
 	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	domaintypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/pkg/idutil"
 	"origadmin/application/origstudio/internal/features/user/dto"
 )
@@ -123,7 +126,6 @@ func EntityToUserEntityDTO(u *entity.User) *dto.UserEntityDTO {
 		Name:         u.Name,
 		Slug:         u.Slug,
 		Role:         dto.UserRoleType(string(u.Role)),
-		IsStaff:      u.IsStaff,
 		IsSuperuser:  u.IsSuperuser,
 		IsFeatured:   u.IsFeatured,
 		IsEditor:     u.IsEditor,
@@ -226,11 +228,11 @@ func (r *userRepo) Create(
 		SetID(idutil.GenUUID()).
 		SetUsername(in.Username).
 		SetName(in.Nickname).
+		SetNickname(in.Nickname).
 		SetEmail(in.Email).
 		SetPassword(hashedPassword).
 		SetSlug(slug).
 		SetStatus(status).
-		SetIsStaff(in.IsStaff).
 		SetIsSuperuser(in.IsSuperuser).
 		SetLogo(in.Avatar).
 		SetRole("user").
@@ -248,9 +250,15 @@ func (r *userRepo) Update(
 	in *types.User,
 	opts ...*dto.UserUpdateOption,
 ) (*types.User, error) {
+	// BUG-241: nickname must be written to the nickname column (proto.User.Nickname
+	// reads ent.Nickname via convpb); SetName alone wrote it to the name column and
+	// the list showed nothing. Keep SetName too — the name column carries the
+	// display name (UserProfile.Name) and existing rows rely on it.
 	u, err := r.db.User.UpdateOneID(in.Id).
 		SetName(in.Nickname).
+		SetNickname(in.Nickname).
 		SetEmail(in.Email).
+		SetPhone(in.Phone).
 		SetStatus(userStatusFromProto(in.Status)).
 		SetLogo(in.Avatar).
 		Save(ctx)
@@ -282,7 +290,6 @@ func (r *userRepo) GetByUsername(ctx context.Context, username string) (*types.U
 	slog.Info("user from db raw",
 		"id", u.ID,
 		"username", u.Username,
-		"is_staff", u.IsStaff,
 		"is_superuser", u.IsSuperuser,
 		"status", u.Status,
 	)
@@ -354,7 +361,7 @@ func (r *userRepo) ChangeUserPassword(ctx context.Context, userID string, hashed
 func (r *userRepo) UpdateUserProfile(ctx context.Context, userID string, profile *types.UserProfile) error {
 	return r.db.User.UpdateOneID(userID).
 		SetName(profile.Name).
-		SetDescription(profile.Bio).
+		SetTitle(profile.Bio).
 		SetLocation(profile.Location).
 		SetLogo(profile.Avatar).
 		Exec(ctx)
@@ -369,14 +376,29 @@ func (r *userRepo) GetUserProfile(ctx context.Context, userID string) (*types.Us
 	return convertUserToProfileProto(u), nil
 }
 
-// UpdateUserSetting is a stub (settings could be added to schema later if needed).
+// UpdateUserSetting stores user settings as JSON in the description field.
 func (r *userRepo) UpdateUserSetting(ctx context.Context, userID string, setting *types.UserSetting) error {
-	return nil
+	data, err := json.Marshal(setting)
+	if err != nil {
+		return fmt.Errorf("marshal user setting: %w", err)
+	}
+	return r.db.User.UpdateOneID(userID).SetDescription(string(data)).Exec(ctx)
 }
 
-// GetUserSetting is a stub.
+// GetUserSetting retrieves user settings from the description field.
 func (r *userRepo) GetUserSetting(ctx context.Context, userID string) (*types.UserSetting, error) {
-	return &types.UserSetting{}, nil
+	u, err := r.db.User.Get(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if u.Description == "" {
+		return &types.UserSetting{}, nil
+	}
+	var setting types.UserSetting
+	if err := json.Unmarshal([]byte(u.Description), &setting); err != nil {
+		return &types.UserSetting{}, nil
+	}
+	return &setting, nil
 }
 
 // UpdateUserStatus updates a user's status.
@@ -413,8 +435,10 @@ func convertUserToProto(u *entity.User) *types.User {
 
 func convertUserToProfileProto(u *entity.User) *types.UserProfile {
 	return &types.UserProfile{
-		Avatar: u.Logo,
-		Name:   u.Name,
+		Avatar:   u.Logo,
+		Name:     u.Name,
+		Bio:      u.Title,
+		Location: u.Location,
 	}
 }
 
@@ -430,6 +454,11 @@ func (r *userRepo) GetEntity(ctx context.Context, id string) (*dto.UserEntityDTO
 // SetUserRole updates a user's role field directly.
 func (r *userRepo) SetUserRole(ctx context.Context, id string, role string) error {
 	return r.db.User.UpdateOneID(id).SetRole(user.Role(role)).Exec(ctx)
+}
+
+// SetUserSuperuser updates a user's is_superuser field directly.
+func (r *userRepo) SetUserSuperuser(ctx context.Context, id string, isSuperuser bool) error {
+	return r.db.User.UpdateOneID(id).SetIsSuperuser(isSuperuser).Exec(ctx)
 }
 
 // ==================== Subscription Methods ====================
@@ -494,12 +523,16 @@ func (r *userRepo) Unsubscribe(ctx context.Context, subscriberID, channelID stri
 	return err
 }
 
-// GetSubscriptions gets all channels a user is subscribed to
-func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.User, int, error) {
+// GetSubscriptions gets all channels a user is subscribed to.
+//
+// BUG-194: subscriptions store the CHANNEL id (user_channels.id) in channel_id.
+// The ent Subscription "channel" edge actually maps channel_id → users.id (the
+// channel owner), so WithChannel() returns nil for real channel ids. Instead we
+// batch-load the channels by id to obtain short_token + display fields (avoids N+1).
+func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID string, page, pageSize int) ([]*types.Channel, int, error) {
 	subs, err := r.db.Subscription.Query().
 		Where(subscription.SubscriberID(subscriberID)).
-		WithChannel().
-		Offset((page - 1) * pageSize).
+		Offset(domaintypes.CalcOffset(page, pageSize)).
 		Limit(pageSize).
 		All(ctx)
 	if err != nil {
@@ -513,11 +546,40 @@ func (r *userRepo) GetSubscriptions(ctx context.Context, subscriberID string, pa
 		return nil, 0, err
 	}
 
-	result := make([]*types.User, len(subs))
-	for i, sub := range subs {
-		if channel := sub.Edges.Channel; channel != nil {
-			result[i] = convertUserToProto(channel)
+	channelIDs := make([]string, 0, len(subs))
+	for _, sub := range subs {
+		if sub.ChannelID != "" {
+			channelIDs = append(channelIDs, sub.ChannelID)
 		}
+	}
+	channelByID := map[string]*entity.Channel{}
+	if len(channelIDs) > 0 {
+		chs, err := r.db.Channel.Query().
+			Where(channel.IDIn(channelIDs...)).
+			All(ctx)
+		if err != nil {
+			return nil, 0, err
+		}
+		for _, ch := range chs {
+			channelByID[ch.ID] = ch
+		}
+	}
+
+	result := make([]*types.Channel, 0, len(subs))
+	for _, sub := range subs {
+		ch, ok := channelByID[sub.ChannelID]
+		if !ok {
+			continue
+		}
+		result = append(result, &types.Channel{
+			Id:         ch.ID,
+			Title:      ch.Title,
+			UserId:     ch.UserID,
+			Name:       ch.Name,
+			Slug:       ch.Slug,
+			Avatar:     ch.Avatar,
+			ShortToken: ch.ShortToken,
+		})
 	}
 
 	return result, total, nil

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origstudio/internal/dal/entity/channeltag"
+	"origadmin/application/origstudio/internal/dal/entity/mediatag"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"origadmin/application/origstudio/internal/dal/entity/tagname"
@@ -271,6 +272,21 @@ func (_u *TagUpdate) AddChannelTags(v ...*ChannelTag) *TagUpdate {
 	return _u.AddChannelTagIDs(ids...)
 }
 
+// AddMediaTagIDs adds the "media_tags" edge to the MediaTag entity by IDs.
+func (_u *TagUpdate) AddMediaTagIDs(ids ...int) *TagUpdate {
+	_u.mutation.AddMediaTagIDs(ids...)
+	return _u
+}
+
+// AddMediaTags adds the "media_tags" edges to the MediaTag entity.
+func (_u *TagUpdate) AddMediaTags(v ...*MediaTag) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMediaTagIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_u *TagUpdate) Mutation() *TagMutation {
 	return _u.mutation
@@ -337,6 +353,27 @@ func (_u *TagUpdate) RemoveChannelTags(v ...*ChannelTag) *TagUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChannelTagIDs(ids...)
+}
+
+// ClearMediaTags clears all "media_tags" edges to the MediaTag entity.
+func (_u *TagUpdate) ClearMediaTags() *TagUpdate {
+	_u.mutation.ClearMediaTags()
+	return _u
+}
+
+// RemoveMediaTagIDs removes the "media_tags" edge to MediaTag entities by IDs.
+func (_u *TagUpdate) RemoveMediaTagIDs(ids ...int) *TagUpdate {
+	_u.mutation.RemoveMediaTagIDs(ids...)
+	return _u
+}
+
+// RemoveMediaTags removes "media_tags" edges to MediaTag entities.
+func (_u *TagUpdate) RemoveMediaTags(v ...*MediaTag) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMediaTagIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -623,6 +660,51 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.MediaTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMediaTagsIDs(); len(nodes) > 0 && !_u.mutation.MediaTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MediaTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -884,6 +966,21 @@ func (_u *TagUpdateOne) AddChannelTags(v ...*ChannelTag) *TagUpdateOne {
 	return _u.AddChannelTagIDs(ids...)
 }
 
+// AddMediaTagIDs adds the "media_tags" edge to the MediaTag entity by IDs.
+func (_u *TagUpdateOne) AddMediaTagIDs(ids ...int) *TagUpdateOne {
+	_u.mutation.AddMediaTagIDs(ids...)
+	return _u
+}
+
+// AddMediaTags adds the "media_tags" edges to the MediaTag entity.
+func (_u *TagUpdateOne) AddMediaTags(v ...*MediaTag) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMediaTagIDs(ids...)
+}
+
 // Mutation returns the TagMutation object of the builder.
 func (_u *TagUpdateOne) Mutation() *TagMutation {
 	return _u.mutation
@@ -950,6 +1047,27 @@ func (_u *TagUpdateOne) RemoveChannelTags(v ...*ChannelTag) *TagUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveChannelTagIDs(ids...)
+}
+
+// ClearMediaTags clears all "media_tags" edges to the MediaTag entity.
+func (_u *TagUpdateOne) ClearMediaTags() *TagUpdateOne {
+	_u.mutation.ClearMediaTags()
+	return _u
+}
+
+// RemoveMediaTagIDs removes the "media_tags" edge to MediaTag entities by IDs.
+func (_u *TagUpdateOne) RemoveMediaTagIDs(ids ...int) *TagUpdateOne {
+	_u.mutation.RemoveMediaTagIDs(ids...)
+	return _u
+}
+
+// RemoveMediaTags removes "media_tags" edges to MediaTag entities.
+func (_u *TagUpdateOne) RemoveMediaTags(v ...*MediaTag) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMediaTagIDs(ids...)
 }
 
 // Where appends a list predicates to the TagUpdate builder.
@@ -1259,6 +1377,51 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MediaTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMediaTagsIDs(); len(nodes) > 0 && !_u.mutation.MediaTagsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MediaTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

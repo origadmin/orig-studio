@@ -135,6 +135,10 @@ func errorCodeToReason(code int) string {
 		return "COMMENT_FORBIDDEN"
 	case ErrBadRequest:
 		return "BAD_REQUEST"
+	case ErrPayloadTooLarge:
+		return "PAYLOAD_TOO_LARGE"
+	case ErrUnsupportedMediaType:
+		return "UNSUPPORTED_MEDIA_TYPE"
 	case ErrConflict:
 		return "CONFLICT"
 	case ErrUserExists:
@@ -165,6 +169,10 @@ func getHTTPStatus(code int) int {
 		return http.StatusForbidden
 	case code == ErrBadRequest:
 		return http.StatusBadRequest
+	case code == ErrPayloadTooLarge:
+		return http.StatusRequestEntityTooLarge
+	case code == ErrUnsupportedMediaType:
+		return http.StatusUnsupportedMediaType
 	case code == ErrConflict:
 		return http.StatusConflict
 	case code == ErrUserNotFound:
@@ -206,15 +214,85 @@ func GetClaimsCtx(ctx http2.Context) (*auth.Claims, bool) {
 	return claims, ok
 }
 
+// ==================== http2.Context variants ====================
+// These functions accept the framework-agnostic http2.Context and are used by
+// service handlers that have been migrated off *gin.Context. The legacy
+// *gin.Context variants (OK/Fail/Page/Created/ProtoOK/FailAbort) are retained
+// for CE compatibility and existing tests; new code should use the Ctx variants.
+//
+// Behavior parity: proto.Message → protojsonMarshaler (snake_case + EmitUnpopulated);
+// non-proto → encoding/json via ctx.JSON. This matches the *gin.Context path so
+// CE and EE produce identical responses.
+
+func writeCtxProtoResponse(ctx http2.Context, statusCode int, data proto.Message) error {
+	b, err := protojsonMarshaler.Marshal(data)
+	if err != nil {
+		return FailCtx(ctx, ErrInternal, "internal error")
+	}
+	return ctx.Blob(statusCode, "application/json; charset=utf-8", b)
+}
+
+func writeCtxJSONResponse(ctx http2.Context, statusCode int, data interface{}) error {
+	return ctx.JSON(statusCode, data)
+}
+
+func OKCtx(ctx http2.Context, data interface{}) error {
+	if msg, ok := data.(proto.Message); ok {
+		return writeCtxProtoResponse(ctx, http.StatusOK, msg)
+	}
+	return writeCtxJSONResponse(ctx, http.StatusOK, data)
+}
+
+func PageCtx(ctx http2.Context, items interface{}, total int64, page, pageSize int) {
+	if msg, ok := items.(proto.Message); ok {
+		_ = writeCtxProtoResponse(ctx, http.StatusOK, msg)
+		return
+	}
+	_ = writeCtxJSONResponse(ctx, http.StatusOK, PageData{
+		Items:    items,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	})
+}
+
+func CreatedCtx(ctx http2.Context, data interface{}) error {
+	if msg, ok := data.(proto.Message); ok {
+		return writeCtxProtoResponse(ctx, http.StatusCreated, msg)
+	}
+	return writeCtxJSONResponse(ctx, http.StatusCreated, data)
+}
+
+func FailCtx(ctx http2.Context, code int, message string) error {
+	httpStatus := getHTTPStatus(code)
+	reason := errorCodeToReason(code)
+	return ctx.JSON(httpStatus, ErrorResponse{Code: httpStatus, Reason: reason, Message: message, Metadata: map[string]string{}})
+}
+
+func FailAbortCtx(ctx http2.Context, code int, message string) error {
+	// http2.Context has no Abort concept; FailAbortCtx behaves like FailCtx.
+	return FailCtx(ctx, code, message)
+}
+
+func ProtoOKCtx(ctx http2.Context, data proto.Message) error {
+	return writeCtxProtoResponse(ctx, http.StatusOK, data)
+}
+
+func ProtoOKPageCtx(ctx http2.Context, data proto.Message) error {
+	return writeCtxProtoResponse(ctx, http.StatusOK, data)
+}
+
+func ProtoCreatedCtx(ctx http2.Context, data proto.Message) error {
+	return writeCtxProtoResponse(ctx, http.StatusCreated, data)
+}
+
+func OKPageCtx(ctx http2.Context, items interface{}, total int64, page, pageSize int) {
+	PageCtx(ctx, items, total, page, pageSize)
+}
+
 func HTTPToHandlerFunc(h http.HandlerFunc) http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		if gc == nil {
-			http2.Fail(ctx, http2.ErrInternal, "internal error")
-			return nil
-		}
-		r := ginadapter.SetGinContext(ctx.Request(), gc)
-		h(gc.Writer, r)
+		h(ctx.Response(), ctx.Request())
 		return nil
 	}
 }

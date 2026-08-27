@@ -12,6 +12,10 @@ const (
 	Label = "media_tag"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldMediaID holds the string denoting the media_id field in the database.
+	FieldMediaID = "media_id"
+	// FieldTagID holds the string denoting the tag_id field in the database.
+	FieldTagID = "tag_id"
 	// EdgeMedia holds the string denoting the media edge name in mutations.
 	EdgeMedia = "media"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
@@ -19,30 +23,26 @@ const (
 	// Table holds the table name of the mediatag in the database.
 	Table = "content_media_tags"
 	// MediaTable is the table that holds the media relation/edge.
-	MediaTable = "content_media"
+	MediaTable = "content_media_tags"
 	// MediaInverseTable is the table name for the Media entity.
 	// It exists in this package in order to avoid circular dependency with the "media" package.
 	MediaInverseTable = "content_media"
 	// MediaColumn is the table column denoting the media relation/edge.
-	MediaColumn = "media_tag_media"
+	MediaColumn = "media_id"
 	// TagTable is the table that holds the tag relation/edge.
-	TagTable = "content_tags"
+	TagTable = "content_media_tags"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "content_tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "media_tag_tag"
+	TagColumn = "tag_id"
 )
 
 // Columns holds all SQL columns for mediatag fields.
 var Columns = []string{
 	FieldID,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "content_media_tags"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"media_tags_rel",
+	FieldMediaID,
+	FieldTagID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -52,13 +52,13 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
+
+var (
+	// MediaIDValidator is a validator for the "media_id" field. It is called by the builders before save.
+	MediaIDValidator func(string) error
+)
 
 // OrderOption defines the ordering options for the MediaTag queries.
 type OrderOption func(*sql.Selector)
@@ -68,44 +68,40 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByMediaCount orders the results by media count.
-func ByMediaCount(opts ...sql.OrderTermOption) OrderOption {
+// ByMediaID orders the results by the media_id field.
+func ByMediaID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMediaID, opts...).ToFunc()
+}
+
+// ByTagID orders the results by the tag_id field.
+func ByTagID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTagID, opts...).ToFunc()
+}
+
+// ByMediaField orders the results by media field.
+func ByMediaField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newMediaStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByMedia orders the results by media terms.
-func ByMedia(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByTagField orders the results by tag field.
+func ByTagField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMediaStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByTagCount orders the results by tag count.
-func ByTagCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTagStep(), opts...)
-	}
-}
-
-// ByTag orders the results by tag terms.
-func ByTag(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTagStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newTagStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MediaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, MediaTable, MediaColumn),
 	)
 }
 func newTagStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TagInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, TagTable, TagColumn),
 	)
 }

@@ -127,5 +127,7 @@ func convertEncodeProfileToDTO(m *entity.EncodeProfile) *dto.EncodeProfile {
 		AudioBitrate:    m.AudioBitrate,
 		BentoParameters: m.BentoParameters,
 		IsActive:        m.IsActive,
+		CreateTime:      m.CreateTime,
+		UpdateTime:      m.UpdateTime,
 	}
 }

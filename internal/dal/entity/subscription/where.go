@@ -250,6 +250,26 @@ func CreateTimeLTE(v time.Time) predicate.Subscription {
 	return predicate.Subscription(sql.FieldLTE(FieldCreateTime, v))
 }
 
+// NotificationPreferenceEQ applies the EQ predicate on the "notification_preference" field.
+func NotificationPreferenceEQ(v NotificationPreference) predicate.Subscription {
+	return predicate.Subscription(sql.FieldEQ(FieldNotificationPreference, v))
+}
+
+// NotificationPreferenceNEQ applies the NEQ predicate on the "notification_preference" field.
+func NotificationPreferenceNEQ(v NotificationPreference) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNEQ(FieldNotificationPreference, v))
+}
+
+// NotificationPreferenceIn applies the In predicate on the "notification_preference" field.
+func NotificationPreferenceIn(vs ...NotificationPreference) predicate.Subscription {
+	return predicate.Subscription(sql.FieldIn(FieldNotificationPreference, vs...))
+}
+
+// NotificationPreferenceNotIn applies the NotIn predicate on the "notification_preference" field.
+func NotificationPreferenceNotIn(vs ...NotificationPreference) predicate.Subscription {
+	return predicate.Subscription(sql.FieldNotIn(FieldNotificationPreference, vs...))
+}
+
 // HasSubscriber applies the HasEdge predicate on the "subscriber" edge.
 func HasSubscriber() predicate.Subscription {
 	return predicate.Subscription(func(s *sql.Selector) {
@@ -285,7 +305,7 @@ func HasChannel() predicate.Subscription {
 }
 
 // HasChannelWith applies the HasEdge predicate on the "channel" edge with a given conditions (other predicates).
-func HasChannelWith(preds ...predicate.User) predicate.Subscription {
+func HasChannelWith(preds ...predicate.Channel) predicate.Subscription {
 	return predicate.Subscription(func(s *sql.Selector) {
 		step := newChannelStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

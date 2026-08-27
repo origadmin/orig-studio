@@ -6,12 +6,13 @@ package dal
 
 import (
 	"context"
+	"io"
 )
 
 // Storage 存储接口
 type Storage interface {
 	// StorePart 存储分片
-	StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error)
+	StorePart(ctx context.Context, uploadID string, partNumber int, r io.Reader, size int64) (string, error)
 	// MergeParts 合并分片
 	MergeParts(ctx context.Context, uploadID string, totalParts int, finalPath string) error
 	// DeleteParts 删除分片

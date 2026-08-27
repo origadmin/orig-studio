@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"origadmin/application/origstudio/internal/dal/entity/channeltag"
+	"origadmin/application/origstudio/internal/dal/entity/mediatag"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"origadmin/application/origstudio/internal/dal/entity/tagname"
 	"origadmin/application/origstudio/internal/dal/entity/user"
@@ -210,6 +211,21 @@ func (_c *TagCreate) AddChannelTags(v ...*ChannelTag) *TagCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddChannelTagIDs(ids...)
+}
+
+// AddMediaTagIDs adds the "media_tags" edge to the MediaTag entity by IDs.
+func (_c *TagCreate) AddMediaTagIDs(ids ...int) *TagCreate {
+	_c.mutation.AddMediaTagIDs(ids...)
+	return _c
+}
+
+// AddMediaTags adds the "media_tags" edges to the MediaTag entity.
+func (_c *TagCreate) AddMediaTags(v ...*MediaTag) *TagCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMediaTagIDs(ids...)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -438,6 +454,22 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(channeltag.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MediaTagsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tag.MediaTagsTable,
+			Columns: []string{tag.MediaTagsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediatag.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

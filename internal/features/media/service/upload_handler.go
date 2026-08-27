@@ -5,6 +5,11 @@
 package service
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -59,26 +64,51 @@ func (h *UploadHandler) RegisterRoutes(r http2.Router) {
 	}
 }
 
+// HTTPHandler returns an http.Handler that serves all upload routes.
+// It creates a Gin engine, registers the routes under /api/v1, and returns
+// the engine as a standard http.Handler. This is used to mount raw-binary
+// upload endpoints on the Kratos HTTP server, bypassing the gateway's
+// JSON-only codec.
+func (h *UploadHandler) HTTPHandler() http.Handler {
+	ginEngine := gin.New()
+	ginEngine.Use(gin.Logger(), gin.Recovery())
+	apiV1 := ginEngine.Group("/api/v1")
+	router := ginadapter.NewRouterAdapter(apiV1)
+	h.RegisterRoutes(router)
+	return ginEngine
+}
+
 // --- Handlers (Refactored to use biz.UploadUseCase) ---
 
 // simpleUpload handles a single-file upload via multipart/form-data.
 // It initiates a session, uploads the file as one part, and completes
-// the upload in a single request. Suitable for small files (<5MB).
+// the upload in a single request. Suitable for small files (<100MB).
 func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
 		h.log.Infof("simpleUpload called")
 
+		const simpleUploadMaxSize = 100 << 20
+		r.Body = http.MaxBytesReader(w, r.Body, simpleUploadMaxSize)
+
 		// Parse multipart form
 		file, header, err := gc.Request.FormFile("file")
 		if err != nil {
+			if isRequestBodyTooLarge(err) {
+				server.Fail(gc, server.ErrMediaTooLarge, "request body exceeds 100MB simple upload limit, please use multipart upload")
+				return
+			}
 			h.log.Errorf("failed to read file from form: %v", err)
 			server.Fail(gc, server.ErrBadRequest, "failed to read file: "+err.Error())
 			return
 		}
 		defer file.Close()
 
-		claims, _ := server.GetClaims(gc)
+		claims, ok := server.GetClaims(gc)
+		if !ok || claims == nil {
+			server.Fail(gc, server.ErrUnauthorized, "missing or expired token")
+			return
+		}
 		userID := claims.GetUserID()
 
 		title := gc.PostForm("title")
@@ -93,6 +123,11 @@ func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 			if cid, err := strconv.ParseInt(cidStr, 10, 64); err == nil {
 				categoryID = &cid
 			}
+		}
+
+		var channelID *string
+		if chIDStr := gc.PostForm("channel_id"); chIDStr != "" {
+			channelID = &chIDStr
 		}
 
 		var tags []string
@@ -111,13 +146,21 @@ func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 			contentType = "application/octet-stream"
 		}
 
-		// Read file data
-		data, err := io.ReadAll(file)
-		if err != nil {
-			h.log.Errorf("failed to read file data: %v", err)
-			server.Fail(gc, server.ErrInternal, "failed to read file data")
+		if header.Size > simpleUploadMaxSize {
+			server.Fail(gc, server.ErrMediaTooLarge, fmt.Sprintf("file size %d exceeds simple upload limit %d, please use multipart upload", header.Size, simpleUploadMaxSize))
 			return
 		}
+
+		// Read entire file into memory for simple upload (size limited)
+		fileBytes, err := io.ReadAll(file)
+		if err != nil {
+			server.Fail(gc, server.ErrBadRequest, "failed to read file: "+err.Error())
+			return
+		}
+
+		// Calculate SHA256 for integrity check
+		hash := sha256.Sum256(fileBytes)
+		fileSha256 := hex.EncodeToString(hash[:])
 
 		// Initiate multipart upload session
 		session, err := h.uc.InitiateMultipartUpload(
@@ -128,6 +171,7 @@ func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 			title,
 			description,
 			categoryID,
+			channelID,
 			tags,
 			thumbnail,
 			&userID,
@@ -139,7 +183,7 @@ func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 		}
 
 		// Upload as single part
-		etag, err := h.uc.UploadPart(r.Context(), session.UploadID, 1, data)
+		etag, err := h.uc.UploadPart(r.Context(), session.UploadID, 1, bytes.NewReader(fileBytes), header.Size)
 		if err != nil {
 			h.log.Errorf("UploadPart failed: %v", err)
 			_ = h.uc.AbortMultipartUpload(r.Context(), session.UploadID)
@@ -152,10 +196,11 @@ func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 		media, err := h.uc.CompleteMultipartUpload(
 			r.Context(),
 			session.UploadID,
-			"",
+			fileSha256,
 			title,
 			description,
 			categoryID,
+			channelID,
 			tags,
 			thumbnail,
 		)
@@ -166,7 +211,17 @@ func (h *UploadHandler) simpleUpload() http.HandlerFunc {
 		}
 
 		h.log.Infof("simpleUpload completed: filename=%s, size=%d", header.Filename, header.Size)
-		server.OK(gc, gin.H{"media": media})
+		server.OK(gc, gin.H{
+			"media_id":        media.Id,
+			"state":           media.State,
+			"encoding_status": media.EncodingStatus,
+			"url":             media.Url,
+			"thumbnail":       media.Thumbnail,
+			"title":           media.Title,
+			"type":            media.Type,
+			"size":            media.Size,
+			"mime_type":       media.MimeType,
+		})
 	}
 }
 
@@ -175,8 +230,12 @@ func (h *UploadHandler) initiateMultipartUpload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
 		h.log.Infof("initiateMultipartUpload called")
-		
-		claims, _ := server.GetClaims(gc)
+
+		claims, ok := server.GetClaims(gc)
+		if !ok || claims == nil {
+			server.Fail(gc, server.ErrUnauthorized, "missing or expired token")
+			return
+		}
 		h.log.Infof("user_id: %s", claims.GetUserID())
 
 		var req struct {
@@ -186,6 +245,7 @@ func (h *UploadHandler) initiateMultipartUpload() http.HandlerFunc {
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
 			CategoryID  *int64   `json:"category_id"`
+			ChannelID   *string  `json:"channel_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
@@ -206,6 +266,7 @@ func (h *UploadHandler) initiateMultipartUpload() http.HandlerFunc {
 			req.Title,
 			req.Description,
 			req.CategoryID,
+			req.ChannelID,
 			req.Tags,
 			req.Thumbnail,
 			&userID,
@@ -233,7 +294,7 @@ func (h *UploadHandler) uploadPart() http.HandlerFunc {
 		uploadID := gc.Param("uploadId")
 		partNumberStr := gc.Param("partNumber")
 		h.log.Infof("uploadPart called: upload_id=%s, part_number=%s", uploadID, partNumberStr)
-		
+
 		partNumber, err := strconv.Atoi(partNumberStr)
 		if err != nil {
 			h.log.Errorf("invalid part number: %s, error: %v", partNumberStr, err)
@@ -241,15 +302,24 @@ func (h *UploadHandler) uploadPart() http.HandlerFunc {
 			return
 		}
 
-		data, err := gc.GetRawData()
+		// Read body into memory to make it seekable for S3 storage.
+		// S3 PutObject requires a seekable stream (io.ReadSeeker) for content-length
+		// computation and retry handling. HTTP request body (r.Body) is a
+		// non-seekable io.ReadCloser, so we buffer it into a bytes.Reader.
+		// Default chunk size is 5MB, which is acceptable to hold in memory.
+		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			h.log.Errorf("failed to read part data: %v", err)
-			server.Fail(gc, server.ErrBadRequest, "failed to read part data")
+			h.log.Errorf("failed to read part body: %v", err)
+			server.Fail(gc, server.ErrBadRequest, "failed to read request body: "+err.Error())
 			return
 		}
-		h.log.Infof("read part data: size=%d bytes", len(data))
+		_ = r.Body.Close()
 
-		etag, err := h.uc.UploadPart(r.Context(), uploadID, partNumber, data)
+		size := int64(len(bodyBytes))
+		h.log.Infof("uploading part: size=%d bytes", size)
+
+		reader := bytes.NewReader(bodyBytes)
+		etag, err := h.uc.UploadPart(r.Context(), uploadID, partNumber, reader, size)
 		if err != nil {
 			h.log.Errorf("UploadPart failed: %v", err)
 			server.Fail(gc, server.ErrInternal, err.Error())
@@ -259,7 +329,7 @@ func (h *UploadHandler) uploadPart() http.HandlerFunc {
 		h.log.Infof("part uploaded: upload_id=%s, part_number=%d, etag=%s", uploadID, partNumber, etag)
 		server.OK(gc, gin.H{
 			"etag": etag,
-			"size": len(data),
+			"size": size,
 		})
 	}
 }
@@ -306,6 +376,7 @@ func (h *UploadHandler) completeMultipartUpload() http.HandlerFunc {
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
 			CategoryID  *int64   `json:"category_id"`
+			ChannelID   *string  `json:"channel_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
@@ -328,6 +399,7 @@ func (h *UploadHandler) completeMultipartUpload() http.HandlerFunc {
 			req.Title,
 			req.Description,
 			req.CategoryID,
+			req.ChannelID,
 			req.Tags,
 			req.Thumbnail,
 		)
@@ -336,7 +408,17 @@ func (h *UploadHandler) completeMultipartUpload() http.HandlerFunc {
 			return
 		}
 
-		server.OK(gc, gin.H{"media": media})
+		server.OK(gc, gin.H{
+			"media_id":        media.Id,
+			"state":           media.State,
+			"encoding_status": media.EncodingStatus,
+			"url":             media.Url,
+			"thumbnail":       media.Thumbnail,
+			"title":           media.Title,
+			"type":            media.Type,
+			"size":            media.Size,
+			"mime_type":       media.MimeType,
+		})
 	}
 }
 
@@ -362,6 +444,7 @@ func (h *UploadHandler) updateMetadata() http.HandlerFunc {
 			Title       string   `json:"title"`
 			Description string   `json:"description"`
 			CategoryID  *int64   `json:"category_id"`
+			ChannelID   *string  `json:"channel_id"`
 			Tags        []string `json:"tags"`
 			Thumbnail   string   `json:"thumbnail"`
 		}
@@ -376,6 +459,7 @@ func (h *UploadHandler) updateMetadata() http.HandlerFunc {
 			req.Title,
 			req.Description,
 			req.CategoryID,
+			req.ChannelID,
 			req.Tags,
 			req.Thumbnail,
 		); err != nil {
@@ -405,7 +489,11 @@ func (h *UploadHandler) getUploadSession() http.HandlerFunc {
 func (h *UploadHandler) listUploadSessions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		gc := ginadapter.GetGinContext(r)
-		claims, _ := server.GetClaims(gc)
+		claims, ok := server.GetClaims(gc)
+		if !ok || claims == nil {
+			server.Fail(gc, server.ErrUnauthorized, "missing or expired token")
+			return
+		}
 		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
 		status := enums.ParseUploadStatus(gc.Query("status"))
@@ -427,4 +515,11 @@ func (h *UploadHandler) listUploadSessions() http.HandlerFunc {
 			"total":    total,
 		})
 	}
+}
+
+// isRequestBodyTooLarge checks if the error is from http.MaxBytesReader
+// indicating the request body exceeds the configured size limit.
+func isRequestBodyTooLarge(err error) bool {
+	var maxErr *http.MaxBytesError
+	return errors.As(err, &maxErr)
 }

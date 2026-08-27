@@ -1,7 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"strconv"
 	"strings"
 	"time"
@@ -9,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/metadata"
 
-	pb "origadmin/application/origstudio/api/gen/v1/upload"
+	pb "origadmin/application/origstudio/api/gen/v1/media"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/biz"
@@ -73,6 +76,10 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 	if req.CategoryId != 0 {
 		categoryID = &req.CategoryId
 	}
+	var channelID *string
+	if req.ChannelId != "" {
+		channelID = &req.ChannelId
+	}
 
 	session, err := s.uc.InitiateMultipartUpload(
 		ctx,
@@ -82,8 +89,9 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 		req.Title,
 		req.Description,
 		categoryID,
+		channelID,
 		req.Tags,
-		"",
+		req.Thumbnail,
 		userID,
 	)
 	if err != nil {
@@ -99,7 +107,7 @@ func (s *UploadService) InitiateMultipartUpload(ctx context.Context, req *pb.Ini
 }
 
 func (s *UploadService) UploadPart(ctx context.Context, req *pb.UploadPartRequest) (*pb.UploadPartResponse, error) {
-	etag, err := s.uc.UploadPart(ctx, req.UploadId, int(req.PartNumber), req.Data)
+	etag, err := s.uc.UploadPart(ctx, req.UploadId, int(req.PartNumber), bytes.NewReader(req.Data), int64(len(req.Data)))
 	if err != nil {
 		s.log.Errorf("failed to upload part %d for upload %s: %v", req.PartNumber, req.UploadId, err)
 		return nil, err
@@ -158,7 +166,7 @@ func (s *UploadService) CompleteMultipartUpload(ctx context.Context, req *pb.Com
 	}
 
 	media, err := s.uc.CompleteMultipartUpload(ctx, req.UploadId, req.Sha256,
-		title, description, categoryID, tags, session.Thumbnail)
+		title, description, categoryID, session.ChannelID, tags, session.Thumbnail)
 	if err != nil {
 		s.log.Errorf("failed to complete multipart upload %s: %v", req.UploadId, err)
 		return nil, err
@@ -194,6 +202,7 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		req.Title,
 		req.Description,
 		categoryID,
+		nil,
 		req.Tags,
 		"",
 		userID,
@@ -202,14 +211,14 @@ func (s *UploadService) UploadFile(ctx context.Context, req *pb.UploadFileReques
 		return nil, err
 	}
 
-	_, err = s.uc.UploadPart(ctx, session.UploadID, 1, req.Data)
+	_, err = s.uc.UploadPart(ctx, session.UploadID, 1, bytes.NewReader(req.Data), int64(len(req.Data)))
 	if err != nil {
 		_ = s.uc.AbortMultipartUpload(ctx, session.UploadID)
 		return nil, err
 	}
 
 	media, err := s.uc.CompleteMultipartUpload(ctx, session.UploadID, "",
-		req.Title, req.Description, categoryID, req.Tags, "")
+		req.Title, req.Description, categoryID, nil, req.Tags, "")
 	if err != nil {
 		_ = s.uc.AbortMultipartUpload(ctx, session.UploadID)
 		return nil, err
@@ -282,6 +291,62 @@ func (s *UploadService) ListUploadSessions(ctx context.Context, req *pb.ListUplo
 	return &pb.ListUploadSessionsResponse{
 		Sessions: pbSessions,
 		Total:    int32(total),
+	}, nil
+}
+
+func (s *UploadService) SimpleUpload(ctx context.Context, req *pb.SimpleUploadRequest) (*pb.SimpleUploadResponse, error) {
+	userID := s.extractUserID(ctx)
+
+	var categoryID *int64
+	if req.CategoryId != 0 {
+		categoryID = &req.CategoryId
+	}
+
+	var channelID *string
+	if req.ChannelId != "" {
+		channelID = &req.ChannelId
+	}
+
+	// Calculate SHA256
+	hash := sha256.Sum256(req.Data)
+	fileSha256 := hex.EncodeToString(hash[:])
+
+	// Start with multipart upload
+	session, err := s.uc.InitiateMultipartUpload(
+		ctx,
+		req.Filename,
+		int64(len(req.Data)),
+		req.ContentType,
+		req.Title,
+		req.Description,
+		categoryID,
+		channelID,
+		req.Tags,
+		req.Thumbnail,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Upload first and only part
+	_, err = s.uc.UploadPart(ctx, session.UploadID, 1, bytes.NewReader(req.Data), int64(len(req.Data)))
+	if err != nil {
+		_ = s.uc.AbortMultipartUpload(ctx, session.UploadID)
+		return nil, err
+	}
+
+	// Complete upload
+	media, err := s.uc.CompleteMultipartUpload(ctx, session.UploadID, fileSha256,
+		req.Title, req.Description, categoryID, channelID, req.Tags, req.Thumbnail)
+	if err != nil {
+		_ = s.uc.AbortMultipartUpload(ctx, session.UploadID)
+		return nil, err
+	}
+
+	return &pb.SimpleUploadResponse{
+		Media: media,
+		UploadUrl: "",
 	}, nil
 }
 

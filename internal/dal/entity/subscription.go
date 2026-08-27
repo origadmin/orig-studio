@@ -4,6 +4,7 @@ package entity
 
 import (
 	"fmt"
+	"origadmin/application/origstudio/internal/dal/entity/channel"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
 	"strings"
@@ -24,6 +25,8 @@ type Subscription struct {
 	ChannelID string `json:"channel_id,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
+	// NotificationPreference holds the value of the "notification_preference" field.
+	NotificationPreference subscription.NotificationPreference `json:"notification_preference,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SubscriptionQuery when eager-loading is set.
 	Edges        SubscriptionEdges `json:"edges"`
@@ -35,7 +38,7 @@ type SubscriptionEdges struct {
 	// Subscriber holds the value of the subscriber edge.
 	Subscriber *User `json:"subscriber,omitempty"`
 	// Channel holds the value of the channel edge.
-	Channel *User `json:"channel,omitempty"`
+	Channel *Channel `json:"channel,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -54,11 +57,11 @@ func (e SubscriptionEdges) SubscriberOrErr() (*User, error) {
 
 // ChannelOrErr returns the Channel value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SubscriptionEdges) ChannelOrErr() (*User, error) {
+func (e SubscriptionEdges) ChannelOrErr() (*Channel, error) {
 	if e.Channel != nil {
 		return e.Channel, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: user.Label}
+		return nil, &NotFoundError{label: channel.Label}
 	}
 	return nil, &NotLoadedError{edge: "channel"}
 }
@@ -68,7 +71,7 @@ func (*Subscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case subscription.FieldID, subscription.FieldSubscriberID, subscription.FieldChannelID:
+		case subscription.FieldID, subscription.FieldSubscriberID, subscription.FieldChannelID, subscription.FieldNotificationPreference:
 			values[i] = new(sql.NullString)
 		case subscription.FieldCreateTime:
 			values[i] = new(sql.NullTime)
@@ -111,6 +114,12 @@ func (_m *Subscription) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreateTime = value.Time
 			}
+		case subscription.FieldNotificationPreference:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field notification_preference", values[i])
+			} else if value.Valid {
+				_m.NotificationPreference = subscription.NotificationPreference(value.String)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -130,7 +139,7 @@ func (_m *Subscription) QuerySubscriber() *UserQuery {
 }
 
 // QueryChannel queries the "channel" edge of the Subscription entity.
-func (_m *Subscription) QueryChannel() *UserQuery {
+func (_m *Subscription) QueryChannel() *ChannelQuery {
 	return NewSubscriptionClient(_m.config).QueryChannel(_m)
 }
 
@@ -165,6 +174,9 @@ func (_m *Subscription) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("create_time=")
 	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("notification_preference=")
+	builder.WriteString(fmt.Sprintf("%v", _m.NotificationPreference))
 	builder.WriteByte(')')
 	return builder.String()
 }

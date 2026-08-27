@@ -2,22 +2,17 @@ package service
 
 import (
 	"strconv"
-	"time"
-
-	"github.com/gin-gonic/gin"
 
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/media"
+	contentdal "origadmin/application/origstudio/internal/features/content/dal"
 )
 
 type ExploreHandler struct {
-	entityClient *entity.Client
+	exploreQS *contentdal.ExploreQueryService
 }
 
-func NewExploreHandler(entityClient *entity.Client) *ExploreHandler {
-	return &ExploreHandler{entityClient: entityClient}
+func NewExploreHandler(exploreQS *contentdal.ExploreQueryService) *ExploreHandler {
+	return &ExploreHandler{exploreQS: exploreQS}
 }
 
 func (h *ExploreHandler) RegisterRoutes(r http2.Router) {
@@ -29,47 +24,35 @@ func (h *ExploreHandler) RegisterRoutes(r http2.Router) {
 
 func (h *ExploreHandler) trending() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		_ = gc.DefaultQuery("period", "week")
-		limit, _ := strconv.Atoi(gc.DefaultQuery("limit", "50"))
-		if limit <= 0 || limit > 100 {
-			limit = 50
-		}
+		_ = ctx.QueryVarDefault("period", "week")
+		limit, _ := strconv.Atoi(ctx.QueryVarDefault("limit", "50"))
 
 		reqCtx := ctx.Request().Context()
 
-		medias, err := h.entityClient.Media.Query().
-			Limit(limit).
-			Order(entity.Desc(media.FieldViewCount)).
-			All(reqCtx)
+		items, err := h.exploreQS.GetTrending(reqCtx, limit)
 		if err != nil {
 			http2.Fail(ctx, http2.ErrInternal, err.Error())
 			return nil
 		}
 
-		items := make([]interface{}, 0, len(medias))
-		for _, m := range medias {
-			publishedAt := ""
-			if !m.PublishedAt.IsZero() {
-				publishedAt = m.PublishedAt.Format(time.RFC3339)
-			}
-
-			items = append(items, gin.H{
-				"id":           m.ID,
-				"short_token":  m.ShortToken,
-				"title":        m.Title,
-				"description":  m.Description,
-				"thumbnail":    m.Thumbnail,
-				"duration":     m.Duration,
-				"view_count":   m.ViewCount,
-				"like_count":   m.LikeCount,
-				"published_at": publishedAt,
+		result := make([]interface{}, 0, len(items))
+		for _, item := range items {
+			result = append(result, map[string]any{
+				"id":           item.ID,
+				"short_token":  item.ShortToken,
+				"title":        item.Title,
+				"description":  item.Description,
+				"thumbnail":    item.Thumbnail,
+				"duration":     item.Duration,
+				"view_count":   item.ViewCount,
+				"like_count":   item.LikeCount,
+				"published_at": item.PublishedAt,
 			})
 		}
 
-		http2.OK(ctx, gin.H{
-			"items": items,
-			"total": len(items),
+		http2.OK(ctx, map[string]any{
+			"items": result,
+			"total": len(result),
 		})
 		return nil
 	}

@@ -2,23 +2,15 @@ package dal
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/dal/entity/encodeprofile"
 	"strings"
 )
 
 // SeedEncodeProfiles ensures default encoding profiles exist in the system.
 func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
-	count, err := client.EncodeProfile.Query().Count(ctx)
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		slog.Info("Encode profiles already seeded, skipping")
-		return nil
-	}
-
 	profiles := []struct {
 		Name        string
 		Ext         string
@@ -55,15 +47,27 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 		{"preview", "gif", "-", "-", true, "--fps 10 --scale 320"},
 	}
 
+	var seeded int
 	for _, p := range profiles {
-		_, err := client.EncodeProfile.Create().
+		exists, err := client.EncodeProfile.Query().Where(encodeprofile.NameEQ(p.Name)).Exist(ctx)
+		if err != nil {
+			return fmt.Errorf("check profile %s: %w", p.Name, err)
+		}
+		if exists {
+			continue
+		}
+		audioCodec := "aac"
+		if p.Ext == "gif" || p.Codec == "-" {
+			audioCodec = ""
+		}
+		_, err = client.EncodeProfile.Create().
 			SetName(p.Name).
-			SetDescription("MotoPlayer specific profile").
+			SetDescription(profileDescription(p.Name, p.Codec, p.Ext, p.Res)).
 			SetResolution(p.Res).
 			SetExtension(p.Ext).
 			SetVideoCodec(p.Codec).
 			SetVideoBitrate(extractBentoBitrate(p.BentoParams, "video")).
-			SetAudioCodec("aac").
+			SetAudioCodec(audioCodec).
 			SetAudioBitrate(extractBentoBitrate(p.BentoParams, "audio")).
 			SetBentoParameters(p.BentoParams).
 			SetIsActive(p.Active).
@@ -72,9 +76,14 @@ func SeedEncodeProfiles(ctx context.Context, client *entity.Client) error {
 			slog.Error("failed to seed encode profile", "name", p.Name, "err", err)
 			return err
 		}
+		seeded++
 	}
 
-	slog.Info("Successfully seeded Bento4-ready profiles")
+	if seeded > 0 {
+		slog.Info("Seeded encode profiles", "count", seeded)
+	} else {
+		slog.Info("All encode profiles already exist, skipping seed")
+	}
 	return nil
 }
 
@@ -92,4 +101,31 @@ func extractBentoBitrate(bentoParams, kind string) string {
 		}
 	}
 	return ""
+}
+
+func profileDescription(name, codec, ext, res string) string {
+	if name == "preview" {
+		return "Preview GIF generation profile"
+	}
+	var codecDisplay string
+	switch codec {
+	case "h264":
+		codecDisplay = "H.264"
+	case "h265":
+		codecDisplay = "H.265"
+	case "vp9":
+		codecDisplay = "VP9"
+	default:
+		codecDisplay = strings.ToUpper(codec)
+	}
+	var extDisplay string
+	switch ext {
+	case "mp4":
+		extDisplay = "MP4"
+	case "webm":
+		extDisplay = "WebM"
+	default:
+		extDisplay = strings.ToUpper(ext)
+	}
+	return fmt.Sprintf("%s %sp %s encoding profile", codecDisplay, res, extDisplay)
 }

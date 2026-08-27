@@ -6,29 +6,35 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
-	"github.com/gin-gonic/gin"
-
 	"origadmin/application/origstudio/api/gen/v1/types"
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/infra/auth"
+	authdto "origadmin/application/origstudio/internal/features/auth/dto"
 	"origadmin/application/origstudio/internal/features/user/biz"
 	"origadmin/application/origstudio/internal/features/user/dto"
 	"origadmin/application/origstudio/internal/server"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 )
 
+type AuditFunc func(ctx context.Context, userID, username, action, ip, userAgent, result string)
+
 type AuthHandler struct {
 	uc            *biz.UserUseCase
 	jwt           *auth.Manager
 	configProvider systembiz.ConfigProvider
+	auditFn       AuditFunc
 }
 
 func NewAuthHandler(uc *biz.UserUseCase, jwt *auth.Manager, configProvider systembiz.ConfigProvider) *AuthHandler {
 	return &AuthHandler{uc: uc, jwt: jwt, configProvider: configProvider}
+}
+
+func (h *AuthHandler) SetAuditFunc(fn AuditFunc) {
+	h.auditFn = fn
 }
 
 func (h *AuthHandler) RegisterRoutes(r http2.Router) {
@@ -38,51 +44,28 @@ func (h *AuthHandler) RegisterRoutes(r http2.Router) {
 		authGroup.POST("/signup", h.registerUser())
 		authGroup.POST("/refresh", h.refreshToken())
 		authGroup.POST("/signout", h.logout())
+		authGroup.PUT("/password", server.WithJWTCtx(h.jwt, h.changePassword()))
 	}
-}
-
-type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
-type RegisterRequest struct {
-	Username string `json:"username" binding:"required,min=3,max=64"`
-	Password string `json:"password" binding:"required,min=6,max=128"`
-	Email    string `json:"email"    binding:"omitempty,email"`
-	Nickname string `json:"nickname"`
-}
-
-type TokenResponse struct {
-	AccessToken  string     `json:"access_token"`
-	RefreshToken string     `json:"refresh_token"`
-	TokenType    string     `json:"token_type"`
-	ExpiresIn    int64      `json:"expires_in"`
-	User         *LoginUser `json:"user"`
-}
-
-type LoginUser struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-	Nickname string `json:"nickname,omitempty"`
-	Email    string `json:"email,omitempty"`
-	IsStaff  bool   `json:"is_staff"`
-	Role     string `json:"role,omitempty"`
 }
 
 func (h *AuthHandler) login() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
-		var req LoginRequest
-		if err := gc.ShouldBindJSON(&req); err != nil {
+		var req authdto.LoginRequest
+		if err := ctx.BindJSON(&req); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
 
 		u, err := h.uc.GetUserByUsername(ctx.Request().Context(), req.Username)
 		if err != nil {
+			h.auditLogin(ctx, "", req.Username, "failure")
 			http2.Fail(ctx, server.ErrUnauthorized, "invalid credentials")
+			return nil
+		}
+
+		if u.Status != types.UserStatus_USER_STATUS_ACTIVE {
+			h.auditLogin(ctx, u.Id, u.Username, "failure")
+			http2.Fail(ctx, server.ErrForbidden, "account is not active")
 			return nil
 		}
 
@@ -92,6 +75,7 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 		}
 
 		if err := h.uc.VerifyPassword(ctx.Request().Context(), u.Id, req.Password); err != nil {
+			h.auditLogin(ctx, u.Id, u.Username, "failure")
 			http2.Fail(ctx, server.ErrUnauthorized, "invalid credentials")
 			return nil
 		}
@@ -110,26 +94,24 @@ func (h *AuthHandler) login() http2.HandlerFunc {
 			return nil
 		}
 
-		loginUser := &LoginUser{
+		loginUser := &authdto.LoginUser{
 			Id:       u.Id,
 			Username: u.Username,
 			Nickname: u.Nickname,
 			Email:    u.Email,
-			IsStaff:  u.IsStaff,
 			Role:     userRole,
 		}
 
-		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		h.auditLogin(ctx, u.Id, u.Username, "success")
+		http2.OK(ctx, authdto.TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
 
 func (h *AuthHandler) registerUser() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
-		var req RegisterRequest
-		if err := gc.ShouldBindJSON(&req); err != nil {
+		var req authdto.RegisterRequest
+		if err := ctx.BindJSON(&req); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
@@ -157,8 +139,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			Username: req.Username,
 			Nickname: req.Nickname,
 			Email:    req.Email,
-			Status:   1,
-			IsStaff:  isFirstUser,
+			Status:   types.UserStatus_USER_STATUS_ACTIVE,
 		}
 
 		created, err := func() (*types.User, error) {
@@ -178,6 +159,7 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 		if isFirstUser {
 			userRole = "admin"
 			_ = h.uc.SetUserRole(ctx.Request().Context(), created.Id, "admin")
+			_ = h.uc.SetUserSuperuser(ctx.Request().Context(), created.Id, true)
 		}
 
 		token, err := h.jwt.Generate(created.Id, created.Username, userRole)
@@ -193,28 +175,25 @@ func (h *AuthHandler) registerUser() http2.HandlerFunc {
 			return nil
 		}
 
-		loginUser := &LoginUser{
+		loginUser := &authdto.LoginUser{
 			Id:       created.Id,
 			Username: created.Username,
 			Nickname: created.Nickname,
 			Email:    created.Email,
-			IsStaff:  created.IsStaff,
 			Role:     userRole,
 		}
 
-		http2.Created(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.Created(ctx, authdto.TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
 
 func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-
 		var req struct {
 			RefreshToken string `json:"refresh_token" binding:"required"`
 		}
-		if err := gc.ShouldBindJSON(&req); err != nil {
+		if err := ctx.BindJSON(&req); err != nil {
 			http2.Fail(ctx, server.ErrBadRequest, err.Error())
 			return nil
 		}
@@ -228,6 +207,11 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 		u, err := h.uc.GetUser(ctx.Request().Context(), claims.GetUserID(), nil)
 		if err != nil {
 			http2.Fail(ctx, server.ErrInternal, "user not found")
+			return nil
+		}
+
+		if u.Status != types.UserStatus_USER_STATUS_ACTIVE {
+			http2.Fail(ctx, server.ErrForbidden, "account is not active")
 			return nil
 		}
 
@@ -245,23 +229,69 @@ func (h *AuthHandler) refreshToken() http2.HandlerFunc {
 			return nil
 		}
 
-		loginUser := &LoginUser{
+		loginUser := &authdto.LoginUser{
 			Id:       u.Id,
 			Username: u.Username,
 			Nickname: u.Nickname,
 			Email:    u.Email,
-			IsStaff:  u.IsStaff,
 			Role:     u.Role,
 		}
 
-		http2.OK(ctx, TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
+		http2.OK(ctx, authdto.TokenResponse{AccessToken: token, RefreshToken: refreshToken, TokenType: "Bearer", ExpiresIn: int64(h.jwt.TTL().Seconds()), User: loginUser})
 		return nil
 	}
 }
 
 func (h *AuthHandler) logout() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		http2.OK(ctx, gin.H{"message": "logged out"})
+		if claims, ok := server.GetClaimsCtx(ctx); ok {
+			h.auditLogout(ctx, claims.GetUserID(), claims.Username)
+		} else {
+			header := ctx.GetHeader("Authorization")
+			if len(header) >= 8 && header[:7] == "Bearer " {
+				if claims, err := h.jwt.Parse(header[7:]); err == nil {
+					h.auditLogout(ctx, claims.GetUserID(), claims.Username)
+				}
+			}
+		}
+		http2.OK(ctx, map[string]any{"message": "logged out"})
+		return nil
+	}
+}
+
+func (h *AuthHandler) changePassword() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		claims, ok := server.GetClaimsCtx(ctx)
+		if !ok {
+			http2.Fail(ctx, server.ErrUnauthorized, "unauthorized")
+			return nil
+		}
+
+		var req authdto.ChangePasswordRequest
+		if err := ctx.BindJSON(&req); err != nil {
+			http2.Fail(ctx, server.ErrBadRequest, err.Error())
+			return nil
+		}
+
+		if err := h.uc.VerifyPassword(ctx.Request().Context(), claims.GetUserID(), req.CurrentPassword); err != nil {
+			http2.Fail(ctx, server.ErrUnauthorized, "invalid current password")
+			return nil
+		}
+
+		hashedPassword, err := h.uc.HashPassword(req.NewPassword)
+		if err != nil {
+			slog.Error("failed to hash password", "err", err)
+			http2.Fail(ctx, server.ErrInternal, "password update failed")
+			return nil
+		}
+
+		if err := h.uc.UpdateUserPassword(ctx.Request().Context(), claims.GetUserID(), hashedPassword); err != nil {
+			slog.Error("failed to update password", "err", err)
+			http2.Fail(ctx, server.ErrInternal, "password update failed")
+			return nil
+		}
+
+		http2.OK(ctx, map[string]any{"message": "password updated"})
 		return nil
 	}
 }
@@ -284,4 +314,22 @@ func (h *AuthHandler) Me() http2.HandlerFunc {
 		http2.OK(ctx, u)
 		return nil
 	}
+}
+
+func (h *AuthHandler) auditLogin(ctx http2.Context, userID, username, result string) {
+	if h.auditFn == nil {
+		return
+	}
+	ip := ctx.ClientIP()
+	ua := ctx.GetHeader("User-Agent")
+	h.auditFn(ctx.Request().Context(), userID, username, "login", ip, ua, result)
+}
+
+func (h *AuthHandler) auditLogout(ctx http2.Context, userID, username string) {
+	if h.auditFn == nil {
+		return
+	}
+	ip := ctx.ClientIP()
+	ua := ctx.GetHeader("User-Agent")
+	h.auditFn(ctx.Request().Context(), userID, username, "logout", ip, ua, "success")
 }

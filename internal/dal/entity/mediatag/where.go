@@ -54,12 +54,107 @@ func IDLTE(id int) predicate.MediaTag {
 	return predicate.MediaTag(sql.FieldLTE(FieldID, id))
 }
 
+// MediaID applies equality check predicate on the "media_id" field. It's identical to MediaIDEQ.
+func MediaID(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldEQ(FieldMediaID, v))
+}
+
+// TagID applies equality check predicate on the "tag_id" field. It's identical to TagIDEQ.
+func TagID(v int) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldEQ(FieldTagID, v))
+}
+
+// MediaIDEQ applies the EQ predicate on the "media_id" field.
+func MediaIDEQ(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldEQ(FieldMediaID, v))
+}
+
+// MediaIDNEQ applies the NEQ predicate on the "media_id" field.
+func MediaIDNEQ(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldNEQ(FieldMediaID, v))
+}
+
+// MediaIDIn applies the In predicate on the "media_id" field.
+func MediaIDIn(vs ...string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldIn(FieldMediaID, vs...))
+}
+
+// MediaIDNotIn applies the NotIn predicate on the "media_id" field.
+func MediaIDNotIn(vs ...string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldNotIn(FieldMediaID, vs...))
+}
+
+// MediaIDGT applies the GT predicate on the "media_id" field.
+func MediaIDGT(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldGT(FieldMediaID, v))
+}
+
+// MediaIDGTE applies the GTE predicate on the "media_id" field.
+func MediaIDGTE(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldGTE(FieldMediaID, v))
+}
+
+// MediaIDLT applies the LT predicate on the "media_id" field.
+func MediaIDLT(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldLT(FieldMediaID, v))
+}
+
+// MediaIDLTE applies the LTE predicate on the "media_id" field.
+func MediaIDLTE(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldLTE(FieldMediaID, v))
+}
+
+// MediaIDContains applies the Contains predicate on the "media_id" field.
+func MediaIDContains(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldContains(FieldMediaID, v))
+}
+
+// MediaIDHasPrefix applies the HasPrefix predicate on the "media_id" field.
+func MediaIDHasPrefix(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldHasPrefix(FieldMediaID, v))
+}
+
+// MediaIDHasSuffix applies the HasSuffix predicate on the "media_id" field.
+func MediaIDHasSuffix(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldHasSuffix(FieldMediaID, v))
+}
+
+// MediaIDEqualFold applies the EqualFold predicate on the "media_id" field.
+func MediaIDEqualFold(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldEqualFold(FieldMediaID, v))
+}
+
+// MediaIDContainsFold applies the ContainsFold predicate on the "media_id" field.
+func MediaIDContainsFold(v string) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldContainsFold(FieldMediaID, v))
+}
+
+// TagIDEQ applies the EQ predicate on the "tag_id" field.
+func TagIDEQ(v int) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldEQ(FieldTagID, v))
+}
+
+// TagIDNEQ applies the NEQ predicate on the "tag_id" field.
+func TagIDNEQ(v int) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldNEQ(FieldTagID, v))
+}
+
+// TagIDIn applies the In predicate on the "tag_id" field.
+func TagIDIn(vs ...int) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldIn(FieldTagID, vs...))
+}
+
+// TagIDNotIn applies the NotIn predicate on the "tag_id" field.
+func TagIDNotIn(vs ...int) predicate.MediaTag {
+	return predicate.MediaTag(sql.FieldNotIn(FieldTagID, vs...))
+}
+
 // HasMedia applies the HasEdge predicate on the "media" edge.
 func HasMedia() predicate.MediaTag {
 	return predicate.MediaTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, MediaTable, MediaColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, MediaTable, MediaColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -82,7 +177,7 @@ func HasTag() predicate.MediaTag {
 	return predicate.MediaTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

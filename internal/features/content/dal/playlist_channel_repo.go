@@ -7,6 +7,7 @@ package dal
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,6 +23,7 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/setting"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
@@ -158,7 +160,7 @@ func (r *playlistRepo) ListByUser(ctx context.Context, userID string, page, page
 	ents, err := query.
 		Order(entity.Desc(playlist.FieldCreateTime)).
 		Limit(pageSize).
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		All(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -167,6 +169,36 @@ func (r *playlistRepo) ListByUser(ctx context.Context, userID string, page, page
 	for i, ent := range ents {
 		playlist := mapPlaylist(ent)
 		// Get media items for each playlist
+		mediaItems, err := r.GetPlaylistMedia(ctx, ent.ID)
+		if err == nil {
+			playlist.MediaItems = mediaItems
+		}
+		res[i] = playlist
+	}
+	return res, total, nil
+}
+
+func (r *playlistRepo) ListPublicByUser(ctx context.Context, userID string, page, pageSize int) ([]*biz.Playlist, int, error) {
+	query := r.data.db.Playlist.Query().
+		Where(
+			playlist.UserIDEQ(userID),
+			playlist.PrivacyEQ(playlist.PrivacyPUBLIC),
+		)
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	ents, err := query.
+		Order(entity.Desc(playlist.FieldCreateTime)).
+		Limit(pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	res := make([]*biz.Playlist, len(ents))
+	for i, ent := range ents {
+		playlist := mapPlaylist(ent)
 		mediaItems, err := r.GetPlaylistMedia(ctx, ent.ID)
 		if err == nil {
 			playlist.MediaItems = mediaItems
@@ -203,6 +235,55 @@ func (r *playlistRepo) ListAll(ctx context.Context, page, pageSize int) ([]*biz.
 	return res, total, nil
 }
 
+// ResolveMediaID resolves a media UUID or short_token into the canonical media
+// UUID.
+//
+// BUG-128 root cause C: playlist media mutations used to pass the raw client
+// value straight into the join table, so a bogus id was rejected by the database
+// foreign key and surfaced as a 500 that leaked the constraint name. Resolving
+// up-front turns that into a clean NotFound and, as a bonus, accepts the
+// short_token form used by every other media endpoint.
+func (r *playlistRepo) ResolveMediaID(ctx context.Context, idOrToken string) (string, error) {
+	idOrToken = strings.TrimSpace(idOrToken)
+	if idOrToken == "" {
+		return "", biz.ErrMediaNotFound
+	}
+
+	// Fast path: the value is already a media UUID.
+	if ok, err := r.data.db.Media.Query().Where(media.IDEQ(idOrToken)).Exist(ctx); err == nil && ok {
+		return idOrToken, nil
+	}
+
+	ent, err := r.data.db.Media.Query().Where(media.ShortTokenEQ(idOrToken)).Only(ctx)
+	if err != nil {
+		if entity.IsNotFound(err) {
+			return "", biz.ErrMediaNotFound
+		}
+		return "", err
+	}
+	return ent.ID, nil
+}
+
+// syncMediaCount refreshes the denormalized content_playlist.media_count column
+// from the join table.
+//
+// BUG-128: no write path ever maintained this column, so it stayed 0 forever
+// while the real count lived in content_playlist_media. Read paths now derive
+// the count from the join rows; this keeps the stored column honest as well so
+// admin listings and future sorting do not read a dead field.
+func (r *playlistRepo) syncMediaCount(ctx context.Context, playlistID string) {
+	count, err := r.data.db.MediaPlaylist.Query().
+		Where(mediaplaylist.PlaylistIDEQ(playlistID)).
+		Count(ctx)
+	if err != nil {
+		r.log.Warnf("playlist %s: count media for sync failed: %v", playlistID, err)
+		return
+	}
+	if err := r.data.db.Playlist.UpdateOneID(playlistID).SetMediaCount(count).Exec(ctx); err != nil {
+		r.log.Warnf("playlist %s: sync media_count failed: %v", playlistID, err)
+	}
+}
+
 func (r *playlistRepo) AddMedia(ctx context.Context, playlistID, mediaID string) error {
 	// Check if already in playlist
 	exists, _ := r.data.db.MediaPlaylist.Query().
@@ -224,20 +305,27 @@ func (r *playlistRepo) AddMedia(ctx context.Context, playlistID, mediaID string)
 		maxOrder = last.Ordering
 	}
 
-	return r.data.db.MediaPlaylist.Create().
+	if err := r.data.db.MediaPlaylist.Create().
 		SetPlaylistID(playlistID).
 		SetMediaID(mediaID).
 		SetOrdering(maxOrder + 1).
-		Exec(ctx)
+		Exec(ctx); err != nil {
+		return err
+	}
+	r.syncMediaCount(ctx, playlistID)
+	return nil
 }
 
 func (r *playlistRepo) RemoveMedia(ctx context.Context, playlistID, mediaID string) error {
-	_, err := r.data.db.MediaPlaylist.Delete().
+	if _, err := r.data.db.MediaPlaylist.Delete().
 		Where(
 			mediaplaylist.PlaylistIDEQ(playlistID),
 			mediaplaylist.MediaIDEQ(mediaID),
-		).Exec(ctx)
-	return err
+		).Exec(ctx); err != nil {
+		return err
+	}
+	r.syncMediaCount(ctx, playlistID)
+	return nil
 }
 
 func (r *playlistRepo) ReorderMedia(ctx context.Context, playlistID string, mediaOrders map[string]int) error {
@@ -626,19 +714,29 @@ func (r *channelRepo) Subscribe(ctx context.Context, channelID, userID string) e
 	}
 
 	// Create new subscription
-	_, err := r.data.db.Subscription.Create().
+	if _, err := r.data.db.Subscription.Create().
 		SetChannelID(channelID).
 		SetSubscriberID(userID).
-		Save(ctx)
+		Save(ctx); err != nil {
+		return err
+	}
+	// BUG-185: keep the denormalized channel.subscriber_count column honest so
+	// channel pages/cards (which read the column) reflect the real count.
+	_, err := r.data.db.Channel.UpdateOneID(channelID).AddSubscriberCount(1).Save(ctx)
 	return err
 }
 
 func (r *channelRepo) Unsubscribe(ctx context.Context, channelID, userID string) error {
-	_, err := r.data.db.Subscription.Delete().
+	if _, err := r.data.db.Subscription.Delete().
 		Where(
 			subscription.ChannelIDEQ(channelID),
 			subscription.SubscriberIDEQ(userID),
-		).Exec(ctx)
+		).Exec(ctx); err != nil {
+		return err
+	}
+	// BUG-185: mirror the decrease on the denormalized column (the deleted row
+	// implies the count was >= 1, so it never goes below 0 while in sync).
+	_, err := r.data.db.Channel.UpdateOneID(channelID).AddSubscriberCount(-1).Save(ctx)
 	return err
 }
 
@@ -648,6 +746,32 @@ func (r *channelRepo) IsSubscribed(ctx context.Context, channelID, userID string
 			subscription.ChannelIDEQ(channelID),
 			subscription.SubscriberIDEQ(userID),
 		).Exist(ctx)
+}
+
+// UpdateSubscriptionNotificationPreference 更新订阅者对该频道的通知偏好（BUG-198 真功能）。
+func (r *channelRepo) UpdateSubscriptionNotificationPreference(ctx context.Context, channelID, userID, pref string) error {
+	_, err := r.data.db.Subscription.Update().
+		Where(
+			subscription.ChannelIDEQ(channelID),
+			subscription.SubscriberIDEQ(userID),
+		).
+		SetNotificationPreference(subscription.NotificationPreference(pref)).
+		Save(ctx)
+	return err
+}
+
+// GetSubscriptionNotificationPreference 读取订阅者对该频道的通知偏好（BUG-198 真功能）。
+func (r *channelRepo) GetSubscriptionNotificationPreference(ctx context.Context, channelID, userID string) (string, error) {
+	sub, err := r.data.db.Subscription.Query().
+		Where(
+			subscription.ChannelIDEQ(channelID),
+			subscription.SubscriberIDEQ(userID),
+		).
+		Only(ctx)
+	if err != nil {
+		return "", err
+	}
+	return string(sub.NotificationPreference), nil
 }
 
 func (r *channelRepo) GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]string, int, error) {
@@ -747,7 +871,7 @@ func (r *channelRepo) GetSubscriptionVideos(ctx context.Context, userID string, 
 		return []*biz.SubscriptionVideoItem{}, 0, nil
 	}
 
-	query := r.data.db.Media.Query().
+	query := r.data.db.Media.Query().WithUser().
 		Where(
 			media.ChannelIDIn(channelIDs...),
 			media.StateEQ("active"),
@@ -793,14 +917,26 @@ func (r *channelRepo) GetSubscriptionVideos(ctx context.Context, userID string, 
 			Title:          m.Title,
 			Description:    m.Description,
 			Thumbnail:      m.Thumbnail,
+			Poster:         m.Poster,
 			Duration:       m.Duration,
 			ViewCount:      m.ViewCount,
 			LikeCount:      m.LikeCount,
 			CommentCount:   m.CommentCount,
 			Type:           m.Type,
+			State:          m.State,
 			ChannelID:      m.ChannelID,
 			UserID:         m.UserID,
 			EncodingStatus: m.EncodingStatus,
+		}
+		// Fill user information if available
+		if m.Edges.User != nil {
+			item.Username = m.Edges.User.Username
+			item.Nickname = m.Edges.User.Nickname
+			if m.Edges.User.Avatar != "" {
+				item.UserAvatar = m.Edges.User.Avatar
+			} else {
+				item.UserAvatar = m.Edges.User.Logo
+			}
 		}
 		if !m.CreateTime.IsZero() {
 			item.CreateTime = m.CreateTime
@@ -815,6 +951,8 @@ func (r *channelRepo) GetSubscriptionVideos(ctx context.Context, userID string, 
 }
 
 // GetChannelVideos returns paginated videos for a channel by short_token.
+// For the user's default channel (first channel by ID), also includes videos
+// where channel_id is NULL (videos uploaded without selecting a channel).
 func (r *channelRepo) GetChannelVideos(ctx context.Context, token string, sortBy string, page, limit int) ([]*biz.SubscriptionVideoItem, int, error) {
 	// Resolve short_token to channel ID
 	ch, err := r.data.db.Channel.Query().
@@ -824,12 +962,33 @@ func (r *channelRepo) GetChannelVideos(ctx context.Context, token string, sortBy
 		return nil, 0, fmt.Errorf("channel_not_found")
 	}
 
+	// Check if this is the user's default channel (first channel by ID)
+	firstChannel, err := r.data.db.Channel.Query().
+		Where(channel.UserIDEQ(ch.UserID)).
+		Order(entity.Asc(channel.FieldID)).
+		First(ctx)
+	isDefaultChannel := err == nil && firstChannel.ID == ch.ID
+
 	// Build media query for this channel
-	query := r.data.db.Media.Query().
-		Where(
-			media.ChannelID(ch.ID),
-			media.StateEQ("active"),
+	query := r.data.db.Media.Query().WithUser()
+	if isDefaultChannel {
+		// Default channel: videos explicitly assigned to this channel
+		// OR videos by this user with no channel assigned (channel_id IS NULL)
+		query.Where(
+			media.Or(
+				media.ChannelID(ch.ID),
+				media.And(
+					media.ChannelIDIsNil(),
+					media.UserIDEQ(ch.UserID),
+				),
+			),
 		)
+	} else {
+		// Non-default channel: only videos explicitly assigned to this channel
+		query.Where(
+			media.ChannelID(ch.ID),
+		)
+	}
 
 	// Apply sorting
 	switch sortBy {
@@ -867,14 +1026,26 @@ func (r *channelRepo) GetChannelVideos(ctx context.Context, token string, sortBy
 			Title:          m.Title,
 			Description:    m.Description,
 			Thumbnail:      m.Thumbnail,
+			Poster:         m.Poster,
 			Duration:       m.Duration,
 			ViewCount:      m.ViewCount,
 			LikeCount:      m.LikeCount,
 			CommentCount:   m.CommentCount,
 			Type:           m.Type,
+			State:          m.State,
 			ChannelID:      m.ChannelID,
 			UserID:         m.UserID,
 			EncodingStatus: m.EncodingStatus,
+		}
+		// Fill user information if available
+		if m.Edges.User != nil {
+			item.Username = m.Edges.User.Username
+			item.Nickname = m.Edges.User.Nickname
+			if m.Edges.User.Avatar != "" {
+				item.UserAvatar = m.Edges.User.Avatar
+			} else {
+				item.UserAvatar = m.Edges.User.Logo
+			}
 		}
 		if !m.CreateTime.IsZero() {
 			item.CreateTime = m.CreateTime
@@ -948,9 +1119,13 @@ func mapPlaylist(ent *entity.Playlist) *biz.Playlist {
 		Description: ent.Description,
 		ShortToken:  ent.ShortToken,
 		UserID:      ent.UserID,
+		Privacy:     string(ent.Privacy),
 		IsPublic:    ent.Privacy == playlist.PrivacyPUBLIC,
+		Status:      string(ent.Status),
+		Thumbnail:   ent.Thumbnail,
+		MediaCount:  ent.MediaCount,
 		CreateTime:  ent.AddDate,
-		UpdateTime:  ent.AddDate,
+		UpdateTime:  ent.UpdateTime,
 		MediaItems:  []string{},
 	}
 }
@@ -1078,17 +1253,22 @@ func (r *systemConfigRepo) Get(ctx context.Context, key string) (string, error) 
 }
 
 func (r *systemConfigRepo) Set(ctx context.Context, key, value string) error {
-	// Upsert: try update first, then create
-	_, err := r.data.db.Setting.Update().Where(setting.KeyEQ(key)).SetValue(value).Save(ctx)
+	// Upsert: try update first, then create.
+	// NOTE: ent Update().Save() returns affected=0 (and nil error) when no row
+	// matches — so we must branch on the affected count, not on err.
+	affected, err := r.data.db.Setting.Update().Where(setting.KeyEQ(key)).SetValue(value).Save(ctx)
 	if err != nil {
-		// Try create if update found nothing
+		return fmt.Errorf("failed to update setting %s: %w", key, err)
+	}
+	if affected == 0 {
+		// No existing row — insert.
 		_, err = r.data.db.Setting.Create().
 			SetKey(key).
 			SetValue(value).
 			SetCategory(setting.CategoryGeneral).
 			Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to set setting %s: %w", key, err)
+			return fmt.Errorf("failed to create setting %s: %w", key, err)
 		}
 	}
 

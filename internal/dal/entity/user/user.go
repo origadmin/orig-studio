@@ -31,8 +31,6 @@ const (
 	FieldLastName = "last_name"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldIsStaff holds the string denoting the is_staff field in the database.
-	FieldIsStaff = "is_staff"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldIsSuperuser holds the string denoting the is_superuser field in the database.
@@ -111,8 +109,6 @@ const (
 	EdgeCommentLikes = "comment_likes"
 	// EdgeSubscriptions holds the string denoting the subscriptions edge name in mutations.
 	EdgeSubscriptions = "subscriptions"
-	// EdgeSubscribers holds the string denoting the subscribers edge name in mutations.
-	EdgeSubscribers = "subscribers"
 	// EdgeReviewLogs holds the string denoting the review_logs edge name in mutations.
 	EdgeReviewLogs = "review_logs"
 	// EdgeCommentReports holds the string denoting the comment_reports edge name in mutations.
@@ -127,6 +123,20 @@ const (
 	EdgeCreatedGroups = "created_groups"
 	// EdgeHistory holds the string denoting the history edge name in mutations.
 	EdgeHistory = "history"
+	// EdgeLiveRooms holds the string denoting the live_rooms edge name in mutations.
+	EdgeLiveRooms = "live_rooms"
+	// EdgeLiveChatMessages holds the string denoting the live_chat_messages edge name in mutations.
+	EdgeLiveChatMessages = "live_chat_messages"
+	// EdgePaymentSubscriptions holds the string denoting the payment_subscriptions edge name in mutations.
+	EdgePaymentSubscriptions = "payment_subscriptions"
+	// EdgePaymentOrders holds the string denoting the payment_orders edge name in mutations.
+	EdgePaymentOrders = "payment_orders"
+	// EdgePaymentWallet holds the string denoting the payment_wallet edge name in mutations.
+	EdgePaymentWallet = "payment_wallet"
+	// EdgeDrmLicenses holds the string denoting the drm_licenses edge name in mutations.
+	EdgeDrmLicenses = "drm_licenses"
+	// EdgePromotionSubscriptions holds the string denoting the promotion_subscriptions edge name in mutations.
+	EdgePromotionSubscriptions = "promotion_subscriptions"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// MediaTable is the table that holds the media relation/edge.
@@ -209,13 +219,6 @@ const (
 	SubscriptionsInverseTable = "user_subscriptions"
 	// SubscriptionsColumn is the table column denoting the subscriptions relation/edge.
 	SubscriptionsColumn = "subscriber_id"
-	// SubscribersTable is the table that holds the subscribers relation/edge.
-	SubscribersTable = "user_subscriptions"
-	// SubscribersInverseTable is the table name for the Subscription entity.
-	// It exists in this package in order to avoid circular dependency with the "subscription" package.
-	SubscribersInverseTable = "user_subscriptions"
-	// SubscribersColumn is the table column denoting the subscribers relation/edge.
-	SubscribersColumn = "channel_id"
 	// ReviewLogsTable is the table that holds the review_logs relation/edge.
 	ReviewLogsTable = "content_media_review_logs"
 	// ReviewLogsInverseTable is the table name for the MediaReviewLog entity.
@@ -265,6 +268,55 @@ const (
 	HistoryInverseTable = "user_history"
 	// HistoryColumn is the table column denoting the history relation/edge.
 	HistoryColumn = "user_id"
+	// LiveRoomsTable is the table that holds the live_rooms relation/edge.
+	LiveRoomsTable = "live_rooms"
+	// LiveRoomsInverseTable is the table name for the LiveRoom entity.
+	// It exists in this package in order to avoid circular dependency with the "liveroom" package.
+	LiveRoomsInverseTable = "live_rooms"
+	// LiveRoomsColumn is the table column denoting the live_rooms relation/edge.
+	LiveRoomsColumn = "user_id"
+	// LiveChatMessagesTable is the table that holds the live_chat_messages relation/edge.
+	LiveChatMessagesTable = "live_chat_messages"
+	// LiveChatMessagesInverseTable is the table name for the LiveChatMessage entity.
+	// It exists in this package in order to avoid circular dependency with the "livechatmessage" package.
+	LiveChatMessagesInverseTable = "live_chat_messages"
+	// LiveChatMessagesColumn is the table column denoting the live_chat_messages relation/edge.
+	LiveChatMessagesColumn = "user_id"
+	// PaymentSubscriptionsTable is the table that holds the payment_subscriptions relation/edge.
+	PaymentSubscriptionsTable = "payment_user_subscriptions"
+	// PaymentSubscriptionsInverseTable is the table name for the UserSubscription entity.
+	// It exists in this package in order to avoid circular dependency with the "usersubscription" package.
+	PaymentSubscriptionsInverseTable = "payment_user_subscriptions"
+	// PaymentSubscriptionsColumn is the table column denoting the payment_subscriptions relation/edge.
+	PaymentSubscriptionsColumn = "user_id"
+	// PaymentOrdersTable is the table that holds the payment_orders relation/edge.
+	PaymentOrdersTable = "payment_orders"
+	// PaymentOrdersInverseTable is the table name for the Order entity.
+	// It exists in this package in order to avoid circular dependency with the "order" package.
+	PaymentOrdersInverseTable = "payment_orders"
+	// PaymentOrdersColumn is the table column denoting the payment_orders relation/edge.
+	PaymentOrdersColumn = "user_id"
+	// PaymentWalletTable is the table that holds the payment_wallet relation/edge.
+	PaymentWalletTable = "payment_wallets"
+	// PaymentWalletInverseTable is the table name for the Wallet entity.
+	// It exists in this package in order to avoid circular dependency with the "wallet" package.
+	PaymentWalletInverseTable = "payment_wallets"
+	// PaymentWalletColumn is the table column denoting the payment_wallet relation/edge.
+	PaymentWalletColumn = "user_id"
+	// DrmLicensesTable is the table that holds the drm_licenses relation/edge.
+	DrmLicensesTable = "drm_licenses"
+	// DrmLicensesInverseTable is the table name for the DrmLicense entity.
+	// It exists in this package in order to avoid circular dependency with the "drmlicense" package.
+	DrmLicensesInverseTable = "drm_licenses"
+	// DrmLicensesColumn is the table column denoting the drm_licenses relation/edge.
+	DrmLicensesColumn = "user_id"
+	// PromotionSubscriptionsTable is the table that holds the promotion_subscriptions relation/edge.
+	PromotionSubscriptionsTable = "promotion_subscriptions"
+	// PromotionSubscriptionsInverseTable is the table name for the PromotionSubscription entity.
+	// It exists in this package in order to avoid circular dependency with the "promotionsubscription" package.
+	PromotionSubscriptionsInverseTable = "promotion_subscriptions"
+	// PromotionSubscriptionsColumn is the table column denoting the promotion_subscriptions relation/edge.
+	PromotionSubscriptionsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -278,7 +330,6 @@ var Columns = []string{
 	FieldFirstName,
 	FieldLastName,
 	FieldStatus,
-	FieldIsStaff,
 	FieldRole,
 	FieldIsSuperuser,
 	FieldIsFeatured,
@@ -342,8 +393,6 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
-	// DefaultIsStaff holds the default value on creation for the "is_staff" field.
-	DefaultIsStaff bool
 	// DefaultIsSuperuser holds the default value on creation for the "is_superuser" field.
 	DefaultIsSuperuser bool
 	// DefaultIsFeatured holds the default value on creation for the "is_featured" field.
@@ -498,11 +547,6 @@ func ByLastName(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByIsStaff orders the results by the is_staff field.
-func ByIsStaff(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsStaff, opts...).ToFunc()
 }
 
 // ByRole orders the results by the role field.
@@ -808,20 +852,6 @@ func BySubscriptions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// BySubscribersCount orders the results by subscribers count.
-func BySubscribersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSubscribersStep(), opts...)
-	}
-}
-
-// BySubscribers orders the results by subscribers terms.
-func BySubscribers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSubscribersStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByReviewLogsCount orders the results by review_logs count.
 func ByReviewLogsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -919,6 +949,104 @@ func ByHistory(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newHistoryStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLiveRoomsCount orders the results by live_rooms count.
+func ByLiveRoomsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLiveRoomsStep(), opts...)
+	}
+}
+
+// ByLiveRooms orders the results by live_rooms terms.
+func ByLiveRooms(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLiveRoomsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLiveChatMessagesCount orders the results by live_chat_messages count.
+func ByLiveChatMessagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLiveChatMessagesStep(), opts...)
+	}
+}
+
+// ByLiveChatMessages orders the results by live_chat_messages terms.
+func ByLiveChatMessages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLiveChatMessagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPaymentSubscriptionsCount orders the results by payment_subscriptions count.
+func ByPaymentSubscriptionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPaymentSubscriptionsStep(), opts...)
+	}
+}
+
+// ByPaymentSubscriptions orders the results by payment_subscriptions terms.
+func ByPaymentSubscriptions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPaymentSubscriptionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPaymentOrdersCount orders the results by payment_orders count.
+func ByPaymentOrdersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPaymentOrdersStep(), opts...)
+	}
+}
+
+// ByPaymentOrders orders the results by payment_orders terms.
+func ByPaymentOrders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPaymentOrdersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPaymentWalletCount orders the results by payment_wallet count.
+func ByPaymentWalletCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPaymentWalletStep(), opts...)
+	}
+}
+
+// ByPaymentWallet orders the results by payment_wallet terms.
+func ByPaymentWallet(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPaymentWalletStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDrmLicensesCount orders the results by drm_licenses count.
+func ByDrmLicensesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDrmLicensesStep(), opts...)
+	}
+}
+
+// ByDrmLicenses orders the results by drm_licenses terms.
+func ByDrmLicenses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDrmLicensesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPromotionSubscriptionsCount orders the results by promotion_subscriptions count.
+func ByPromotionSubscriptionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPromotionSubscriptionsStep(), opts...)
+	}
+}
+
+// ByPromotionSubscriptions orders the results by promotion_subscriptions terms.
+func ByPromotionSubscriptions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPromotionSubscriptionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMediaStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1003,13 +1131,6 @@ func newSubscriptionsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, SubscriptionsTable, SubscriptionsColumn),
 	)
 }
-func newSubscribersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SubscribersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, SubscribersTable, SubscribersColumn),
-	)
-}
 func newReviewLogsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -1057,5 +1178,54 @@ func newHistoryStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(HistoryInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, HistoryTable, HistoryColumn),
+	)
+}
+func newLiveRoomsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LiveRoomsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LiveRoomsTable, LiveRoomsColumn),
+	)
+}
+func newLiveChatMessagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LiveChatMessagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LiveChatMessagesTable, LiveChatMessagesColumn),
+	)
+}
+func newPaymentSubscriptionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PaymentSubscriptionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PaymentSubscriptionsTable, PaymentSubscriptionsColumn),
+	)
+}
+func newPaymentOrdersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PaymentOrdersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PaymentOrdersTable, PaymentOrdersColumn),
+	)
+}
+func newPaymentWalletStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PaymentWalletInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PaymentWalletTable, PaymentWalletColumn),
+	)
+}
+func newDrmLicensesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DrmLicensesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DrmLicensesTable, DrmLicensesColumn),
+	)
+}
+func newPromotionSubscriptionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PromotionSubscriptionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PromotionSubscriptionsTable, PromotionSubscriptionsColumn),
 	)
 }

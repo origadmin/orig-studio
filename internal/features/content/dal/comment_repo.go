@@ -11,6 +11,7 @@ import (
 
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/entity/comment"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/content/dto"
 )
@@ -83,7 +84,7 @@ func (r *commentRepo) ListByMedia(ctx context.Context, mediaID string, page, pag
 
 	ents, err := query.
 		Limit(pageSize).
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		Order(entity.Desc(comment.FieldAddDate)).
 		WithUser().
 		WithReplies(func(rq *entity.CommentQuery) {

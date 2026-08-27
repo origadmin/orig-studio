@@ -12,6 +12,7 @@ import (
 
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
@@ -36,7 +37,7 @@ func (r *feedRepo) ListLatest(ctx context.Context, page, pageSize int) ([]*biz.M
 
 	ents, err := query.
 		Limit(pageSize).
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		Order(entity.Desc(media.FieldCreateTime)).
 		WithUser().
 		All(ctx)
@@ -105,15 +106,15 @@ func mapMediaInfo(ent *entity.Media) *biz.MediaInfo {
 		username = ent.Edges.User.Username
 	}
 	return &biz.MediaInfo{
-		ID:          int64(len(ent.ID)),
+		ID:          ent.ID,
 		Title:       ent.Title,
 		Description: ent.Description,
 		Thumbnail:   ent.Thumbnail,
 		Duration:    ent.Duration,
 		ViewCount:   ent.ViewCount,
-		UserID:      int(len(ent.UserID)),
+		UserID:      ent.UserID,
 		Username:    username,
 		Type:        ent.Type,
-		URL:         fmt.Sprintf("/v/%d", len(ent.ID)),
+		URL:         fmt.Sprintf("/v/%s", ent.ID),
 	}
 }

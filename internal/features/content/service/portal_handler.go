@@ -3,14 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
-
 	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/content/dto"
 	"origadmin/application/origstudio/internal/infra/auth"
@@ -20,74 +16,74 @@ import (
 
 type PortalHandler struct {
 	uc         *biz.PortalUseCase
+	adUC       *biz.AdUseCase
 	catUC      *biz.CategoryTagUseCase
 	jwt        *auth.Manager
 	settingUC  *systembiz.SettingUseCase
+	featureUC  *systembiz.FeatureFlagUseCase
 }
 
-func NewPortalHandler(uc *biz.PortalUseCase, catUC *biz.CategoryTagUseCase, jwt *auth.Manager, settingUC *systembiz.SettingUseCase) *PortalHandler {
-	return &PortalHandler{uc: uc, catUC: catUC, jwt: jwt, settingUC: settingUC}
+func NewPortalHandler(uc *biz.PortalUseCase, adUC *biz.AdUseCase, catUC *biz.CategoryTagUseCase, jwt *auth.Manager, settingUC *systembiz.SettingUseCase, featureUC *systembiz.FeatureFlagUseCase) *PortalHandler {
+	return &PortalHandler{uc: uc, adUC: adUC, catUC: catUC, jwt: jwt, settingUC: settingUC, featureUC: featureUC}
 }
 
 func (h *PortalHandler) RegisterRoutes(r http2.Router) {
 	adminNavItems := r.Group("/admin/nav-items")
 	adminNavItems.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
 	{
-		adminNavItems.GET("", server.HTTPToHandlerFunc(h.listNavItems()))
-		adminNavItems.POST("", server.HTTPToHandlerFunc(h.createNavItem()))
-		adminNavItems.PUT("/:id", server.HTTPToHandlerFunc(h.updateNavItem()))
-		adminNavItems.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteNavItem()))
-		adminNavItems.PUT("/reorder", server.HTTPToHandlerFunc(h.reorderNavItems()))
+		adminNavItems.GET("", h.listNavItems())
+		adminNavItems.POST("", h.createNavItem())
+		adminNavItems.PUT("/:id", h.updateNavItem())
+		adminNavItems.DELETE("/:id", h.deleteNavItem())
+		adminNavItems.PUT("/reorder", h.reorderNavItems())
 	}
 
 	adminBanners := r.Group("/admin/banners")
 	adminBanners.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
 	{
-		adminBanners.GET("", server.HTTPToHandlerFunc(h.listBanners()))
-		adminBanners.POST("", server.HTTPToHandlerFunc(h.createBanner()))
-		adminBanners.PUT("/:id", server.HTTPToHandlerFunc(h.updateBanner()))
-		adminBanners.POST("/:id/toggle", server.HTTPToHandlerFunc(h.toggleBanner()))
+		adminBanners.GET("", h.listBanners())
+		adminBanners.POST("", h.createBanner())
+		adminBanners.GET("/:id", h.getBanner())
+		adminBanners.PUT("/:id", h.updateBanner())
+		adminBanners.DELETE("/:id", h.deleteBanner())
+		adminBanners.POST("/:id/toggle", h.toggleBanner())
 	}
 
 	adminPages := r.Group("/admin/pages")
 	adminPages.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
 	{
-		adminPages.GET("", server.HTTPToHandlerFunc(h.listCustomPages()))
-		adminPages.POST("", server.HTTPToHandlerFunc(h.createCustomPage()))
-		adminPages.GET("/:id", server.HTTPToHandlerFunc(h.getCustomPage()))
-		adminPages.PUT("/:id", server.HTTPToHandlerFunc(h.updateCustomPage()))
-		adminPages.DELETE("/:id", server.HTTPToHandlerFunc(h.deleteCustomPage()))
+		adminPages.GET("", h.listCustomPages())
+		adminPages.POST("", h.createCustomPage())
+		adminPages.GET("/:id", h.getCustomPage())
+		adminPages.PUT("/:id", h.updateCustomPage())
+		adminPages.DELETE("/:id", h.deleteCustomPage())
 	}
 
 	pages := r.Group("/p")
 	{
-		pages.GET("/:slug", server.HTTPToHandlerFunc(h.getPublicPageBySlug()))
+		pages.GET("/:slug", h.getPublicPageBySlug())
 	}
 
 	portal := r.Group("/portal")
 	{
-		portal.GET("/config", server.HTTPToHandlerFunc(h.getPortalConfig()))
+		portal.GET("/config", h.getPortalConfig())
 	}
 }
 
 // ==================== Admin NavItem Handlers ====================
 
-func (h *PortalHandler) listNavItems() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		items, err := h.uc.ListNavItems(r.Context())
+func (h *PortalHandler) listNavItems() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		items, err := h.uc.ListNavItems(ctx)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, items)
+		return server.OKCtx(ctx, items)
 	}
 }
 
-func (h *PortalHandler) createNavItem() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-
+func (h *PortalHandler) createNavItem() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var input struct {
 			Type       string            `json:"type" binding:"required"`
 			Label      string            `json:"label" binding:"required"`
@@ -104,9 +100,8 @@ func (h *PortalHandler) createNavItem() http.HandlerFunc {
 			CSSClass   string            `json:"css_class"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		isVisible := true
@@ -134,22 +129,19 @@ func (h *PortalHandler) createNavItem() http.HandlerFunc {
 			CSSClass:   input.CSSClass,
 		}
 
-		created, err := h.uc.CreateNavItem(r.Context(), item)
+		created, err := h.uc.CreateNavItem(ctx, item)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, created)
+		return server.OKCtx(ctx, created)
 	}
 }
 
-func (h *PortalHandler) updateNavItem() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) updateNavItem() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		var input struct {
@@ -168,15 +160,13 @@ func (h *PortalHandler) updateNavItem() http.HandlerFunc {
 			CSSClass   string            `json:"css_class"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		existing, err := h.uc.GetNavItemByID(r.Context(), id)
+		existing, err := h.uc.GetNavItemByID(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "nav item not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "nav item not found")
 		}
 		_ = existing
 
@@ -209,71 +199,59 @@ func (h *PortalHandler) updateNavItem() http.HandlerFunc {
 		}
 		item.CSSClass = input.CSSClass
 
-		updated, err := h.uc.UpdateNavItem(r.Context(), item)
+		updated, err := h.uc.UpdateNavItem(ctx, item)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, updated)
+		return server.OKCtx(ctx, updated)
 	}
 }
 
-func (h *PortalHandler) deleteNavItem() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) deleteNavItem() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
-		if err := h.uc.DeleteNavItem(r.Context(), id); err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+		if err := h.uc.DeleteNavItem(ctx, id); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, nil)
+		return server.OKCtx(ctx, nil)
 	}
 }
 
-func (h *PortalHandler) reorderNavItems() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-
+func (h *PortalHandler) reorderNavItems() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var input struct {
 			IDs []string `json:"ids" binding:"required"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		if err := h.uc.ReorderNavItems(r.Context(), input.IDs); err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+		if err := h.uc.ReorderNavItems(ctx, input.IDs); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, nil)
+		return server.OKCtx(ctx, nil)
 	}
 }
 
 // ==================== Admin Banner Handlers ====================
 
-func (h *PortalHandler) listBanners() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		items, err := h.uc.ListBanners(r.Context())
+func (h *PortalHandler) listBanners() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		items, err := h.uc.ListBanners(ctx)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, items)
+		return server.OKCtx(ctx, items)
 	}
 }
 
-func (h *PortalHandler) createBanner() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-
+func (h *PortalHandler) createBanner() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var input struct {
 			Title             string            `json:"title" binding:"required"`
 			TitleI18n         map[string]string `json:"title_i18n"`
@@ -296,9 +274,8 @@ func (h *PortalHandler) createBanner() http.HandlerFunc {
 			AutoSlideInterval int               `json:"auto_slide_interval"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		isActive := true
@@ -332,22 +309,19 @@ func (h *PortalHandler) createBanner() http.HandlerFunc {
 			b.EndAt = *input.EndAt
 		}
 
-		created, err := h.uc.CreateBanner(r.Context(), b)
+		created, err := h.uc.CreateBanner(ctx, b)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, created)
+		return server.OKCtx(ctx, created)
 	}
 }
 
-func (h *PortalHandler) updateBanner() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) updateBanner() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		var input struct {
@@ -372,9 +346,8 @@ func (h *PortalHandler) updateBanner() http.HandlerFunc {
 			AutoSlideInterval *int              `json:"auto_slide_interval"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		b := &dto.PortalBannerDTO{ID: id}
@@ -414,40 +387,64 @@ func (h *PortalHandler) updateBanner() http.HandlerFunc {
 			b.AutoSlideInterval = *input.AutoSlideInterval
 		}
 
-		updated, err := h.uc.UpdateBanner(r.Context(), b)
+		updated, err := h.uc.UpdateBanner(ctx, b)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, updated)
+		return server.OKCtx(ctx, updated)
 	}
 }
 
-func (h *PortalHandler) toggleBanner() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) toggleBanner() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
-		updated, err := h.uc.ToggleBanner(r.Context(), id)
+		updated, err := h.uc.ToggleBanner(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, updated)
+		return server.OKCtx(ctx, updated)
+	}
+}
+
+func (h *PortalHandler) getBanner() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
+		if id == "" {
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
+		}
+
+		banner, err := h.uc.GetBanner(ctx, id)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrNotFound, "banner not found")
+		}
+		return server.OKCtx(ctx, banner)
+	}
+}
+
+func (h *PortalHandler) deleteBanner() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
+		if id == "" {
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
+		}
+
+		if err := h.uc.DeleteBanner(ctx, id); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
+		}
+		return server.OKCtx(ctx, nil)
 	}
 }
 
 // ==================== Admin CustomPage Handlers ====================
 
-func (h *PortalHandler) listCustomPages() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+func (h *PortalHandler) listCustomPages() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 		if page <= 0 {
 			page = 1
 		}
@@ -455,13 +452,12 @@ func (h *PortalHandler) listCustomPages() http.HandlerFunc {
 			pageSize = 20
 		}
 
-		items, total, err := h.uc.ListCustomPages(r.Context(), page, pageSize)
+		items, total, err := h.uc.ListCustomPages(ctx, page, pageSize)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		server.OK(gc, gin.H{
+		return server.OKCtx(ctx, map[string]any{
 			"items":     items,
 			"total":     total,
 			"page":      page,
@@ -470,10 +466,8 @@ func (h *PortalHandler) listCustomPages() http.HandlerFunc {
 	}
 }
 
-func (h *PortalHandler) createCustomPage() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-
+func (h *PortalHandler) createCustomPage() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		var input struct {
 			Title          string `json:"title" binding:"required"`
 			Slug           string `json:"slug" binding:"required"`
@@ -487,9 +481,8 @@ func (h *PortalHandler) createCustomPage() http.HandlerFunc {
 			FeaturedImage  string `json:"featured_image"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
 		isPublished := false
@@ -513,40 +506,33 @@ func (h *PortalHandler) createCustomPage() http.HandlerFunc {
 			p.PublishedAt = time.Now()
 		}
 
-		created, err := h.uc.CreateCustomPage(r.Context(), p)
+		created, err := h.uc.CreateCustomPage(ctx, p)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, created)
+		return server.OKCtx(ctx, created)
 	}
 }
 
-func (h *PortalHandler) getCustomPage() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) getCustomPage() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
-		page, err := h.uc.GetCustomPageByID(r.Context(), id)
+		page, err := h.uc.GetCustomPageByID(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "page not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "page not found")
 		}
-		server.OK(gc, page)
+		return server.OKCtx(ctx, page)
 	}
 }
 
 // ==================== Public Portal Config ====================
 
-func (h *PortalHandler) getPortalConfig() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		ctx := r.Context()
-
+func (h *PortalHandler) getPortalConfig() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
 		modules := biz.PortalModules{
 			Articles: getPortalBool(h.settingUC, ctx, "module_articles", true),
 			Videos:   getPortalBool(h.settingUC, ctx, "module_videos", true),
@@ -560,30 +546,25 @@ func (h *PortalHandler) getPortalConfig() http.HandlerFunc {
 		layout := resolvePortalLayout(modules, configuredLayout)
 
 		site := biz.PortalSite{
-			SiteName:          h.settingUC.Get(ctx, "site_name"),
-			SiteDescription:   h.settingUC.Get(ctx, "site_description"),
+			SiteName:          h.settingUC.GetNoCache(ctx, "site_name"),
+			SiteDescription:   h.settingUC.GetNoCache(ctx, "site_description"),
 			AllowRegistration: getPortalBool(h.settingUC, ctx, "allow_registration", true),
 			AllowUpload:       getPortalBool(h.settingUC, ctx, "allow_upload", true),
-			PrimaryURL:        h.settingUC.Get(ctx, "primary_url"),
+			PrimaryURL:        h.settingUC.GetNoCache(ctx, "primary_url"),
+			SiteLogoURL:       h.settingUC.GetNoCache(ctx, "site_logo_url"),
 		}
-		if urls := h.settingUC.Get(ctx, "base_urls"); urls != "" {
+		if urls := h.settingUC.GetNoCache(ctx, "base_urls"); urls != "" {
 			_ = json.Unmarshal([]byte(urls), &site.AllowedURLs)
 		}
 
 		navItems, _ := h.uc.ListNavItems(ctx)
 		banners, _ := h.uc.ListActiveBanners(ctx)
-		categories, _ := h.catUC.ListCategories(ctx)
+		categories, _ := h.catUC.ListActiveCategories(ctx)
 		pages, _ := h.uc.ListPublishedCustomPages(ctx)
 
-		features := map[string]bool{
-			"multiTenant":             false,
-			"auditLog":                false,
-			"advancedRBAC":            false,
-			"reviewWorkflow":          false,
-			"enterpriseNotification":  false,
-		}
+		features := h.featureUC.GetAll(ctx)
 
-		resp := gin.H{
+		resp := map[string]any{
 			"modules":     modules,
 			"layout":      layout,
 			"site":        site,
@@ -594,7 +575,7 @@ func (h *PortalHandler) getPortalConfig() http.HandlerFunc {
 			"features":    features,
 		}
 
-		server.OK(gc, resp)
+		return server.OKCtx(ctx, resp)
 	}
 }
 
@@ -632,13 +613,11 @@ func resolvePortalLayout(modules biz.PortalModules, configuredLayout string) str
 	return "welcome"
 }
 
-func (h *PortalHandler) updateCustomPage() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) updateCustomPage() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
 		var input struct {
@@ -654,15 +633,13 @@ func (h *PortalHandler) updateCustomPage() http.HandlerFunc {
 			FeaturedImage  string `json:"featured_image"`
 		}
 
-		if err := gc.ShouldBindJSON(&input); err != nil {
-			server.Fail(gc, server.ErrBadRequest, err.Error())
-			return
+		if err := ctx.BindJSON(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		existing, err := h.uc.GetCustomPageByID(r.Context(), id)
+		existing, err := h.uc.GetCustomPageByID(ctx, id)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "page not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "page not found")
 		}
 
 		p := &dto.PortalCustomPageDTO{ID: id}
@@ -705,58 +682,48 @@ func (h *PortalHandler) updateCustomPage() http.HandlerFunc {
 		p.SeoDescription = input.SeoDescription
 		p.FeaturedImage = input.FeaturedImage
 
-		updated, err := h.uc.UpdateCustomPage(r.Context(), p)
+		updated, err := h.uc.UpdateCustomPage(ctx, p)
 		if err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, updated)
+		return server.OKCtx(ctx, updated)
 	}
 }
 
-func (h *PortalHandler) deleteCustomPage() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		id := gc.Param("id")
+func (h *PortalHandler) deleteCustomPage() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		id := ctx.Var("id")
 		if id == "" {
-			server.Fail(gc, server.ErrBadRequest, "id is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "id is required")
 		}
 
-		if err := h.uc.DeleteCustomPage(r.Context(), id); err != nil {
-			server.Fail(gc, server.ErrInternal, err.Error())
-			return
+		if err := h.uc.DeleteCustomPage(ctx, id); err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-		server.OK(gc, nil)
+		return server.OKCtx(ctx, nil)
 	}
 }
 
 // ==================== Public Page Handler ====================
 
-func (h *PortalHandler) getPublicPageBySlug() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gc := ginadapter.GetGinContext(r)
-		slug := gc.Param("slug")
+func (h *PortalHandler) getPublicPageBySlug() http2.HandlerFunc {
+	return func(ctx http2.Context) error {
+		slug := ctx.Var("slug")
 		if slug == "" {
-			server.Fail(gc, server.ErrBadRequest, "slug is required")
-			return
+			return server.FailCtx(ctx, server.ErrBadRequest, "slug is required")
 		}
 
-		page, err := h.uc.GetCustomPageBySlug(r.Context(), slug)
+		page, err := h.uc.GetCustomPageBySlug(ctx, slug)
 		if err != nil {
-			server.Fail(gc, server.ErrNotFound, "page not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "page not found")
 		}
 
 		if !page.IsPublished {
-			server.Fail(gc, server.ErrNotFound, "page not found")
-			return
+			return server.FailCtx(ctx, server.ErrNotFound, "page not found")
 		}
 
-		_ = h.uc.IncrementPageViewCount(r.Context(), page.ID)
+		_ = h.uc.IncrementPageViewCount(ctx, page.ID)
 
-		server.OK(gc, page)
+		return server.OKCtx(ctx, page)
 	}
 }
-
-

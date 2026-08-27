@@ -45,6 +45,8 @@ const (
 	EdgeNames = "names"
 	// EdgeChannelTags holds the string denoting the channel_tags edge name in mutations.
 	EdgeChannelTags = "channel_tags"
+	// EdgeMediaTags holds the string denoting the media_tags edge name in mutations.
+	EdgeMediaTags = "media_tags"
 	// Table holds the table name of the tag in the database.
 	Table = "content_tags"
 	// UserTable is the table that holds the user relation/edge. The primary key declared below.
@@ -66,6 +68,13 @@ const (
 	ChannelTagsInverseTable = "content_channel_tags"
 	// ChannelTagsColumn is the table column denoting the channel_tags relation/edge.
 	ChannelTagsColumn = "tag_channel_tags"
+	// MediaTagsTable is the table that holds the media_tags relation/edge.
+	MediaTagsTable = "content_media_tags"
+	// MediaTagsInverseTable is the table name for the MediaTag entity.
+	// It exists in this package in order to avoid circular dependency with the "mediatag" package.
+	MediaTagsInverseTable = "content_media_tags"
+	// MediaTagsColumn is the table column denoting the media_tags relation/edge.
+	MediaTagsColumn = "tag_id"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -85,12 +94,6 @@ var Columns = []string{
 	FieldUpdateTime,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "content_tags"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"media_tag_tag",
-}
-
 var (
 	// UserPrimaryKey and UserColumn2 are the table columns denoting the
 	// primary key for the user relation (M2M).
@@ -101,11 +104,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -262,6 +260,20 @@ func ByChannelTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newChannelTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByMediaTagsCount orders the results by media_tags count.
+func ByMediaTagsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMediaTagsStep(), opts...)
+	}
+}
+
+// ByMediaTags orders the results by media_tags terms.
+func ByMediaTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMediaTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -281,5 +293,12 @@ func newChannelTagsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ChannelTagsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ChannelTagsTable, ChannelTagsColumn),
+	)
+}
+func newMediaTagsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MediaTagsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MediaTagsTable, MediaTagsColumn),
 	)
 }

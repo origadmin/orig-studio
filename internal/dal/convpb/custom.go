@@ -157,6 +157,8 @@ func ConvertPrivacyPBToMediaPrivacy(from types.Privacy) media.Privacy {
 		return media.PrivacyUNLISTED
 	case types.Privacy_PRIVACY_PAID:
 		return media.PrivacyPAID
+	case types.Privacy_PRIVACY_SUBSCRIBERS_ONLY:
+		return media.PrivacyPRIVATE
 	default:
 		return media.PrivacyPUBLIC
 	}

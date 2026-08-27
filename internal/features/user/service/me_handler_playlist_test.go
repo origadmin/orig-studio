@@ -9,13 +9,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	std "origadmin/application/origstudio/internal/pkg/http/std"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/server"
 )
 
 // ---------------------------------------------------------------------------
@@ -94,12 +94,32 @@ func (m *meMockPlaylistRepo) ListByUser(_ context.Context, userID string, page, 
 	return result, len(result), nil
 }
 
+func (m *meMockPlaylistRepo) ListPublicByUser(_ context.Context, userID string, page, pageSize int) ([]*contentbiz.Playlist, int, error) {
+	var result []*contentbiz.Playlist
+	for _, p := range m.playlists {
+		if p.UserID == userID && p.IsPublic {
+			result = append(result, p)
+		}
+	}
+	return result, len(result), nil
+}
+
 func (m *meMockPlaylistRepo) ListAll(_ context.Context, page, pageSize int) ([]*contentbiz.Playlist, int, error) {
 	var result []*contentbiz.Playlist
 	for _, p := range m.playlists {
 		result = append(result, p)
 	}
 	return result, len(result), nil
+}
+
+// ResolveMediaID mirrors the real repository contract: any non-empty reference
+// resolves to itself, while the empty string and the reserved "missing-media"
+// token report contentbiz.ErrMediaNotFound (BUG-128 root cause C).
+func (m *meMockPlaylistRepo) ResolveMediaID(_ context.Context, idOrToken string) (string, error) {
+	if idOrToken == "" || idOrToken == "missing-media" {
+		return "", contentbiz.ErrMediaNotFound
+	}
+	return idOrToken, nil
 }
 
 func (m *meMockPlaylistRepo) AddMedia(_ context.Context, playlistID, mediaID string) error {
@@ -185,27 +205,27 @@ func (m *meMockUserRepo) GetByUsername(_ context.Context, username string) (*con
 
 // mePlaylistTestEnv holds the test environment for MeHandler playlist tests.
 type mePlaylistTestEnv struct {
-	router       *gin.Engine
+	router       *std.Router
 	handler      *MeHandler
 	playlistRepo *meMockPlaylistRepo
 }
 
 // withClaims creates a middleware that injects test claims into the context.
-func withMeClaims(userID string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("claims", &auth.Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject: userID,
-			},
-		})
-		c.Next()
+func withMeClaims(userID string) http2.MiddlewareFunc {
+	return func(next http2.HandlerFunc) http2.HandlerFunc {
+		return func(ctx http2.Context) error {
+			ctx.Set("claims", &auth.Claims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Subject: userID,
+				},
+			})
+			return next(ctx)
+		}
 	}
 }
 
 // newMePlaylistTestEnv creates a test environment without auth middleware.
 func newMePlaylistTestEnv() *mePlaylistTestEnv {
-	gin.SetMode(gin.TestMode)
-
 	playlistRepo := newMeMockPlaylistRepo()
 	configRepo := newMeMockSystemConfigRepo()
 	configRepo.configs["module_videos"] = "true"
@@ -217,7 +237,7 @@ func newMePlaylistTestEnv() *mePlaylistTestEnv {
 		playlistUC: playlistUC,
 	}
 
-	r := gin.New()
+	r := std.NewRouter()
 	me := r.Group("/me")
 	{
 		me.GET("/playlists", handler.GetPlaylists)
@@ -237,8 +257,6 @@ func newMePlaylistTestEnv() *mePlaylistTestEnv {
 
 // newMePlaylistTestEnvWithAuth creates a test environment with JWT claims injection middleware.
 func newMePlaylistTestEnvWithAuth(userID string) *mePlaylistTestEnv {
-	gin.SetMode(gin.TestMode)
-
 	playlistRepo := newMeMockPlaylistRepo()
 	configRepo := newMeMockSystemConfigRepo()
 	configRepo.configs["module_videos"] = "true"
@@ -250,7 +268,7 @@ func newMePlaylistTestEnvWithAuth(userID string) *mePlaylistTestEnv {
 		playlistUC: playlistUC,
 	}
 
-	r := gin.New()
+	r := std.NewRouter()
 	me := r.Group("/me")
 	me.Use(withMeClaims(userID))
 	{
@@ -284,7 +302,7 @@ func TestMeHandler_GetPlaylists_RequiresAuth(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(server.ErrUnauthorized), resp["code"])
+	assert.Equal(t, float64(http.StatusUnauthorized), resp["code"])
 }
 
 func TestMeHandler_GetPlaylists_Success(t *testing.T) {
@@ -305,12 +323,8 @@ func TestMeHandler_GetPlaylists_Success(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
-
-	data, ok := resp["data"].(map[string]interface{})
-	assert.True(t, ok, "response should have data field")
-	items, ok := data["items"].([]interface{})
-	assert.True(t, ok, "data should have items array")
+	items, ok := resp["items"].([]interface{})
+	assert.True(t, ok, "response should have items array")
 	assert.Equal(t, 1, len(items), "should have 1 playlist")
 }
 
@@ -322,10 +336,6 @@ func TestMeHandler_GetPlaylists_EmptyList(t *testing.T) {
 	env.router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-
-	var resp map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
 }
 
 func TestMeHandler_GetPlaylists_WithPagination(t *testing.T) {
@@ -373,7 +383,7 @@ func TestMeHandler_CreatePlaylist_MissingTitle(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(server.ErrBadRequest), resp["code"])
+	assert.Equal(t, float64(http.StatusBadRequest), resp["code"])
 	assert.Contains(t, resp["message"], "title is required")
 }
 
@@ -394,12 +404,8 @@ func TestMeHandler_CreatePlaylist_Success(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
-
-	data, ok := resp["data"].(map[string]interface{})
-	assert.True(t, ok, "response should have data field")
-	playlist, ok := data["playlist"].(map[string]interface{})
-	assert.True(t, ok, "data should have playlist field")
+	playlist, ok := resp["playlist"].(map[string]interface{})
+	assert.True(t, ok, "response should have playlist field")
 	assert.Equal(t, "My Playlist", playlist["title"])
 	assert.Equal(t, "user-001", playlist["user_id"])
 }
@@ -465,7 +471,7 @@ func TestMeHandler_UpdatePlaylist_NotFound(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(server.ErrNotFound), resp["code"])
+	assert.Equal(t, float64(http.StatusNotFound), resp["code"])
 }
 
 func TestMeHandler_UpdatePlaylist_Success(t *testing.T) {
@@ -492,11 +498,7 @@ func TestMeHandler_UpdatePlaylist_Success(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
-
-	data, ok := resp["data"].(map[string]interface{})
-	assert.True(t, ok)
-	playlist, ok := data["playlist"].(map[string]interface{})
+	playlist, ok := resp["playlist"].(map[string]interface{})
 	assert.True(t, ok)
 	assert.Equal(t, "Updated Title", playlist["title"])
 }
@@ -544,7 +546,8 @@ func TestMeHandler_DeletePlaylist_Success(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
+	_, hasMessage := resp["message"]
+	assert.True(t, hasMessage, "response should have message field")
 
 	// Verify the playlist is deleted
 	_, err := env.playlistRepo.Get(context.Background(), created.ID)
@@ -628,9 +631,8 @@ func TestMeHandler_AddMedia_Success(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
-
-	// Verify the media was added
+	_, hasMessage := resp["message"]
+	assert.True(t, hasMessage, "response should have message field")
 	mediaItems, _ := env.playlistRepo.GetPlaylistMedia(context.Background(), created.ID)
 	assert.Contains(t, mediaItems, "media-001")
 }
@@ -679,9 +681,8 @@ func TestMeHandler_RemoveMedia_Success(t *testing.T) {
 
 	var resp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &resp)
-	assert.Equal(t, float64(0), resp["code"])
-
-	// Verify the media was removed
+	_, hasMessage := resp["message"]
+	assert.True(t, hasMessage, "response should have message field")
 	mediaItems, _ := env.playlistRepo.GetPlaylistMedia(context.Background(), created.ID)
 	assert.NotContains(t, mediaItems, "media-001")
 }

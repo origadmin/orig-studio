@@ -3,6 +3,7 @@
 package subscription
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -20,6 +21,8 @@ const (
 	FieldChannelID = "channel_id"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
+	// FieldNotificationPreference holds the string denoting the notification_preference field in the database.
+	FieldNotificationPreference = "notification_preference"
 	// EdgeSubscriber holds the string denoting the subscriber edge name in mutations.
 	EdgeSubscriber = "subscriber"
 	// EdgeChannel holds the string denoting the channel edge name in mutations.
@@ -35,9 +38,9 @@ const (
 	SubscriberColumn = "subscriber_id"
 	// ChannelTable is the table that holds the channel relation/edge.
 	ChannelTable = "user_subscriptions"
-	// ChannelInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	ChannelInverseTable = "users"
+	// ChannelInverseTable is the table name for the Channel entity.
+	// It exists in this package in order to avoid circular dependency with the "channel" package.
+	ChannelInverseTable = "user_channels"
 	// ChannelColumn is the table column denoting the channel relation/edge.
 	ChannelColumn = "channel_id"
 )
@@ -48,6 +51,7 @@ var Columns = []string{
 	FieldSubscriberID,
 	FieldChannelID,
 	FieldCreateTime,
+	FieldNotificationPreference,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,6 +72,33 @@ var (
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
+
+// NotificationPreference defines the type for the "notification_preference" enum field.
+type NotificationPreference string
+
+// NotificationPreferenceAll is the default value of the NotificationPreference enum.
+const DefaultNotificationPreference = NotificationPreferenceAll
+
+// NotificationPreference values.
+const (
+	NotificationPreferenceAll          NotificationPreference = "all"
+	NotificationPreferencePersonalized NotificationPreference = "personalized"
+	NotificationPreferenceNone         NotificationPreference = "none"
+)
+
+func (np NotificationPreference) String() string {
+	return string(np)
+}
+
+// NotificationPreferenceValidator is a validator for the "notification_preference" field enum values. It is called by the builders before save.
+func NotificationPreferenceValidator(np NotificationPreference) error {
+	switch np {
+	case NotificationPreferenceAll, NotificationPreferencePersonalized, NotificationPreferenceNone:
+		return nil
+	default:
+		return fmt.Errorf("subscription: invalid enum value for notification_preference field: %q", np)
+	}
+}
 
 // OrderOption defines the ordering options for the Subscription queries.
 type OrderOption func(*sql.Selector)
@@ -90,6 +121,11 @@ func ByChannelID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreateTime orders the results by the create_time field.
 func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+}
+
+// ByNotificationPreference orders the results by the notification_preference field.
+func ByNotificationPreference(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNotificationPreference, opts...).ToFunc()
 }
 
 // BySubscriberField orders the results by subscriber field.

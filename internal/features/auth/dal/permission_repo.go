@@ -9,6 +9,7 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/entity/groupmember"
 	"origadmin/application/origstudio/internal/dal/entity/permissiongroup"
+	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/auth/biz"
 )
 
@@ -136,7 +137,7 @@ func (r *permissionGroupRepo) List(ctx context.Context, isActive *bool, page, pa
 	}
 
 	ents, err := query.
-		Offset((page - 1) * pageSize).
+		Offset(types.CalcOffset(page, pageSize)).
 		Limit(pageSize).
 		Order(entity.Desc(permissiongroup.FieldCreateTime)).
 		All(ctx)

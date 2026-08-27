@@ -13,20 +13,27 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/comment"
 	"origadmin/application/origstudio/internal/dal/entity/commentlike"
 	"origadmin/application/origstudio/internal/dal/entity/commentreport"
+	"origadmin/application/origstudio/internal/dal/entity/drmlicense"
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/groupmember"
 	"origadmin/application/origstudio/internal/dal/entity/history"
 	"origadmin/application/origstudio/internal/dal/entity/like"
+	"origadmin/application/origstudio/internal/dal/entity/livechatmessage"
+	"origadmin/application/origstudio/internal/dal/entity/liveroom"
 	"origadmin/application/origstudio/internal/dal/entity/media"
 	"origadmin/application/origstudio/internal/dal/entity/mediareport"
 	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/dal/entity/notification"
+	"origadmin/application/origstudio/internal/dal/entity/order"
 	"origadmin/application/origstudio/internal/dal/entity/permissiongroup"
 	"origadmin/application/origstudio/internal/dal/entity/playlist"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
+	"origadmin/application/origstudio/internal/dal/entity/promotionsubscription"
 	"origadmin/application/origstudio/internal/dal/entity/subscription"
 	"origadmin/application/origstudio/internal/dal/entity/tag"
 	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/dal/entity/usersubscription"
+	"origadmin/application/origstudio/internal/dal/entity/wallet"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -38,31 +45,37 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []user.OrderOption
-	inters                []Interceptor
-	predicates            []predicate.User
-	withMedia             *MediaQuery
-	withArticles          *ArticleQuery
-	withChannels          *ChannelQuery
-	withPlaylists         *PlaylistQuery
-	withComments          *CommentQuery
-	withNotifications     *NotificationQuery
-	withCategories        *CategoryQuery
-	withTags              *TagQuery
-	withFavorites         *FavoriteQuery
-	withLikes             *LikeQuery
-	withCommentLikes      *CommentLikeQuery
-	withSubscriptions     *SubscriptionQuery
-	withSubscribers       *SubscriptionQuery
-	withReviewLogs        *MediaReviewLogQuery
-	withCommentReports    *CommentReportQuery
-	withMediaReports      *MediaReportQuery
-	withModeratedComments *CommentQuery
-	withGroupMemberships  *GroupMemberQuery
-	withCreatedGroups     *PermissionGroupQuery
-	withHistory           *HistoryQuery
-	modifiers             []func(*sql.Selector)
+	ctx                        *QueryContext
+	order                      []user.OrderOption
+	inters                     []Interceptor
+	predicates                 []predicate.User
+	withMedia                  *MediaQuery
+	withArticles               *ArticleQuery
+	withChannels               *ChannelQuery
+	withPlaylists              *PlaylistQuery
+	withComments               *CommentQuery
+	withNotifications          *NotificationQuery
+	withCategories             *CategoryQuery
+	withTags                   *TagQuery
+	withFavorites              *FavoriteQuery
+	withLikes                  *LikeQuery
+	withCommentLikes           *CommentLikeQuery
+	withSubscriptions          *SubscriptionQuery
+	withReviewLogs             *MediaReviewLogQuery
+	withCommentReports         *CommentReportQuery
+	withMediaReports           *MediaReportQuery
+	withModeratedComments      *CommentQuery
+	withGroupMemberships       *GroupMemberQuery
+	withCreatedGroups          *PermissionGroupQuery
+	withHistory                *HistoryQuery
+	withLiveRooms              *LiveRoomQuery
+	withLiveChatMessages       *LiveChatMessageQuery
+	withPaymentSubscriptions   *UserSubscriptionQuery
+	withPaymentOrders          *OrderQuery
+	withPaymentWallet          *WalletQuery
+	withDrmLicenses            *DrmLicenseQuery
+	withPromotionSubscriptions *PromotionSubscriptionQuery
+	modifiers                  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -363,28 +376,6 @@ func (_q *UserQuery) QuerySubscriptions() *SubscriptionQuery {
 	return query
 }
 
-// QuerySubscribers chains the current query on the "subscribers" edge.
-func (_q *UserQuery) QuerySubscribers() *SubscriptionQuery {
-	query := (&SubscriptionClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(subscription.Table, subscription.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.SubscribersTable, user.SubscribersColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryReviewLogs chains the current query on the "review_logs" edge.
 func (_q *UserQuery) QueryReviewLogs() *MediaReviewLogQuery {
 	query := (&MediaReviewLogClient{config: _q.config}).Query()
@@ -532,6 +523,160 @@ func (_q *UserQuery) QueryHistory() *HistoryQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(history.Table, history.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.HistoryTable, user.HistoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLiveRooms chains the current query on the "live_rooms" edge.
+func (_q *UserQuery) QueryLiveRooms() *LiveRoomQuery {
+	query := (&LiveRoomClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(liveroom.Table, liveroom.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.LiveRoomsTable, user.LiveRoomsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLiveChatMessages chains the current query on the "live_chat_messages" edge.
+func (_q *UserQuery) QueryLiveChatMessages() *LiveChatMessageQuery {
+	query := (&LiveChatMessageClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(livechatmessage.Table, livechatmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.LiveChatMessagesTable, user.LiveChatMessagesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPaymentSubscriptions chains the current query on the "payment_subscriptions" edge.
+func (_q *UserQuery) QueryPaymentSubscriptions() *UserSubscriptionQuery {
+	query := (&UserSubscriptionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(usersubscription.Table, usersubscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PaymentSubscriptionsTable, user.PaymentSubscriptionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPaymentOrders chains the current query on the "payment_orders" edge.
+func (_q *UserQuery) QueryPaymentOrders() *OrderQuery {
+	query := (&OrderClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(order.Table, order.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PaymentOrdersTable, user.PaymentOrdersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPaymentWallet chains the current query on the "payment_wallet" edge.
+func (_q *UserQuery) QueryPaymentWallet() *WalletQuery {
+	query := (&WalletClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PaymentWalletTable, user.PaymentWalletColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDrmLicenses chains the current query on the "drm_licenses" edge.
+func (_q *UserQuery) QueryDrmLicenses() *DrmLicenseQuery {
+	query := (&DrmLicenseClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(drmlicense.Table, drmlicense.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DrmLicensesTable, user.DrmLicensesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPromotionSubscriptions chains the current query on the "promotion_subscriptions" edge.
+func (_q *UserQuery) QueryPromotionSubscriptions() *PromotionSubscriptionQuery {
+	query := (&PromotionSubscriptionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(promotionsubscription.Table, promotionsubscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PromotionSubscriptionsTable, user.PromotionSubscriptionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -726,31 +871,37 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:                _q.config,
-		ctx:                   _q.ctx.Clone(),
-		order:                 append([]user.OrderOption{}, _q.order...),
-		inters:                append([]Interceptor{}, _q.inters...),
-		predicates:            append([]predicate.User{}, _q.predicates...),
-		withMedia:             _q.withMedia.Clone(),
-		withArticles:          _q.withArticles.Clone(),
-		withChannels:          _q.withChannels.Clone(),
-		withPlaylists:         _q.withPlaylists.Clone(),
-		withComments:          _q.withComments.Clone(),
-		withNotifications:     _q.withNotifications.Clone(),
-		withCategories:        _q.withCategories.Clone(),
-		withTags:              _q.withTags.Clone(),
-		withFavorites:         _q.withFavorites.Clone(),
-		withLikes:             _q.withLikes.Clone(),
-		withCommentLikes:      _q.withCommentLikes.Clone(),
-		withSubscriptions:     _q.withSubscriptions.Clone(),
-		withSubscribers:       _q.withSubscribers.Clone(),
-		withReviewLogs:        _q.withReviewLogs.Clone(),
-		withCommentReports:    _q.withCommentReports.Clone(),
-		withMediaReports:      _q.withMediaReports.Clone(),
-		withModeratedComments: _q.withModeratedComments.Clone(),
-		withGroupMemberships:  _q.withGroupMemberships.Clone(),
-		withCreatedGroups:     _q.withCreatedGroups.Clone(),
-		withHistory:           _q.withHistory.Clone(),
+		config:                     _q.config,
+		ctx:                        _q.ctx.Clone(),
+		order:                      append([]user.OrderOption{}, _q.order...),
+		inters:                     append([]Interceptor{}, _q.inters...),
+		predicates:                 append([]predicate.User{}, _q.predicates...),
+		withMedia:                  _q.withMedia.Clone(),
+		withArticles:               _q.withArticles.Clone(),
+		withChannels:               _q.withChannels.Clone(),
+		withPlaylists:              _q.withPlaylists.Clone(),
+		withComments:               _q.withComments.Clone(),
+		withNotifications:          _q.withNotifications.Clone(),
+		withCategories:             _q.withCategories.Clone(),
+		withTags:                   _q.withTags.Clone(),
+		withFavorites:              _q.withFavorites.Clone(),
+		withLikes:                  _q.withLikes.Clone(),
+		withCommentLikes:           _q.withCommentLikes.Clone(),
+		withSubscriptions:          _q.withSubscriptions.Clone(),
+		withReviewLogs:             _q.withReviewLogs.Clone(),
+		withCommentReports:         _q.withCommentReports.Clone(),
+		withMediaReports:           _q.withMediaReports.Clone(),
+		withModeratedComments:      _q.withModeratedComments.Clone(),
+		withGroupMemberships:       _q.withGroupMemberships.Clone(),
+		withCreatedGroups:          _q.withCreatedGroups.Clone(),
+		withHistory:                _q.withHistory.Clone(),
+		withLiveRooms:              _q.withLiveRooms.Clone(),
+		withLiveChatMessages:       _q.withLiveChatMessages.Clone(),
+		withPaymentSubscriptions:   _q.withPaymentSubscriptions.Clone(),
+		withPaymentOrders:          _q.withPaymentOrders.Clone(),
+		withPaymentWallet:          _q.withPaymentWallet.Clone(),
+		withDrmLicenses:            _q.withDrmLicenses.Clone(),
+		withPromotionSubscriptions: _q.withPromotionSubscriptions.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -890,17 +1041,6 @@ func (_q *UserQuery) WithSubscriptions(opts ...func(*SubscriptionQuery)) *UserQu
 	return _q
 }
 
-// WithSubscribers tells the query-builder to eager-load the nodes that are connected to
-// the "subscribers" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithSubscribers(opts ...func(*SubscriptionQuery)) *UserQuery {
-	query := (&SubscriptionClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withSubscribers = query
-	return _q
-}
-
 // WithReviewLogs tells the query-builder to eager-load the nodes that are connected to
 // the "review_logs" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithReviewLogs(opts ...func(*MediaReviewLogQuery)) *UserQuery {
@@ -975,6 +1115,83 @@ func (_q *UserQuery) WithHistory(opts ...func(*HistoryQuery)) *UserQuery {
 		opt(query)
 	}
 	_q.withHistory = query
+	return _q
+}
+
+// WithLiveRooms tells the query-builder to eager-load the nodes that are connected to
+// the "live_rooms" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithLiveRooms(opts ...func(*LiveRoomQuery)) *UserQuery {
+	query := (&LiveRoomClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLiveRooms = query
+	return _q
+}
+
+// WithLiveChatMessages tells the query-builder to eager-load the nodes that are connected to
+// the "live_chat_messages" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithLiveChatMessages(opts ...func(*LiveChatMessageQuery)) *UserQuery {
+	query := (&LiveChatMessageClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLiveChatMessages = query
+	return _q
+}
+
+// WithPaymentSubscriptions tells the query-builder to eager-load the nodes that are connected to
+// the "payment_subscriptions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithPaymentSubscriptions(opts ...func(*UserSubscriptionQuery)) *UserQuery {
+	query := (&UserSubscriptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPaymentSubscriptions = query
+	return _q
+}
+
+// WithPaymentOrders tells the query-builder to eager-load the nodes that are connected to
+// the "payment_orders" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithPaymentOrders(opts ...func(*OrderQuery)) *UserQuery {
+	query := (&OrderClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPaymentOrders = query
+	return _q
+}
+
+// WithPaymentWallet tells the query-builder to eager-load the nodes that are connected to
+// the "payment_wallet" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithPaymentWallet(opts ...func(*WalletQuery)) *UserQuery {
+	query := (&WalletClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPaymentWallet = query
+	return _q
+}
+
+// WithDrmLicenses tells the query-builder to eager-load the nodes that are connected to
+// the "drm_licenses" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithDrmLicenses(opts ...func(*DrmLicenseQuery)) *UserQuery {
+	query := (&DrmLicenseClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withDrmLicenses = query
+	return _q
+}
+
+// WithPromotionSubscriptions tells the query-builder to eager-load the nodes that are connected to
+// the "promotion_subscriptions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithPromotionSubscriptions(opts ...func(*PromotionSubscriptionQuery)) *UserQuery {
+	query := (&PromotionSubscriptionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withPromotionSubscriptions = query
 	return _q
 }
 
@@ -1056,7 +1273,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [20]bool{
+		loadedTypes = [26]bool{
 			_q.withMedia != nil,
 			_q.withArticles != nil,
 			_q.withChannels != nil,
@@ -1069,7 +1286,6 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withLikes != nil,
 			_q.withCommentLikes != nil,
 			_q.withSubscriptions != nil,
-			_q.withSubscribers != nil,
 			_q.withReviewLogs != nil,
 			_q.withCommentReports != nil,
 			_q.withMediaReports != nil,
@@ -1077,6 +1293,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withGroupMemberships != nil,
 			_q.withCreatedGroups != nil,
 			_q.withHistory != nil,
+			_q.withLiveRooms != nil,
+			_q.withLiveChatMessages != nil,
+			_q.withPaymentSubscriptions != nil,
+			_q.withPaymentOrders != nil,
+			_q.withPaymentWallet != nil,
+			_q.withDrmLicenses != nil,
+			_q.withPromotionSubscriptions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -1184,13 +1407,6 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := _q.withSubscribers; query != nil {
-		if err := _q.loadSubscribers(ctx, query, nodes,
-			func(n *User) { n.Edges.Subscribers = []*Subscription{} },
-			func(n *User, e *Subscription) { n.Edges.Subscribers = append(n.Edges.Subscribers, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := _q.withReviewLogs; query != nil {
 		if err := _q.loadReviewLogs(ctx, query, nodes,
 			func(n *User) { n.Edges.ReviewLogs = []*MediaReviewLog{} },
@@ -1237,6 +1453,59 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadHistory(ctx, query, nodes,
 			func(n *User) { n.Edges.History = []*History{} },
 			func(n *User, e *History) { n.Edges.History = append(n.Edges.History, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLiveRooms; query != nil {
+		if err := _q.loadLiveRooms(ctx, query, nodes,
+			func(n *User) { n.Edges.LiveRooms = []*LiveRoom{} },
+			func(n *User, e *LiveRoom) { n.Edges.LiveRooms = append(n.Edges.LiveRooms, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLiveChatMessages; query != nil {
+		if err := _q.loadLiveChatMessages(ctx, query, nodes,
+			func(n *User) { n.Edges.LiveChatMessages = []*LiveChatMessage{} },
+			func(n *User, e *LiveChatMessage) { n.Edges.LiveChatMessages = append(n.Edges.LiveChatMessages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPaymentSubscriptions; query != nil {
+		if err := _q.loadPaymentSubscriptions(ctx, query, nodes,
+			func(n *User) { n.Edges.PaymentSubscriptions = []*UserSubscription{} },
+			func(n *User, e *UserSubscription) {
+				n.Edges.PaymentSubscriptions = append(n.Edges.PaymentSubscriptions, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPaymentOrders; query != nil {
+		if err := _q.loadPaymentOrders(ctx, query, nodes,
+			func(n *User) { n.Edges.PaymentOrders = []*Order{} },
+			func(n *User, e *Order) { n.Edges.PaymentOrders = append(n.Edges.PaymentOrders, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPaymentWallet; query != nil {
+		if err := _q.loadPaymentWallet(ctx, query, nodes,
+			func(n *User) { n.Edges.PaymentWallet = []*Wallet{} },
+			func(n *User, e *Wallet) { n.Edges.PaymentWallet = append(n.Edges.PaymentWallet, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withDrmLicenses; query != nil {
+		if err := _q.loadDrmLicenses(ctx, query, nodes,
+			func(n *User) { n.Edges.DrmLicenses = []*DrmLicense{} },
+			func(n *User, e *DrmLicense) { n.Edges.DrmLicenses = append(n.Edges.DrmLicenses, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withPromotionSubscriptions; query != nil {
+		if err := _q.loadPromotionSubscriptions(ctx, query, nodes,
+			func(n *User) { n.Edges.PromotionSubscriptions = []*PromotionSubscription{} },
+			func(n *User, e *PromotionSubscription) {
+				n.Edges.PromotionSubscriptions = append(n.Edges.PromotionSubscriptions, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -1670,36 +1939,6 @@ func (_q *UserQuery) loadSubscriptions(ctx context.Context, query *SubscriptionQ
 	}
 	return nil
 }
-func (_q *UserQuery) loadSubscribers(ctx context.Context, query *SubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *Subscription)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(subscription.FieldChannelID)
-	}
-	query.Where(predicate.Subscription(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.SubscribersColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ChannelID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "channel_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (_q *UserQuery) loadReviewLogs(ctx context.Context, query *MediaReviewLogQuery, nodes []*User, init func(*User), assign func(*User, *MediaReviewLog)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*User)
@@ -1896,6 +2135,217 @@ func (_q *UserQuery) loadHistory(ctx context.Context, query *HistoryQuery, nodes
 	}
 	query.Where(predicate.History(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.HistoryColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadLiveRooms(ctx context.Context, query *LiveRoomQuery, nodes []*User, init func(*User), assign func(*User, *LiveRoom)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(liveroom.FieldUserID)
+	}
+	query.Where(predicate.LiveRoom(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.LiveRoomsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadLiveChatMessages(ctx context.Context, query *LiveChatMessageQuery, nodes []*User, init func(*User), assign func(*User, *LiveChatMessage)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(livechatmessage.FieldUserID)
+	}
+	query.Where(predicate.LiveChatMessage(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.LiveChatMessagesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadPaymentSubscriptions(ctx context.Context, query *UserSubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *UserSubscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(usersubscription.FieldUserID)
+	}
+	query.Where(predicate.UserSubscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PaymentSubscriptionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadPaymentOrders(ctx context.Context, query *OrderQuery, nodes []*User, init func(*User), assign func(*User, *Order)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(order.FieldUserID)
+	}
+	query.Where(predicate.Order(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PaymentOrdersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadPaymentWallet(ctx context.Context, query *WalletQuery, nodes []*User, init func(*User), assign func(*User, *Wallet)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(wallet.FieldUserID)
+	}
+	query.Where(predicate.Wallet(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PaymentWalletColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadDrmLicenses(ctx context.Context, query *DrmLicenseQuery, nodes []*User, init func(*User), assign func(*User, *DrmLicense)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(drmlicense.FieldUserID)
+	}
+	query.Where(predicate.DrmLicense(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.DrmLicensesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadPromotionSubscriptions(ctx context.Context, query *PromotionSubscriptionQuery, nodes []*User, init func(*User), assign func(*User, *PromotionSubscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(promotionsubscription.FieldUserID)
+	}
+	query.Where(predicate.PromotionSubscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PromotionSubscriptionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

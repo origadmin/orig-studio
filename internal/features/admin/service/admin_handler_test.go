@@ -7,22 +7,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
+	std "origadmin/application/origstudio/internal/pkg/http/std"
 )
 
 func TestGetSystemInfo(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	handler := &AdminHandler{
 		appVersion: "v1.0.0-test",
 		dbDialect:  "sqlite3",
 		startTime:  time.Now().Add(-5 * time.Minute),
 	}
 
-	r := gin.New()
-	adapter := ginadapter.NewStdRouterAdapter(&r.RouterGroup)
-	adapter.GET("/api/v1/admin/settings/info", handler.getSystemInfo())
+	r := std.NewRouter()
+	r.GET("/api/v1/admin/settings/info", handler.getSystemInfo())
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/settings/info", nil)
 	w := httptest.NewRecorder()
@@ -32,63 +28,47 @@ func TestGetSystemInfo(t *testing.T) {
 		t.Fatalf("expected status 200, got %d, body: %s", w.Code, w.Body.String())
 	}
 
-	var resp struct {
-		Code int                    `json:"code"`
-		Data map[string]interface{} `json:"data"`
-	}
+	var resp map[string]interface{}
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("failed to parse response: %v", err)
 	}
 
-	if resp.Code != 0 {
-		t.Errorf("expected code 0, got %d", resp.Code)
-	}
-
-	data := resp.Data
-
-	// Verify required fields exist
 	requiredFields := []string{"version", "goVersion", "database", "os", "uptime", "totalMemory", "usedMemory", "cpuUsage", "memoryUsage"}
 	for _, field := range requiredFields {
-		if _, ok := data[field]; !ok {
+		if _, ok := resp[field]; !ok {
 			t.Errorf("missing required field: %s", field)
 		}
 	}
 
-	// Verify specific values
-	if data["version"] != "v1.0.0-test" {
-		t.Errorf("expected version 'v1.0.0-test', got %v", data["version"])
+	if resp["version"] != "v1.0.0-test" {
+		t.Errorf("expected version 'v1.0.0-test', got %v", resp["version"])
 	}
-	if data["database"] != "SQLite" {
-		t.Errorf("expected database 'SQLite', got %v", data["database"])
+	if resp["database"] != "SQLite" {
+		t.Errorf("expected database 'SQLite', got %v", resp["database"])
 	}
 }
 
 func TestGetSystemInfo_PostgresDialect(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
 	handler := &AdminHandler{
 		appVersion: "v2.0.0",
 		dbDialect:  "postgres",
 		startTime:  time.Now(),
 	}
 
-	r := gin.New()
-	adapter := ginadapter.NewStdRouterAdapter(&r.RouterGroup)
-	adapter.GET("/info", handler.getSystemInfo())
+	r := std.NewRouter()
+	r.GET("/info", handler.getSystemInfo())
 
 	req := httptest.NewRequest(http.MethodGet, "/info", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
-	var resp struct {
-		Data map[string]interface{} `json:"data"`
-	}
+	var resp map[string]interface{}
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("failed to parse response: %v", err)
 	}
 
-	if resp.Data["database"] != "PostgreSQL" {
-		t.Errorf("expected database 'PostgreSQL', got %v", resp.Data["database"])
+	if resp["database"] != "PostgreSQL" {
+		t.Errorf("expected database 'PostgreSQL', got %v", resp["database"])
 	}
 }
 

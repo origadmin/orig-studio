@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/conf"
+	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 
@@ -23,8 +24,10 @@ func NewTranscodeHandlerWithConfig(
 	publisher message.Publisher,
 	logger log.Logger,
 	sp *conf.StoragePaths,
+	storage Storage,
 	cfg *conf.TranscodeConfig,
 	spriteUC *SpriteUseCase,
+	notificationUC *contentbiz.NotificationUseCase,
 ) *TranscodeHandler {
 	return NewTranscodeHandler(
 		mediaUC,
@@ -35,7 +38,9 @@ func NewTranscodeHandlerWithConfig(
 		publisher,
 		logger,
 		sp,
+		storage,
 		cfg.TaskTimeout,
 		spriteUC,
+		notificationUC,
 	)
 }

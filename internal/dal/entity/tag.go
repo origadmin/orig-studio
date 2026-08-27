@@ -44,9 +44,8 @@ type Tag struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TagQuery when eager-loading is set.
-	Edges         TagEdges `json:"edges"`
-	media_tag_tag *int
-	selectValues  sql.SelectValues
+	Edges        TagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TagEdges holds the relations/edges for other nodes in the graph.
@@ -57,9 +56,11 @@ type TagEdges struct {
 	Names []*TagName `json:"names,omitempty"`
 	// ChannelTags holds the value of the channel_tags edge.
 	ChannelTags []*ChannelTag `json:"channel_tags,omitempty"`
+	// MediaTags holds the value of the media_tags edge.
+	MediaTags []*MediaTag `json:"media_tags,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -89,6 +90,15 @@ func (e TagEdges) ChannelTagsOrErr() ([]*ChannelTag, error) {
 	return nil, &NotLoadedError{edge: "channel_tags"}
 }
 
+// MediaTagsOrErr returns the MediaTags value or an error if the edge
+// was not loaded in eager-loading.
+func (e TagEdges) MediaTagsOrErr() ([]*MediaTag, error) {
+	if e.loadedTypes[3] {
+		return e.MediaTags, nil
+	}
+	return nil, &NotLoadedError{edge: "media_tags"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Tag) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -102,8 +112,6 @@ func (*Tag) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case tag.FieldCreateTime, tag.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case tag.ForeignKeys[0]: // media_tag_tag
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -201,13 +209,6 @@ func (_m *Tag) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdateTime = value.Time
 			}
-		case tag.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field media_tag_tag", value)
-			} else if value.Valid {
-				_m.media_tag_tag = new(int)
-				*_m.media_tag_tag = int(value.Int64)
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -234,6 +235,11 @@ func (_m *Tag) QueryNames() *TagNameQuery {
 // QueryChannelTags queries the "channel_tags" edge of the Tag entity.
 func (_m *Tag) QueryChannelTags() *ChannelTagQuery {
 	return NewTagClient(_m.config).QueryChannelTags(_m)
+}
+
+// QueryMediaTags queries the "media_tags" edge of the Tag entity.
+func (_m *Tag) QueryMediaTags() *MediaTagQuery {
+	return NewTagClient(_m.config).QueryMediaTags(_m)
 }
 
 // Update returns a builder for updating this Tag.

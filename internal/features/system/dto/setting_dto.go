@@ -26,6 +26,7 @@ const (
 	SettingCategorySecurity  SettingCategory = "security"
 	SettingCategoryAdvanced  SettingCategory = "advanced"
 	SettingCategoryPortal    SettingCategory = "portal"
+	SettingCategoryFeature   SettingCategory = "feature"
 )
 
 // SettingDTO is the data transfer object for settings, isolating biz/service from entity.

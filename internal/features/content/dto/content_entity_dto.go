@@ -43,6 +43,7 @@ type PortalBannerDTO struct {
 	BadgeText         string            `json:"badge_text,omitempty"`
 	ImageURL          string            `json:"image_url,omitempty"`
 	ImageMobileURL    string            `json:"image_mobile_url,omitempty"`
+	VideoURL          string            `json:"video_url,omitempty"`
 	BgColorStart      string            `json:"bg_color_start,omitempty"`
 	BgColorEnd        string            `json:"bg_color_end,omitempty"`
 	BgOverlayOpacity  float64           `json:"bg_overlay_opacity,omitempty"`
@@ -90,16 +91,17 @@ type PortalCustomPageDTO struct {
 
 // AdPlacementDTO mirrors entity.AdPlacement without importing the entity package.
 type AdPlacementDTO struct {
-	ID          string `json:"id,omitempty"`
-	Name        string `json:"name,omitempty"`
-	Slug        string `json:"slug,omitempty"`
-	Type        string `json:"type,omitempty"`
-	Description string `json:"description,omitempty"`
-	Width       int    `json:"width,omitempty"`
-	Height      int    `json:"height,omitempty"`
-	MaxAds      int    `json:"max_ads,omitempty"`
-	IsActive    bool   `json:"is_active,omitempty"`
-	Sequence    int    `json:"sequence,omitempty"`
+	ID          string   `json:"id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Slug        string   `json:"slug,omitempty"`
+	Type        string   `json:"type,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Width       int      `json:"width,omitempty"`
+	Height      int      `json:"height,omitempty"`
+	MaxAds      int      `json:"max_ads,omitempty"`
+	IsActive    bool     `json:"is_active,omitempty"`
+	Sequence    int      `json:"sequence,omitempty"`
+	CreativeIDs []string `json:"creative_ids,omitempty"`
 	// Legacy compatibility fields
 	CreateTime  time.Time `json:"create_time,omitempty"`
 	UpdateTime  time.Time `json:"update_time,omitempty"`
@@ -128,6 +130,38 @@ type AdDTO struct {
 	EndTime    time.Time `json:"end_time,omitempty"`
 	CreateTime time.Time `json:"create_time,omitempty"`
 	UpdateTime time.Time `json:"update_time,omitempty"`
+}
+
+// AdCreativeDTO mirrors entity.AdCreative (the reusable creative library item) without importing the entity package.
+type AdCreativeDTO struct {
+	ID             string            `json:"id,omitempty"`
+	Title          string            `json:"title,omitempty"`
+	TitleI18n      map[string]string `json:"title_i18n,omitempty"`
+	ImageURL       string            `json:"image_url,omitempty"`
+	ImageMobileURL string            `json:"image_mobile_url,omitempty"`
+	LinkURL        string            `json:"link_url,omitempty"`
+	LinkTarget     string            `json:"link_target,omitempty"`
+	BadgeText      string            `json:"badge_text,omitempty"`
+	IsActive       bool              `json:"is_active,omitempty"`
+	Priority       int               `json:"priority,omitempty"`
+	Impressions    int64             `json:"impressions,omitempty"`
+	Clicks         int64             `json:"clicks,omitempty"`
+	CreateTime     time.Time         `json:"create_time,omitempty"`
+	UpdateTime     time.Time         `json:"update_time,omitempty"`
+}
+
+// AdPlacementWithAdsDTO is used by public endpoints to return a placement with its active ads and assigned creatives.
+type AdPlacementWithAdsDTO struct {
+	ID          string           `json:"id,omitempty"`
+	Name        string           `json:"name,omitempty"`
+	Slug        string           `json:"slug,omitempty"`
+	Type        string           `json:"type,omitempty"`
+	Description string           `json:"description,omitempty"`
+	Width       int              `json:"width,omitempty"`
+	Height      int              `json:"height,omitempty"`
+	Sequence    int              `json:"sequence,omitempty"`
+	Ads         []*AdDTO         `json:"ads,omitempty"`
+	Creatives   []*AdCreativeDTO `json:"creatives,omitempty"`
 }
 
 // AdClickLogDTO mirrors entity.AdClickLog without importing the entity package.

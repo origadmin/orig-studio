@@ -6,6 +6,7 @@ package biz
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -32,7 +33,11 @@ type Playlist struct {
 	Description  string              `json:"description"`
 	ShortToken   string              `json:"short_token"`
 	UserID       string              `json:"user_id"`
+	Privacy      string              `json:"privacy"`
 	IsPublic     bool                `json:"is_public"`
+	Status       string              `json:"status"`
+	Thumbnail    string              `json:"thumbnail"`
+	MediaCount   int                 `json:"media_count"`
 	CreateTime   time.Time           `json:"create_time"`
 	UpdateTime   time.Time           `json:"update_time"`
 	MediaItems   []string            `json:"media_items,omitempty"`
@@ -96,6 +101,14 @@ type User struct {
 	CreateTime  time.Time `json:"create_time"`
 }
 
+// ErrMediaNotFound is returned when a media reference (UUID or short_token)
+// cannot be resolved to an existing media row.
+//
+// BUG-128 root cause C: playlist media mutations used to hand the raw client
+// value straight to Postgres, so a bogus id surfaced as a 500 that leaked the
+// foreign key constraint name. Callers map this sentinel onto NotFound.
+var ErrMediaNotFound = errors.New("media not found")
+
 // PlaylistRepo defines storage operations for playlists.
 type PlaylistRepo interface {
 	Create(ctx context.Context, p *Playlist) (*Playlist, error)
@@ -104,10 +117,14 @@ type PlaylistRepo interface {
 	Update(ctx context.Context, p *Playlist) (*Playlist, error)
 	Delete(ctx context.Context, id string) error
 	ListByUser(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error)
+	ListPublicByUser(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error)
 	ListAll(ctx context.Context, page, pageSize int) ([]*Playlist, int, error)
 	AddMedia(ctx context.Context, playlistID, mediaID string) error
 	RemoveMedia(ctx context.Context, playlistID, mediaID string) error
 	ReorderMedia(ctx context.Context, playlistID string, mediaOrders map[string]int) error
+	// ResolveMediaID resolves a media UUID or short_token into the canonical
+	// media UUID, returning ErrMediaNotFound when neither matches.
+	ResolveMediaID(ctx context.Context, idOrToken string) (string, error)
 	GetPlaylistMedia(ctx context.Context, playlistID string) ([]string, error)
 	GetPlaylistMediaDetails(ctx context.Context, playlistID string) ([]PlaylistMediaItem, error)
 }
@@ -131,6 +148,9 @@ type ChannelRepo interface {
 	Subscribe(ctx context.Context, channelID, userID string) error
 	Unsubscribe(ctx context.Context, channelID, userID string) error
 	IsSubscribed(ctx context.Context, channelID, userID string) (bool, error)
+	// BUG-198: subscriber notification preference (all/personalized/none)
+	GetSubscriptionNotificationPreference(ctx context.Context, channelID, userID string) (string, error)
+	UpdateSubscriptionNotificationPreference(ctx context.Context, channelID, userID, pref string) error
 	GetSubscribers(ctx context.Context, channelID string, page, pageSize int) ([]string, int, error)
 	GetSubscriberCount(ctx context.Context, channelID string) (int, error)
 	// Invitation methods
@@ -210,6 +230,10 @@ func (uc *PlaylistChannelUseCase) ListUserPlaylists(ctx context.Context, userID 
 	return uc.playlistRepo.ListByUser(ctx, userID, page, pageSize)
 }
 
+func (uc *PlaylistChannelUseCase) ListUserPublicPlaylists(ctx context.Context, userID string, page, pageSize int) ([]*Playlist, int, error) {
+	return uc.playlistRepo.ListPublicByUser(ctx, userID, page, pageSize)
+}
+
 func (uc *PlaylistChannelUseCase) UpdatePlaylist(ctx context.Context, p *Playlist, userID string, isAdmin bool) (*Playlist, error) {
 	existing, err := uc.playlistRepo.Get(ctx, p.ID)
 	if err != nil {
@@ -240,7 +264,14 @@ func (uc *PlaylistChannelUseCase) AddMediaToPlaylist(ctx context.Context, playli
 	if existing.UserID != userID && !isAdmin {
 		return fmt.Errorf("permission denied")
 	}
-	return uc.playlistRepo.AddMedia(ctx, playlistID, mediaID)
+	// BUG-128 root cause C: validate/normalize the media reference before it
+	// reaches Postgres, so a bogus or short_token-shaped id yields NotFound
+	// instead of a 500 leaking the foreign key constraint name.
+	resolved, err := uc.playlistRepo.ResolveMediaID(ctx, mediaID)
+	if err != nil {
+		return err
+	}
+	return uc.playlistRepo.AddMedia(ctx, playlistID, resolved)
 }
 
 func (uc *PlaylistChannelUseCase) RemoveMediaFromPlaylist(ctx context.Context, playlistID, mediaID string, userID string, isAdmin bool) error {
@@ -251,7 +282,11 @@ func (uc *PlaylistChannelUseCase) RemoveMediaFromPlaylist(ctx context.Context, p
 	if existing.UserID != userID && !isAdmin {
 		return fmt.Errorf("permission denied")
 	}
-	return uc.playlistRepo.RemoveMedia(ctx, playlistID, mediaID)
+	resolved, err := uc.playlistRepo.ResolveMediaID(ctx, mediaID)
+	if err != nil {
+		return err
+	}
+	return uc.playlistRepo.RemoveMedia(ctx, playlistID, resolved)
 }
 
 func (uc *PlaylistChannelUseCase) ReorderMediaInPlaylist(ctx context.Context, playlistID string, mediaOrders map[string]int, userID string, isAdmin bool) error {
@@ -445,11 +480,40 @@ func (uc *PlaylistChannelUseCase) RemoveMediaFromChannel(ctx context.Context, ch
 	return uc.channelRepo.RemoveMedia(ctx, channelID, mediaID)
 }
 
+// resolveChannel resolves a channel by whatever identifier the client sends,
+// trying short_token first (the contract used by most app routes), then UUID
+// id, handle, and slug. This lets callers pass any identifier they happen to
+// have — e.g. a video's channel_id (UUID) from the watch page, where the
+// channel edge only carries {id, name} and no short_token — without an extra
+// lookup. Fixes BUG-151 (500 channel_not_found when the watch page subscribed
+// with a UUID).
+// ResolveChannel resolves a channel by short_token, UUID id, handle, or slug
+// (BUG-237/2026-08-20: slug follows the authoritative tag slug rule, so lookups
+// by slug must work — e.g. /channels/{slug} with a Base58 or hyphenated slug).
+func (uc *PlaylistChannelUseCase) ResolveChannel(ctx context.Context, tokenOrID string) (*Channel, error) {
+	return uc.resolveChannel(ctx, tokenOrID)
+}
+
+func (uc *PlaylistChannelUseCase) resolveChannel(ctx context.Context, tokenOrID string) (*Channel, error) {
+	if ch, err := uc.channelRepo.GetByShortToken(ctx, tokenOrID); err == nil {
+		return ch, nil
+	}
+	if ch, err := uc.channelRepo.Get(ctx, tokenOrID); err == nil {
+		return ch, nil
+	}
+	if ch, err := uc.channelRepo.GetByHandle(ctx, tokenOrID); err == nil {
+		return ch, nil
+	}
+	if ch, err := uc.channelRepo.GetBySlug(ctx, tokenOrID); err == nil {
+		return ch, nil
+	}
+	return nil, fmt.Errorf("channel_not_found")
+}
+
 // Subscription methods
 
 func (uc *PlaylistChannelUseCase) SubscribeToChannel(ctx context.Context, channelToken, userID string) error {
-	// Resolve short_token to channel first
-	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	ch, err := uc.resolveChannel(ctx, channelToken)
 	if err != nil {
 		return fmt.Errorf("channel_not_found")
 	}
@@ -461,8 +525,7 @@ func (uc *PlaylistChannelUseCase) SubscribeToChannel(ctx context.Context, channe
 }
 
 func (uc *PlaylistChannelUseCase) UnsubscribeFromChannel(ctx context.Context, channelToken, userID string) error {
-	// Resolve short_token to channel first
-	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	ch, err := uc.resolveChannel(ctx, channelToken)
 	if err != nil {
 		return fmt.Errorf("channel_not_found")
 	}
@@ -470,17 +533,38 @@ func (uc *PlaylistChannelUseCase) UnsubscribeFromChannel(ctx context.Context, ch
 }
 
 func (uc *PlaylistChannelUseCase) IsSubscribedToChannel(ctx context.Context, channelToken, userID string) (bool, error) {
-	// Resolve short_token to channel first
-	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	ch, err := uc.resolveChannel(ctx, channelToken)
 	if err != nil {
 		return false, fmt.Errorf("channel_not_found")
 	}
 	return uc.channelRepo.IsSubscribed(ctx, ch.ID, userID)
 }
 
+// BUG-198: get subscriber's notification preference for this channel.
+func (uc *PlaylistChannelUseCase) GetSubscriptionNotificationPreference(ctx context.Context, channelToken, userID string) (string, error) {
+	ch, err := uc.resolveChannel(ctx, channelToken)
+	if err != nil {
+		return "", fmt.Errorf("channel_not_found")
+	}
+	return uc.channelRepo.GetSubscriptionNotificationPreference(ctx, ch.ID, userID)
+}
+
+// BUG-198: persist subscriber's notification preference for this channel.
+func (uc *PlaylistChannelUseCase) UpdateSubscriptionNotificationPreference(ctx context.Context, channelToken, userID, pref string) error {
+	ch, err := uc.resolveChannel(ctx, channelToken)
+	if err != nil {
+		return fmt.Errorf("channel_not_found")
+	}
+	switch pref {
+	case "all", "personalized", "none":
+	default:
+		return fmt.Errorf("invalid_notification_preference")
+	}
+	return uc.channelRepo.UpdateSubscriptionNotificationPreference(ctx, ch.ID, userID, pref)
+}
+
 func (uc *PlaylistChannelUseCase) GetChannelSubscribers(ctx context.Context, channelToken string, page, pageSize int) ([]string, int, error) {
-	// Resolve short_token to channel first
-	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	ch, err := uc.resolveChannel(ctx, channelToken)
 	if err != nil {
 		return nil, 0, fmt.Errorf("channel_not_found")
 	}
@@ -488,8 +572,7 @@ func (uc *PlaylistChannelUseCase) GetChannelSubscribers(ctx context.Context, cha
 }
 
 func (uc *PlaylistChannelUseCase) GetChannelSubscriberCount(ctx context.Context, channelToken string) (int, error) {
-	// Resolve short_token to channel first
-	ch, err := uc.channelRepo.GetByShortToken(ctx, channelToken)
+	ch, err := uc.resolveChannel(ctx, channelToken)
 	if err != nil {
 		return 0, fmt.Errorf("channel_not_found")
 	}
@@ -557,14 +640,20 @@ type SubscriptionVideoItem struct {
 	Title          string    `json:"title"`
 	Description    string    `json:"description"`
 	Thumbnail      string    `json:"thumbnail"`
+	Poster         string    `json:"poster"`
 	Duration       int       `json:"duration"`
 	ViewCount      int64     `json:"view_count"`
 	LikeCount      int64     `json:"like_count"`
 	CommentCount   int64     `json:"comment_count"`
 	Type           string    `json:"type"`
+	State          string    `json:"state"`
 	ChannelID      string    `json:"channel_id"`
 	UserID         string    `json:"user_id"`
 	EncodingStatus string    `json:"encoding_status"`
+	// User information
+	Username   string    `json:"username"`
+	Nickname   string    `json:"nickname"`
+	UserAvatar string    `json:"user_avatar"`
 	CreateTime     time.Time `json:"create_time"`
 	PublishedAt    time.Time `json:"published_at"`
 }

@@ -6,7 +6,4 @@ package service
 
 import "github.com/google/wire"
 
-// ProviderSet is the wire provider set for the auth service layer.
-var ProviderSet = wire.NewSet(
-	NewPermissionHandler,
-)
+var ProviderSet = wire.NewSet()

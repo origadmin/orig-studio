@@ -75,6 +75,8 @@ const (
 	EdgeCategory = "category"
 	// EdgeTagsRel holds the string denoting the tags_rel edge name in mutations.
 	EdgeTagsRel = "tags_rel"
+	// EdgeSubscribers holds the string denoting the subscribers edge name in mutations.
+	EdgeSubscribers = "subscribers"
 	// Table holds the table name of the channel in the database.
 	Table = "user_channels"
 	// UserTable is the table that holds the user relation/edge.
@@ -112,6 +114,13 @@ const (
 	TagsRelInverseTable = "content_channel_tags"
 	// TagsRelColumn is the table column denoting the tags_rel relation/edge.
 	TagsRelColumn = "channel_tags_rel"
+	// SubscribersTable is the table that holds the subscribers relation/edge.
+	SubscribersTable = "user_subscriptions"
+	// SubscribersInverseTable is the table name for the Subscription entity.
+	// It exists in this package in order to avoid circular dependency with the "subscription" package.
+	SubscribersInverseTable = "user_subscriptions"
+	// SubscribersColumn is the table column denoting the subscribers relation/edge.
+	SubscribersColumn = "channel_id"
 )
 
 // Columns holds all SQL columns for channel fields.
@@ -422,6 +431,20 @@ func ByTagsRel(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTagsRelStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySubscribersCount orders the results by subscribers count.
+func BySubscribersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSubscribersStep(), opts...)
+	}
+}
+
+// BySubscribers orders the results by subscribers terms.
+func BySubscribers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubscribersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -455,5 +478,12 @@ func newTagsRelStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TagsRelInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TagsRelTable, TagsRelColumn),
+	)
+}
+func newSubscribersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubscribersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SubscribersTable, SubscribersColumn),
 	)
 }

@@ -13,10 +13,12 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/like"
 	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity/mediadrmpolicy"
 	"origadmin/application/origstudio/internal/dal/entity/mediaplaylist"
 	"origadmin/application/origstudio/internal/dal/entity/mediareport"
 	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/dal/entity/mediatag"
+	"origadmin/application/origstudio/internal/dal/entity/subtitle"
 	"origadmin/application/origstudio/internal/dal/entity/user"
 	"time"
 
@@ -211,16 +213,16 @@ func (_c *MediaCreate) SetNillableMimeType(v *string) *MediaCreate {
 	return _c
 }
 
-// SetMd5sum sets the "md5sum" field.
-func (_c *MediaCreate) SetMd5sum(v string) *MediaCreate {
-	_c.mutation.SetMd5sum(v)
+// SetSha256 sets the "sha256" field.
+func (_c *MediaCreate) SetSha256(v string) *MediaCreate {
+	_c.mutation.SetSha256(v)
 	return _c
 }
 
-// SetNillableMd5sum sets the "md5sum" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableMd5sum(v *string) *MediaCreate {
+// SetNillableSha256 sets the "sha256" field if the given value is not nil.
+func (_c *MediaCreate) SetNillableSha256(v *string) *MediaCreate {
 	if v != nil {
-		_c.SetMd5sum(*v)
+		_c.SetSha256(*v)
 	}
 	return _c
 }
@@ -379,20 +381,6 @@ func (_c *MediaCreate) SetNillableShareCount(v *int64) *MediaCreate {
 	return _c
 }
 
-// SetUUID sets the "uuid" field.
-func (_c *MediaCreate) SetUUID(v string) *MediaCreate {
-	_c.mutation.SetUUID(v)
-	return _c
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableUUID(v *string) *MediaCreate {
-	if v != nil {
-		_c.SetUUID(*v)
-	}
-	return _c
-}
-
 // SetAllowDownload sets the "allow_download" field.
 func (_c *MediaCreate) SetAllowDownload(v bool) *MediaCreate {
 	_c.mutation.SetAllowDownload(v)
@@ -536,6 +524,12 @@ func (_c *MediaCreate) SetNillableThumbnailTime(v *float64) *MediaCreate {
 // SetTags sets the "tags" field.
 func (_c *MediaCreate) SetTags(v []string) *MediaCreate {
 	_c.mutation.SetTags(v)
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *MediaCreate) SetMetadata(v map[string]interface{}) *MediaCreate {
+	_c.mutation.SetMetadata(v)
 	return _c
 }
 
@@ -802,6 +796,21 @@ func (_c *MediaCreate) AddReviewLogs(v ...*MediaReviewLog) *MediaCreate {
 	return _c.AddReviewLogIDs(ids...)
 }
 
+// AddSubtitleIDs adds the "subtitles" edge to the Subtitle entity by IDs.
+func (_c *MediaCreate) AddSubtitleIDs(ids ...string) *MediaCreate {
+	_c.mutation.AddSubtitleIDs(ids...)
+	return _c
+}
+
+// AddSubtitles adds the "subtitles" edges to the Subtitle entity.
+func (_c *MediaCreate) AddSubtitles(v ...*Subtitle) *MediaCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSubtitleIDs(ids...)
+}
+
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
 func (_c *MediaCreate) AddArticleIDs(ids ...string) *MediaCreate {
 	_c.mutation.AddArticleIDs(ids...)
@@ -830,6 +839,21 @@ func (_c *MediaCreate) AddReports(v ...*MediaReport) *MediaCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddReportIDs(ids...)
+}
+
+// AddDrmPolicyIDs adds the "drm_policies" edge to the MediaDrmPolicy entity by IDs.
+func (_c *MediaCreate) AddDrmPolicyIDs(ids ...string) *MediaCreate {
+	_c.mutation.AddDrmPolicyIDs(ids...)
+	return _c
+}
+
+// AddDrmPolicies adds the "drm_policies" edges to the MediaDrmPolicy entity.
+func (_c *MediaCreate) AddDrmPolicies(v ...*MediaDrmPolicy) *MediaCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddDrmPolicyIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -1054,9 +1078,9 @@ func (_c *MediaCreate) check() error {
 			return &ValidationError{Name: "mime_type", err: fmt.Errorf(`entity: validator failed for field "Media.mime_type": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Md5sum(); ok {
-		if err := media.Md5sumValidator(v); err != nil {
-			return &ValidationError{Name: "md5sum", err: fmt.Errorf(`entity: validator failed for field "Media.md5sum": %w`, err)}
+	if v, ok := _c.mutation.Sha256(); ok {
+		if err := media.Sha256Validator(v); err != nil {
+			return &ValidationError{Name: "sha256", err: fmt.Errorf(`entity: validator failed for field "Media.sha256": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.Extension(); ok {
@@ -1108,11 +1132,6 @@ func (_c *MediaCreate) check() error {
 	}
 	if _, ok := _c.mutation.ShareCount(); !ok {
 		return &ValidationError{Name: "share_count", err: errors.New(`entity: missing required field "Media.share_count"`)}
-	}
-	if v, ok := _c.mutation.UUID(); ok {
-		if err := media.UUIDValidator(v); err != nil {
-			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
-		}
 	}
 	if _, ok := _c.mutation.AllowDownload(); !ok {
 		return &ValidationError{Name: "allow_download", err: errors.New(`entity: missing required field "Media.allow_download"`)}
@@ -1274,9 +1293,9 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_spec.SetField(media.FieldMimeType, field.TypeString, value)
 		_node.MimeType = value
 	}
-	if value, ok := _c.mutation.Md5sum(); ok {
-		_spec.SetField(media.FieldMd5sum, field.TypeString, value)
-		_node.Md5sum = value
+	if value, ok := _c.mutation.Sha256(); ok {
+		_spec.SetField(media.FieldSha256, field.TypeString, value)
+		_node.Sha256 = value
 	}
 	if value, ok := _c.mutation.Extension(); ok {
 		_spec.SetField(media.FieldExtension, field.TypeString, value)
@@ -1322,10 +1341,6 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_spec.SetField(media.FieldShareCount, field.TypeInt64, value)
 		_node.ShareCount = value
 	}
-	if value, ok := _c.mutation.UUID(); ok {
-		_spec.SetField(media.FieldUUID, field.TypeString, value)
-		_node.UUID = value
-	}
 	if value, ok := _c.mutation.AllowDownload(); ok {
 		_spec.SetField(media.FieldAllowDownload, field.TypeBool, value)
 		_node.AllowDownload = value
@@ -1369,6 +1384,10 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Tags(); ok {
 		_spec.SetField(media.FieldTags, field.TypeJSON, value)
 		_node.Tags = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(media.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.TitleI18n(); ok {
 		_spec.SetField(media.FieldTitleI18n, field.TypeJSON, value)
@@ -1553,6 +1572,22 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.SubtitlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.ArticlesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -1578,6 +1613,22 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.DrmPoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

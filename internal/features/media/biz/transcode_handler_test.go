@@ -6,8 +6,16 @@ package biz
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
+	"time"
 
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
+	"origadmin/application/origstudio/api/gen/v1/types"
 	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
@@ -373,7 +381,6 @@ func TestTranscodeJob_Structure(t *testing.T) {
 		Profile:   &dto.EncodeProfile{Name: "1080p", Resolution: "1080"},
 		InputPath: "/path/to/input.mp4",
 		OutputDir: "/path/to/output",
-		UUID:      "uuid-789",
 	}
 
 	if job.MediaID != "media-123" {
@@ -409,4 +416,63 @@ func TestVariantInfo(t *testing.T) {
 	if info.ProfileName != "1080p" {
 		t.Errorf("ProfileName = %s, want 1080p", info.ProfileName)
 	}
+}
+
+// TestTranscodeHandler_Handle_InvalidJSON verifies that Handle returns an error
+// when the message payload is not valid JSON.
+func TestTranscodeHandler_Handle_InvalidJSON(t *testing.T) {
+	h := &TranscodeHandler{
+		logger:      log.NewHelper(log.DefaultLogger),
+		taskTimeout: time.Minute,
+	}
+
+	msg := message.NewMessage("test-id", []byte(`{"media_id":`))
+	err := h.Handle(msg)
+	require.Error(t, err)
+}
+
+// TestTranscodeHandler_Handle_MediaNotFound verifies that Handle returns an error
+// when the media record cannot be found in the repository.
+func TestTranscodeHandler_Handle_MediaNotFound(t *testing.T) {
+	repo := &mockMediaRepo{}
+	repo.On("Get", mock.Anything, "media-123", mock.Anything).
+		Return((*types.Media)(nil), errors.New("media not found"))
+
+	h := &TranscodeHandler{
+		mediaRepo:   repo,
+		logger:      log.NewHelper(log.DefaultLogger),
+		taskTimeout: time.Minute,
+	}
+
+	payload, _ := json.Marshal(MediaEncodeRequest{
+		MediaID:     "media-123",
+		MediaPath:   "uploads/test.mp4",
+		ContentType: "video/mp4",
+	})
+	msg := message.NewMessage("test-id", payload)
+	err := h.Handle(msg)
+	require.Error(t, err)
+}
+
+// TestTranscodeHandler_Handle_EmptyMediaID verifies that Handle returns an error
+// when the media ID is empty (mediaRepo.Get will fail).
+func TestTranscodeHandler_Handle_EmptyMediaID(t *testing.T) {
+	repo := &mockMediaRepo{}
+	repo.On("Get", mock.Anything, "", mock.Anything).
+		Return((*types.Media)(nil), errors.New("empty media id"))
+
+	h := &TranscodeHandler{
+		mediaRepo:   repo,
+		logger:      log.NewHelper(log.DefaultLogger),
+		taskTimeout: time.Minute,
+	}
+
+	payload, _ := json.Marshal(MediaEncodeRequest{
+		MediaID:     "",
+		MediaPath:   "uploads/test.mp4",
+		ContentType: "video/mp4",
+	})
+	msg := message.NewMessage("test-id", payload)
+	err := h.Handle(msg)
+	require.Error(t, err)
 }

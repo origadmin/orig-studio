@@ -5,6 +5,7 @@
 package biz
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/dal/enums"
+	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 	"origadmin/application/origstudio/internal/infra/pubsub"
 	"origadmin/application/origstudio/internal/features/media/dto"
@@ -46,16 +48,18 @@ type MediaEncodeEvent struct {
 //
 //	thumbnail → parallel profile transcodes (direct HLS or GIF preview) → master playlist → status determination
 type TranscodeHandler struct {
-	mediaUC      *MediaUseCase
-	profileRepo  dto.EncodeProfileRepo
-	encodingRepo dto.EncodingTaskRepo
-	mediaRepo    MediaRepo
-	worker       TranscodeWorker
-	publisher    message.Publisher
-	logger       *log.Helper
-	paths        *conf.StoragePaths
-	taskTimeout  time.Duration
-	spriteUC     *SpriteUseCase
+	mediaUC        *MediaUseCase
+	profileRepo    dto.EncodeProfileRepo
+	encodingRepo   dto.EncodingTaskRepo
+	mediaRepo      MediaRepo
+	worker         TranscodeWorker
+	publisher      message.Publisher
+	logger         *log.Helper
+	paths          *conf.StoragePaths
+	storage        Storage
+	taskTimeout    time.Duration
+	spriteUC       *SpriteUseCase
+	notificationUC *contentbiz.NotificationUseCase
 }
 
 // NewTranscodeHandler creates a new TranscodeHandler.
@@ -68,20 +72,24 @@ func NewTranscodeHandler(
 	publisher message.Publisher,
 	logger log.Logger,
 	paths *conf.StoragePaths,
+	storage Storage,
 	taskTimeout time.Duration,
 	spriteUC *SpriteUseCase,
+	notificationUC *contentbiz.NotificationUseCase,
 ) *TranscodeHandler {
 	return &TranscodeHandler{
-		mediaUC:      mediaUC,
-		profileRepo:  profileRepo,
-		encodingRepo: encodingRepo,
-		mediaRepo:    mediaRepo,
-		worker:       worker,
-		publisher:    publisher,
-		logger:       log.NewHelper(log.With(logger, "module", "transcode.handler")),
-		paths:        paths,
-		taskTimeout:  taskTimeout,
-		spriteUC:     spriteUC,
+		mediaUC:        mediaUC,
+		profileRepo:    profileRepo,
+		encodingRepo:   encodingRepo,
+		mediaRepo:      mediaRepo,
+		worker:         worker,
+		publisher:      publisher,
+		logger:         log.NewHelper(log.With(logger, "module", "transcode.handler")),
+		paths:          paths,
+		storage:        storage,
+		taskTimeout:    taskTimeout,
+		spriteUC:       spriteUC,
+		notificationUC: notificationUC,
 	}
 }
 
@@ -123,7 +131,6 @@ func (h *TranscodeHandler) Handle(msg *message.Message) error {
 //     - preview task outcome does NOT affect overall status
 func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeRequest) error {
 	mediaID := req.MediaID
-	fullPath := h.paths.FullPath(req.MediaPath)
 
 	procCtx, cancel := context.WithTimeout(context.Background(), h.taskTimeout)
 	defer cancel()
@@ -134,8 +141,43 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		return fmt.Errorf("get media %s: %w", mediaID, err)
 	}
 
+	// Use media.Url from DB (may have been updated by preprocessing) rather than
+	// the request payload, which could reference the original pre-remux path.
+	sourcePath := media.Url
+	if sourcePath == "" {
+		sourcePath = req.MediaPath
+	}
+
+	var workDir *LocalWorkDir
+	fullPath := h.paths.FullPath(sourcePath)
+	if _, err := os.Stat(fullPath); err != nil {
+		workDir, err = DownloadToLocalWorkDir(procCtx, h.storage, sourcePath, h.paths.FullPath)
+		if err != nil {
+			return fmt.Errorf("download source for S3: %w", err)
+		}
+		if workDir != nil {
+			fullPath = workDir.LocalPath
+		}
+	}
+	defer workDir.Cleanup()
+
 	// Use media ID (which is already a UUID) for secure public paths
 	mediaUUID := media.Id
+
+	// Idempotency: if media is already successfully encoded, skip reprocessing
+	if media.EncodingStatus == "success" && media.HlsFile != "" {
+		h.logger.Infof("media %s already encoded successfully, skipping (redelivered message)", mediaID)
+		// Ensure already-encoded media is published (backward compat for videos encoded before auto-publish)
+		if media.State != "active" || media.ReviewStatus != "reviewed" || !media.Listable {
+			media.State = "active"
+			media.ReviewStatus = "reviewed"
+			media.Listable = h.mediaUC.ShouldBeListable(media)
+			if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
+				h.logger.Warnf("failed to auto-publish already-encoded media %s: %v", mediaID, err)
+			}
+		}
+		return nil
+	}
 
 	// Update media status to processing
 	media.EncodingStatus = "processing"
@@ -145,10 +187,29 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 	// --- Step 2: Generate thumbnail ---
 	if media.Thumbnail == "" {
-		thumbDir := h.paths.ThumbnailsDir
+		thumbDir := h.paths.ThumbnailsDir()
 		thumbFilename := fmt.Sprintf("%s.jpg", mediaUUID)
-		if _, err := GenerateThumbnail(procCtx, fullPath, thumbDir, thumbFilename); err == nil {
+		thumbGeneratedPath, err := GenerateThumbnail(procCtx, fullPath, thumbDir, thumbFilename)
+		if err == nil {
 			media.Thumbnail = h.paths.RelativeThumbnail(mediaUUID)
+
+			// Verify thumbnail file exists and log size
+			if fi, statErr := os.Stat(thumbGeneratedPath); statErr == nil {
+				h.logger.Infof("thumbnail generated for media %s: %s (%d bytes)", mediaID, thumbGeneratedPath, fi.Size())
+			} else {
+				h.logger.Warnf("thumbnail file missing after generation for media %s: %v", mediaID, statErr)
+			}
+
+			// Upload thumbnail to storage for non-local backends (S3/Hybrid)
+			if data, readErr := os.ReadFile(thumbGeneratedPath); readErr == nil {
+				thumbRelPath := h.paths.RelativeThumbnail(mediaUUID)
+				if _, upErr := h.storage.Upload(procCtx, thumbRelPath, bytes.NewReader(data), int64(len(data)), "image/jpeg"); upErr != nil {
+					h.logger.Warnf("failed to upload thumbnail to storage for media %s: %v", mediaID, upErr)
+				}
+			} else {
+				h.logger.Warnf("failed to read thumbnail for media %s: %v (path=%s)", mediaID, readErr, thumbGeneratedPath)
+			}
+
 			if _, err := h.mediaRepo.Update(procCtx, media); err != nil {
 				h.logger.Warnf("failed to save thumbnail for media %s: %v", mediaID, err)
 			}
@@ -267,6 +328,56 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 	}
 
 	if len(tasks) == 0 {
+		// Check if all tasks are already in a terminal state (success/failed) — this is a redelivered message
+		allExistingTasks, _ := h.encodingRepo.ListByMedia(procCtx, mediaID)
+		allTerminal := len(allExistingTasks) > 0
+		videoSuccess := 0
+		videoTotal := 0
+		for _, et := range allExistingTasks {
+			prof, pErr := h.profileRepo.Get(procCtx, et.ProfileId)
+			if pErr != nil || prof == nil {
+				continue
+			}
+			if IsVideoProfile(prof) {
+				videoTotal++
+				if et.Status == enums.EncodingTaskStatusSuccess {
+					videoSuccess++
+				}
+			}
+			if et.Status != enums.EncodingTaskStatusSuccess && et.Status != enums.EncodingTaskStatusFailed {
+				allTerminal = false
+			}
+		}
+		if allTerminal {
+			h.logger.Infof("media %s already processed (redelivered message), skipping", mediaID)
+			// Determine final status from existing tasks
+			switch {
+			case videoTotal == 0:
+				media.EncodingStatus = "success"
+			case videoSuccess == videoTotal:
+				media.EncodingStatus = "success"
+			case videoSuccess > 0:
+				media.EncodingStatus = "partial"
+			default:
+				media.EncodingStatus = "failed"
+			}
+			// Auto-publish on redelivery too
+			if media.EncodingStatus == "success" {
+				media.State = "active"
+				media.ReviewStatus = "reviewed"
+				media.Listable = h.mediaUC.ShouldBeListable(media)
+			}
+			// Update HLS file reference if needed
+		if media.HlsFile == "" && media.EncodingStatus == "success" {
+			media.HlsFile = h.paths.RelativeHLSMaster(mediaUUID)
+		}
+			h.mediaRepo.Update(procCtx, media)
+			h.publishEvent(ctx, &MediaEncodeEvent{
+				MediaID: mediaID,
+				Status:  media.EncodingStatus,
+			})
+			return nil
+		}
 		h.logger.Warnf("no encoding tasks created for media %s", mediaID)
 		media.EncodingStatus = "failed"
 		h.mediaRepo.Update(procCtx, media)
@@ -295,8 +406,8 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		if IsVideoProfile(profile) {
 			outputDir = filepath.Join(hlsBaseDir, profile.Name)
 		} else {
-			// Preview: output goes to previews/ dir; we pass hlsBaseDir as anchor
-			outputDir = hlsBaseDir // executePreviewJob will navigate up to previews/
+			// Preview: output goes directly to previews/ directory
+			outputDir = h.paths.PreviewsDir()
 		}
 
 		// 创建局部变量，避免闭包问题
@@ -356,9 +467,9 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 			if profile != nil {
 				if IsVideoProfile(profile) {
-					t.OutputPath = fmt.Sprintf("%s/%s/index.m3u8", mediaUUID, profile.Name)
+					t.OutputPath = h.paths.RelativeHLSProfile(mediaUUID, profile.Name)
 				} else if IsPreviewProfile(profile) {
-					t.OutputPath = fmt.Sprintf("previews/%s.gif", mediaUUID)
+					t.OutputPath = h.paths.RelativePreview(mediaUUID)
 				}
 			}
 		}
@@ -410,10 +521,10 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 		if IsPreviewProfile(profile) {
 			// Update preview file path if preview task succeeded
-			if t.Status == enums.EncodingTaskStatusSuccess {
-				media.PreviewFilePath = fmt.Sprintf("hls/previews/%s.gif", mediaUUID)
-				h.logger.Infof("set preview file path to: %s", media.PreviewFilePath)
-			}
+		if t.Status == enums.EncodingTaskStatusSuccess {
+			media.PreviewFilePath = h.paths.RelativePreview(mediaUUID)
+			h.logger.Infof("set preview file path to: %s", media.PreviewFilePath)
+		}
 			continue
 		}
 
@@ -443,12 +554,19 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		media.EncodingStatus = "failed"
 	}
 
-	// Recalculate listable now that encoding_status may have changed
+	// Auto-publish: when video transcoding succeeds, automatically set state to active
+	// and review_status to reviewed so the video becomes publicly visible
+	if media.EncodingStatus == "success" {
+		media.State = "active"
+		media.ReviewStatus = "reviewed"
+	}
+
+	// Recalculate listable now that encoding_status and state may have changed
 	media.Listable = h.mediaUC.ShouldBeListable(media)
 
 	// Regenerate master playlist if we have any successful variants
 	if len(variantInfos) > 0 {
-		masterRelPath := fmt.Sprintf("hls/%s/master.m3u8", mediaUUID)
+		masterRelPath := h.paths.RelativeHLSMaster(mediaUUID)
 		if _, err := GenerateMasterPlaylist(hlsBaseDir, variantInfos); err != nil {
 			h.logger.Errorf("master playlist generation failed: %v", err)
 		} else {
@@ -464,6 +582,14 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 		h.logger.Errorf("failed to update media final status: %v", err)
 	}
 
+	// BUG-264: 转码终态通知上传者（设计锚点 12-NOTIFICATION_TYPES_AND_PREFS.md §4）。
+	// 仅正常完成路径触发（redelivery 分支已提前 return，不重复通知）。
+	if h.notificationUC != nil {
+		if err := h.notificationUC.NotifyTranscodeStatus(procCtx, media.UserId, media.Title, media.EncodingStatus, ""); err != nil {
+			h.logger.Warnf("failed to notify transcode status for media %s: %v", mediaID, err)
+		}
+	}
+
 	// Final completion notification
 	h.publishEvent(ctx, &MediaEncodeEvent{
 		MediaID: mediaID,
@@ -472,6 +598,12 @@ func (h *TranscodeHandler) processMedia(ctx context.Context, req *MediaEncodeReq
 
 	h.logger.Infof("media processing complete: media=%s uuid=%s status=%s (video: %d ok / %d fail)",
 		mediaID, mediaUUID, media.EncodingStatus, videoSuccessCount, videoFailedCount)
+
+	if workDir != nil {
+		if err := h.uploadOutputDirs(procCtx, mediaUUID); err != nil {
+			h.logger.Warnf("failed to upload output dirs to S3 for media %s: %v", mediaID, err)
+		}
+	}
 
 	if media.Type == "video" && h.spriteUC != nil {
 		go func() {
@@ -499,21 +631,30 @@ func (h *TranscodeHandler) waitForOutput(
 	if IsVideoProfile(job.Profile) {
 		expectedFile = filepath.Join(job.OutputDir, "index.m3u8")
 	} else if IsPreviewProfile(job.Profile) {
-		expectedFile = filepath.Join(job.OutputDir, "..", "previews", fmt.Sprintf("%s.gif", job.MediaID))
+		expectedFile = filepath.Join(job.OutputDir, fmt.Sprintf("%s.gif", job.MediaID))
 	} else {
 		return nil // unknown type, nothing to wait for
 	}
 
-	// 等待任务开始执行（状态变为 processing 或 failed）
+	// 等待任务开始执行（状态变为 processing、success 或 failed）
 	maxWaitForStart := 120 // 最多等待 10 分钟（5s interval）
 	for i := 0; i < maxWaitForStart; i++ {
 		// 检查任务状态
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
 		if err == nil && currentTask != nil {
-			if currentTask.Status == enums.EncodingTaskStatusProcessing {
+			switch currentTask.Status {
+			case enums.EncodingTaskStatusSuccess:
+				// Task already completed successfully (fast job), skip to file check
+				h.logger.Infof("task %s already completed successfully, checking output", task.Id)
+				if _, err := os.Stat(expectedFile); err == nil {
+					return nil
+				}
+				// File not found yet despite success status; continue to file-wait loop
+				goto fileWait
+			case enums.EncodingTaskStatusProcessing:
 				h.logger.Infof("task %s has started processing, beginning file wait", task.Id)
-				break
-			} else if currentTask.Status == enums.EncodingTaskStatusFailed {
+				goto fileWait
+			case enums.EncodingTaskStatusFailed:
 				h.logger.Warnf("task %s failed during execution: %s", task.Id, currentTask.ErrorMessage)
 				return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
 			}
@@ -524,6 +665,7 @@ func (h *TranscodeHandler) waitForOutput(
 		}
 	}
 
+fileWait:
 	// 初始延迟：给转码任务时间开始生成文件
 	time.Sleep(2 * time.Second)
 
@@ -533,9 +675,16 @@ func (h *TranscodeHandler) waitForOutput(
 	for i := 0; i < maxAttempts; i++ {
 		// Check task status first
 		currentTask, err := h.encodingRepo.Get(context.Background(), task.Id)
-		if err == nil && currentTask != nil && currentTask.Status == enums.EncodingTaskStatusFailed {
-			h.logger.Warnf("task %s failed during file wait: %s", task.Id, currentTask.ErrorMessage)
-			return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
+		if err == nil && currentTask != nil {
+			if currentTask.Status == enums.EncodingTaskStatusFailed {
+				h.logger.Warnf("task %s failed during file wait: %s", task.Id, currentTask.ErrorMessage)
+				return fmt.Errorf("task %s failed: %s", task.Id, currentTask.ErrorMessage)
+			}
+			if currentTask.Status == enums.EncodingTaskStatusSuccess {
+				if _, err := os.Stat(expectedFile); err == nil {
+					return nil
+				}
+			}
 		}
 
 		// For preview profiles, provide basic progress updates
@@ -602,8 +751,54 @@ func (h *TranscodeHandler) publishEvent(ctx context.Context, event *MediaEncodeE
 	}
 }
 
-// estimateBandwidth extracts bandwidth from profile's BentoParameters (e.g., "--video-bitrate 400k" → 400000).
-// Falls back to resolution-based estimation if not parseable.
+func (h *TranscodeHandler) uploadOutputDirs(ctx context.Context, mediaUUID string) error {
+	hlsDir := h.paths.HLSDirForMedia(mediaUUID)
+	if _, err := os.Stat(hlsDir); err == nil {
+		if err := h.storage.UploadDir(ctx, hlsDir, h.paths.Relative("hls", mediaUUID)); err != nil {
+			h.logger.Warnf("failed to upload HLS dir to S3: %v", err)
+		}
+	}
+
+	thumbDir := h.paths.ThumbnailsDir()
+	if _, err := os.Stat(thumbDir); err == nil {
+		thumbPattern := filepath.Join(thumbDir, mediaUUID+".*")
+		matches, _ := filepath.Glob(thumbPattern)
+		for _, m := range matches {
+			relKey := h.paths.Relative("thumbnails", filepath.Base(m))
+			// Read into memory first to avoid source/destination path conflict
+			// where LocalStorage.Upload's os.Create truncates the file before io.Copy.
+			data, err := os.ReadFile(m)
+			if err != nil {
+				continue
+			}
+			if _, err := h.storage.Upload(ctx, relKey, bytes.NewReader(data), int64(len(data)), ""); err != nil {
+				h.logger.Warnf("failed to upload thumbnail %s to storage: %v", relKey, err)
+			}
+		}
+	}
+
+	previewPath := h.paths.PreviewAbsPath(mediaUUID)
+	if _, err := os.Stat(previewPath); err == nil {
+		relKey := h.paths.RelativePreview(mediaUUID)
+		// Read into memory first to avoid source/destination path conflict.
+		data, err := os.ReadFile(previewPath)
+		if err == nil {
+			if _, err := h.storage.Upload(ctx, relKey, bytes.NewReader(data), int64(len(data)), ""); err != nil {
+				h.logger.Warnf("failed to upload preview %s to storage: %v", relKey, err)
+			}
+		}
+	}
+
+	spriteDir := h.paths.SpriteDirAbs(mediaUUID)
+	if _, err := os.Stat(spriteDir); err == nil {
+		if err := h.storage.UploadDir(ctx, spriteDir, h.paths.Relative("sprites", mediaUUID)); err != nil {
+			h.logger.Warnf("failed to upload sprite dir to S3: %v", err)
+		}
+	}
+
+	return nil
+}
+
 func estimateBandwidth(p *dto.EncodeProfile) int {
 	// Try parsing from BentoParameters
 	if p.BentoParameters != "" {

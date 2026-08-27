@@ -322,19 +322,19 @@ func TestCommentTextContentMapping(t *testing.T) {
 		Status: comment.StatusPENDING,
 	}
 	pb := ConvertCommentToCommentPB(commentEnt)
-	if pb.Content != "hello world" {
-		t.Errorf("Comment.Text -> CommentPB.Content: got %q, want %q", pb.Content, "hello world")
+	if pb.Text != "hello world" {
+		t.Errorf("Comment.Text -> CommentPB.Text: got %q, want %q", pb.Text, "hello world")
 	}
 
 	pb2 := &types.Comment{
-		Id:      "c-1",
-		Content: "hello from pb",
-		UserId:  "u-1",
+		Id:     "c-1",
+		Text:   "hello from pb",
+		UserId: "u-1",
 		MediaId: "m-1",
 	}
 	ent := ConvertCommentPBToComment(pb2)
 	if ent.Text != "hello from pb" {
-		t.Errorf("CommentPB.Content -> Comment.Text: got %q, want %q", ent.Text, "hello from pb")
+		t.Errorf("CommentPB.Text -> Comment.Text: got %q, want %q", ent.Text, "hello from pb")
 	}
 }
 
@@ -346,19 +346,19 @@ func TestLikeTypeMapping(t *testing.T) {
 		LikeType: "like",
 	}
 	pb := ConvertLikeToLikePB(likeEnt)
-	if pb.Type != "like" {
-		t.Errorf("Like.LikeType -> LikePB.Type: got %q, want %q", pb.Type, "like")
+	if pb.LikeType != "like" {
+		t.Errorf("Like.LikeType -> LikePB.LikeType: got %q, want %q", pb.LikeType, "like")
 	}
 
 	pb2 := &types.Like{
-		Id:     "l-1",
-		UserId: "u-1",
-		MediaId: "m-1",
-		Type:   "dislike",
+		Id:       "l-1",
+		UserId:   "u-1",
+		MediaId:  "m-1",
+		LikeType: "dislike",
 	}
 	ent := ConvertLikePBToLike(pb2)
 	if ent.LikeType != "dislike" {
-		t.Errorf("LikePB.Type -> Like.LikeType: got %q, want %q", ent.LikeType, "dislike")
+		t.Errorf("LikePB.LikeType -> Like.LikeType: got %q, want %q", ent.LikeType, "dislike")
 	}
 }
 
@@ -369,18 +369,18 @@ func TestTagTitleNameMapping(t *testing.T) {
 		Slug:  "go-lang",
 	}
 	pb := ConvertTagToTagPB(tagEnt)
-	if pb.Name != "golang" {
-		t.Errorf("Tag.Title -> TagPB.Name: got %q, want %q", pb.Name, "golang")
+	if pb.Title != "golang" {
+		t.Errorf("Tag.Title -> TagPB.Title: got %q, want %q", pb.Title, "golang")
 	}
 
 	pb2 := &types.Tag{
-		Id:   2,
-		Name: "rust",
-		Slug: "rust-lang",
+		Id:    2,
+		Title: "rust",
+		Slug:  "rust-lang",
 	}
 	ent := ConvertTagPBToTag(pb2)
 	if ent.Title != "rust" {
-		t.Errorf("TagPB.Name -> Tag.Title: got %q, want %q", ent.Title, "rust")
+		t.Errorf("TagPB.Title -> Tag.Title: got %q, want %q", ent.Title, "rust")
 	}
 }
 

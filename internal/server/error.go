@@ -2,13 +2,15 @@ package server
 
 // Common error codes
 const (
-	ErrOK           = 0
-	ErrInternal     = 10000
-	ErrNotFound     = 10001
-	ErrUnauthorized = 10002
-	ErrForbidden    = 10003
-	ErrBadRequest   = 10004
-	ErrConflict     = 10005
+	ErrOK                   = 0
+	ErrInternal             = 10000
+	ErrNotFound             = 10001
+	ErrUnauthorized         = 10002
+	ErrForbidden            = 10003
+	ErrBadRequest           = 10004
+	ErrConflict             = 10005
+	ErrPayloadTooLarge      = 10006
+	ErrUnsupportedMediaType = 10007
 )
 
 // Business error codes

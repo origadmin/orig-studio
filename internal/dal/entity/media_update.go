@@ -13,11 +13,13 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/like"
 	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/dal/entity/mediadrmpolicy"
 	"origadmin/application/origstudio/internal/dal/entity/mediaplaylist"
 	"origadmin/application/origstudio/internal/dal/entity/mediareport"
 	"origadmin/application/origstudio/internal/dal/entity/mediareviewlog"
 	"origadmin/application/origstudio/internal/dal/entity/mediatag"
 	"origadmin/application/origstudio/internal/dal/entity/predicate"
+	"origadmin/application/origstudio/internal/dal/entity/subtitle"
 	"origadmin/application/origstudio/internal/dal/entity/user"
 	"time"
 
@@ -300,23 +302,23 @@ func (_u *MediaUpdate) ClearMimeType() *MediaUpdate {
 	return _u
 }
 
-// SetMd5sum sets the "md5sum" field.
-func (_u *MediaUpdate) SetMd5sum(v string) *MediaUpdate {
-	_u.mutation.SetMd5sum(v)
+// SetSha256 sets the "sha256" field.
+func (_u *MediaUpdate) SetSha256(v string) *MediaUpdate {
+	_u.mutation.SetSha256(v)
 	return _u
 }
 
-// SetNillableMd5sum sets the "md5sum" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableMd5sum(v *string) *MediaUpdate {
+// SetNillableSha256 sets the "sha256" field if the given value is not nil.
+func (_u *MediaUpdate) SetNillableSha256(v *string) *MediaUpdate {
 	if v != nil {
-		_u.SetMd5sum(*v)
+		_u.SetSha256(*v)
 	}
 	return _u
 }
 
-// ClearMd5sum clears the value of the "md5sum" field.
-func (_u *MediaUpdate) ClearMd5sum() *MediaUpdate {
-	_u.mutation.ClearMd5sum()
+// ClearSha256 clears the value of the "sha256" field.
+func (_u *MediaUpdate) ClearSha256() *MediaUpdate {
+	_u.mutation.ClearSha256()
 	return _u
 }
 
@@ -529,26 +531,6 @@ func (_u *MediaUpdate) AddShareCount(v int64) *MediaUpdate {
 	return _u
 }
 
-// SetUUID sets the "uuid" field.
-func (_u *MediaUpdate) SetUUID(v string) *MediaUpdate {
-	_u.mutation.SetUUID(v)
-	return _u
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableUUID(v *string) *MediaUpdate {
-	if v != nil {
-		_u.SetUUID(*v)
-	}
-	return _u
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (_u *MediaUpdate) ClearUUID() *MediaUpdate {
-	_u.mutation.ClearUUID()
-	return _u
-}
-
 // SetAllowDownload sets the "allow_download" field.
 func (_u *MediaUpdate) SetAllowDownload(v bool) *MediaUpdate {
 	_u.mutation.SetAllowDownload(v)
@@ -736,6 +718,18 @@ func (_u *MediaUpdate) AppendTags(v []string) *MediaUpdate {
 // ClearTags clears the value of the "tags" field.
 func (_u *MediaUpdate) ClearTags() *MediaUpdate {
 	_u.mutation.ClearTags()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *MediaUpdate) SetMetadata(v map[string]interface{}) *MediaUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *MediaUpdate) ClearMetadata() *MediaUpdate {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -1030,6 +1024,21 @@ func (_u *MediaUpdate) AddReviewLogs(v ...*MediaReviewLog) *MediaUpdate {
 	return _u.AddReviewLogIDs(ids...)
 }
 
+// AddSubtitleIDs adds the "subtitles" edge to the Subtitle entity by IDs.
+func (_u *MediaUpdate) AddSubtitleIDs(ids ...string) *MediaUpdate {
+	_u.mutation.AddSubtitleIDs(ids...)
+	return _u
+}
+
+// AddSubtitles adds the "subtitles" edges to the Subtitle entity.
+func (_u *MediaUpdate) AddSubtitles(v ...*Subtitle) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleIDs(ids...)
+}
+
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
 func (_u *MediaUpdate) AddArticleIDs(ids ...string) *MediaUpdate {
 	_u.mutation.AddArticleIDs(ids...)
@@ -1058,6 +1067,21 @@ func (_u *MediaUpdate) AddReports(v ...*MediaReport) *MediaUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddReportIDs(ids...)
+}
+
+// AddDrmPolicyIDs adds the "drm_policies" edge to the MediaDrmPolicy entity by IDs.
+func (_u *MediaUpdate) AddDrmPolicyIDs(ids ...string) *MediaUpdate {
+	_u.mutation.AddDrmPolicyIDs(ids...)
+	return _u
+}
+
+// AddDrmPolicies adds the "drm_policies" edges to the MediaDrmPolicy entity.
+func (_u *MediaUpdate) AddDrmPolicies(v ...*MediaDrmPolicy) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDrmPolicyIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -1209,6 +1233,27 @@ func (_u *MediaUpdate) RemoveReviewLogs(v ...*MediaReviewLog) *MediaUpdate {
 	return _u.RemoveReviewLogIDs(ids...)
 }
 
+// ClearSubtitles clears all "subtitles" edges to the Subtitle entity.
+func (_u *MediaUpdate) ClearSubtitles() *MediaUpdate {
+	_u.mutation.ClearSubtitles()
+	return _u
+}
+
+// RemoveSubtitleIDs removes the "subtitles" edge to Subtitle entities by IDs.
+func (_u *MediaUpdate) RemoveSubtitleIDs(ids ...string) *MediaUpdate {
+	_u.mutation.RemoveSubtitleIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitles removes "subtitles" edges to Subtitle entities.
+func (_u *MediaUpdate) RemoveSubtitles(v ...*Subtitle) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleIDs(ids...)
+}
+
 // ClearArticles clears all "articles" edges to the Article entity.
 func (_u *MediaUpdate) ClearArticles() *MediaUpdate {
 	_u.mutation.ClearArticles()
@@ -1249,6 +1294,27 @@ func (_u *MediaUpdate) RemoveReports(v ...*MediaReport) *MediaUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveReportIDs(ids...)
+}
+
+// ClearDrmPolicies clears all "drm_policies" edges to the MediaDrmPolicy entity.
+func (_u *MediaUpdate) ClearDrmPolicies() *MediaUpdate {
+	_u.mutation.ClearDrmPolicies()
+	return _u
+}
+
+// RemoveDrmPolicyIDs removes the "drm_policies" edge to MediaDrmPolicy entities by IDs.
+func (_u *MediaUpdate) RemoveDrmPolicyIDs(ids ...string) *MediaUpdate {
+	_u.mutation.RemoveDrmPolicyIDs(ids...)
+	return _u
+}
+
+// RemoveDrmPolicies removes "drm_policies" edges to MediaDrmPolicy entities.
+func (_u *MediaUpdate) RemoveDrmPolicies(v ...*MediaDrmPolicy) *MediaUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDrmPolicyIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1339,9 +1405,9 @@ func (_u *MediaUpdate) check() error {
 			return &ValidationError{Name: "mime_type", err: fmt.Errorf(`entity: validator failed for field "Media.mime_type": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Md5sum(); ok {
-		if err := media.Md5sumValidator(v); err != nil {
-			return &ValidationError{Name: "md5sum", err: fmt.Errorf(`entity: validator failed for field "Media.md5sum": %w`, err)}
+	if v, ok := _u.mutation.Sha256(); ok {
+		if err := media.Sha256Validator(v); err != nil {
+			return &ValidationError{Name: "sha256", err: fmt.Errorf(`entity: validator failed for field "Media.sha256": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Extension(); ok {
@@ -1362,11 +1428,6 @@ func (_u *MediaUpdate) check() error {
 	if v, ok := _u.mutation.State(); ok {
 		if err := media.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.UUID(); ok {
-		if err := media.UUIDValidator(v); err != nil {
-			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ReviewStatus(); ok {
@@ -1490,11 +1551,11 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.MimeTypeCleared() {
 		_spec.ClearField(media.FieldMimeType, field.TypeString)
 	}
-	if value, ok := _u.mutation.Md5sum(); ok {
-		_spec.SetField(media.FieldMd5sum, field.TypeString, value)
+	if value, ok := _u.mutation.Sha256(); ok {
+		_spec.SetField(media.FieldSha256, field.TypeString, value)
 	}
-	if _u.mutation.Md5sumCleared() {
-		_spec.ClearField(media.FieldMd5sum, field.TypeString)
+	if _u.mutation.Sha256Cleared() {
+		_spec.ClearField(media.FieldSha256, field.TypeString)
 	}
 	if value, ok := _u.mutation.Extension(); ok {
 		_spec.SetField(media.FieldExtension, field.TypeString, value)
@@ -1553,12 +1614,6 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedShareCount(); ok {
 		_spec.AddField(media.FieldShareCount, field.TypeInt64, value)
 	}
-	if value, ok := _u.mutation.UUID(); ok {
-		_spec.SetField(media.FieldUUID, field.TypeString, value)
-	}
-	if _u.mutation.UUIDCleared() {
-		_spec.ClearField(media.FieldUUID, field.TypeString)
-	}
 	if value, ok := _u.mutation.AllowDownload(); ok {
 		_spec.SetField(media.FieldAllowDownload, field.TypeBool, value)
 	}
@@ -1614,6 +1669,12 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(media.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(media.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.TitleI18n(); ok {
 		_spec.SetField(media.FieldTitleI18n, field.TypeJSON, value)
@@ -2014,6 +2075,51 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SubtitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitlesIDs(); len(nodes) > 0 && !_u.mutation.SubtitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.ArticlesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -2097,6 +2203,51 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DrmPoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDrmPoliciesIDs(); len(nodes) > 0 && !_u.mutation.DrmPoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DrmPoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -2385,23 +2536,23 @@ func (_u *MediaUpdateOne) ClearMimeType() *MediaUpdateOne {
 	return _u
 }
 
-// SetMd5sum sets the "md5sum" field.
-func (_u *MediaUpdateOne) SetMd5sum(v string) *MediaUpdateOne {
-	_u.mutation.SetMd5sum(v)
+// SetSha256 sets the "sha256" field.
+func (_u *MediaUpdateOne) SetSha256(v string) *MediaUpdateOne {
+	_u.mutation.SetSha256(v)
 	return _u
 }
 
-// SetNillableMd5sum sets the "md5sum" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableMd5sum(v *string) *MediaUpdateOne {
+// SetNillableSha256 sets the "sha256" field if the given value is not nil.
+func (_u *MediaUpdateOne) SetNillableSha256(v *string) *MediaUpdateOne {
 	if v != nil {
-		_u.SetMd5sum(*v)
+		_u.SetSha256(*v)
 	}
 	return _u
 }
 
-// ClearMd5sum clears the value of the "md5sum" field.
-func (_u *MediaUpdateOne) ClearMd5sum() *MediaUpdateOne {
-	_u.mutation.ClearMd5sum()
+// ClearSha256 clears the value of the "sha256" field.
+func (_u *MediaUpdateOne) ClearSha256() *MediaUpdateOne {
+	_u.mutation.ClearSha256()
 	return _u
 }
 
@@ -2614,26 +2765,6 @@ func (_u *MediaUpdateOne) AddShareCount(v int64) *MediaUpdateOne {
 	return _u
 }
 
-// SetUUID sets the "uuid" field.
-func (_u *MediaUpdateOne) SetUUID(v string) *MediaUpdateOne {
-	_u.mutation.SetUUID(v)
-	return _u
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableUUID(v *string) *MediaUpdateOne {
-	if v != nil {
-		_u.SetUUID(*v)
-	}
-	return _u
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (_u *MediaUpdateOne) ClearUUID() *MediaUpdateOne {
-	_u.mutation.ClearUUID()
-	return _u
-}
-
 // SetAllowDownload sets the "allow_download" field.
 func (_u *MediaUpdateOne) SetAllowDownload(v bool) *MediaUpdateOne {
 	_u.mutation.SetAllowDownload(v)
@@ -2821,6 +2952,18 @@ func (_u *MediaUpdateOne) AppendTags(v []string) *MediaUpdateOne {
 // ClearTags clears the value of the "tags" field.
 func (_u *MediaUpdateOne) ClearTags() *MediaUpdateOne {
 	_u.mutation.ClearTags()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *MediaUpdateOne) SetMetadata(v map[string]interface{}) *MediaUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *MediaUpdateOne) ClearMetadata() *MediaUpdateOne {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -3115,6 +3258,21 @@ func (_u *MediaUpdateOne) AddReviewLogs(v ...*MediaReviewLog) *MediaUpdateOne {
 	return _u.AddReviewLogIDs(ids...)
 }
 
+// AddSubtitleIDs adds the "subtitles" edge to the Subtitle entity by IDs.
+func (_u *MediaUpdateOne) AddSubtitleIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.AddSubtitleIDs(ids...)
+	return _u
+}
+
+// AddSubtitles adds the "subtitles" edges to the Subtitle entity.
+func (_u *MediaUpdateOne) AddSubtitles(v ...*Subtitle) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSubtitleIDs(ids...)
+}
+
 // AddArticleIDs adds the "articles" edge to the Article entity by IDs.
 func (_u *MediaUpdateOne) AddArticleIDs(ids ...string) *MediaUpdateOne {
 	_u.mutation.AddArticleIDs(ids...)
@@ -3143,6 +3301,21 @@ func (_u *MediaUpdateOne) AddReports(v ...*MediaReport) *MediaUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddReportIDs(ids...)
+}
+
+// AddDrmPolicyIDs adds the "drm_policies" edge to the MediaDrmPolicy entity by IDs.
+func (_u *MediaUpdateOne) AddDrmPolicyIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.AddDrmPolicyIDs(ids...)
+	return _u
+}
+
+// AddDrmPolicies adds the "drm_policies" edges to the MediaDrmPolicy entity.
+func (_u *MediaUpdateOne) AddDrmPolicies(v ...*MediaDrmPolicy) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddDrmPolicyIDs(ids...)
 }
 
 // Mutation returns the MediaMutation object of the builder.
@@ -3294,6 +3467,27 @@ func (_u *MediaUpdateOne) RemoveReviewLogs(v ...*MediaReviewLog) *MediaUpdateOne
 	return _u.RemoveReviewLogIDs(ids...)
 }
 
+// ClearSubtitles clears all "subtitles" edges to the Subtitle entity.
+func (_u *MediaUpdateOne) ClearSubtitles() *MediaUpdateOne {
+	_u.mutation.ClearSubtitles()
+	return _u
+}
+
+// RemoveSubtitleIDs removes the "subtitles" edge to Subtitle entities by IDs.
+func (_u *MediaUpdateOne) RemoveSubtitleIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.RemoveSubtitleIDs(ids...)
+	return _u
+}
+
+// RemoveSubtitles removes "subtitles" edges to Subtitle entities.
+func (_u *MediaUpdateOne) RemoveSubtitles(v ...*Subtitle) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSubtitleIDs(ids...)
+}
+
 // ClearArticles clears all "articles" edges to the Article entity.
 func (_u *MediaUpdateOne) ClearArticles() *MediaUpdateOne {
 	_u.mutation.ClearArticles()
@@ -3334,6 +3528,27 @@ func (_u *MediaUpdateOne) RemoveReports(v ...*MediaReport) *MediaUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveReportIDs(ids...)
+}
+
+// ClearDrmPolicies clears all "drm_policies" edges to the MediaDrmPolicy entity.
+func (_u *MediaUpdateOne) ClearDrmPolicies() *MediaUpdateOne {
+	_u.mutation.ClearDrmPolicies()
+	return _u
+}
+
+// RemoveDrmPolicyIDs removes the "drm_policies" edge to MediaDrmPolicy entities by IDs.
+func (_u *MediaUpdateOne) RemoveDrmPolicyIDs(ids ...string) *MediaUpdateOne {
+	_u.mutation.RemoveDrmPolicyIDs(ids...)
+	return _u
+}
+
+// RemoveDrmPolicies removes "drm_policies" edges to MediaDrmPolicy entities.
+func (_u *MediaUpdateOne) RemoveDrmPolicies(v ...*MediaDrmPolicy) *MediaUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveDrmPolicyIDs(ids...)
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
@@ -3437,9 +3652,9 @@ func (_u *MediaUpdateOne) check() error {
 			return &ValidationError{Name: "mime_type", err: fmt.Errorf(`entity: validator failed for field "Media.mime_type": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Md5sum(); ok {
-		if err := media.Md5sumValidator(v); err != nil {
-			return &ValidationError{Name: "md5sum", err: fmt.Errorf(`entity: validator failed for field "Media.md5sum": %w`, err)}
+	if v, ok := _u.mutation.Sha256(); ok {
+		if err := media.Sha256Validator(v); err != nil {
+			return &ValidationError{Name: "sha256", err: fmt.Errorf(`entity: validator failed for field "Media.sha256": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Extension(); ok {
@@ -3460,11 +3675,6 @@ func (_u *MediaUpdateOne) check() error {
 	if v, ok := _u.mutation.State(); ok {
 		if err := media.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entity: validator failed for field "Media.state": %w`, err)}
-		}
-	}
-	if v, ok := _u.mutation.UUID(); ok {
-		if err := media.UUIDValidator(v); err != nil {
-			return &ValidationError{Name: "uuid", err: fmt.Errorf(`entity: validator failed for field "Media.uuid": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ReviewStatus(); ok {
@@ -3605,11 +3815,11 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if _u.mutation.MimeTypeCleared() {
 		_spec.ClearField(media.FieldMimeType, field.TypeString)
 	}
-	if value, ok := _u.mutation.Md5sum(); ok {
-		_spec.SetField(media.FieldMd5sum, field.TypeString, value)
+	if value, ok := _u.mutation.Sha256(); ok {
+		_spec.SetField(media.FieldSha256, field.TypeString, value)
 	}
-	if _u.mutation.Md5sumCleared() {
-		_spec.ClearField(media.FieldMd5sum, field.TypeString)
+	if _u.mutation.Sha256Cleared() {
+		_spec.ClearField(media.FieldSha256, field.TypeString)
 	}
 	if value, ok := _u.mutation.Extension(); ok {
 		_spec.SetField(media.FieldExtension, field.TypeString, value)
@@ -3668,12 +3878,6 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	if value, ok := _u.mutation.AddedShareCount(); ok {
 		_spec.AddField(media.FieldShareCount, field.TypeInt64, value)
 	}
-	if value, ok := _u.mutation.UUID(); ok {
-		_spec.SetField(media.FieldUUID, field.TypeString, value)
-	}
-	if _u.mutation.UUIDCleared() {
-		_spec.ClearField(media.FieldUUID, field.TypeString)
-	}
 	if value, ok := _u.mutation.AllowDownload(); ok {
 		_spec.SetField(media.FieldAllowDownload, field.TypeBool, value)
 	}
@@ -3729,6 +3933,12 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 	}
 	if _u.mutation.TagsCleared() {
 		_spec.ClearField(media.FieldTags, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(media.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(media.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.TitleI18n(); ok {
 		_spec.SetField(media.FieldTitleI18n, field.TypeJSON, value)
@@ -4129,6 +4339,51 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SubtitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSubtitlesIDs(); len(nodes) > 0 && !_u.mutation.SubtitlesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SubtitlesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.SubtitlesTable,
+			Columns: []string{media.SubtitlesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subtitle.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.ArticlesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -4212,6 +4467,51 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(mediareport.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.DrmPoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedDrmPoliciesIDs(); len(nodes) > 0 && !_u.mutation.DrmPoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.DrmPoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   media.DrmPoliciesTable,
+			Columns: []string{media.DrmPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(mediadrmpolicy.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

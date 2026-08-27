@@ -58,5 +58,8 @@ func (Tag) Edges() []ent.Edge {
 		edge.From("user", User.Type).Ref("tags"),
 		edge.To("names", TagName.Type),
 		edge.To("channel_tags", ChannelTag.Type),
+		// BUG-132: OnDelete belongs on the assoc edge (see media.go note).
+		edge.To("media_tags", MediaTag.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }

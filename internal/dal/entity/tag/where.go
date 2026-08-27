@@ -734,6 +734,29 @@ func HasChannelTagsWith(preds ...predicate.ChannelTag) predicate.Tag {
 	})
 }
 
+// HasMediaTags applies the HasEdge predicate on the "media_tags" edge.
+func HasMediaTags() predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MediaTagsTable, MediaTagsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMediaTagsWith applies the HasEdge predicate on the "media_tags" edge with a given conditions (other predicates).
+func HasMediaTagsWith(preds ...predicate.MediaTag) predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		step := newMediaTagsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Tag) predicate.Tag {
 	return predicate.Tag(sql.AndPredicates(predicates...))

@@ -8,14 +8,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/origadmin/runtime/errors"
 
 	"origadmin/application/origstudio/api/gen/v1/types" // Import the generated Media type
 	"origadmin/application/origstudio/internal/dal/enums"
@@ -110,6 +111,23 @@ func NewMediaUseCase(
 
 func (uc *MediaUseCase) GetMedia(ctx context.Context, id string) (*Media, error) {
 	return uc.repo.Get(ctx, id)
+}
+
+// DownloadSprite reads a sprite asset (VTT/JPG) from object storage. It is used
+// as a fallback by the sprite HTTP handler when the local-disk copy is missing
+// (multi-node / CDN deployments). relPath is the storage key as stored on the
+// media (info.VttPath / info.SpritePath), which matches the key produced by
+// GenerateSpriteAndVTT's UploadDir(spriteDir, Relative("sprites", mediaID)).
+func (uc *MediaUseCase) DownloadSprite(ctx context.Context, relPath string) ([]byte, error) {
+	if uc.storage == nil {
+		return nil, fmt.Errorf("storage not initialized")
+	}
+	rc, err := uc.storage.Download(ctx, relPath)
+	if err != nil {
+		return nil, err
+	}
+	defer rc.Close()
+	return io.ReadAll(rc)
 }
 
 // GetMediaWithEntity returns a single media with its loaded ent entity (including Edges).
@@ -253,6 +271,27 @@ func (uc *MediaUseCase) UpdateFavoriteCount(ctx context.Context, id string, delt
 	return uc.repo.UpdateFavoriteCount(ctx, id, delta)
 }
 
+func (uc *MediaUseCase) UpdateReportedTimes(ctx context.Context, id string, delta int) error {
+	return uc.repo.UpdateReportedTimes(ctx, id, delta)
+}
+
+// GetDefaultChannelID returns the ID of the user's first (default) channel.
+// Used by UploadMedia to auto-bind videos when no channel is specified.
+func (uc *MediaUseCase) GetDefaultChannelID(ctx context.Context, userID string) (string, error) {
+	return uc.repo.GetDefaultChannelID(ctx, userID)
+}
+
+// GetChannelOwnerID returns the owner user id of a channel ("" if not found).
+func (uc *MediaUseCase) GetChannelOwnerID(ctx context.Context, channelID string) (string, error) {
+	return uc.repo.GetChannelOwnerID(ctx, channelID)
+}
+
+// UpdateMediaChannel sets or clears a media's channel assignment (BUG-105).
+// channelID == "" clears the assignment; otherwise sets it (assign / move A->B).
+func (uc *MediaUseCase) UpdateMediaChannel(ctx context.Context, mediaID, channelID string) error {
+	return uc.repo.UpdateMediaChannel(ctx, mediaID, channelID)
+}
+
 func (uc *MediaUseCase) UpdateMediaState(ctx context.Context, id string, state string) error {
 	m, err := uc.repo.Get(ctx, id)
 	if err != nil {
@@ -390,7 +429,7 @@ func (uc *MediaUseCase) RetryAllFailedTasks(ctx context.Context, mediaID string)
 // --- Transcoding Status ---
 
 // VariantInfo holds aggregated info about a single encoding profile's result.
-// Returned by GetMediaVariants for frontend display and player configuration.
+// Returned by GetMediaVariantsByUUID for frontend display and player configuration.
 type VariantInfo struct {
 	TaskID       string                   `json:"task_id"`
 	ProfileName  string                   `json:"profile_name"`
@@ -475,10 +514,12 @@ type FlatTaskItem struct {
 	Id           string                   `json:"id"`
 	MediaId      string                   `json:"media_id"`
 	MediaTitle   string                   `json:"media_title,omitempty"`
+	MediaUrl     string                   `json:"media_url,omitempty"`
 	Thumbnail    string                   `json:"thumbnail,omitempty"`
 	ProfileId    int                      `json:"profile_id"`
 	ProfileName  string                   `json:"profile_name,omitempty"`
 	Status       enums.EncodingTaskStatus `json:"status"`
+	Progress     int                      `json:"progress"`
 	OutputPath   string                   `json:"output_path,omitempty"`
 	ErrorMessage string                   `json:"error_message,omitempty"`
 	CreateTime   string                   `json:"create_time,omitempty"`
@@ -636,6 +677,7 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 				MediaId:      t.MediaId,
 				ProfileId:    t.ProfileId,
 				Status:       t.Status,
+				Progress:     t.Progress,
 				OutputPath:   t.OutputPath,
 				ErrorMessage: t.ErrorMessage,
 				CreateTime:   t.CreateTime,
@@ -645,9 +687,10 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 			if profile, perr := uc.profileRepo.Get(ctx, t.ProfileId); perr == nil && profile != nil {
 				item.ProfileName = profile.Name
 			}
-			// Look up media title and thumbnail
+			// Look up media title, url and thumbnail
 			if m, ok := mediaCache[t.MediaId]; ok {
 				item.MediaTitle = m.Title
+				item.MediaUrl = m.Url
 				item.Thumbnail = m.Thumbnail
 			}
 			items[i] = item
@@ -667,24 +710,11 @@ func (uc *MediaUseCase) ListEncodingTasksFlat(
 	}, nil
 }
 
-// GetMediaVariants returns a comprehensive variant summary for a single media.
-// Used by media detail/management pages to show transcoding status and provide
-// playback URLs to the frontend.
-func (uc *MediaUseCase) GetMediaVariants(
-	ctx context.Context,
-	mediaID int64,
-) (*MediaVariantSummary, error) {
-	// 1. Load media
-	mediaIDStr := strconv.FormatInt(mediaID, 10)
-	return uc.getMediaVariantsByID(ctx, mediaIDStr, mediaID)
-}
-
 // getMediaVariantsByID is a helper function that takes a string media ID (UUID or numeric)
 // and returns the media variant summary.
 func (uc *MediaUseCase) getMediaVariantsByID(
 	ctx context.Context,
 	mediaIDStr string,
-	mediaID int64,
 ) (*MediaVariantSummary, error) {
 	media, err := uc.repo.Get(ctx, mediaIDStr)
 	if err != nil {
@@ -774,7 +804,7 @@ func (uc *MediaUseCase) GetMediaVariantsByUUID(
 	mediaIDStr string,
 ) (*MediaVariantSummary, error) {
 	// For UUID format, we can use 0 as the numeric mediaID since it's not used in the response
-	return uc.getMediaVariantsByID(ctx, mediaIDStr, 0)
+	return uc.getMediaVariantsByID(ctx, mediaIDStr)
 }
 
 // IsPreviewProfileFromName returns true if the profile name indicates it's a preview/GIF type.
@@ -974,6 +1004,7 @@ func (uc *MediaUseCase) ReviewMedia(ctx context.Context, mediaID string, approve
 	if approve {
 		newStatus = "reviewed"
 		action = "approve"
+		media.State = "active"
 	} else {
 		newStatus = "rejected"
 		action = "reject"
@@ -997,6 +1028,65 @@ func (uc *MediaUseCase) ReviewMedia(ctx context.Context, mediaID string, approve
 	return updated, nil
 }
 
+// PublishMedia submits a media for publication. It enforces the BUG-138 P0 rule:
+// a media can only be published after transcoding completes (encoding_status ==
+// "success"); otherwise it returns a 400 ENCODING_NOT_READY error. Once the guard
+// passes, reviewMode (resolved by the caller from global settings, defaulting to
+// "manual") drives the transition:
+//   - manual / unknown   -> review_status = pending_review (state untouched, admin must approve)
+//   - auto_approve / skip -> state = active, review_status = reviewed (published immediately)
+//
+// Listable is recomputed from (encoding_status, review_status, state) and the
+// submission is recorded in the review log (action="submit" or "auto_approve").
+func (uc *MediaUseCase) PublishMedia(ctx context.Context, mediaID string, reviewMode string, publisherID string) (*Media, error) {
+	media, err := uc.repo.Get(ctx, mediaID)
+	if err != nil {
+		return nil, err
+	}
+
+	// P0 hard guard: transcoding must be complete before publishing.
+	if media.EncodingStatus != "success" {
+		return nil, errors.BadRequest("ENCODING_NOT_READY",
+			fmt.Sprintf("media %s cannot be published: encoding_status=%q, expected 'success'", mediaID, media.EncodingStatus))
+	}
+
+	if reviewMode == "" {
+		reviewMode = "manual"
+	}
+
+	previousStatus := media.ReviewStatus
+	var newReviewStatus, newState, action string
+	switch reviewMode {
+	case "auto_approve", "skip":
+		newReviewStatus = "reviewed"
+		newState = "active"
+		action = "auto_approve"
+	default: // manual
+		newReviewStatus = "pending_review"
+		newState = media.State // unchanged (stays draft until admin approves)
+		action = "submit"
+	}
+
+	media.ReviewStatus = newReviewStatus
+	media.State = newState
+	media.Listable = uc.ShouldBeListable(media)
+
+	updated, err := uc.repo.Update(ctx, media)
+	if err != nil {
+		return nil, err
+	}
+
+	if uc.reviewLogRepo != nil {
+		if _, logErr := uc.reviewLogRepo.Create(ctx, mediaID, publisherID, action, "", previousStatus, newReviewStatus); logErr != nil {
+			uc.log.Warnf("failed to create review log for publish of media %s: %v", mediaID, logErr)
+		}
+	}
+
+	uc.log.Infof("Media %s published by %s: mode=%s (previous review=%s, new review=%s, state=%s)",
+		mediaID, publisherID, reviewMode, previousStatus, newReviewStatus, newState)
+	return updated, nil
+}
+
 // ListReviewLogs returns the review log entries for a given media.
 func (uc *MediaUseCase) ListReviewLogs(ctx context.Context, mediaID string) ([]*ReviewLog, error) {
 	if uc.reviewLogRepo == nil {
@@ -1017,6 +1107,8 @@ func (uc *MediaUseCase) ShouldBeListable(media *Media) bool {
 // SpriteInfo holds sprite-related data for a media item.
 // Used by handlers that need access to internal entity fields not exposed in types.Media.
 type SpriteInfo struct {
+	ID           string
+	UserID       string
 	Type         string
 	SpriteStatus string
 	VttPath      string
@@ -1039,6 +1131,8 @@ func (uc *MediaUseCase) GetSpriteInfoByID(ctx context.Context, id string) (*Spri
 		return nil, err
 	}
 	return &SpriteInfo{
+		ID:           ent.ID,
+		UserID:       ent.UserID,
 		Type:         string(ent.Type),
 		SpriteStatus: ent.SpriteStatus,
 		VttPath:      ent.VttPath,
@@ -1055,6 +1149,8 @@ func (uc *MediaUseCase) GetSpriteInfoByShortToken(ctx context.Context, shortToke
 		return nil, err
 	}
 	return &SpriteInfo{
+		ID:           ent.ID,
+		UserID:       ent.UserID,
 		Type:         string(ent.Type),
 		SpriteStatus: ent.SpriteStatus,
 		VttPath:      ent.VttPath,
@@ -1090,6 +1186,22 @@ func (uc *MediaUseCase) RegenerateThumbnail(ctx context.Context, mediaID string,
 	return uc.spriteUC.RegenerateThumbnail(ctx, mediaID, timestamp)
 }
 
+func (uc *MediaUseCase) SetCustomThumbnail(ctx context.Context, mediaID string, imagePath string) error {
+	if uc.spriteUC == nil {
+		return fmt.Errorf("sprite use case not initialized")
+	}
+	return uc.spriteUC.SetCustomThumbnail(ctx, mediaID, imagePath)
+}
+
+// SetSpriteSheetThumbnail points the media cover at the whole sprite sheet
+// image (see SpriteUseCase.SetSpriteSheetThumbnail for the product rationale).
+func (uc *MediaUseCase) SetSpriteSheetThumbnail(ctx context.Context, mediaID string) error {
+	if uc.spriteUC == nil {
+		return fmt.Errorf("sprite use case not initialized")
+	}
+	return uc.spriteUC.SetSpriteSheetThumbnail(ctx, mediaID)
+}
+
 // GenerateCommandPreview generates a preview of the ffmpeg command that would be
 // executed for the given encode profile. This does not execute the command, only
 // produces the command string for display purposes.
@@ -1110,4 +1222,44 @@ func (uc *MediaUseCase) GenerateCommandPreview(ctx context.Context, profile *dto
 	default:
 		return ""
 	}
+}
+
+func (uc *MediaUseCase) ListCategories(ctx context.Context, opts ...*dto.CategoryQueryOption) ([]*types.Category, int32, error) {
+	return uc.repo.ListCategories(ctx, opts...)
+}
+
+func (uc *MediaUseCase) GetCategory(ctx context.Context, id string) (*types.Category, error) {
+	return uc.repo.GetCategory(ctx, id)
+}
+
+func (uc *MediaUseCase) CreateCategory(ctx context.Context, c *types.Category) (*types.Category, error) {
+	return uc.repo.CreateCategory(ctx, c)
+}
+
+func (uc *MediaUseCase) UpdateCategory(ctx context.Context, c *types.Category) (*types.Category, error) {
+	return uc.repo.UpdateCategory(ctx, c)
+}
+
+func (uc *MediaUseCase) DeleteCategory(ctx context.Context, id string) error {
+	return uc.repo.DeleteCategory(ctx, id)
+}
+
+func (uc *MediaUseCase) ListTags(ctx context.Context, opts ...*dto.TagQueryOption) ([]*types.Tag, int32, error) {
+	return uc.repo.ListTags(ctx, opts...)
+}
+
+func (uc *MediaUseCase) GetTag(ctx context.Context, id string) (*types.Tag, error) {
+	return uc.repo.GetTag(ctx, id)
+}
+
+func (uc *MediaUseCase) CreateTag(ctx context.Context, t *types.Tag) (*types.Tag, error) {
+	return uc.repo.CreateTag(ctx, t)
+}
+
+func (uc *MediaUseCase) UpdateTag(ctx context.Context, t *types.Tag) (*types.Tag, error) {
+	return uc.repo.UpdateTag(ctx, t)
+}
+
+func (uc *MediaUseCase) DeleteTag(ctx context.Context, id string) error {
+	return uc.repo.DeleteTag(ctx, id)
 }

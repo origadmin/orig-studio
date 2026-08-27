@@ -89,6 +89,11 @@ func ImageMobileURL(v string) predicate.PortalBanner {
 	return predicate.PortalBanner(sql.FieldEQ(FieldImageMobileURL, v))
 }
 
+// VideoURL applies equality check predicate on the "video_url" field. It's identical to VideoURLEQ.
+func VideoURL(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldVideoURL, v))
+}
+
 // BgColorStart applies equality check predicate on the "bg_color_start" field. It's identical to BgColorStartEQ.
 func BgColorStart(v string) predicate.PortalBanner {
 	return predicate.PortalBanner(sql.FieldEQ(FieldBgColorStart, v))
@@ -147,6 +152,26 @@ func EndAt(v time.Time) predicate.PortalBanner {
 // AutoSlideInterval applies equality check predicate on the "auto_slide_interval" field. It's identical to AutoSlideIntervalEQ.
 func AutoSlideInterval(v int) predicate.PortalBanner {
 	return predicate.PortalBanner(sql.FieldEQ(FieldAutoSlideInterval, v))
+}
+
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldType, v))
+}
+
+// Count applies equality check predicate on the "count" field. It's identical to CountEQ.
+func Count(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldCount, v))
+}
+
+// CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
+func CategoryID(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// DisplayMode applies equality check predicate on the "display_mode" field. It's identical to DisplayModeEQ.
+func DisplayMode(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldDisplayMode, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -532,6 +557,81 @@ func ImageMobileURLEqualFold(v string) predicate.PortalBanner {
 // ImageMobileURLContainsFold applies the ContainsFold predicate on the "image_mobile_url" field.
 func ImageMobileURLContainsFold(v string) predicate.PortalBanner {
 	return predicate.PortalBanner(sql.FieldContainsFold(FieldImageMobileURL, v))
+}
+
+// VideoURLEQ applies the EQ predicate on the "video_url" field.
+func VideoURLEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldVideoURL, v))
+}
+
+// VideoURLNEQ applies the NEQ predicate on the "video_url" field.
+func VideoURLNEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNEQ(FieldVideoURL, v))
+}
+
+// VideoURLIn applies the In predicate on the "video_url" field.
+func VideoURLIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIn(FieldVideoURL, vs...))
+}
+
+// VideoURLNotIn applies the NotIn predicate on the "video_url" field.
+func VideoURLNotIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotIn(FieldVideoURL, vs...))
+}
+
+// VideoURLGT applies the GT predicate on the "video_url" field.
+func VideoURLGT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGT(FieldVideoURL, v))
+}
+
+// VideoURLGTE applies the GTE predicate on the "video_url" field.
+func VideoURLGTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGTE(FieldVideoURL, v))
+}
+
+// VideoURLLT applies the LT predicate on the "video_url" field.
+func VideoURLLT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLT(FieldVideoURL, v))
+}
+
+// VideoURLLTE applies the LTE predicate on the "video_url" field.
+func VideoURLLTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLTE(FieldVideoURL, v))
+}
+
+// VideoURLContains applies the Contains predicate on the "video_url" field.
+func VideoURLContains(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContains(FieldVideoURL, v))
+}
+
+// VideoURLHasPrefix applies the HasPrefix predicate on the "video_url" field.
+func VideoURLHasPrefix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasPrefix(FieldVideoURL, v))
+}
+
+// VideoURLHasSuffix applies the HasSuffix predicate on the "video_url" field.
+func VideoURLHasSuffix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasSuffix(FieldVideoURL, v))
+}
+
+// VideoURLIsNil applies the IsNil predicate on the "video_url" field.
+func VideoURLIsNil() predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIsNull(FieldVideoURL))
+}
+
+// VideoURLNotNil applies the NotNil predicate on the "video_url" field.
+func VideoURLNotNil() predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotNull(FieldVideoURL))
+}
+
+// VideoURLEqualFold applies the EqualFold predicate on the "video_url" field.
+func VideoURLEqualFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEqualFold(FieldVideoURL, v))
+}
+
+// VideoURLContainsFold applies the ContainsFold predicate on the "video_url" field.
+func VideoURLContainsFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContainsFold(FieldVideoURL, v))
 }
 
 // BgColorStartEQ applies the EQ predicate on the "bg_color_start" field.
@@ -1212,6 +1312,251 @@ func AutoSlideIntervalLT(v int) predicate.PortalBanner {
 // AutoSlideIntervalLTE applies the LTE predicate on the "auto_slide_interval" field.
 func AutoSlideIntervalLTE(v int) predicate.PortalBanner {
 	return predicate.PortalBanner(sql.FieldLTE(FieldAutoSlideInterval, v))
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotIn(FieldType, vs...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGT(FieldType, v))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGTE(FieldType, v))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLT(FieldType, v))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLTE(FieldType, v))
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContains(FieldType, v))
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasPrefix(FieldType, v))
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasSuffix(FieldType, v))
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEqualFold(FieldType, v))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContainsFold(FieldType, v))
+}
+
+// CountEQ applies the EQ predicate on the "count" field.
+func CountEQ(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldCount, v))
+}
+
+// CountNEQ applies the NEQ predicate on the "count" field.
+func CountNEQ(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNEQ(FieldCount, v))
+}
+
+// CountIn applies the In predicate on the "count" field.
+func CountIn(vs ...int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIn(FieldCount, vs...))
+}
+
+// CountNotIn applies the NotIn predicate on the "count" field.
+func CountNotIn(vs ...int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotIn(FieldCount, vs...))
+}
+
+// CountGT applies the GT predicate on the "count" field.
+func CountGT(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGT(FieldCount, v))
+}
+
+// CountGTE applies the GTE predicate on the "count" field.
+func CountGTE(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGTE(FieldCount, v))
+}
+
+// CountLT applies the LT predicate on the "count" field.
+func CountLT(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLT(FieldCount, v))
+}
+
+// CountLTE applies the LTE predicate on the "count" field.
+func CountLTE(v int) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLTE(FieldCount, v))
+}
+
+// CategoryIDEQ applies the EQ predicate on the "category_id" field.
+func CategoryIDEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldCategoryID, v))
+}
+
+// CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
+func CategoryIDNEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNEQ(FieldCategoryID, v))
+}
+
+// CategoryIDIn applies the In predicate on the "category_id" field.
+func CategoryIDIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
+func CategoryIDNotIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotIn(FieldCategoryID, vs...))
+}
+
+// CategoryIDGT applies the GT predicate on the "category_id" field.
+func CategoryIDGT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGT(FieldCategoryID, v))
+}
+
+// CategoryIDGTE applies the GTE predicate on the "category_id" field.
+func CategoryIDGTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGTE(FieldCategoryID, v))
+}
+
+// CategoryIDLT applies the LT predicate on the "category_id" field.
+func CategoryIDLT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLT(FieldCategoryID, v))
+}
+
+// CategoryIDLTE applies the LTE predicate on the "category_id" field.
+func CategoryIDLTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLTE(FieldCategoryID, v))
+}
+
+// CategoryIDContains applies the Contains predicate on the "category_id" field.
+func CategoryIDContains(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContains(FieldCategoryID, v))
+}
+
+// CategoryIDHasPrefix applies the HasPrefix predicate on the "category_id" field.
+func CategoryIDHasPrefix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasPrefix(FieldCategoryID, v))
+}
+
+// CategoryIDHasSuffix applies the HasSuffix predicate on the "category_id" field.
+func CategoryIDHasSuffix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasSuffix(FieldCategoryID, v))
+}
+
+// CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
+func CategoryIDIsNil() predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIsNull(FieldCategoryID))
+}
+
+// CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
+func CategoryIDNotNil() predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotNull(FieldCategoryID))
+}
+
+// CategoryIDEqualFold applies the EqualFold predicate on the "category_id" field.
+func CategoryIDEqualFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEqualFold(FieldCategoryID, v))
+}
+
+// CategoryIDContainsFold applies the ContainsFold predicate on the "category_id" field.
+func CategoryIDContainsFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContainsFold(FieldCategoryID, v))
+}
+
+// DisplayModeEQ applies the EQ predicate on the "display_mode" field.
+func DisplayModeEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEQ(FieldDisplayMode, v))
+}
+
+// DisplayModeNEQ applies the NEQ predicate on the "display_mode" field.
+func DisplayModeNEQ(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNEQ(FieldDisplayMode, v))
+}
+
+// DisplayModeIn applies the In predicate on the "display_mode" field.
+func DisplayModeIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldIn(FieldDisplayMode, vs...))
+}
+
+// DisplayModeNotIn applies the NotIn predicate on the "display_mode" field.
+func DisplayModeNotIn(vs ...string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldNotIn(FieldDisplayMode, vs...))
+}
+
+// DisplayModeGT applies the GT predicate on the "display_mode" field.
+func DisplayModeGT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGT(FieldDisplayMode, v))
+}
+
+// DisplayModeGTE applies the GTE predicate on the "display_mode" field.
+func DisplayModeGTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldGTE(FieldDisplayMode, v))
+}
+
+// DisplayModeLT applies the LT predicate on the "display_mode" field.
+func DisplayModeLT(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLT(FieldDisplayMode, v))
+}
+
+// DisplayModeLTE applies the LTE predicate on the "display_mode" field.
+func DisplayModeLTE(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldLTE(FieldDisplayMode, v))
+}
+
+// DisplayModeContains applies the Contains predicate on the "display_mode" field.
+func DisplayModeContains(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContains(FieldDisplayMode, v))
+}
+
+// DisplayModeHasPrefix applies the HasPrefix predicate on the "display_mode" field.
+func DisplayModeHasPrefix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasPrefix(FieldDisplayMode, v))
+}
+
+// DisplayModeHasSuffix applies the HasSuffix predicate on the "display_mode" field.
+func DisplayModeHasSuffix(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldHasSuffix(FieldDisplayMode, v))
+}
+
+// DisplayModeEqualFold applies the EqualFold predicate on the "display_mode" field.
+func DisplayModeEqualFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldEqualFold(FieldDisplayMode, v))
+}
+
+// DisplayModeContainsFold applies the ContainsFold predicate on the "display_mode" field.
+func DisplayModeContainsFold(v string) predicate.PortalBanner {
+	return predicate.PortalBanner(sql.FieldContainsFold(FieldDisplayMode, v))
 }
 
 // And groups predicates with the AND operator between them.

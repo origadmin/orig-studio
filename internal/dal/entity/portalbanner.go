@@ -32,6 +32,8 @@ type PortalBanner struct {
 	ImageURL string `json:"image_url,omitempty"`
 	// ImageMobileURL holds the value of the "image_mobile_url" field.
 	ImageMobileURL string `json:"image_mobile_url,omitempty"`
+	// VideoURL holds the value of the "video_url" field.
+	VideoURL string `json:"video_url,omitempty"`
 	// BgColorStart holds the value of the "bg_color_start" field.
 	BgColorStart string `json:"bg_color_start,omitempty"`
 	// BgColorEnd holds the value of the "bg_color_end" field.
@@ -56,7 +58,15 @@ type PortalBanner struct {
 	EndAt time.Time `json:"end_at,omitempty"`
 	// AutoSlideInterval holds the value of the "auto_slide_interval" field.
 	AutoSlideInterval int `json:"auto_slide_interval,omitempty"`
-	selectValues      sql.SelectValues
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
+	// Count holds the value of the "count" field.
+	Count int `json:"count,omitempty"`
+	// CategoryID holds the value of the "category_id" field.
+	CategoryID string `json:"category_id,omitempty"`
+	// DisplayMode holds the value of the "display_mode" field.
+	DisplayMode  string `json:"display_mode,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -70,9 +80,9 @@ func (*PortalBanner) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case portalbanner.FieldBgOverlayOpacity:
 			values[i] = new(sql.NullFloat64)
-		case portalbanner.FieldSequence, portalbanner.FieldAutoSlideInterval:
+		case portalbanner.FieldSequence, portalbanner.FieldAutoSlideInterval, portalbanner.FieldCount:
 			values[i] = new(sql.NullInt64)
-		case portalbanner.FieldID, portalbanner.FieldTitle, portalbanner.FieldSubtitle, portalbanner.FieldBadgeText, portalbanner.FieldImageURL, portalbanner.FieldImageMobileURL, portalbanner.FieldBgColorStart, portalbanner.FieldBgColorEnd, portalbanner.FieldPrimaryBtnText, portalbanner.FieldPrimaryBtnURL, portalbanner.FieldSecondaryBtnText, portalbanner.FieldSecondaryBtnURL:
+		case portalbanner.FieldID, portalbanner.FieldTitle, portalbanner.FieldSubtitle, portalbanner.FieldBadgeText, portalbanner.FieldImageURL, portalbanner.FieldImageMobileURL, portalbanner.FieldVideoURL, portalbanner.FieldBgColorStart, portalbanner.FieldBgColorEnd, portalbanner.FieldPrimaryBtnText, portalbanner.FieldPrimaryBtnURL, portalbanner.FieldSecondaryBtnText, portalbanner.FieldSecondaryBtnURL, portalbanner.FieldType, portalbanner.FieldCategoryID, portalbanner.FieldDisplayMode:
 			values[i] = new(sql.NullString)
 		case portalbanner.FieldStartAt, portalbanner.FieldEndAt:
 			values[i] = new(sql.NullTime)
@@ -142,6 +152,12 @@ func (_m *PortalBanner) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field image_mobile_url", values[i])
 			} else if value.Valid {
 				_m.ImageMobileURL = value.String
+			}
+		case portalbanner.FieldVideoURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field video_url", values[i])
+			} else if value.Valid {
+				_m.VideoURL = value.String
 			}
 		case portalbanner.FieldBgColorStart:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -215,6 +231,30 @@ func (_m *PortalBanner) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AutoSlideInterval = int(value.Int64)
 			}
+		case portalbanner.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				_m.Type = value.String
+			}
+		case portalbanner.FieldCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field count", values[i])
+			} else if value.Valid {
+				_m.Count = int(value.Int64)
+			}
+		case portalbanner.FieldCategoryID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field category_id", values[i])
+			} else if value.Valid {
+				_m.CategoryID = value.String
+			}
+		case portalbanner.FieldDisplayMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_mode", values[i])
+			} else if value.Valid {
+				_m.DisplayMode = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -272,6 +312,9 @@ func (_m *PortalBanner) String() string {
 	builder.WriteString("image_mobile_url=")
 	builder.WriteString(_m.ImageMobileURL)
 	builder.WriteString(", ")
+	builder.WriteString("video_url=")
+	builder.WriteString(_m.VideoURL)
+	builder.WriteString(", ")
 	builder.WriteString("bg_color_start=")
 	builder.WriteString(_m.BgColorStart)
 	builder.WriteString(", ")
@@ -307,6 +350,18 @@ func (_m *PortalBanner) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("auto_slide_interval=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AutoSlideInterval))
+	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(_m.Type)
+	builder.WriteString(", ")
+	builder.WriteString("count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Count))
+	builder.WriteString(", ")
+	builder.WriteString("category_id=")
+	builder.WriteString(_m.CategoryID)
+	builder.WriteString(", ")
+	builder.WriteString("display_mode=")
+	builder.WriteString(_m.DisplayMode)
 	builder.WriteByte(')')
 	return builder.String()
 }

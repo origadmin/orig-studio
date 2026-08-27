@@ -43,8 +43,8 @@ const (
 	FieldHeight = "height"
 	// FieldMimeType holds the string denoting the mime_type field in the database.
 	FieldMimeType = "mime_type"
-	// FieldMd5sum holds the string denoting the md5sum field in the database.
-	FieldMd5sum = "md5sum"
+	// FieldSha256 holds the string denoting the sha256 field in the database.
+	FieldSha256 = "sha256"
 	// FieldExtension holds the string denoting the extension field in the database.
 	FieldExtension = "extension"
 	// FieldPrivacy holds the string denoting the privacy field in the database.
@@ -67,8 +67,6 @@ const (
 	FieldDownloadCount = "download_count"
 	// FieldShareCount holds the string denoting the share_count field in the database.
 	FieldShareCount = "share_count"
-	// FieldUUID holds the string denoting the uuid field in the database.
-	FieldUUID = "uuid"
 	// FieldAllowDownload holds the string denoting the allow_download field in the database.
 	FieldAllowDownload = "allow_download"
 	// FieldEnableComments holds the string denoting the enable_comments field in the database.
@@ -91,6 +89,8 @@ const (
 	FieldThumbnailTime = "thumbnail_time"
 	// FieldTags holds the string denoting the tags field in the database.
 	FieldTags = "tags"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// FieldTitleI18n holds the string denoting the title_i18n field in the database.
 	FieldTitleI18n = "title_i18n"
 	// FieldDescriptionI18n holds the string denoting the description_i18n field in the database.
@@ -133,10 +133,14 @@ const (
 	EdgeLikes = "likes"
 	// EdgeReviewLogs holds the string denoting the review_logs edge name in mutations.
 	EdgeReviewLogs = "review_logs"
+	// EdgeSubtitles holds the string denoting the subtitles edge name in mutations.
+	EdgeSubtitles = "subtitles"
 	// EdgeArticles holds the string denoting the articles edge name in mutations.
 	EdgeArticles = "articles"
 	// EdgeReports holds the string denoting the reports edge name in mutations.
 	EdgeReports = "reports"
+	// EdgeDrmPolicies holds the string denoting the drm_policies edge name in mutations.
+	EdgeDrmPolicies = "drm_policies"
 	// Table holds the table name of the media in the database.
 	Table = "content_media"
 	// UserTable is the table that holds the user relation/edge.
@@ -180,7 +184,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "mediatag" package.
 	TagsRelInverseTable = "content_media_tags"
 	// TagsRelColumn is the table column denoting the tags_rel relation/edge.
-	TagsRelColumn = "media_tags_rel"
+	TagsRelColumn = "media_id"
 	// FavoritesTable is the table that holds the favorites relation/edge.
 	FavoritesTable = "content_favorites"
 	// FavoritesInverseTable is the table name for the Favorite entity.
@@ -202,6 +206,13 @@ const (
 	ReviewLogsInverseTable = "content_media_review_logs"
 	// ReviewLogsColumn is the table column denoting the review_logs relation/edge.
 	ReviewLogsColumn = "media_id"
+	// SubtitlesTable is the table that holds the subtitles relation/edge.
+	SubtitlesTable = "subtitles"
+	// SubtitlesInverseTable is the table name for the Subtitle entity.
+	// It exists in this package in order to avoid circular dependency with the "subtitle" package.
+	SubtitlesInverseTable = "subtitles"
+	// SubtitlesColumn is the table column denoting the subtitles relation/edge.
+	SubtitlesColumn = "media_id"
 	// ArticlesTable is the table that holds the articles relation/edge.
 	ArticlesTable = "content_articles"
 	// ArticlesInverseTable is the table name for the Article entity.
@@ -216,6 +227,13 @@ const (
 	ReportsInverseTable = "content_media_reports"
 	// ReportsColumn is the table column denoting the reports relation/edge.
 	ReportsColumn = "media_id"
+	// DrmPoliciesTable is the table that holds the drm_policies relation/edge.
+	DrmPoliciesTable = "media_drm_policies"
+	// DrmPoliciesInverseTable is the table name for the MediaDrmPolicy entity.
+	// It exists in this package in order to avoid circular dependency with the "mediadrmpolicy" package.
+	DrmPoliciesInverseTable = "media_drm_policies"
+	// DrmPoliciesColumn is the table column denoting the drm_policies relation/edge.
+	DrmPoliciesColumn = "media_id"
 )
 
 // Columns holds all SQL columns for media fields.
@@ -235,7 +253,7 @@ var Columns = []string{
 	FieldWidth,
 	FieldHeight,
 	FieldMimeType,
-	FieldMd5sum,
+	FieldSha256,
 	FieldExtension,
 	FieldPrivacy,
 	FieldEncodingStatus,
@@ -247,7 +265,6 @@ var Columns = []string{
 	FieldFavoriteCount,
 	FieldDownloadCount,
 	FieldShareCount,
-	FieldUUID,
 	FieldAllowDownload,
 	FieldEnableComments,
 	FieldFeatured,
@@ -259,6 +276,7 @@ var Columns = []string{
 	FieldVttPath,
 	FieldThumbnailTime,
 	FieldTags,
+	FieldMetadata,
 	FieldTitleI18n,
 	FieldDescriptionI18n,
 	FieldSyncStatus,
@@ -277,7 +295,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"media_category_media",
-	"media_tag_media",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -326,8 +343,8 @@ var (
 	DefaultHeight int
 	// MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
 	MimeTypeValidator func(string) error
-	// Md5sumValidator is a validator for the "md5sum" field. It is called by the builders before save.
-	Md5sumValidator func(string) error
+	// Sha256Validator is a validator for the "sha256" field. It is called by the builders before save.
+	Sha256Validator func(string) error
 	// ExtensionValidator is a validator for the "extension" field. It is called by the builders before save.
 	ExtensionValidator func(string) error
 	// DefaultEncodingStatus holds the default value on creation for the "encoding_status" field.
@@ -352,8 +369,6 @@ var (
 	DefaultDownloadCount int64
 	// DefaultShareCount holds the default value on creation for the "share_count" field.
 	DefaultShareCount int64
-	// UUIDValidator is a validator for the "uuid" field. It is called by the builders before save.
-	UUIDValidator func(string) error
 	// DefaultAllowDownload holds the default value on creation for the "allow_download" field.
 	DefaultAllowDownload bool
 	// DefaultEnableComments holds the default value on creation for the "enable_comments" field.
@@ -502,9 +517,9 @@ func ByMimeType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMimeType, opts...).ToFunc()
 }
 
-// ByMd5sum orders the results by the md5sum field.
-func ByMd5sum(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMd5sum, opts...).ToFunc()
+// BySha256 orders the results by the sha256 field.
+func BySha256(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSha256, opts...).ToFunc()
 }
 
 // ByExtension orders the results by the extension field.
@@ -560,11 +575,6 @@ func ByDownloadCount(opts ...sql.OrderTermOption) OrderOption {
 // ByShareCount orders the results by the share_count field.
 func ByShareCount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldShareCount, opts...).ToFunc()
-}
-
-// ByUUID orders the results by the uuid field.
-func ByUUID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUUID, opts...).ToFunc()
 }
 
 // ByAllowDownload orders the results by the allow_download field.
@@ -772,6 +782,20 @@ func ByReviewLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// BySubtitlesCount orders the results by subtitles count.
+func BySubtitlesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSubtitlesStep(), opts...)
+	}
+}
+
+// BySubtitles orders the results by subtitles terms.
+func BySubtitles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSubtitlesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByArticlesCount orders the results by articles count.
 func ByArticlesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -797,6 +821,20 @@ func ByReportsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByReports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newReportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByDrmPoliciesCount orders the results by drm_policies count.
+func ByDrmPoliciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDrmPoliciesStep(), opts...)
+	}
+}
+
+// ByDrmPolicies orders the results by drm_policies terms.
+func ByDrmPolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDrmPoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newUserStep() *sqlgraph.Step {
@@ -862,6 +900,13 @@ func newReviewLogsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, ReviewLogsTable, ReviewLogsColumn),
 	)
 }
+func newSubtitlesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SubtitlesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SubtitlesTable, SubtitlesColumn),
+	)
+}
 func newArticlesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -874,5 +919,12 @@ func newReportsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ReportsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ReportsTable, ReportsColumn),
+	)
+}
+func newDrmPoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DrmPoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DrmPoliciesTable, DrmPoliciesColumn),
 	)
 }

@@ -12,8 +12,6 @@ import (
 	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/entity/favorite"
 	"origadmin/application/origstudio/internal/dal/entity/like"
-	"origadmin/application/origstudio/internal/dal/entity/media"
-	"origadmin/application/origstudio/internal/dal/entity/user"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )
 
@@ -65,8 +63,8 @@ func (r *likeRepo) Create(
 func (r *likeRepo) Delete(ctx context.Context, userID, mediaID string) error {
 	_, err := r.data.db.Like.Delete().
 		Where(
-			like.HasMediaWith(media.IDEQ(mediaID)),
-			like.HasUserWith(user.IDEQ(userID)),
+			like.UserIDEQ(userID),
+			like.MediaIDEQ(mediaID),
 		).
 		Exec(ctx)
 	return err
@@ -75,8 +73,8 @@ func (r *likeRepo) Delete(ctx context.Context, userID, mediaID string) error {
 func (r *likeRepo) GetStatus(ctx context.Context, userID, mediaID string) (string, error) {
 	ent, err := r.data.db.Like.Query().
 		Where(
-			like.HasMediaWith(media.IDEQ(mediaID)),
-			like.HasUserWith(user.IDEQ(userID)),
+			like.UserIDEQ(userID),
+			like.MediaIDEQ(mediaID),
 		).
 		Only(ctx)
 	if err != nil {
@@ -91,7 +89,7 @@ func (r *likeRepo) GetStatus(ctx context.Context, userID, mediaID string) (strin
 func (r *likeRepo) CountByMedia(ctx context.Context, mediaID string, likeType string) (int64, error) {
 	count, err := r.data.db.Like.Query().
 		Where(
-			like.HasMediaWith(media.IDEQ(mediaID)),
+			like.MediaIDEQ(mediaID),
 			like.LikeTypeEQ(likeType),
 		).
 		Count(ctx)
@@ -100,7 +98,7 @@ func (r *likeRepo) CountByMedia(ctx context.Context, mediaID string, likeType st
 
 func (r *likeRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Like, error) {
 	ents, err := r.data.db.Like.Query().
-		Where(like.HasUserWith(user.IDEQ(userID))).
+		Where(like.UserIDEQ(userID)).
 		Order(entity.Desc(like.FieldCreateTime)).
 		WithMedia().
 		All(ctx)
@@ -145,8 +143,8 @@ func (r *favoriteRepo) Create(ctx context.Context, userID, mediaID string) (*biz
 func (r *favoriteRepo) Delete(ctx context.Context, userID, mediaID string) error {
 	_, err := r.data.db.Favorite.Delete().
 		Where(
-			favorite.HasMediaWith(media.IDEQ(mediaID)),
-			favorite.HasUserWith(user.IDEQ(userID)),
+			favorite.UserIDEQ(userID),
+			favorite.MediaIDEQ(mediaID),
 		).
 		Exec(ctx)
 	return err
@@ -159,22 +157,22 @@ func (r *favoriteRepo) DeleteByID(ctx context.Context, id string) error {
 func (r *favoriteRepo) IsFavorited(ctx context.Context, userID, mediaID string) (bool, error) {
 	return r.data.db.Favorite.Query().
 		Where(
-			favorite.HasMediaWith(media.IDEQ(mediaID)),
-			favorite.HasUserWith(user.IDEQ(userID)),
+			favorite.UserIDEQ(userID),
+			favorite.MediaIDEQ(mediaID),
 		).
 		Exist(ctx)
 }
 
 func (r *favoriteRepo) CountByMedia(ctx context.Context, mediaID string) (int64, error) {
 	count, err := r.data.db.Favorite.Query().
-		Where(favorite.HasMediaWith(media.IDEQ(mediaID))).
+		Where(favorite.MediaIDEQ(mediaID)).
 		Count(ctx)
 	return int64(count), err
 }
 
 func (r *favoriteRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Favorite, error) {
 	ents, err := r.data.db.Favorite.Query().
-		Where(favorite.HasUserWith(user.IDEQ(userID))).
+		Where(favorite.UserIDEQ(userID)).
 		Order(entity.Desc(favorite.FieldCreateTime)).
 		WithMedia(func(q *entity.MediaQuery) { q.WithUser() }).
 		All(ctx)
@@ -222,28 +220,34 @@ func (r *favoriteRepo) ListByUser(ctx context.Context, userID string) ([]*biz.Fa
 }
 
 func (r *favoriteRepo) ListByUserPaginated(ctx context.Context, userID string, page, pageSize int) ([]*biz.Favorite, int, error) {
-	query := r.data.db.Favorite.Query().
-		Where(favorite.HasUserWith(user.IDEQ(userID)))
+	r.log.Infof("ListByUserPaginated: userID=%s, page=%d, pageSize=%d", userID, page, pageSize)
 
-	// Get total count
-	total, err := query.Count(ctx)
+	// Get total count - build separate query
+	countQuery := r.data.db.Favorite.Query().
+		Where(favorite.UserIDEQ(userID))
+	total, err := countQuery.Count(ctx)
 	if err != nil {
+		r.log.Errorf("ListByUserPaginated count error: %v", err)
 		return nil, 0, err
 	}
+	r.log.Infof("ListByUserPaginated: total=%d", total)
 
 	// Calculate offset
 	offset := (page - 1) * pageSize
 
-	// Get paginated results
-	ents, err := query.
+	// Get paginated results - build new query
+	ents, err := r.data.db.Favorite.Query().
+		Where(favorite.UserIDEQ(userID)).
 		Order(entity.Desc(favorite.FieldCreateTime)).
 		WithMedia(func(q *entity.MediaQuery) { q.WithUser() }).
 		Offset(offset).
 		Limit(pageSize).
 		All(ctx)
 	if err != nil {
+		r.log.Errorf("ListByUserPaginated query error: %v", err)
 		return nil, 0, err
 	}
+	r.log.Infof("ListByUserPaginated: found %d items", len(ents))
 
 	res := make([]*biz.Favorite, len(ents))
 	for i, ent := range ents {

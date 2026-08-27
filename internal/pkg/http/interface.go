@@ -41,6 +41,9 @@ type Context interface {
 	Get(key string) (interface{}, bool)
 	GetString(key string) string
 
+	// Client information
+	ClientIP() string // real client IP (handles X-Forwarded-For / X-Real-IP)
+
 	// Response writing
 	Response() http.ResponseWriter
 	JSON(code int, v interface{}) error

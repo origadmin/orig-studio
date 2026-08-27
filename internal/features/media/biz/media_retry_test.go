@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/dal/entity"
 	"origadmin/application/origstudio/internal/dal/enums"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
@@ -25,16 +24,28 @@ func (m *mockMediaRepo) Get(ctx context.Context, id string, opts ...*dto.MediaQu
 	return args.Get(0).(*types.Media), args.Error(1)
 }
 
-func (m *mockMediaRepo) GetWithEntity(ctx context.Context, id string, opts ...*dto.MediaQueryOption) (*entity.Media, *types.Media, error) {
+// GetChannelOwnerID satisfies dto.MediaRepo. Deliberately not routed through
+// mock.Called: the retry/transcode flows never touch channel ownership, and an
+// unexpected Called() would panic instead of failing meaningfully.
+func (m *mockMediaRepo) GetChannelOwnerID(ctx context.Context, channelID string) (string, error) {
+	return "", nil
+}
+
+// UpdateMediaChannel satisfies dto.MediaRepo (BUG-105 channel assignment).
+func (m *mockMediaRepo) UpdateMediaChannel(ctx context.Context, mediaID, channelID string) error {
+	return nil
+}
+
+func (m *mockMediaRepo) GetWithEntity(ctx context.Context, id string, opts ...*dto.MediaQueryOption) (*dto.MediaEntityDTO, *types.Media, error) {
 	args := m.Called(ctx, id, opts)
-	return nil, args.Get(0).(*types.Media), args.Error(1)
+	return nil, args.Get(0).(*types.Media), args.Error(2)
 }
 
 func (m *mockMediaRepo) List(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*types.Media, int32, error) {
 	return nil, 0, nil
 }
 
-func (m *mockMediaRepo) ListWithEntities(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*entity.Media, []*types.Media, int32, error) {
+func (m *mockMediaRepo) ListWithEntities(ctx context.Context, opts ...*dto.MediaQueryOption) ([]*dto.MediaEntityDTO, []*types.Media, int32, error) {
 	return nil, nil, 0, nil
 }
 
@@ -42,8 +53,8 @@ func (m *mockMediaRepo) Create(ctx context.Context, media *types.Media, opts ...
 	return nil, nil
 }
 
-func (m *mockMediaRepo) CreateWithEntity(ctx context.Context, media *types.Media) (*entity.Media, *types.Media, error) {
-	return nil, nil, nil
+func (m *mockMediaRepo) CreateWithEntity(ctx context.Context, media *types.Media) (*dto.MediaEntityDTO, *types.Media, error) {
+	return &dto.MediaEntityDTO{ID: media.Id}, media, nil
 }
 
 func (m *mockMediaRepo) Update(ctx context.Context, media *types.Media, opts ...*dto.MediaUpdateOption) (*types.Media, error) {
@@ -60,6 +71,38 @@ func (m *mockMediaRepo) ListCategories(ctx context.Context, opts ...*dto.Categor
 
 func (m *mockMediaRepo) GetCategory(ctx context.Context, id string) (*types.Category, error) {
 	return nil, nil
+}
+
+func (m *mockMediaRepo) CreateCategory(ctx context.Context, cat *types.Category) (*types.Category, error) {
+	return cat, nil
+}
+
+func (m *mockMediaRepo) UpdateCategory(ctx context.Context, cat *types.Category) (*types.Category, error) {
+	return cat, nil
+}
+
+func (m *mockMediaRepo) DeleteCategory(ctx context.Context, id string) error {
+	return nil
+}
+
+func (m *mockMediaRepo) ListTags(ctx context.Context, opts ...*dto.TagQueryOption) ([]*types.Tag, int32, error) {
+	return nil, 0, nil
+}
+
+func (m *mockMediaRepo) GetTag(ctx context.Context, id string) (*types.Tag, error) {
+	return nil, nil
+}
+
+func (m *mockMediaRepo) CreateTag(ctx context.Context, tag *types.Tag) (*types.Tag, error) {
+	return tag, nil
+}
+
+func (m *mockMediaRepo) UpdateTag(ctx context.Context, tag *types.Tag) (*types.Tag, error) {
+	return tag, nil
+}
+
+func (m *mockMediaRepo) DeleteTag(ctx context.Context, id string) error {
+	return nil
 }
 
 func (m *mockMediaRepo) IncrementViewCount(ctx context.Context, id string) (int64, error) {
@@ -82,11 +125,15 @@ func (m *mockMediaRepo) UpdateFavoriteCount(ctx context.Context, id string, delt
 	return nil
 }
 
-func (m *mockMediaRepo) GetEntityByID(ctx context.Context, id string) (*entity.Media, error) {
+func (m *mockMediaRepo) UpdateReportedTimes(ctx context.Context, id string, delta int) error {
+	return nil
+}
+
+func (m *mockMediaRepo) GetEntityByID(ctx context.Context, id string) (*dto.MediaEntityDTO, error) {
 	return nil, nil
 }
 
-func (m *mockMediaRepo) GetEntityByShortToken(ctx context.Context, shortToken string) (*entity.Media, error) {
+func (m *mockMediaRepo) GetEntityByShortToken(ctx context.Context, shortToken string) (*dto.MediaEntityDTO, error) {
 	return nil, nil
 }
 
@@ -132,6 +179,10 @@ func (m *mockMediaRepo) UpdateDimensions(ctx context.Context, mediaID string, wi
 
 func (m *mockMediaRepo) ListTempMediaBefore(ctx context.Context, cutoff time.Time) ([]*types.Media, error) {
 	return nil, nil
+}
+
+func (m *mockMediaRepo) GetDefaultChannelID(ctx context.Context, userID string) (string, error) {
+	return "", nil
 }
 
 // mockEncodingTaskRepo is a mock of EncodingTaskRepo

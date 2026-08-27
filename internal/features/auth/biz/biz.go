@@ -2,4 +2,4 @@ package biz
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewPermissionUseCase)
+var ProviderSet = wire.NewSet()

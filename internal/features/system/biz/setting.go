@@ -142,6 +142,18 @@ func (uc *SettingUseCase) Get(ctx context.Context, key string) string {
 	return ""
 }
 
+// GetNoCache reads a setting directly from the DB, bypassing the per-process
+// 60s in-memory cache. Used by cross-service reads (e.g. portal config served
+// by a different microservice than the one that writes admin settings) so a
+// save takes effect immediately instead of waiting for the local cache TTL.
+func (uc *SettingUseCase) GetNoCache(ctx context.Context, key string) string {
+	s, err := uc.repo.GetByKey(ctx, key)
+	if err != nil {
+		return ""
+	}
+	return s.Value
+}
+
 func (uc *SettingUseCase) GetBool(ctx context.Context, key string) bool {
 	val := uc.Get(ctx, key)
 	b, err := strconv.ParseBool(val)
@@ -177,12 +189,14 @@ func (uc *SettingUseCase) GetPublicSettings(ctx context.Context) map[string]stri
 		"site_name":          true,
 		"site_description":   true,
 		"primary_url":        true,
+		"site_logo_url":      true,
 		"allow_registration": true,
 		"allow_upload":       true,
 		"module_articles":    true,
 		"module_videos":      true,
 		"module_music":       true,
 		"homepage_layout":    true,
+		"share_platforms":    true,
 	}
 	m, err := uc.loadCache(ctx)
 	if err != nil {

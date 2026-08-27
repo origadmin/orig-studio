@@ -2,17 +2,15 @@ package service
 
 import (
 	"strconv"
+	"strings"
 
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	types "origadmin/application/origstudio/api/gen/v1/types"
 	pb "origadmin/application/origstudio/api/gen/v1/media"
-	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
-	"origadmin/application/origstudio/internal/infra/auth"
+	types "origadmin/application/origstudio/api/gen/v1/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
-	repotypes "origadmin/application/origstudio/internal/domain/types"
+	"origadmin/application/origstudio/internal/infra/auth"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/server"
 )
 
@@ -30,30 +28,26 @@ func (h *CategoryHandler) RegisterRoutes(r http2.Router) {
 	{
 		categories.GET("", h.listCategories())
 		categories.POST("", server.WithJWTCtx(h.jwt, h.createCategory()))
-
-		categories.GET("/:slug", h.getCategory())
-		categories.PUT("/:slug", server.WithJWTCtx(h.jwt, h.updateCategory()))
-		categories.PATCH("/:slug", server.WithJWTCtx(h.jwt, h.updateCategoryPartial()))
-		categories.DELETE("/:slug", server.WithJWTCtx(h.jwt, h.deleteCategory()))
+		categories.GET("/:id", h.getCategory())
+		categories.PUT("/:id", server.WithJWTCtx(h.jwt, h.updateCategory()))
+		categories.PATCH("/:id", server.WithJWTCtx(h.jwt, h.updateCategoryPartial()))
+		categories.DELETE("/:id", server.WithJWTCtx(h.jwt, h.deleteCategory()))
 	}
+}
+
+func parseCategoryID(idStr string) (int, error) {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (h *CategoryHandler) listCategories() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		page, _ := strconv.Atoi(gc.Query("page"))
-		if page == 0 {
-			page = 1
-		}
-		limit, _ := strconv.Atoi(gc.Query("page_size"))
-		if limit == 0 {
-			limit = 100
-		}
-		page, limit = repotypes.NormalizeHTTPPagination(page, limit)
-		items, err := h.uc.ListCategories(ctx.Request().Context())
+		items, err := h.uc.ListActiveCategories(ctx.Request().Context())
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
-			return nil
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
 		pbCategories := make([]*types.Category, len(items))
@@ -61,175 +55,179 @@ func (h *CategoryHandler) listCategories() http2.HandlerFunc {
 			pbCategories[i] = bizCategoryToProto(item)
 		}
 
-		http2.OK(ctx, &pb.ListCategoriesResponse{
-			Items:     pbCategories,
-			Total:     int32(len(items)),
-			Page:      int32(page),
-			PageSize:  int32(limit),
+		return server.OKCtx(ctx, &pb.ListCategoriesResponse{
+			Items:    pbCategories,
+			Total:    int32(len(pbCategories)),
+			Page:     1,
+			PageSize: int32(len(pbCategories)),
 		})
-		return nil
 	}
 }
 
 func (h *CategoryHandler) createCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
 		var input struct {
 			Name        string `json:"name"`
 			Description string `json:"description"`
 			Slug        string `json:"slug"`
+			ParentID    *int64 `json:"parent_id"`
+			Order       *int   `json:"order"`
+			Status      *int   `json:"status"`
 		}
-		if err := gc.Bind(&input); err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, err.Error())
-			return nil
+		if err := ctx.Bind(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		cat, err := h.uc.CreateCategory(ctx.Request().Context(), &biz.Category{
-			Name:        input.Name,
-			Description: input.Description,
-			Slug:        input.Slug,
-		})
+		name := strings.TrimSpace(input.Name)
+		if name == "" {
+			return server.FailCtx(ctx, server.ErrBadRequest, "category name is required")
+		}
+
+		c := &biz.Category{
+			Name:        name,
+			Description: strings.TrimSpace(input.Description),
+			Slug:        strings.TrimSpace(input.Slug),
+			Status:      1,
+			Sequence:    0,
+		}
+		if input.Status != nil {
+			c.Status = *input.Status
+		}
+		if input.ParentID != nil {
+			c.ParentID = *input.ParentID
+		}
+		if input.Order != nil {
+			c.Sequence = *input.Order
+		}
+
+		cat, err := h.uc.CreateCategory(ctx.Request().Context(), c)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
-			return nil
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		http2.Created(ctx, &pb.CreateCategoryResponse{
+		return server.CreatedCtx(ctx, &pb.CreateCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
-		return nil
 	}
 }
 
 func (h *CategoryHandler) getCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		slug := gc.Param("slug")
-		if slug == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
-			return nil
-		}
-		cat, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
+		idStr := ctx.Var("id")
+		id, err := parseCategoryID(idStr)
 		if err != nil {
-			http2.Fail(ctx, server.ErrNotFound, "category not found")
-			return nil
+			return server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
 		}
-		http2.OK(ctx, &pb.GetCategoryResponse{
+		cat, err := h.uc.GetCategory(ctx.Request().Context(), id)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrNotFound, "category not found")
+		}
+		return server.OKCtx(ctx, &pb.GetCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
-		return nil
 	}
 }
 
 func (h *CategoryHandler) updateCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		slug := gc.Param("slug")
-		if slug == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
-			return nil
+		idStr := ctx.Var("id")
+		id, err := parseCategoryID(idStr)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
 		}
 
-		// Resolve slug to category first
-		existing, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
+		existing, err := h.uc.GetCategory(ctx.Request().Context(), id)
 		if err != nil {
-			http2.Fail(ctx, server.ErrNotFound, "category not found")
-			return nil
+			return server.FailCtx(ctx, server.ErrNotFound, "category not found")
 		}
 
 		var input struct {
 			Name        string `json:"name"`
 			Description string `json:"description"`
 			Slug        string `json:"slug"`
+			ParentID    *int64 `json:"parent_id"`
+			Order       *int   `json:"order"`
+			Status      *int   `json:"status"`
 		}
-		if err := gc.Bind(&input); err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, err.Error())
-			return nil
+		if err := ctx.Bind(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		cat, err := h.uc.UpdateCategory(ctx.Request().Context(), &biz.Category{
+		c := &biz.Category{
 			ID:          existing.ID,
-			Name:        input.Name,
-			Description: input.Description,
-			Slug:        input.Slug,
-		})
-		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
-			return nil
+			Name:        strings.TrimSpace(input.Name),
+			Description: strings.TrimSpace(input.Description),
+			Slug:        strings.TrimSpace(input.Slug),
+			Status:      existing.Status,
+			ParentID:    existing.ParentID,
+			Sequence:    existing.Sequence,
+		}
+		if c.Name == "" {
+			c.Name = existing.Name
+		}
+		if input.Status != nil {
+			c.Status = *input.Status
+		}
+		if input.ParentID != nil {
+			c.ParentID = *input.ParentID
+		}
+		if input.Order != nil {
+			c.Sequence = *input.Order
 		}
 
-		http2.OK(ctx, &pb.UpdateCategoryResponse{
+		cat, err := h.uc.UpdateCategory(ctx.Request().Context(), c)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
+		}
+
+		return server.OKCtx(ctx, &pb.UpdateCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
-		return nil
 	}
 }
 
 func (h *CategoryHandler) updateCategoryPartial() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		slug := gc.Param("slug")
-		if slug == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
-			return nil
-		}
-
-		// Resolve slug to category first
-		existing, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
+		idStr := ctx.Var("id")
+		id, err := parseCategoryID(idStr)
 		if err != nil {
-			http2.Fail(ctx, server.ErrNotFound, "category not found")
-			return nil
+			return server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
 		}
 
 		var input biz.UpdateCategoryInput
-		if err := gc.Bind(&input); err != nil {
-			http2.Fail(ctx, server.ErrBadRequest, err.Error())
-			return nil
+		if err := ctx.Bind(&input); err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
 		}
 
-		cat, err := h.uc.UpdateCategoryPartial(ctx.Request().Context(), existing.ID, &input)
+		cat, err := h.uc.UpdateCategoryPartial(ctx.Request().Context(), id, &input)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
-			return nil
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		http2.OK(ctx, &pb.UpdateCategoryResponse{
+		return server.OKCtx(ctx, &pb.UpdateCategoryResponse{
 			Category: bizCategoryToProto(cat),
 		})
-		return nil
 	}
 }
 
 func (h *CategoryHandler) deleteCategory() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		slug := gc.Param("slug")
-		if slug == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "category slug is required")
-			return nil
+		idStr := ctx.Var("id")
+		id, err := parseCategoryID(idStr)
+		if err != nil {
+			return server.FailCtx(ctx, server.ErrBadRequest, "invalid category id")
 		}
 
-		// Resolve slug to category first
-		existing, err := h.uc.GetCategoryBySlug(ctx.Request().Context(), slug)
+		err = h.uc.DeleteCategory(ctx.Request().Context(), id)
 		if err != nil {
-			http2.Fail(ctx, server.ErrNotFound, "category not found")
-			return nil
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
-
-		err = h.uc.DeleteCategory(ctx.Request().Context(), existing.ID)
-		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
-			return nil
-		}
-		http2.OK(ctx, &pb.DeleteCategoryResponse{
-			Empty: &emptypb.Empty{},
-		})
-		return nil
+		return server.OKCtx(ctx, &pb.DeleteCategoryResponse{})
 	}
 }
 
 func bizCategoryToProto(c *biz.Category) *types.Category {
-	pb := &types.Category{
+	pbCat := &types.Category{
 		Id:          int64(c.ID),
 		Name:        c.Name,
 		Slug:        c.Slug,
@@ -240,10 +238,10 @@ func bizCategoryToProto(c *biz.Category) *types.Category {
 		MediaCount:  int64(c.MediaCount),
 	}
 	if !c.CreateTime.IsZero() {
-		pb.CreateTime = timestamppb.New(c.CreateTime)
+		pbCat.CreateTime = timestamppb.New(c.CreateTime)
 	}
 	if !c.UpdateTime.IsZero() {
-		pb.UpdateTime = timestamppb.New(c.UpdateTime)
+		pbCat.UpdateTime = timestamppb.New(c.UpdateTime)
 	}
-	return pb
+	return pbCat
 }

@@ -3,9 +3,8 @@ package biz
 import (
 	"testing"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/setting"
 	systemdal "origadmin/application/origstudio/internal/features/system/dal"
+	systemdto "origadmin/application/origstudio/internal/features/system/dto"
 )
 
 func TestDefaultSettings(t *testing.T) {
@@ -30,11 +29,12 @@ func TestDefaultSettingsCategories(t *testing.T) {
 	defaults := systemdal.DefaultSettings()
 
 	categories := map[string]int{
-		"general": 0,
-		"upload":  0,
-		"review":  0,
-		"email":   0,
-		"module":  0,
+		"general":  0,
+		"storage":  0,
+		"advanced": 0,
+		"email":    0,
+		"portal":   0,
+		"feature":  0,
 	}
 	for _, s := range defaults {
 		cat := string(s.Category)
@@ -47,17 +47,14 @@ func TestDefaultSettingsCategories(t *testing.T) {
 	if categories["general"] < 2 {
 		t.Errorf("expected at least 2 general settings, got %d", categories["general"])
 	}
-	if categories["upload"] < 1 {
-		t.Errorf("expected at least 1 upload setting, got %d", categories["upload"])
-	}
-	if categories["review"] < 1 {
-		t.Errorf("expected at least 1 review setting, got %d", categories["review"])
+	if categories["storage"] < 1 {
+		t.Errorf("expected at least 1 storage setting, got %d", categories["storage"])
 	}
 	if categories["email"] < 1 {
 		t.Errorf("expected at least 1 email setting, got %d", categories["email"])
 	}
-	if categories["module"] < 1 {
-		t.Errorf("expected at least 1 module setting, got %d", categories["module"])
+	if categories["feature"] < 1 {
+		t.Errorf("expected at least 1 feature setting, got %d", categories["feature"])
 	}
 }
 
@@ -103,10 +100,10 @@ func TestDefaultSettingsTypes(t *testing.T) {
 		"thumbnail_quality":     true,
 	}
 	for _, s := range defaults {
-		if boolKeys[s.Key] && s.Type != setting.TypeBool {
+		if boolKeys[s.Key] && s.Type != systemdto.SettingTypeBool {
 			t.Errorf("expected %s to be bool type, got %s", s.Key, s.Type)
 		}
-		if intKeys[s.Key] && s.Type != setting.TypeInt {
+		if intKeys[s.Key] && s.Type != systemdto.SettingTypeInt {
 			t.Errorf("expected %s to be int type, got %s", s.Key, s.Type)
 		}
 	}
@@ -115,7 +112,7 @@ func TestDefaultSettingsTypes(t *testing.T) {
 func TestMaskSensitive(t *testing.T) {
 	uc := &SettingUseCase{}
 
-	sensitive := &entity.Setting{
+	sensitive := &systemdto.SettingDTO{
 		Key:         "smtp_password",
 		Value:       "secret123",
 		IsSensitive: true,
@@ -128,7 +125,7 @@ func TestMaskSensitive(t *testing.T) {
 		t.Errorf("expected key to remain 'smtp_password', got '%s'", masked.Key)
 	}
 
-	normal := &entity.Setting{
+	normal := &systemdto.SettingDTO{
 		Key:         "site_name",
 		Value:       "OrigStudio",
 		IsSensitive: false,
@@ -142,7 +139,7 @@ func TestMaskSensitive(t *testing.T) {
 func TestMaskSensitiveDoesNotMutateOriginal(t *testing.T) {
 	uc := &SettingUseCase{}
 
-	sensitive := &entity.Setting{
+	sensitive := &systemdto.SettingDTO{
 		Key:         "smtp_password",
 		Value:       "secret123",
 		IsSensitive: true,

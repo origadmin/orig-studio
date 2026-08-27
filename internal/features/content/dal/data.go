@@ -6,7 +6,6 @@ package dal
 
 import "github.com/google/wire"
 
-// ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
 	NewData,
 	NewCommentRepo,
@@ -28,6 +27,55 @@ var ProviderSet = wire.NewSet(
 	NewMediaReportRepo,
 	NewMediaReportModerationRepo,
 	NewPortalRepo,
-	)
+	NewAdRepo,
+	NewSubtitleRepo,
+	NewCommentQueryService,
+	NewExploreQueryService,
+)
 
-// var 
+var MicroserviceProviderSet = wire.NewSet(
+	NewEntClient,
+	NewData,
+	NewCommentRepo,
+	NewNotificationRepo,
+	NewLikeRepo,
+	NewFavoriteRepo,
+	NewCategoryRepo,
+	NewTagRepo,
+	NewPlaylistRepo,
+	NewChannelRepo,
+	NewSystemConfigRepo,
+	NewChannelUserRepo,
+	NewFeedRepo,
+	NewArticleRepo,
+	NewCommentModerationRepo,
+	NewCommentReportRepo,
+	NewCommentLikeRepo,
+	NewHistoryRepo,
+	NewMediaReportRepo,
+	NewMediaReportModerationRepo,
+	NewPortalRepo,
+	NewCommentQueryService,
+)
+
+var RepoProviderSet = wire.NewSet(
+	NewData,
+	NewCommentRepo,
+	NewNotificationRepo,
+	NewLikeRepo,
+	NewFavoriteRepo,
+	NewCategoryRepo,
+	NewTagRepo,
+	NewPlaylistRepo,
+	NewChannelRepo,
+	NewSystemConfigRepo,
+	NewChannelUserRepo,
+	NewFeedRepo,
+	NewArticleRepo,
+	NewCommentModerationRepo,
+	NewCommentReportRepo,
+	NewCommentLikeRepo,
+	NewHistoryRepo,
+	NewMediaReportRepo,
+	NewMediaReportModerationRepo,
+)

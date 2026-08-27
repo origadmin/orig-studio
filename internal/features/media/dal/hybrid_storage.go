@@ -124,8 +124,8 @@ func (hs *HybridStorage) GetURL(ctx context.Context, key string) (string, error)
 }
 
 // StorePart stores a part in local storage only (upload performance).
-func (hs *HybridStorage) StorePart(ctx context.Context, uploadID string, partNumber int, data []byte) (string, error) {
-	return hs.local.StorePart(ctx, uploadID, partNumber, data)
+func (hs *HybridStorage) StorePart(ctx context.Context, uploadID string, partNumber int, r io.Reader, size int64) (string, error) {
+	return hs.local.StorePart(ctx, uploadID, partNumber, r, size)
 }
 
 // MergeParts merges parts locally and queues the merged file for S3 sync.
@@ -160,9 +160,7 @@ func (hs *HybridStorage) CleanupTempParts(ctx context.Context, userID, uploadID 
 // SyncStatus returns the sync status for a key.
 // Checks if the file exists in S3 to determine sync state.
 func (hs *HybridStorage) SyncStatus(ctx context.Context, key string) (enums.SyncStatus, error) {
-	// Check local existence first
 	if _, err := os.Stat(hs.paths.FullPath(key)); err != nil {
-		// Not local — check S3
 		s3Status, _ := hs.remote.SyncStatus(ctx, key)
 		if s3Status == enums.SyncStatusSynced {
 			return enums.SyncStatusSynced, nil
@@ -170,12 +168,45 @@ func (hs *HybridStorage) SyncStatus(ctx context.Context, key string) (enums.Sync
 		return enums.SyncStatusLocalOnly, nil
 	}
 
-	// File exists locally — check S3
 	s3Status, _ := hs.remote.SyncStatus(ctx, key)
 	if s3Status == enums.SyncStatusSynced {
 		return enums.SyncStatusSynced, nil
 	}
 	return enums.SyncStatusLocalOnly, nil
+}
+
+func (hs *HybridStorage) DownloadToFile(ctx context.Context, key string, localPath string) error {
+	err := hs.local.DownloadToFile(ctx, key, localPath)
+	if err == nil {
+		return nil
+	}
+	return hs.remote.DownloadToFile(ctx, key, localPath)
+}
+
+func (hs *HybridStorage) UploadDir(ctx context.Context, localDir string, keyPrefix string) error {
+	if err := hs.local.UploadDir(ctx, localDir, keyPrefix); err != nil {
+		return err
+	}
+	return filepath.Walk(localDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(localDir, path)
+		if relErr != nil {
+			return relErr
+		}
+		key := keyPrefix + "/" + filepath.ToSlash(rel)
+		hs.queueSync(key, 1)
+		return nil
+	})
+}
+
+func (hs *HybridStorage) DeletePrefix(ctx context.Context, keyPrefix string) error {
+	_ = hs.local.DeletePrefix(ctx, keyPrefix)
+	return hs.remote.DeletePrefix(ctx, keyPrefix)
 }
 
 // queueSync enqueues a sync task. Non-blocking; drops the task if the queue is full.
@@ -290,7 +321,7 @@ func (hs *HybridStorage) getLocalUsage() int64 {
 func (hs *HybridStorage) getSyncedFilesOldestFirst() []localFileEntry {
 	var files []localFileEntry
 
-	_ = filepath.Walk(hs.paths.OriginalsDir, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(hs.paths.OriginalsDir(), func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
 			return nil
 		}

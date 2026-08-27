@@ -32,7 +32,6 @@ func (User) Fields() []ent.Field {
 		field.String("first_name").Optional().MaxLen(150),
 		field.String("last_name").Optional().MaxLen(150),
 		field.Enum("status").Values("PENDING", "ACTIVE", "INACTIVE", "SUSPENDED", "REJECTED").Default("ACTIVE"),
-		field.Bool("is_staff").Default(false),
 		field.Enum("role").Values("user", "admin", "editor").Default("user"),
 		field.Bool("is_superuser").Default(false),
 		field.Bool("is_featured").Default(false),
@@ -70,7 +69,7 @@ func (User) Indexes() []ent.Index {
 		index.Fields("email"),
 		index.Fields("slug"),
 		index.Fields("status"),
-		index.Fields("is_staff"),
+		index.Fields("role"),
 		index.Fields("date_added"),
 	}
 }
@@ -96,7 +95,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("likes", Like.Type),
 		edge.To("comment_likes", CommentLike.Type),
 		edge.To("subscriptions", Subscription.Type),
-		edge.To("subscribers", Subscription.Type),
 		edge.To("review_logs", MediaReviewLog.Type),
 		edge.To("comment_reports", CommentReport.Type),
 		edge.To("media_reports", MediaReport.Type),
@@ -104,5 +102,12 @@ func (User) Edges() []ent.Edge {
 		edge.To("group_memberships", GroupMember.Type),
 		edge.To("created_groups", PermissionGroup.Type),
 		edge.To("history", History.Type),
+		edge.To("live_rooms", LiveRoom.Type),
+		edge.To("live_chat_messages", LiveChatMessage.Type),
+		edge.To("payment_subscriptions", UserSubscription.Type),
+		edge.To("payment_orders", Order.Type),
+		edge.To("payment_wallet", Wallet.Type),
+		edge.To("drm_licenses", DrmLicense.Type),
+		edge.To("promotion_subscriptions", PromotionSubscription.Type),
 	}
 }

@@ -33,8 +33,6 @@ type User struct {
 	LastName string `json:"last_name,omitempty"`
 	// Status holds the value of the "status" field.
 	Status user.Status `json:"status,omitempty"`
-	// IsStaff holds the value of the "is_staff" field.
-	IsStaff bool `json:"is_staff,omitempty"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
 	// IsSuperuser holds the value of the "is_superuser" field.
@@ -121,8 +119,6 @@ type UserEdges struct {
 	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
 	// Subscriptions holds the value of the subscriptions edge.
 	Subscriptions []*Subscription `json:"subscriptions,omitempty"`
-	// Subscribers holds the value of the subscribers edge.
-	Subscribers []*Subscription `json:"subscribers,omitempty"`
 	// ReviewLogs holds the value of the review_logs edge.
 	ReviewLogs []*MediaReviewLog `json:"review_logs,omitempty"`
 	// CommentReports holds the value of the comment_reports edge.
@@ -137,9 +133,23 @@ type UserEdges struct {
 	CreatedGroups []*PermissionGroup `json:"created_groups,omitempty"`
 	// History holds the value of the history edge.
 	History []*History `json:"history,omitempty"`
+	// LiveRooms holds the value of the live_rooms edge.
+	LiveRooms []*LiveRoom `json:"live_rooms,omitempty"`
+	// LiveChatMessages holds the value of the live_chat_messages edge.
+	LiveChatMessages []*LiveChatMessage `json:"live_chat_messages,omitempty"`
+	// PaymentSubscriptions holds the value of the payment_subscriptions edge.
+	PaymentSubscriptions []*UserSubscription `json:"payment_subscriptions,omitempty"`
+	// PaymentOrders holds the value of the payment_orders edge.
+	PaymentOrders []*Order `json:"payment_orders,omitempty"`
+	// PaymentWallet holds the value of the payment_wallet edge.
+	PaymentWallet []*Wallet `json:"payment_wallet,omitempty"`
+	// DrmLicenses holds the value of the drm_licenses edge.
+	DrmLicenses []*DrmLicense `json:"drm_licenses,omitempty"`
+	// PromotionSubscriptions holds the value of the promotion_subscriptions edge.
+	PromotionSubscriptions []*PromotionSubscription `json:"promotion_subscriptions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [20]bool
+	loadedTypes [26]bool
 }
 
 // MediaOrErr returns the Media value or an error if the edge
@@ -250,19 +260,10 @@ func (e UserEdges) SubscriptionsOrErr() ([]*Subscription, error) {
 	return nil, &NotLoadedError{edge: "subscriptions"}
 }
 
-// SubscribersOrErr returns the Subscribers value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) SubscribersOrErr() ([]*Subscription, error) {
-	if e.loadedTypes[12] {
-		return e.Subscribers, nil
-	}
-	return nil, &NotLoadedError{edge: "subscribers"}
-}
-
 // ReviewLogsOrErr returns the ReviewLogs value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ReviewLogsOrErr() ([]*MediaReviewLog, error) {
-	if e.loadedTypes[13] {
+	if e.loadedTypes[12] {
 		return e.ReviewLogs, nil
 	}
 	return nil, &NotLoadedError{edge: "review_logs"}
@@ -271,7 +272,7 @@ func (e UserEdges) ReviewLogsOrErr() ([]*MediaReviewLog, error) {
 // CommentReportsOrErr returns the CommentReports value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CommentReportsOrErr() ([]*CommentReport, error) {
-	if e.loadedTypes[14] {
+	if e.loadedTypes[13] {
 		return e.CommentReports, nil
 	}
 	return nil, &NotLoadedError{edge: "comment_reports"}
@@ -280,7 +281,7 @@ func (e UserEdges) CommentReportsOrErr() ([]*CommentReport, error) {
 // MediaReportsOrErr returns the MediaReports value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) MediaReportsOrErr() ([]*MediaReport, error) {
-	if e.loadedTypes[15] {
+	if e.loadedTypes[14] {
 		return e.MediaReports, nil
 	}
 	return nil, &NotLoadedError{edge: "media_reports"}
@@ -289,7 +290,7 @@ func (e UserEdges) MediaReportsOrErr() ([]*MediaReport, error) {
 // ModeratedCommentsOrErr returns the ModeratedComments value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ModeratedCommentsOrErr() ([]*Comment, error) {
-	if e.loadedTypes[16] {
+	if e.loadedTypes[15] {
 		return e.ModeratedComments, nil
 	}
 	return nil, &NotLoadedError{edge: "moderated_comments"}
@@ -298,7 +299,7 @@ func (e UserEdges) ModeratedCommentsOrErr() ([]*Comment, error) {
 // GroupMembershipsOrErr returns the GroupMemberships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GroupMembershipsOrErr() ([]*GroupMember, error) {
-	if e.loadedTypes[17] {
+	if e.loadedTypes[16] {
 		return e.GroupMemberships, nil
 	}
 	return nil, &NotLoadedError{edge: "group_memberships"}
@@ -307,7 +308,7 @@ func (e UserEdges) GroupMembershipsOrErr() ([]*GroupMember, error) {
 // CreatedGroupsOrErr returns the CreatedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CreatedGroupsOrErr() ([]*PermissionGroup, error) {
-	if e.loadedTypes[18] {
+	if e.loadedTypes[17] {
 		return e.CreatedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "created_groups"}
@@ -316,10 +317,73 @@ func (e UserEdges) CreatedGroupsOrErr() ([]*PermissionGroup, error) {
 // HistoryOrErr returns the History value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) HistoryOrErr() ([]*History, error) {
-	if e.loadedTypes[19] {
+	if e.loadedTypes[18] {
 		return e.History, nil
 	}
 	return nil, &NotLoadedError{edge: "history"}
+}
+
+// LiveRoomsOrErr returns the LiveRooms value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) LiveRoomsOrErr() ([]*LiveRoom, error) {
+	if e.loadedTypes[19] {
+		return e.LiveRooms, nil
+	}
+	return nil, &NotLoadedError{edge: "live_rooms"}
+}
+
+// LiveChatMessagesOrErr returns the LiveChatMessages value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) LiveChatMessagesOrErr() ([]*LiveChatMessage, error) {
+	if e.loadedTypes[20] {
+		return e.LiveChatMessages, nil
+	}
+	return nil, &NotLoadedError{edge: "live_chat_messages"}
+}
+
+// PaymentSubscriptionsOrErr returns the PaymentSubscriptions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PaymentSubscriptionsOrErr() ([]*UserSubscription, error) {
+	if e.loadedTypes[21] {
+		return e.PaymentSubscriptions, nil
+	}
+	return nil, &NotLoadedError{edge: "payment_subscriptions"}
+}
+
+// PaymentOrdersOrErr returns the PaymentOrders value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PaymentOrdersOrErr() ([]*Order, error) {
+	if e.loadedTypes[22] {
+		return e.PaymentOrders, nil
+	}
+	return nil, &NotLoadedError{edge: "payment_orders"}
+}
+
+// PaymentWalletOrErr returns the PaymentWallet value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PaymentWalletOrErr() ([]*Wallet, error) {
+	if e.loadedTypes[23] {
+		return e.PaymentWallet, nil
+	}
+	return nil, &NotLoadedError{edge: "payment_wallet"}
+}
+
+// DrmLicensesOrErr returns the DrmLicenses value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DrmLicensesOrErr() ([]*DrmLicense, error) {
+	if e.loadedTypes[24] {
+		return e.DrmLicenses, nil
+	}
+	return nil, &NotLoadedError{edge: "drm_licenses"}
+}
+
+// PromotionSubscriptionsOrErr returns the PromotionSubscriptions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PromotionSubscriptionsOrErr() ([]*PromotionSubscription, error) {
+	if e.loadedTypes[25] {
+		return e.PromotionSubscriptions, nil
+	}
+	return nil, &NotLoadedError{edge: "promotion_subscriptions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -327,7 +391,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldIsStaff, user.FieldIsSuperuser, user.FieldIsFeatured, user.FieldAdvancedUser, user.FieldIsEditor, user.FieldIsManager, user.FieldNotificationOnComments, user.FieldAllowContact:
+		case user.FieldIsSuperuser, user.FieldIsFeatured, user.FieldAdvancedUser, user.FieldIsEditor, user.FieldIsManager, user.FieldNotificationOnComments, user.FieldAllowContact:
 			values[i] = new(sql.NullBool)
 		case user.FieldMediaCount:
 			values[i] = new(sql.NullInt64)
@@ -403,12 +467,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = user.Status(value.String)
-			}
-		case user.FieldIsStaff:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_staff", values[i])
-			} else if value.Valid {
-				_m.IsStaff = value.Bool
 			}
 		case user.FieldRole:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -645,11 +703,6 @@ func (_m *User) QuerySubscriptions() *SubscriptionQuery {
 	return NewUserClient(_m.config).QuerySubscriptions(_m)
 }
 
-// QuerySubscribers queries the "subscribers" edge of the User entity.
-func (_m *User) QuerySubscribers() *SubscriptionQuery {
-	return NewUserClient(_m.config).QuerySubscribers(_m)
-}
-
 // QueryReviewLogs queries the "review_logs" edge of the User entity.
 func (_m *User) QueryReviewLogs() *MediaReviewLogQuery {
 	return NewUserClient(_m.config).QueryReviewLogs(_m)
@@ -683,6 +736,41 @@ func (_m *User) QueryCreatedGroups() *PermissionGroupQuery {
 // QueryHistory queries the "history" edge of the User entity.
 func (_m *User) QueryHistory() *HistoryQuery {
 	return NewUserClient(_m.config).QueryHistory(_m)
+}
+
+// QueryLiveRooms queries the "live_rooms" edge of the User entity.
+func (_m *User) QueryLiveRooms() *LiveRoomQuery {
+	return NewUserClient(_m.config).QueryLiveRooms(_m)
+}
+
+// QueryLiveChatMessages queries the "live_chat_messages" edge of the User entity.
+func (_m *User) QueryLiveChatMessages() *LiveChatMessageQuery {
+	return NewUserClient(_m.config).QueryLiveChatMessages(_m)
+}
+
+// QueryPaymentSubscriptions queries the "payment_subscriptions" edge of the User entity.
+func (_m *User) QueryPaymentSubscriptions() *UserSubscriptionQuery {
+	return NewUserClient(_m.config).QueryPaymentSubscriptions(_m)
+}
+
+// QueryPaymentOrders queries the "payment_orders" edge of the User entity.
+func (_m *User) QueryPaymentOrders() *OrderQuery {
+	return NewUserClient(_m.config).QueryPaymentOrders(_m)
+}
+
+// QueryPaymentWallet queries the "payment_wallet" edge of the User entity.
+func (_m *User) QueryPaymentWallet() *WalletQuery {
+	return NewUserClient(_m.config).QueryPaymentWallet(_m)
+}
+
+// QueryDrmLicenses queries the "drm_licenses" edge of the User entity.
+func (_m *User) QueryDrmLicenses() *DrmLicenseQuery {
+	return NewUserClient(_m.config).QueryDrmLicenses(_m)
+}
+
+// QueryPromotionSubscriptions queries the "promotion_subscriptions" edge of the User entity.
+func (_m *User) QueryPromotionSubscriptions() *PromotionSubscriptionQuery {
+	return NewUserClient(_m.config).QueryPromotionSubscriptions(_m)
 }
 
 // Update returns a builder for updating this User.
@@ -731,9 +819,6 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
-	builder.WriteString(", ")
-	builder.WriteString("is_staff=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsStaff))
 	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Role))

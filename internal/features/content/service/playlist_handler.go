@@ -3,16 +3,13 @@ package service
 import (
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
-	http2 "origadmin/application/origstudio/internal/pkg/http"
-	ginadapter "origadmin/application/origstudio/internal/pkg/http/gin"
-	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/domain/types"
-	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/server"
+	"origadmin/application/origstudio/internal/features/content/biz"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"
 	systemservice "origadmin/application/origstudio/internal/features/system/service"
+	"origadmin/application/origstudio/internal/infra/auth"
+	http2 "origadmin/application/origstudio/internal/pkg/http"
+	"origadmin/application/origstudio/internal/server"
 )
 
 // PlaylistHandler handles public/portal playlist HTTP endpoints.
@@ -49,19 +46,21 @@ func (h *PlaylistHandler) RegisterRoutes(r http2.Router) {
 // listPlaylists returns all public playlists with pagination (portal view).
 func (h *PlaylistHandler) listPlaylists() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		page, _ := strconv.Atoi(gc.DefaultQuery("page", "1"))
-		pageSize, _ := strconv.Atoi(gc.DefaultQuery("page_size", "20"))
+		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
+		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
 		page, pageSize = types.NormalizeHTTPPagination(page, pageSize)
 
 		items, total, err := h.playlistUC.ListPlaylists(ctx.Request().Context(), page, pageSize)
 		if err != nil {
-			http2.Fail(ctx, server.ErrInternal, err.Error())
-			return nil
+			return server.FailCtx(ctx, server.ErrInternal, err.Error())
 		}
 
-		http2.Page(ctx, items, int64(total), page, pageSize)
-		return nil
+		return server.OKCtx(ctx, map[string]any{
+			"items":     items,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		})
 	}
 }
 
@@ -70,29 +69,24 @@ func (h *PlaylistHandler) listPlaylists() http2.HandlerFunc {
 // Private playlists are only accessible to their owner (requires JWT).
 func (h *PlaylistHandler) getPlaylistByToken() http2.HandlerFunc {
 	return func(ctx http2.Context) error {
-		gc := ginadapter.GinContextFromHTTP(ctx)
-		token := gc.Param("token")
+		token := ctx.Var("token")
 		if token == "" {
-			http2.Fail(ctx, server.ErrBadRequest, "playlist token is required")
-			return nil
+			return server.FailCtx(ctx, server.ErrBadRequest, "playlist token is required")
 		}
 
 		playlist, err := h.playlistUC.GetPlaylistByShortToken(ctx.Request().Context(), token)
 		if err != nil {
-			http2.Fail(ctx, server.ErrNotFound, "playlist not found")
-			return nil
+			return server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
 		}
 
 		// Private playlists: only the owner can view them
 		if !playlist.IsPublic {
 			claims, ok := server.GetClaimsCtx(ctx)
 			if !ok || claims.GetUserID() != playlist.UserID {
-				http2.Fail(ctx, server.ErrNotFound, "playlist not found")
-				return nil
+				return server.FailCtx(ctx, server.ErrNotFound, "playlist not found")
 			}
 		}
 
-		http2.OK(ctx, gin.H{"playlist": playlist})
-		return nil
+		return server.OKCtx(ctx, map[string]any{"playlist": playlist})
 	}
 }
