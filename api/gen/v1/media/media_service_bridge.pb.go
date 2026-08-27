@@ -29,134 +29,187 @@ var (
 )
 
 const MediaServiceListMediasBridgeOperation = "/api.v1.services.media.MediaService/ListMedias"
+const MediaServiceListFeaturedMediasBridgeOperation = "/api.v1.services.media.MediaService/ListFeaturedMedias"
+const MediaServiceListLatestMediasBridgeOperation = "/api.v1.services.media.MediaService/ListLatestMedias"
 const MediaServiceGetMediaBridgeOperation = "/api.v1.services.media.MediaService/GetMedia"
-const MediaServiceCreateMediaBridgeOperation = "/api.v1.services.media.MediaService/CreateMedia"
-const MediaServiceUpdateMediaBridgeOperation = "/api.v1.services.media.MediaService/UpdateMedia"
-const MediaServiceDeleteMediaBridgeOperation = "/api.v1.services.media.MediaService/DeleteMedia"
-const MediaServiceIncrementViewCountBridgeOperation = "/api.v1.services.media.MediaService/IncrementViewCount"
-const MediaServiceUploadMediaBridgeOperation = "/api.v1.services.media.MediaService/UploadMedia"
-const MediaServiceGetMediaStreamBridgeOperation = "/api.v1.services.media.MediaService/GetMediaStream"
-const MediaServiceGetMediaDownloadBridgeOperation = "/api.v1.services.media.MediaService/GetMediaDownload"
-const MediaServiceGetMediaThumbnailBridgeOperation = "/api.v1.services.media.MediaService/GetMediaThumbnail"
-const MediaServiceListEncodingTasksBridgeOperation = "/api.v1.services.media.MediaService/ListEncodingTasks"
 const MediaServiceGetMediaVariantsBridgeOperation = "/api.v1.services.media.MediaService/GetMediaVariants"
-const MediaServiceRetryEncodingTaskBridgeOperation = "/api.v1.services.media.MediaService/RetryEncodingTask"
-const MediaServiceGetEncodingStatusBridgeOperation = "/api.v1.services.media.MediaService/GetEncodingStatus"
-const MediaServiceListAllEncodingTasksBridgeOperation = "/api.v1.services.media.MediaService/ListAllEncodingTasks"
-const MediaServiceRetryAllFailedTasksBridgeOperation = "/api.v1.services.media.MediaService/RetryAllFailedTasks"
-const MediaServiceGetMediaLikesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaLikes"
+const MediaServiceIncrementViewCountBridgeOperation = "/api.v1.services.media.MediaService/IncrementViewCount"
 const MediaServiceToggleMediaLikeBridgeOperation = "/api.v1.services.media.MediaService/ToggleMediaLike"
 const MediaServiceDeleteMediaLikeBridgeOperation = "/api.v1.services.media.MediaService/DeleteMediaLike"
-const MediaServiceGetMediaFavoritesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaFavorites"
+const MediaServiceGetMediaLikesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaLikes"
+const MediaServiceToggleMediaLikeCompatBridgeOperation = "/api.v1.services.media.MediaService/ToggleMediaLikeCompat"
+const MediaServiceDeleteMediaLikeCompatBridgeOperation = "/api.v1.services.media.MediaService/DeleteMediaLikeCompat"
 const MediaServiceToggleMediaFavoriteBridgeOperation = "/api.v1.services.media.MediaService/ToggleMediaFavorite"
 const MediaServiceDeleteMediaFavoriteBridgeOperation = "/api.v1.services.media.MediaService/DeleteMediaFavorite"
-const MediaServiceGetMediaSharesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaShares"
-const MediaServiceCreateMediaShareBridgeOperation = "/api.v1.services.media.MediaService/CreateMediaShare"
-const MediaServiceGetMediaCommentsBridgeOperation = "/api.v1.services.media.MediaService/GetMediaComments"
+const MediaServiceGetMediaFavoritesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaFavorites"
+const MediaServiceToggleMediaFavoriteCompatBridgeOperation = "/api.v1.services.media.MediaService/ToggleMediaFavoriteCompat"
+const MediaServiceDeleteMediaFavoriteCompatBridgeOperation = "/api.v1.services.media.MediaService/DeleteMediaFavoriteCompat"
+const MediaServiceTranscodingStatusBridgeOperation = "/api.v1.services.media.MediaService/TranscodingStatus"
+const MediaServiceEncodingTasksBridgeOperation = "/api.v1.services.media.MediaService/EncodingTasks"
+const MediaServiceRetryEncodingTaskBridgeOperation = "/api.v1.services.media.MediaService/RetryEncodingTask"
+const MediaServiceRetryAllFailedTasksBridgeOperation = "/api.v1.services.media.MediaService/RetryAllFailedTasks"
+const MediaServiceGetMediaSpriteVTTBridgeOperation = "/api.v1.services.media.MediaService/GetMediaSpriteVTT"
+const MediaServiceGetMediaSpriteJPGBridgeOperation = "/api.v1.services.media.MediaService/GetMediaSpriteJPG"
+const MediaServiceGetMediaDownloadBridgeOperation = "/api.v1.services.media.MediaService/GetMediaDownload"
+const MediaServiceGetMediaStreamBridgeOperation = "/api.v1.services.media.MediaService/GetMediaStream"
+const MediaServiceGetMediaThumbnailBridgeOperation = "/api.v1.services.media.MediaService/GetMediaThumbnail"
+const MediaServiceOwnerRegenerateThumbnailBridgeOperation = "/api.v1.services.media.MediaService/OwnerRegenerateThumbnail"
+const MediaServiceOwnerSetThumbnailBridgeOperation = "/api.v1.services.media.MediaService/OwnerSetThumbnail"
 const MediaServiceGetMediaSubtitlesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaSubtitles"
 const MediaServiceCreateMediaSubtitleBridgeOperation = "/api.v1.services.media.MediaService/CreateMediaSubtitle"
 const MediaServiceGetMediaMetadataBridgeOperation = "/api.v1.services.media.MediaService/GetMediaMetadata"
+const MediaServiceUpdateMediaBridgeOperation = "/api.v1.services.media.MediaService/UpdateMedia"
+const MediaServiceDeleteMediaBridgeOperation = "/api.v1.services.media.MediaService/DeleteMedia"
+const MediaServiceStartMetadataMiningBridgeOperation = "/api.v1.services.media.MediaService/StartMetadataMining"
+const MediaServiceGetMetadataMiningStatusBridgeOperation = "/api.v1.services.media.MediaService/GetMetadataMiningStatus"
+const MediaServiceGetMediaKeyFramesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaKeyFrames"
+const MediaServiceGetMediaAudioWaveformBridgeOperation = "/api.v1.services.media.MediaService/GetMediaAudioWaveform"
+const MediaServiceGetMediaTextContentBridgeOperation = "/api.v1.services.media.MediaService/GetMediaTextContent"
+const MediaServiceGetMediaSceneChangesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaSceneChanges"
+const MediaServiceDeleteSubtitleBridgeOperation = "/api.v1.services.media.MediaService/DeleteSubtitle"
+const MediaServiceListSubtitleLanguagesBridgeOperation = "/api.v1.services.media.MediaService/ListSubtitleLanguages"
 const MediaServiceReportMediaBridgeOperation = "/api.v1.services.media.MediaService/ReportMedia"
-const MediaServiceGetMediaSpriteVTTBridgeOperation = "/api.v1.services.media.MediaService/GetMediaSpriteVTT"
-const MediaServiceGetMediaSpriteJPGBridgeOperation = "/api.v1.services.media.MediaService/GetMediaSpriteJPG"
+const MediaServiceGetMediaSharesBridgeOperation = "/api.v1.services.media.MediaService/GetMediaShares"
+const MediaServiceCreateMediaShareBridgeOperation = "/api.v1.services.media.MediaService/CreateMediaShare"
 
 type MediaServiceBridgeServer interface {
 	// ListMedias returns a list of medias.
 	ListMedias(context.Context, *ListMediasRequest) (*ListMediasResponse, error)
+	// ListFeaturedMedias returns a list of featured medias.
+	ListFeaturedMedias(context.Context, *ListFeaturedMediasRequest) (*ListFeaturedMediasResponse, error)
+	// ListLatestMedias returns a list of latest medias.
+	ListLatestMedias(context.Context, *ListLatestMediasRequest) (*ListLatestMediasResponse, error)
 	// GetMedia returns a media by ID.
 	GetMedia(context.Context, *GetMediaRequest) (*GetMediaResponse, error)
-	// CreateMedia creates a new media.
-	CreateMedia(context.Context, *CreateMediaRequest) (*CreateMediaResponse, error)
-	// UpdateMedia updates an existing media.
-	UpdateMedia(context.Context, *UpdateMediaRequest) (*UpdateMediaResponse, error)
-	// DeleteMedia deletes a media.
-	DeleteMedia(context.Context, *DeleteMediaRequest) (*DeleteMediaResponse, error)
-	// IncrementViewCount increments the view count of a media.
-	IncrementViewCount(context.Context, *IncrementViewCountRequest) (*IncrementViewCountResponse, error)
-	// UploadMedia uploads a media file.
-	UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error)
-	// GetMediaStream returns the streaming URL for a media.
-	GetMediaStream(context.Context, *GetMediaStreamRequest) (*GetMediaStreamResponse, error)
-	// GetMediaDownload returns the download URL for a media.
-	GetMediaDownload(context.Context, *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error)
-	// GetMediaThumbnail returns the thumbnail URL for a media.
-	GetMediaThumbnail(context.Context, *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error)
-	// ListEncodingTasks returns a list of encoding tasks for a media.
-	ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error)
 	// GetMediaVariants returns the available variants for a media.
 	GetMediaVariants(context.Context, *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error)
-	// RetryEncodingTask retries a specific encoding task.
-	RetryEncodingTask(context.Context, *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error)
-	// GetEncodingStatus returns the overall encoding status of the system.
-	GetEncodingStatus(context.Context, *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error)
-	// ListAllEncodingTasks returns a flat list of all encoding tasks (admin view).
-	ListAllEncodingTasks(context.Context, *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error)
-	// RetryAllFailedTasks retries all failed encoding tasks.
-	RetryAllFailedTasks(context.Context, *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error)
-	// GetMediaLikes returns the like status for a media.
-	GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error)
-	// ToggleMediaLike toggles like status for a media.
+	// IncrementViewCount increments the view count of a media.
+	IncrementViewCount(context.Context, *IncrementViewCountRequest) (*IncrementViewCountResponse, error)
+	// ToggleMediaLike toggles like status for a media (canonical).
 	ToggleMediaLike(context.Context, *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error)
-	// DeleteMediaLike removes like from a media.
+	// DeleteMediaLike removes like from a media (canonical).
 	DeleteMediaLike(context.Context, *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error)
-	// GetMediaFavorites returns the favorite status for a media.
-	GetMediaFavorites(context.Context, *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error)
-	// ToggleMediaFavorite toggles favorite status for a media.
+	// GetMediaLikes returns likes for a media (plural compat).
+	GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error)
+	// ToggleMediaLikeCompat toggles like via plural endpoint (compat).
+	ToggleMediaLikeCompat(context.Context, *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error)
+	// DeleteMediaLikeCompat removes like via plural endpoint (compat).
+	DeleteMediaLikeCompat(context.Context, *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error)
+	// ToggleMediaFavorite toggles favorite status (canonical).
 	ToggleMediaFavorite(context.Context, *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error)
-	// DeleteMediaFavorite removes favorite from a media.
+	// DeleteMediaFavorite removes favorite (canonical).
 	DeleteMediaFavorite(context.Context, *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error)
-	// GetMediaShares returns share statistics for a media.
-	GetMediaShares(context.Context, *GetMediaSharesRequest) (*GetMediaSharesResponse, error)
-	// CreateMediaShare creates a share record for a media.
-	CreateMediaShare(context.Context, *CreateMediaShareRequest) (*CreateMediaShareResponse, error)
-	// GetMediaComments returns comments for a media.
-	GetMediaComments(context.Context, *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error)
-	// GetMediaSubtitles returns subtitles for a media.
-	GetMediaSubtitles(context.Context, *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error)
-	// CreateMediaSubtitle uploads a subtitle for a media.
-	CreateMediaSubtitle(context.Context, *CreateMediaSubtitleRequest) (*CreateMediaSubtitleResponse, error)
-	// GetMediaMetadata returns metadata for a media.
-	GetMediaMetadata(context.Context, *GetMediaMetadataRequest) (*GetMediaMetadataResponse, error)
-	// ReportMedia reports a media for review.
-	ReportMedia(context.Context, *ReportMediaRequest) (*ReportMediaResponse, error)
+	// GetMediaFavorites returns favorites (plural compat).
+	GetMediaFavorites(context.Context, *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error)
+	// ToggleMediaFavoriteCompat toggles via plural (compat).
+	ToggleMediaFavoriteCompat(context.Context, *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error)
+	// DeleteMediaFavoriteCompat removes via plural (compat).
+	DeleteMediaFavoriteCompat(context.Context, *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error)
+	// TranscodingStatus returns current transcoding status.
+	TranscodingStatus(context.Context, *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error)
+	// EncodingTasks returns all encoding tasks.
+	EncodingTasks(context.Context, *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error)
+	// RetryEncodingTask retries a specific task.
+	RetryEncodingTask(context.Context, *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error)
+	// RetryAllFailedTasks retries all failed tasks.
+	RetryAllFailedTasks(context.Context, *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error)
+	// NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
 	// GetMediaSpriteVTT returns the VTT sprite file for a media.
 	GetMediaSpriteVTT(context.Context, *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error)
+	// NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
 	// GetMediaSpriteJPG returns the JPG sprite image for a media.
 	GetMediaSpriteJPG(context.Context, *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
+	GetMediaDownload(context.Context, *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
+	GetMediaStream(context.Context, *GetMediaStreamRequest) (*GetMediaStreamResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns non-JSON content (image). Requires adapter-level content-type handling.
+	GetMediaThumbnail(context.Context, *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error)
+	// Owner/portal cover regeneration (short_token; uuid never exposed to client).
+	OwnerRegenerateThumbnail(context.Context, *OwnerRegenerateThumbnailRequest) (*OwnerRegenerateThumbnailResponse, error)
+	// Owner/portal cover selection from sprite sheet (short_token).
+	OwnerSetThumbnail(context.Context, *OwnerSetThumbnailRequest) (*OwnerSetThumbnailResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaSubtitles(context.Context, *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	CreateMediaSubtitle(context.Context, *CreateMediaSubtitleRequest) (*CreateMediaSubtitleResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaMetadata(context.Context, *GetMediaMetadataRequest) (*GetMediaMetadataResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	UpdateMedia(context.Context, *UpdateMediaRequest) (*UpdateMediaResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	DeleteMedia(context.Context, *DeleteMediaRequest) (*DeleteMediaResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	StartMetadataMining(context.Context, *StartMetadataMiningRequest) (*StartMetadataMiningResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMetadataMiningStatus(context.Context, *GetMetadataMiningStatusRequest) (*GetMetadataMiningStatusResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaKeyFrames(context.Context, *GetMediaKeyFramesRequest) (*GetMediaKeyFramesResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaAudioWaveform(context.Context, *GetMediaAudioWaveformRequest) (*GetMediaAudioWaveformResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaTextContent(context.Context, *GetMediaTextContentRequest) (*GetMediaTextContentResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaSceneChanges(context.Context, *GetMediaSceneChangesRequest) (*GetMediaSceneChangesResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	DeleteSubtitle(context.Context, *DeleteSubtitleRequest) (*DeleteSubtitleResponse, error)
+	// STUB: Not yet implemented. Do not remove - reserved for future development.
+	ListSubtitleLanguages(context.Context, *ListSubtitleLanguagesRequest) (*ListSubtitleLanguagesResponse, error)
+	// ReportMedia reports a media for review.
+	ReportMedia(context.Context, *ReportMediaRequest) (*ReportMediaResponse, error)
+	// GetMediaShares returns share links for a media.
+	GetMediaShares(context.Context, *GetMediaSharesRequest) (*GetMediaSharesResponse, error)
+	// CreateMediaShare records a media share event.
+	CreateMediaShare(context.Context, *CreateMediaShareRequest) (*CreateMediaShareResponse, error)
 }
 
 type MediaServiceHooker interface {
 	MediaServiceListMediasHooker
+	MediaServiceListFeaturedMediasHooker
+	MediaServiceListLatestMediasHooker
 	MediaServiceGetMediaHooker
-	MediaServiceCreateMediaHooker
-	MediaServiceUpdateMediaHooker
-	MediaServiceDeleteMediaHooker
-	MediaServiceIncrementViewCountHooker
-	MediaServiceUploadMediaHooker
-	MediaServiceGetMediaStreamHooker
-	MediaServiceGetMediaDownloadHooker
-	MediaServiceGetMediaThumbnailHooker
-	MediaServiceListEncodingTasksHooker
 	MediaServiceGetMediaVariantsHooker
-	MediaServiceRetryEncodingTaskHooker
-	MediaServiceGetEncodingStatusHooker
-	MediaServiceListAllEncodingTasksHooker
-	MediaServiceRetryAllFailedTasksHooker
-	MediaServiceGetMediaLikesHooker
+	MediaServiceIncrementViewCountHooker
 	MediaServiceToggleMediaLikeHooker
 	MediaServiceDeleteMediaLikeHooker
-	MediaServiceGetMediaFavoritesHooker
+	MediaServiceGetMediaLikesHooker
+	MediaServiceToggleMediaLikeCompatHooker
+	MediaServiceDeleteMediaLikeCompatHooker
 	MediaServiceToggleMediaFavoriteHooker
 	MediaServiceDeleteMediaFavoriteHooker
-	MediaServiceGetMediaSharesHooker
-	MediaServiceCreateMediaShareHooker
-	MediaServiceGetMediaCommentsHooker
+	MediaServiceGetMediaFavoritesHooker
+	MediaServiceToggleMediaFavoriteCompatHooker
+	MediaServiceDeleteMediaFavoriteCompatHooker
+	MediaServiceTranscodingStatusHooker
+	MediaServiceEncodingTasksHooker
+	MediaServiceRetryEncodingTaskHooker
+	MediaServiceRetryAllFailedTasksHooker
+	MediaServiceGetMediaSpriteVTTHooker
+	MediaServiceGetMediaSpriteJPGHooker
+	MediaServiceGetMediaDownloadHooker
+	MediaServiceGetMediaStreamHooker
+	MediaServiceGetMediaThumbnailHooker
+	MediaServiceOwnerRegenerateThumbnailHooker
+	MediaServiceOwnerSetThumbnailHooker
 	MediaServiceGetMediaSubtitlesHooker
 	MediaServiceCreateMediaSubtitleHooker
 	MediaServiceGetMediaMetadataHooker
+	MediaServiceUpdateMediaHooker
+	MediaServiceDeleteMediaHooker
+	MediaServiceStartMetadataMiningHooker
+	MediaServiceGetMetadataMiningStatusHooker
+	MediaServiceGetMediaKeyFramesHooker
+	MediaServiceGetMediaAudioWaveformHooker
+	MediaServiceGetMediaTextContentHooker
+	MediaServiceGetMediaSceneChangesHooker
+	MediaServiceDeleteSubtitleHooker
+	MediaServiceListSubtitleLanguagesHooker
 	MediaServiceReportMediaHooker
-	MediaServiceGetMediaSpriteVTTHooker
-	MediaServiceGetMediaSpriteJPGHooker
+	MediaServiceGetMediaSharesHooker
+	MediaServiceCreateMediaShareHooker
 }
 
 type MediaServiceHookedBridger interface {
@@ -167,69 +220,25 @@ type MediaServiceListMediasHooker interface {
 	PrepareListMedias(http.Context, *ListMediasRequest) (context.Context, error)
 	CompleteListMedias(http.Context, *ListMediasRequest, *ListMediasResponse) error
 }
+type MediaServiceListFeaturedMediasHooker interface {
+	PrepareListFeaturedMedias(http.Context, *ListFeaturedMediasRequest) (context.Context, error)
+	CompleteListFeaturedMedias(http.Context, *ListFeaturedMediasRequest, *ListFeaturedMediasResponse) error
+}
+type MediaServiceListLatestMediasHooker interface {
+	PrepareListLatestMedias(http.Context, *ListLatestMediasRequest) (context.Context, error)
+	CompleteListLatestMedias(http.Context, *ListLatestMediasRequest, *ListLatestMediasResponse) error
+}
 type MediaServiceGetMediaHooker interface {
 	PrepareGetMedia(http.Context, *GetMediaRequest) (context.Context, error)
 	CompleteGetMedia(http.Context, *GetMediaRequest, *GetMediaResponse) error
-}
-type MediaServiceCreateMediaHooker interface {
-	PrepareCreateMedia(http.Context, *CreateMediaRequest) (context.Context, error)
-	CompleteCreateMedia(http.Context, *CreateMediaRequest, *CreateMediaResponse) error
-}
-type MediaServiceUpdateMediaHooker interface {
-	PrepareUpdateMedia(http.Context, *UpdateMediaRequest) (context.Context, error)
-	CompleteUpdateMedia(http.Context, *UpdateMediaRequest, *UpdateMediaResponse) error
-}
-type MediaServiceDeleteMediaHooker interface {
-	PrepareDeleteMedia(http.Context, *DeleteMediaRequest) (context.Context, error)
-	CompleteDeleteMedia(http.Context, *DeleteMediaRequest, *DeleteMediaResponse) error
-}
-type MediaServiceIncrementViewCountHooker interface {
-	PrepareIncrementViewCount(http.Context, *IncrementViewCountRequest) (context.Context, error)
-	CompleteIncrementViewCount(http.Context, *IncrementViewCountRequest, *IncrementViewCountResponse) error
-}
-type MediaServiceUploadMediaHooker interface {
-	PrepareUploadMedia(http.Context, *UploadMediaRequest) (context.Context, error)
-	CompleteUploadMedia(http.Context, *UploadMediaRequest, *UploadMediaResponse) error
-}
-type MediaServiceGetMediaStreamHooker interface {
-	PrepareGetMediaStream(http.Context, *GetMediaStreamRequest) (context.Context, error)
-	CompleteGetMediaStream(http.Context, *GetMediaStreamRequest, *GetMediaStreamResponse) error
-}
-type MediaServiceGetMediaDownloadHooker interface {
-	PrepareGetMediaDownload(http.Context, *GetMediaDownloadRequest) (context.Context, error)
-	CompleteGetMediaDownload(http.Context, *GetMediaDownloadRequest, *GetMediaDownloadResponse) error
-}
-type MediaServiceGetMediaThumbnailHooker interface {
-	PrepareGetMediaThumbnail(http.Context, *GetMediaThumbnailRequest) (context.Context, error)
-	CompleteGetMediaThumbnail(http.Context, *GetMediaThumbnailRequest, *GetMediaThumbnailResponse) error
-}
-type MediaServiceListEncodingTasksHooker interface {
-	PrepareListEncodingTasks(http.Context, *ListEncodingTasksRequest) (context.Context, error)
-	CompleteListEncodingTasks(http.Context, *ListEncodingTasksRequest, *ListEncodingTasksResponse) error
 }
 type MediaServiceGetMediaVariantsHooker interface {
 	PrepareGetMediaVariants(http.Context, *GetMediaVariantsRequest) (context.Context, error)
 	CompleteGetMediaVariants(http.Context, *GetMediaVariantsRequest, *GetMediaVariantsResponse) error
 }
-type MediaServiceRetryEncodingTaskHooker interface {
-	PrepareRetryEncodingTask(http.Context, *RetryEncodingTaskRequest) (context.Context, error)
-	CompleteRetryEncodingTask(http.Context, *RetryEncodingTaskRequest, *RetryEncodingTaskResponse) error
-}
-type MediaServiceGetEncodingStatusHooker interface {
-	PrepareGetEncodingStatus(http.Context, *GetEncodingStatusRequest) (context.Context, error)
-	CompleteGetEncodingStatus(http.Context, *GetEncodingStatusRequest, *GetEncodingStatusResponse) error
-}
-type MediaServiceListAllEncodingTasksHooker interface {
-	PrepareListAllEncodingTasks(http.Context, *ListAllEncodingTasksRequest) (context.Context, error)
-	CompleteListAllEncodingTasks(http.Context, *ListAllEncodingTasksRequest, *ListAllEncodingTasksResponse) error
-}
-type MediaServiceRetryAllFailedTasksHooker interface {
-	PrepareRetryAllFailedTasks(http.Context, *RetryAllFailedTasksRequest) (context.Context, error)
-	CompleteRetryAllFailedTasks(http.Context, *RetryAllFailedTasksRequest, *RetryAllFailedTasksResponse) error
-}
-type MediaServiceGetMediaLikesHooker interface {
-	PrepareGetMediaLikes(http.Context, *GetMediaLikesRequest) (context.Context, error)
-	CompleteGetMediaLikes(http.Context, *GetMediaLikesRequest, *GetMediaLikesResponse) error
+type MediaServiceIncrementViewCountHooker interface {
+	PrepareIncrementViewCount(http.Context, *IncrementViewCountRequest) (context.Context, error)
+	CompleteIncrementViewCount(http.Context, *IncrementViewCountRequest, *IncrementViewCountResponse) error
 }
 type MediaServiceToggleMediaLikeHooker interface {
 	PrepareToggleMediaLike(http.Context, *ToggleMediaLikeRequest) (context.Context, error)
@@ -239,9 +248,17 @@ type MediaServiceDeleteMediaLikeHooker interface {
 	PrepareDeleteMediaLike(http.Context, *DeleteMediaLikeRequest) (context.Context, error)
 	CompleteDeleteMediaLike(http.Context, *DeleteMediaLikeRequest, *DeleteMediaLikeResponse) error
 }
-type MediaServiceGetMediaFavoritesHooker interface {
-	PrepareGetMediaFavorites(http.Context, *GetMediaFavoritesRequest) (context.Context, error)
-	CompleteGetMediaFavorites(http.Context, *GetMediaFavoritesRequest, *GetMediaFavoritesResponse) error
+type MediaServiceGetMediaLikesHooker interface {
+	PrepareGetMediaLikes(http.Context, *GetMediaLikesRequest) (context.Context, error)
+	CompleteGetMediaLikes(http.Context, *GetMediaLikesRequest, *GetMediaLikesResponse) error
+}
+type MediaServiceToggleMediaLikeCompatHooker interface {
+	PrepareToggleMediaLikeCompat(http.Context, *ToggleMediaLikeRequest) (context.Context, error)
+	CompleteToggleMediaLikeCompat(http.Context, *ToggleMediaLikeRequest, *ToggleMediaLikeResponse) error
+}
+type MediaServiceDeleteMediaLikeCompatHooker interface {
+	PrepareDeleteMediaLikeCompat(http.Context, *DeleteMediaLikeRequest) (context.Context, error)
+	CompleteDeleteMediaLikeCompat(http.Context, *DeleteMediaLikeRequest, *DeleteMediaLikeResponse) error
 }
 type MediaServiceToggleMediaFavoriteHooker interface {
 	PrepareToggleMediaFavorite(http.Context, *ToggleMediaFavoriteRequest) (context.Context, error)
@@ -251,17 +268,61 @@ type MediaServiceDeleteMediaFavoriteHooker interface {
 	PrepareDeleteMediaFavorite(http.Context, *DeleteMediaFavoriteRequest) (context.Context, error)
 	CompleteDeleteMediaFavorite(http.Context, *DeleteMediaFavoriteRequest, *DeleteMediaFavoriteResponse) error
 }
-type MediaServiceGetMediaSharesHooker interface {
-	PrepareGetMediaShares(http.Context, *GetMediaSharesRequest) (context.Context, error)
-	CompleteGetMediaShares(http.Context, *GetMediaSharesRequest, *GetMediaSharesResponse) error
+type MediaServiceGetMediaFavoritesHooker interface {
+	PrepareGetMediaFavorites(http.Context, *GetMediaFavoritesRequest) (context.Context, error)
+	CompleteGetMediaFavorites(http.Context, *GetMediaFavoritesRequest, *GetMediaFavoritesResponse) error
 }
-type MediaServiceCreateMediaShareHooker interface {
-	PrepareCreateMediaShare(http.Context, *CreateMediaShareRequest) (context.Context, error)
-	CompleteCreateMediaShare(http.Context, *CreateMediaShareRequest, *CreateMediaShareResponse) error
+type MediaServiceToggleMediaFavoriteCompatHooker interface {
+	PrepareToggleMediaFavoriteCompat(http.Context, *ToggleMediaFavoriteRequest) (context.Context, error)
+	CompleteToggleMediaFavoriteCompat(http.Context, *ToggleMediaFavoriteRequest, *ToggleMediaFavoriteResponse) error
 }
-type MediaServiceGetMediaCommentsHooker interface {
-	PrepareGetMediaComments(http.Context, *GetMediaCommentsRequest) (context.Context, error)
-	CompleteGetMediaComments(http.Context, *GetMediaCommentsRequest, *GetMediaCommentsResponse) error
+type MediaServiceDeleteMediaFavoriteCompatHooker interface {
+	PrepareDeleteMediaFavoriteCompat(http.Context, *DeleteMediaFavoriteRequest) (context.Context, error)
+	CompleteDeleteMediaFavoriteCompat(http.Context, *DeleteMediaFavoriteRequest, *DeleteMediaFavoriteResponse) error
+}
+type MediaServiceTranscodingStatusHooker interface {
+	PrepareTranscodingStatus(http.Context, *GetEncodingStatusRequest) (context.Context, error)
+	CompleteTranscodingStatus(http.Context, *GetEncodingStatusRequest, *GetEncodingStatusResponse) error
+}
+type MediaServiceEncodingTasksHooker interface {
+	PrepareEncodingTasks(http.Context, *ListAllEncodingTasksRequest) (context.Context, error)
+	CompleteEncodingTasks(http.Context, *ListAllEncodingTasksRequest, *ListAllEncodingTasksResponse) error
+}
+type MediaServiceRetryEncodingTaskHooker interface {
+	PrepareRetryEncodingTask(http.Context, *RetryEncodingTaskRequest) (context.Context, error)
+	CompleteRetryEncodingTask(http.Context, *RetryEncodingTaskRequest, *RetryEncodingTaskResponse) error
+}
+type MediaServiceRetryAllFailedTasksHooker interface {
+	PrepareRetryAllFailedTasks(http.Context, *RetryAllFailedTasksRequest) (context.Context, error)
+	CompleteRetryAllFailedTasks(http.Context, *RetryAllFailedTasksRequest, *RetryAllFailedTasksResponse) error
+}
+type MediaServiceGetMediaSpriteVTTHooker interface {
+	PrepareGetMediaSpriteVTT(http.Context, *GetMediaSpriteVTTRequest) (context.Context, error)
+	CompleteGetMediaSpriteVTT(http.Context, *GetMediaSpriteVTTRequest, *GetMediaSpriteVTTResponse) error
+}
+type MediaServiceGetMediaSpriteJPGHooker interface {
+	PrepareGetMediaSpriteJPG(http.Context, *GetMediaSpriteJPGRequest) (context.Context, error)
+	CompleteGetMediaSpriteJPG(http.Context, *GetMediaSpriteJPGRequest, *GetMediaSpriteJPGResponse) error
+}
+type MediaServiceGetMediaDownloadHooker interface {
+	PrepareGetMediaDownload(http.Context, *GetMediaDownloadRequest) (context.Context, error)
+	CompleteGetMediaDownload(http.Context, *GetMediaDownloadRequest, *GetMediaDownloadResponse) error
+}
+type MediaServiceGetMediaStreamHooker interface {
+	PrepareGetMediaStream(http.Context, *GetMediaStreamRequest) (context.Context, error)
+	CompleteGetMediaStream(http.Context, *GetMediaStreamRequest, *GetMediaStreamResponse) error
+}
+type MediaServiceGetMediaThumbnailHooker interface {
+	PrepareGetMediaThumbnail(http.Context, *GetMediaThumbnailRequest) (context.Context, error)
+	CompleteGetMediaThumbnail(http.Context, *GetMediaThumbnailRequest, *GetMediaThumbnailResponse) error
+}
+type MediaServiceOwnerRegenerateThumbnailHooker interface {
+	PrepareOwnerRegenerateThumbnail(http.Context, *OwnerRegenerateThumbnailRequest) (context.Context, error)
+	CompleteOwnerRegenerateThumbnail(http.Context, *OwnerRegenerateThumbnailRequest, *OwnerRegenerateThumbnailResponse) error
+}
+type MediaServiceOwnerSetThumbnailHooker interface {
+	PrepareOwnerSetThumbnail(http.Context, *OwnerSetThumbnailRequest) (context.Context, error)
+	CompleteOwnerSetThumbnail(http.Context, *OwnerSetThumbnailRequest, *OwnerSetThumbnailResponse) error
 }
 type MediaServiceGetMediaSubtitlesHooker interface {
 	PrepareGetMediaSubtitles(http.Context, *GetMediaSubtitlesRequest) (context.Context, error)
@@ -275,52 +336,104 @@ type MediaServiceGetMediaMetadataHooker interface {
 	PrepareGetMediaMetadata(http.Context, *GetMediaMetadataRequest) (context.Context, error)
 	CompleteGetMediaMetadata(http.Context, *GetMediaMetadataRequest, *GetMediaMetadataResponse) error
 }
+type MediaServiceUpdateMediaHooker interface {
+	PrepareUpdateMedia(http.Context, *UpdateMediaRequest) (context.Context, error)
+	CompleteUpdateMedia(http.Context, *UpdateMediaRequest, *UpdateMediaResponse) error
+}
+type MediaServiceDeleteMediaHooker interface {
+	PrepareDeleteMedia(http.Context, *DeleteMediaRequest) (context.Context, error)
+	CompleteDeleteMedia(http.Context, *DeleteMediaRequest, *DeleteMediaResponse) error
+}
+type MediaServiceStartMetadataMiningHooker interface {
+	PrepareStartMetadataMining(http.Context, *StartMetadataMiningRequest) (context.Context, error)
+	CompleteStartMetadataMining(http.Context, *StartMetadataMiningRequest, *StartMetadataMiningResponse) error
+}
+type MediaServiceGetMetadataMiningStatusHooker interface {
+	PrepareGetMetadataMiningStatus(http.Context, *GetMetadataMiningStatusRequest) (context.Context, error)
+	CompleteGetMetadataMiningStatus(http.Context, *GetMetadataMiningStatusRequest, *GetMetadataMiningStatusResponse) error
+}
+type MediaServiceGetMediaKeyFramesHooker interface {
+	PrepareGetMediaKeyFrames(http.Context, *GetMediaKeyFramesRequest) (context.Context, error)
+	CompleteGetMediaKeyFrames(http.Context, *GetMediaKeyFramesRequest, *GetMediaKeyFramesResponse) error
+}
+type MediaServiceGetMediaAudioWaveformHooker interface {
+	PrepareGetMediaAudioWaveform(http.Context, *GetMediaAudioWaveformRequest) (context.Context, error)
+	CompleteGetMediaAudioWaveform(http.Context, *GetMediaAudioWaveformRequest, *GetMediaAudioWaveformResponse) error
+}
+type MediaServiceGetMediaTextContentHooker interface {
+	PrepareGetMediaTextContent(http.Context, *GetMediaTextContentRequest) (context.Context, error)
+	CompleteGetMediaTextContent(http.Context, *GetMediaTextContentRequest, *GetMediaTextContentResponse) error
+}
+type MediaServiceGetMediaSceneChangesHooker interface {
+	PrepareGetMediaSceneChanges(http.Context, *GetMediaSceneChangesRequest) (context.Context, error)
+	CompleteGetMediaSceneChanges(http.Context, *GetMediaSceneChangesRequest, *GetMediaSceneChangesResponse) error
+}
+type MediaServiceDeleteSubtitleHooker interface {
+	PrepareDeleteSubtitle(http.Context, *DeleteSubtitleRequest) (context.Context, error)
+	CompleteDeleteSubtitle(http.Context, *DeleteSubtitleRequest, *DeleteSubtitleResponse) error
+}
+type MediaServiceListSubtitleLanguagesHooker interface {
+	PrepareListSubtitleLanguages(http.Context, *ListSubtitleLanguagesRequest) (context.Context, error)
+	CompleteListSubtitleLanguages(http.Context, *ListSubtitleLanguagesRequest, *ListSubtitleLanguagesResponse) error
+}
 type MediaServiceReportMediaHooker interface {
 	PrepareReportMedia(http.Context, *ReportMediaRequest) (context.Context, error)
 	CompleteReportMedia(http.Context, *ReportMediaRequest, *ReportMediaResponse) error
 }
-type MediaServiceGetMediaSpriteVTTHooker interface {
-	PrepareGetMediaSpriteVTT(http.Context, *GetMediaSpriteVTTRequest) (context.Context, error)
-	CompleteGetMediaSpriteVTT(http.Context, *GetMediaSpriteVTTRequest, *GetMediaSpriteVTTResponse) error
+type MediaServiceGetMediaSharesHooker interface {
+	PrepareGetMediaShares(http.Context, *GetMediaSharesRequest) (context.Context, error)
+	CompleteGetMediaShares(http.Context, *GetMediaSharesRequest, *GetMediaSharesResponse) error
 }
-type MediaServiceGetMediaSpriteJPGHooker interface {
-	PrepareGetMediaSpriteJPG(http.Context, *GetMediaSpriteJPGRequest) (context.Context, error)
-	CompleteGetMediaSpriteJPG(http.Context, *GetMediaSpriteJPGRequest, *GetMediaSpriteJPGResponse) error
+type MediaServiceCreateMediaShareHooker interface {
+	PrepareCreateMediaShare(http.Context, *CreateMediaShareRequest) (context.Context, error)
+	CompleteCreateMediaShare(http.Context, *CreateMediaShareRequest, *CreateMediaShareResponse) error
 }
 
 func RegisterMediaServiceBridgeServer(s *http.Server, srv MediaServiceHookedBridger) {
 	r := s.Route("/")
 	r.GET("/api/v1/medias", _MediaService_ListMedias0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/featured", _MediaService_ListFeaturedMedias0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/latest", _MediaService_ListLatestMedias0_Bridge_Handler(srv))
 	r.GET("/api/v1/medias/:id", _MediaService_GetMedia0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias", _MediaService_CreateMedia0_Bridge_Handler(srv))
-	r.PUT("/api/v1/medias/:media.id", _MediaService_UpdateMedia0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/medias/:id", _MediaService_DeleteMedia0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:id/view", _MediaService_IncrementViewCount0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/upload", _MediaService_UploadMedia0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:id/stream", _MediaService_GetMediaStream0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:id/download", _MediaService_GetMediaDownload0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:id/thumbnail", _MediaService_GetMediaThumbnail0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/tasks", _MediaService_ListEncodingTasks0_Bridge_Handler(srv))
 	r.GET("/api/v1/medias/:id/variants", _MediaService_GetMediaVariants0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:media_id/tasks/:task_id/retry", _MediaService_RetryEncodingTask0_Bridge_Handler(srv))
-	r.GET("/api/v1/admin/encoding/status", _MediaService_GetEncodingStatus0_Bridge_Handler(srv))
-	r.GET("/api/v1/admin/encoding/tasks", _MediaService_ListAllEncodingTasks0_Bridge_Handler(srv))
-	r.POST("/api/v1/admin/encoding/retry-failed", _MediaService_RetryAllFailedTasks0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/likes", _MediaService_GetMediaLikes0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:media_id/likes", _MediaService_ToggleMediaLike0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/medias/:media_id/likes", _MediaService_DeleteMediaLike0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/favorites", _MediaService_GetMediaFavorites0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:media_id/favorites", _MediaService_ToggleMediaFavorite0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/medias/:media_id/favorites", _MediaService_DeleteMediaFavorite0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/shares", _MediaService_GetMediaShares0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:media_id/shares", _MediaService_CreateMediaShare0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/comments", _MediaService_GetMediaComments0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/subtitles", _MediaService_GetMediaSubtitles0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:media_id/subtitles", _MediaService_CreateMediaSubtitle0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/metadata", _MediaService_GetMediaMetadata0_Bridge_Handler(srv))
-	r.POST("/api/v1/medias/:id/report", _MediaService_ReportMedia0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/view", _MediaService_IncrementViewCount0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/like", _MediaService_ToggleMediaLike0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/medias/:id/like", _MediaService_DeleteMediaLike0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/likes", _MediaService_GetMediaLikes0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/likes", _MediaService_ToggleMediaLikeCompat0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/medias/:id/likes", _MediaService_DeleteMediaLikeCompat0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/favorite", _MediaService_ToggleMediaFavorite0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/medias/:id/favorite", _MediaService_DeleteMediaFavorite0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/favorites", _MediaService_GetMediaFavorites0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/favorites", _MediaService_ToggleMediaFavoriteCompat0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/medias/:id/favorites", _MediaService_DeleteMediaFavoriteCompat0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/transcoding/status", _MediaService_TranscodingStatus0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/encoding/tasks", _MediaService_EncodingTasks0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/encoding/retry", _MediaService_RetryEncodingTask0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/encoding/retry-all-failed", _MediaService_RetryAllFailedTasks0_Bridge_Handler(srv))
 	r.GET("/api/v1/medias/:id/sprite.vtt", _MediaService_GetMediaSpriteVTT0_Bridge_Handler(srv))
 	r.GET("/api/v1/medias/:id/sprite.jpg", _MediaService_GetMediaSpriteJPG0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/download", _MediaService_GetMediaDownload0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/stream", _MediaService_GetMediaStream0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/thumbnail", _MediaService_GetMediaThumbnail0_Bridge_Handler(srv))
+	r.POST("/api/v1/me/medias/:token/regen-thumbnail", _MediaService_OwnerRegenerateThumbnail0_Bridge_Handler(srv))
+	r.POST("/api/v1/me/medias/:token/set-thumbnail", _MediaService_OwnerSetThumbnail0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/subtitles", _MediaService_GetMediaSubtitles0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/subtitles", _MediaService_CreateMediaSubtitle0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/metadata", _MediaService_GetMediaMetadata0_Bridge_Handler(srv))
+	r.PUT("/api/v1/medias/:id", _MediaService_UpdateMedia0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/medias/:id", _MediaService_DeleteMedia0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/metadata/mining", _MediaService_StartMetadataMining0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/metadata/status", _MediaService_GetMetadataMiningStatus0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/metadata/key-frames", _MediaService_GetMediaKeyFrames0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/metadata/audio-waveform", _MediaService_GetMediaAudioWaveform0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/metadata/text-content", _MediaService_GetMediaTextContent0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/metadata/scene-changes", _MediaService_GetMediaSceneChanges0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/subtitles/:id", _MediaService_DeleteSubtitle0_Bridge_Handler(srv))
+	r.GET("/api/v1/subtitles/languages", _MediaService_ListSubtitleLanguages0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/report", _MediaService_ReportMedia0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/shares", _MediaService_GetMediaShares0_Bridge_Handler(srv))
+	r.POST("/api/v1/medias/:id/shares", _MediaService_CreateMediaShare0_Bridge_Handler(srv))
 }
 
 func _MediaService_ListMedias0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
@@ -343,6 +456,52 @@ func _MediaService_ListMedias0_Bridge_Handler(srv MediaServiceHookedBridger) fun
 			return err
 		}
 		return srv.CompleteListMedias(ctx, &in, out.(*ListMediasResponse))
+	}
+}
+
+func _MediaService_ListFeaturedMedias0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListFeaturedMediasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceListFeaturedMedias)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListFeaturedMedias(ctx, req.(*ListFeaturedMediasRequest))
+		})
+
+		newctx, err := srv.PrepareListFeaturedMedias(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListFeaturedMedias(ctx, &in, out.(*ListFeaturedMediasResponse))
+	}
+}
+
+func _MediaService_ListLatestMedias0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListLatestMediasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceListLatestMedias)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListLatestMedias(ctx, req.(*ListLatestMediasRequest))
+		})
+
+		newctx, err := srv.PrepareListLatestMedias(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListLatestMedias(ctx, &in, out.(*ListLatestMediasResponse))
 	}
 }
 
@@ -372,50 +531,21 @@ func _MediaService_GetMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(
 	}
 }
 
-func _MediaService_CreateMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_GetMediaVariants0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceCreateMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateMedia(ctx, req.(*CreateMediaRequest))
-		})
-
-		newctx, err := srv.PrepareCreateMedia(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteCreateMedia(ctx, &in, out.(*CreateMediaResponse))
-	}
-}
-
-func _MediaService_UpdateMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UpdateMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
+		var in GetMediaVariantsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceUpdateMedia)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaVariants)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateMedia(ctx, req.(*UpdateMediaRequest))
+			return srv.GetMediaVariants(ctx, req.(*GetMediaVariantsRequest))
 		})
 
-		newctx, err := srv.PrepareUpdateMedia(ctx, &in)
+		newctx, err := srv.PrepareGetMediaVariants(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -423,33 +553,7 @@ func _MediaService_UpdateMedia0_Bridge_Handler(srv MediaServiceHookedBridger) fu
 		if err != nil {
 			return err
 		}
-		return srv.CompleteUpdateMedia(ctx, &in, out.(*UpdateMediaResponse))
-	}
-}
-
-func _MediaService_DeleteMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in DeleteMediaRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceDeleteMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteMedia(ctx, req.(*DeleteMediaRequest))
-		})
-
-		newctx, err := srv.PrepareDeleteMedia(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteDeleteMedia(ctx, &in, out.(*DeleteMediaResponse))
+		return srv.CompleteGetMediaVariants(ctx, &in, out.(*GetMediaVariantsResponse))
 	}
 }
 
@@ -479,289 +583,6 @@ func _MediaService_IncrementViewCount0_Bridge_Handler(srv MediaServiceHookedBrid
 			return err
 		}
 		return srv.CompleteIncrementViewCount(ctx, &in, out.(*IncrementViewCountResponse))
-	}
-}
-
-func _MediaService_UploadMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UploadMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceUploadMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UploadMedia(ctx, req.(*UploadMediaRequest))
-		})
-
-		newctx, err := srv.PrepareUploadMedia(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteUploadMedia(ctx, &in, out.(*UploadMediaResponse))
-	}
-}
-
-func _MediaService_GetMediaStream0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaStreamRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaStream)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaStream(ctx, req.(*GetMediaStreamRequest))
-		})
-
-		newctx, err := srv.PrepareGetMediaStream(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetMediaStream(ctx, &in, out.(*GetMediaStreamResponse))
-	}
-}
-
-func _MediaService_GetMediaDownload0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaDownloadRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaDownload)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaDownload(ctx, req.(*GetMediaDownloadRequest))
-		})
-
-		newctx, err := srv.PrepareGetMediaDownload(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetMediaDownload(ctx, &in, out.(*GetMediaDownloadResponse))
-	}
-}
-
-func _MediaService_GetMediaThumbnail0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaThumbnailRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaThumbnail)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaThumbnail(ctx, req.(*GetMediaThumbnailRequest))
-		})
-
-		newctx, err := srv.PrepareGetMediaThumbnail(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetMediaThumbnail(ctx, &in, out.(*GetMediaThumbnailResponse))
-	}
-}
-
-func _MediaService_ListEncodingTasks0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListEncodingTasksRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceListEncodingTasks)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListEncodingTasks(ctx, req.(*ListEncodingTasksRequest))
-		})
-
-		newctx, err := srv.PrepareListEncodingTasks(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteListEncodingTasks(ctx, &in, out.(*ListEncodingTasksResponse))
-	}
-}
-
-func _MediaService_GetMediaVariants0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaVariantsRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaVariants)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaVariants(ctx, req.(*GetMediaVariantsRequest))
-		})
-
-		newctx, err := srv.PrepareGetMediaVariants(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetMediaVariants(ctx, &in, out.(*GetMediaVariantsResponse))
-	}
-}
-
-func _MediaService_RetryEncodingTask0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RetryEncodingTaskRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceRetryEncodingTask)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RetryEncodingTask(ctx, req.(*RetryEncodingTaskRequest))
-		})
-
-		newctx, err := srv.PrepareRetryEncodingTask(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteRetryEncodingTask(ctx, &in, out.(*RetryEncodingTaskResponse))
-	}
-}
-
-func _MediaService_GetEncodingStatus0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetEncodingStatusRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetEncodingStatus)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetEncodingStatus(ctx, req.(*GetEncodingStatusRequest))
-		})
-
-		newctx, err := srv.PrepareGetEncodingStatus(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetEncodingStatus(ctx, &in, out.(*GetEncodingStatusResponse))
-	}
-}
-
-func _MediaService_ListAllEncodingTasks0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListAllEncodingTasksRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceListAllEncodingTasks)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListAllEncodingTasks(ctx, req.(*ListAllEncodingTasksRequest))
-		})
-
-		newctx, err := srv.PrepareListAllEncodingTasks(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteListAllEncodingTasks(ctx, &in, out.(*ListAllEncodingTasksResponse))
-	}
-}
-
-func _MediaService_RetryAllFailedTasks0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RetryAllFailedTasksRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceRetryAllFailedTasks)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RetryAllFailedTasks(ctx, req.(*RetryAllFailedTasksRequest))
-		})
-
-		newctx, err := srv.PrepareRetryAllFailedTasks(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteRetryAllFailedTasks(ctx, &in, out.(*RetryAllFailedTasksResponse))
-	}
-}
-
-func _MediaService_GetMediaLikes0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaLikesRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaLikes)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaLikes(ctx, req.(*GetMediaLikesRequest))
-		})
-
-		newctx, err := srv.PrepareGetMediaLikes(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetMediaLikes(ctx, &in, out.(*GetMediaLikesResponse))
 	}
 }
 
@@ -820,21 +641,21 @@ func _MediaService_DeleteMediaLike0_Bridge_Handler(srv MediaServiceHookedBridger
 	}
 }
 
-func _MediaService_GetMediaFavorites0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_GetMediaLikes0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaFavoritesRequest
+		var in GetMediaLikesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaFavorites)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaLikes)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaFavorites(ctx, req.(*GetMediaFavoritesRequest))
+			return srv.GetMediaLikes(ctx, req.(*GetMediaLikesRequest))
 		})
 
-		newctx, err := srv.PrepareGetMediaFavorites(ctx, &in)
+		newctx, err := srv.PrepareGetMediaLikes(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -842,7 +663,62 @@ func _MediaService_GetMediaFavorites0_Bridge_Handler(srv MediaServiceHookedBridg
 		if err != nil {
 			return err
 		}
-		return srv.CompleteGetMediaFavorites(ctx, &in, out.(*GetMediaFavoritesResponse))
+		return srv.CompleteGetMediaLikes(ctx, &in, out.(*GetMediaLikesResponse))
+	}
+}
+
+func _MediaService_ToggleMediaLikeCompat0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleMediaLikeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceToggleMediaLikeCompat)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleMediaLikeCompat(ctx, req.(*ToggleMediaLikeRequest))
+		})
+
+		newctx, err := srv.PrepareToggleMediaLikeCompat(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleMediaLikeCompat(ctx, &in, out.(*ToggleMediaLikeResponse))
+	}
+}
+
+func _MediaService_DeleteMediaLikeCompat0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteMediaLikeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceDeleteMediaLikeCompat)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteMediaLikeCompat(ctx, req.(*DeleteMediaLikeRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteMediaLikeCompat(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteMediaLikeCompat(ctx, &in, out.(*DeleteMediaLikeResponse))
 	}
 }
 
@@ -901,21 +777,21 @@ func _MediaService_DeleteMediaFavorite0_Bridge_Handler(srv MediaServiceHookedBri
 	}
 }
 
-func _MediaService_GetMediaShares0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_GetMediaFavorites0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaSharesRequest
+		var in GetMediaFavoritesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaShares)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaFavorites)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaShares(ctx, req.(*GetMediaSharesRequest))
+			return srv.GetMediaFavorites(ctx, req.(*GetMediaFavoritesRequest))
 		})
 
-		newctx, err := srv.PrepareGetMediaShares(ctx, &in)
+		newctx, err := srv.PrepareGetMediaFavorites(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -923,13 +799,13 @@ func _MediaService_GetMediaShares0_Bridge_Handler(srv MediaServiceHookedBridger)
 		if err != nil {
 			return err
 		}
-		return srv.CompleteGetMediaShares(ctx, &in, out.(*GetMediaSharesResponse))
+		return srv.CompleteGetMediaFavorites(ctx, &in, out.(*GetMediaFavoritesResponse))
 	}
 }
 
-func _MediaService_CreateMediaShare0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_ToggleMediaFavoriteCompat0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateMediaShareRequest
+		var in ToggleMediaFavoriteRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -939,12 +815,12 @@ func _MediaService_CreateMediaShare0_Bridge_Handler(srv MediaServiceHookedBridge
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceCreateMediaShare)
+		http.SetOperation(ctx, OperationMediaServiceToggleMediaFavoriteCompat)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateMediaShare(ctx, req.(*CreateMediaShareRequest))
+			return srv.ToggleMediaFavoriteCompat(ctx, req.(*ToggleMediaFavoriteRequest))
 		})
 
-		newctx, err := srv.PrepareCreateMediaShare(ctx, &in)
+		newctx, err := srv.PrepareToggleMediaFavoriteCompat(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -952,25 +828,25 @@ func _MediaService_CreateMediaShare0_Bridge_Handler(srv MediaServiceHookedBridge
 		if err != nil {
 			return err
 		}
-		return srv.CompleteCreateMediaShare(ctx, &in, out.(*CreateMediaShareResponse))
+		return srv.CompleteToggleMediaFavoriteCompat(ctx, &in, out.(*ToggleMediaFavoriteResponse))
 	}
 }
 
-func _MediaService_GetMediaComments0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_DeleteMediaFavoriteCompat0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaCommentsRequest
+		var in DeleteMediaFavoriteRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaComments)
+		http.SetOperation(ctx, OperationMediaServiceDeleteMediaFavoriteCompat)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaComments(ctx, req.(*GetMediaCommentsRequest))
+			return srv.DeleteMediaFavoriteCompat(ctx, req.(*DeleteMediaFavoriteRequest))
 		})
 
-		newctx, err := srv.PrepareGetMediaComments(ctx, &in)
+		newctx, err := srv.PrepareDeleteMediaFavoriteCompat(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -978,7 +854,293 @@ func _MediaService_GetMediaComments0_Bridge_Handler(srv MediaServiceHookedBridge
 		if err != nil {
 			return err
 		}
-		return srv.CompleteGetMediaComments(ctx, &in, out.(*GetMediaCommentsResponse))
+		return srv.CompleteDeleteMediaFavoriteCompat(ctx, &in, out.(*DeleteMediaFavoriteResponse))
+	}
+}
+
+func _MediaService_TranscodingStatus0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetEncodingStatusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceTranscodingStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.TranscodingStatus(ctx, req.(*GetEncodingStatusRequest))
+		})
+
+		newctx, err := srv.PrepareTranscodingStatus(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteTranscodingStatus(ctx, &in, out.(*GetEncodingStatusResponse))
+	}
+}
+
+func _MediaService_EncodingTasks0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAllEncodingTasksRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceEncodingTasks)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.EncodingTasks(ctx, req.(*ListAllEncodingTasksRequest))
+		})
+
+		newctx, err := srv.PrepareEncodingTasks(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteEncodingTasks(ctx, &in, out.(*ListAllEncodingTasksResponse))
+	}
+}
+
+func _MediaService_RetryEncodingTask0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RetryEncodingTaskRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceRetryEncodingTask)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RetryEncodingTask(ctx, req.(*RetryEncodingTaskRequest))
+		})
+
+		newctx, err := srv.PrepareRetryEncodingTask(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteRetryEncodingTask(ctx, &in, out.(*RetryEncodingTaskResponse))
+	}
+}
+
+func _MediaService_RetryAllFailedTasks0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RetryAllFailedTasksRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceRetryAllFailedTasks)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RetryAllFailedTasks(ctx, req.(*RetryAllFailedTasksRequest))
+		})
+
+		newctx, err := srv.PrepareRetryAllFailedTasks(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteRetryAllFailedTasks(ctx, &in, out.(*RetryAllFailedTasksResponse))
+	}
+}
+
+func _MediaService_GetMediaSpriteVTT0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaSpriteVTTRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteVTT)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaSpriteVTT(ctx, req.(*GetMediaSpriteVTTRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaSpriteVTT(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaSpriteVTT(ctx, &in, out.(*GetMediaSpriteVTTResponse))
+	}
+}
+
+func _MediaService_GetMediaSpriteJPG0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaSpriteJPGRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteJPG)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaSpriteJPG(ctx, req.(*GetMediaSpriteJPGRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaSpriteJPG(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaSpriteJPG(ctx, &in, out.(*GetMediaSpriteJPGResponse))
+	}
+}
+
+func _MediaService_GetMediaDownload0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaDownloadRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaDownload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaDownload(ctx, req.(*GetMediaDownloadRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaDownload(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaDownload(ctx, &in, out.(*GetMediaDownloadResponse))
+	}
+}
+
+func _MediaService_GetMediaStream0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaStreamRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaStream)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaStream(ctx, req.(*GetMediaStreamRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaStream(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaStream(ctx, &in, out.(*GetMediaStreamResponse))
+	}
+}
+
+func _MediaService_GetMediaThumbnail0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaThumbnailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaThumbnail(ctx, req.(*GetMediaThumbnailRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaThumbnail(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaThumbnail(ctx, &in, out.(*GetMediaThumbnailResponse))
+	}
+}
+
+func _MediaService_OwnerRegenerateThumbnail0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in OwnerRegenerateThumbnailRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceOwnerRegenerateThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.OwnerRegenerateThumbnail(ctx, req.(*OwnerRegenerateThumbnailRequest))
+		})
+
+		newctx, err := srv.PrepareOwnerRegenerateThumbnail(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteOwnerRegenerateThumbnail(ctx, &in, out.(*OwnerRegenerateThumbnailResponse))
+	}
+}
+
+func _MediaService_OwnerSetThumbnail0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in OwnerSetThumbnailRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceOwnerSetThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.OwnerSetThumbnail(ctx, req.(*OwnerSetThumbnailRequest))
+		})
+
+		newctx, err := srv.PrepareOwnerSetThumbnail(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteOwnerSetThumbnail(ctx, &in, out.(*OwnerSetThumbnailResponse))
 	}
 }
 
@@ -1063,6 +1225,269 @@ func _MediaService_GetMediaMetadata0_Bridge_Handler(srv MediaServiceHookedBridge
 	}
 }
 
+func _MediaService_UpdateMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateMediaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceUpdateMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateMedia(ctx, req.(*UpdateMediaRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateMedia(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateMedia(ctx, &in, out.(*UpdateMediaResponse))
+	}
+}
+
+func _MediaService_DeleteMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteMediaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceDeleteMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteMedia(ctx, req.(*DeleteMediaRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteMedia(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteMedia(ctx, &in, out.(*DeleteMediaResponse))
+	}
+}
+
+func _MediaService_StartMetadataMining0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in StartMetadataMiningRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceStartMetadataMining)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.StartMetadataMining(ctx, req.(*StartMetadataMiningRequest))
+		})
+
+		newctx, err := srv.PrepareStartMetadataMining(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteStartMetadataMining(ctx, &in, out.(*StartMetadataMiningResponse))
+	}
+}
+
+func _MediaService_GetMetadataMiningStatus0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMetadataMiningStatusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMetadataMiningStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMetadataMiningStatus(ctx, req.(*GetMetadataMiningStatusRequest))
+		})
+
+		newctx, err := srv.PrepareGetMetadataMiningStatus(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMetadataMiningStatus(ctx, &in, out.(*GetMetadataMiningStatusResponse))
+	}
+}
+
+func _MediaService_GetMediaKeyFrames0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaKeyFramesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaKeyFrames)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaKeyFrames(ctx, req.(*GetMediaKeyFramesRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaKeyFrames(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaKeyFrames(ctx, &in, out.(*GetMediaKeyFramesResponse))
+	}
+}
+
+func _MediaService_GetMediaAudioWaveform0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaAudioWaveformRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaAudioWaveform)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaAudioWaveform(ctx, req.(*GetMediaAudioWaveformRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaAudioWaveform(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaAudioWaveform(ctx, &in, out.(*GetMediaAudioWaveformResponse))
+	}
+}
+
+func _MediaService_GetMediaTextContent0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaTextContentRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaTextContent)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaTextContent(ctx, req.(*GetMediaTextContentRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaTextContent(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaTextContent(ctx, &in, out.(*GetMediaTextContentResponse))
+	}
+}
+
+func _MediaService_GetMediaSceneChanges0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaSceneChangesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaSceneChanges)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaSceneChanges(ctx, req.(*GetMediaSceneChangesRequest))
+		})
+
+		newctx, err := srv.PrepareGetMediaSceneChanges(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetMediaSceneChanges(ctx, &in, out.(*GetMediaSceneChangesResponse))
+	}
+}
+
+func _MediaService_DeleteSubtitle0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteSubtitleRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceDeleteSubtitle)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteSubtitle(ctx, req.(*DeleteSubtitleRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteSubtitle(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteSubtitle(ctx, &in, out.(*DeleteSubtitleResponse))
+	}
+}
+
+func _MediaService_ListSubtitleLanguages0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListSubtitleLanguagesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceListSubtitleLanguages)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListSubtitleLanguages(ctx, req.(*ListSubtitleLanguagesRequest))
+		})
+
+		newctx, err := srv.PrepareListSubtitleLanguages(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListSubtitleLanguages(ctx, &in, out.(*ListSubtitleLanguagesResponse))
+	}
+}
+
 func _MediaService_ReportMedia0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ReportMediaRequest
@@ -1092,21 +1517,21 @@ func _MediaService_ReportMedia0_Bridge_Handler(srv MediaServiceHookedBridger) fu
 	}
 }
 
-func _MediaService_GetMediaSpriteVTT0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_GetMediaShares0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaSpriteVTTRequest
+		var in GetMediaSharesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteVTT)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaShares)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaSpriteVTT(ctx, req.(*GetMediaSpriteVTTRequest))
+			return srv.GetMediaShares(ctx, req.(*GetMediaSharesRequest))
 		})
 
-		newctx, err := srv.PrepareGetMediaSpriteVTT(ctx, &in)
+		newctx, err := srv.PrepareGetMediaShares(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -1114,25 +1539,28 @@ func _MediaService_GetMediaSpriteVTT0_Bridge_Handler(srv MediaServiceHookedBridg
 		if err != nil {
 			return err
 		}
-		return srv.CompleteGetMediaSpriteVTT(ctx, &in, out.(*GetMediaSpriteVTTResponse))
+		return srv.CompleteGetMediaShares(ctx, &in, out.(*GetMediaSharesResponse))
 	}
 }
 
-func _MediaService_GetMediaSpriteJPG0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
+func _MediaService_CreateMediaShare0_Bridge_Handler(srv MediaServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaSpriteJPGRequest
+		var in CreateMediaShareRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteJPG)
+		http.SetOperation(ctx, OperationMediaServiceCreateMediaShare)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaSpriteJPG(ctx, req.(*GetMediaSpriteJPGRequest))
+			return srv.CreateMediaShare(ctx, req.(*CreateMediaShareRequest))
 		})
 
-		newctx, err := srv.PrepareGetMediaSpriteJPG(ctx, &in)
+		newctx, err := srv.PrepareCreateMediaShare(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -1140,7 +1568,7 @@ func _MediaService_GetMediaSpriteJPG0_Bridge_Handler(srv MediaServiceHookedBridg
 		if err != nil {
 			return err
 		}
-		return srv.CompleteGetMediaSpriteJPG(ctx, &in, out.(*GetMediaSpriteJPGResponse))
+		return srv.CompleteCreateMediaShare(ctx, &in, out.(*CreateMediaShareResponse))
 	}
 }
 
@@ -1159,83 +1587,27 @@ func (UnimplementedMediaServiceHooked) CompleteListMedias(ctx http.Context, in *
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedMediaServiceHooked) PrepareListFeaturedMedias(ctx http.Context, in *ListFeaturedMediasRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteListFeaturedMedias(ctx http.Context, in *ListFeaturedMediasRequest, out *ListFeaturedMediasResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareListLatestMedias(ctx http.Context, in *ListLatestMediasRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteListLatestMedias(ctx http.Context, in *ListLatestMediasRequest, out *ListLatestMediasResponse) error {
+	return ctx.Result(200, out)
+}
+
 func (UnimplementedMediaServiceHooked) PrepareGetMedia(ctx http.Context, in *GetMediaRequest) (context.Context, error) {
 	return ctx, nil
 }
 
 func (UnimplementedMediaServiceHooked) CompleteGetMedia(ctx http.Context, in *GetMediaRequest, out *GetMediaResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareCreateMedia(ctx http.Context, in *CreateMediaRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteCreateMedia(ctx http.Context, in *CreateMediaRequest, out *CreateMediaResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareUpdateMedia(ctx http.Context, in *UpdateMediaRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteUpdateMedia(ctx http.Context, in *UpdateMediaRequest, out *UpdateMediaResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareDeleteMedia(ctx http.Context, in *DeleteMediaRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteDeleteMedia(ctx http.Context, in *DeleteMediaRequest, out *DeleteMediaResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareIncrementViewCount(ctx http.Context, in *IncrementViewCountRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteIncrementViewCount(ctx http.Context, in *IncrementViewCountRequest, out *IncrementViewCountResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareUploadMedia(ctx http.Context, in *UploadMediaRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteUploadMedia(ctx http.Context, in *UploadMediaRequest, out *UploadMediaResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareGetMediaStream(ctx http.Context, in *GetMediaStreamRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteGetMediaStream(ctx http.Context, in *GetMediaStreamRequest, out *GetMediaStreamResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareGetMediaDownload(ctx http.Context, in *GetMediaDownloadRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteGetMediaDownload(ctx http.Context, in *GetMediaDownloadRequest, out *GetMediaDownloadResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareGetMediaThumbnail(ctx http.Context, in *GetMediaThumbnailRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteGetMediaThumbnail(ctx http.Context, in *GetMediaThumbnailRequest, out *GetMediaThumbnailResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareListEncodingTasks(ctx http.Context, in *ListEncodingTasksRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteListEncodingTasks(ctx http.Context, in *ListEncodingTasksRequest, out *ListEncodingTasksResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1247,43 +1619,11 @@ func (UnimplementedMediaServiceHooked) CompleteGetMediaVariants(ctx http.Context
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareRetryEncodingTask(ctx http.Context, in *RetryEncodingTaskRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareIncrementViewCount(ctx http.Context, in *IncrementViewCountRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteRetryEncodingTask(ctx http.Context, in *RetryEncodingTaskRequest, out *RetryEncodingTaskResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareGetEncodingStatus(ctx http.Context, in *GetEncodingStatusRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteGetEncodingStatus(ctx http.Context, in *GetEncodingStatusRequest, out *GetEncodingStatusResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareListAllEncodingTasks(ctx http.Context, in *ListAllEncodingTasksRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteListAllEncodingTasks(ctx http.Context, in *ListAllEncodingTasksRequest, out *ListAllEncodingTasksResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareRetryAllFailedTasks(ctx http.Context, in *RetryAllFailedTasksRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteRetryAllFailedTasks(ctx http.Context, in *RetryAllFailedTasksRequest, out *RetryAllFailedTasksResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedMediaServiceHooked) PrepareGetMediaLikes(ctx http.Context, in *GetMediaLikesRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedMediaServiceHooked) CompleteGetMediaLikes(ctx http.Context, in *GetMediaLikesRequest, out *GetMediaLikesResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteIncrementViewCount(ctx http.Context, in *IncrementViewCountRequest, out *IncrementViewCountResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1303,11 +1643,27 @@ func (UnimplementedMediaServiceHooked) CompleteDeleteMediaLike(ctx http.Context,
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareGetMediaFavorites(ctx http.Context, in *GetMediaFavoritesRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareGetMediaLikes(ctx http.Context, in *GetMediaLikesRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteGetMediaFavorites(ctx http.Context, in *GetMediaFavoritesRequest, out *GetMediaFavoritesResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteGetMediaLikes(ctx http.Context, in *GetMediaLikesRequest, out *GetMediaLikesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareToggleMediaLikeCompat(ctx http.Context, in *ToggleMediaLikeRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteToggleMediaLikeCompat(ctx http.Context, in *ToggleMediaLikeRequest, out *ToggleMediaLikeResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareDeleteMediaLikeCompat(ctx http.Context, in *DeleteMediaLikeRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteDeleteMediaLikeCompat(ctx http.Context, in *DeleteMediaLikeRequest, out *DeleteMediaLikeResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1327,27 +1683,115 @@ func (UnimplementedMediaServiceHooked) CompleteDeleteMediaFavorite(ctx http.Cont
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareGetMediaShares(ctx http.Context, in *GetMediaSharesRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareGetMediaFavorites(ctx http.Context, in *GetMediaFavoritesRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteGetMediaShares(ctx http.Context, in *GetMediaSharesRequest, out *GetMediaSharesResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteGetMediaFavorites(ctx http.Context, in *GetMediaFavoritesRequest, out *GetMediaFavoritesResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareCreateMediaShare(ctx http.Context, in *CreateMediaShareRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareToggleMediaFavoriteCompat(ctx http.Context, in *ToggleMediaFavoriteRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteCreateMediaShare(ctx http.Context, in *CreateMediaShareRequest, out *CreateMediaShareResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteToggleMediaFavoriteCompat(ctx http.Context, in *ToggleMediaFavoriteRequest, out *ToggleMediaFavoriteResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareGetMediaComments(ctx http.Context, in *GetMediaCommentsRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareDeleteMediaFavoriteCompat(ctx http.Context, in *DeleteMediaFavoriteRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteGetMediaComments(ctx http.Context, in *GetMediaCommentsRequest, out *GetMediaCommentsResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteDeleteMediaFavoriteCompat(ctx http.Context, in *DeleteMediaFavoriteRequest, out *DeleteMediaFavoriteResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareTranscodingStatus(ctx http.Context, in *GetEncodingStatusRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteTranscodingStatus(ctx http.Context, in *GetEncodingStatusRequest, out *GetEncodingStatusResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareEncodingTasks(ctx http.Context, in *ListAllEncodingTasksRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteEncodingTasks(ctx http.Context, in *ListAllEncodingTasksRequest, out *ListAllEncodingTasksResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareRetryEncodingTask(ctx http.Context, in *RetryEncodingTaskRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteRetryEncodingTask(ctx http.Context, in *RetryEncodingTaskRequest, out *RetryEncodingTaskResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareRetryAllFailedTasks(ctx http.Context, in *RetryAllFailedTasksRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteRetryAllFailedTasks(ctx http.Context, in *RetryAllFailedTasksRequest, out *RetryAllFailedTasksResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaSpriteVTT(ctx http.Context, in *GetMediaSpriteVTTRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaSpriteVTT(ctx http.Context, in *GetMediaSpriteVTTRequest, out *GetMediaSpriteVTTResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaSpriteJPG(ctx http.Context, in *GetMediaSpriteJPGRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaSpriteJPG(ctx http.Context, in *GetMediaSpriteJPGRequest, out *GetMediaSpriteJPGResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaDownload(ctx http.Context, in *GetMediaDownloadRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaDownload(ctx http.Context, in *GetMediaDownloadRequest, out *GetMediaDownloadResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaStream(ctx http.Context, in *GetMediaStreamRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaStream(ctx http.Context, in *GetMediaStreamRequest, out *GetMediaStreamResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaThumbnail(ctx http.Context, in *GetMediaThumbnailRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaThumbnail(ctx http.Context, in *GetMediaThumbnailRequest, out *GetMediaThumbnailResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareOwnerRegenerateThumbnail(ctx http.Context, in *OwnerRegenerateThumbnailRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteOwnerRegenerateThumbnail(ctx http.Context, in *OwnerRegenerateThumbnailRequest, out *OwnerRegenerateThumbnailResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareOwnerSetThumbnail(ctx http.Context, in *OwnerSetThumbnailRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteOwnerSetThumbnail(ctx http.Context, in *OwnerSetThumbnailRequest, out *OwnerSetThumbnailResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1375,6 +1819,86 @@ func (UnimplementedMediaServiceHooked) CompleteGetMediaMetadata(ctx http.Context
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedMediaServiceHooked) PrepareUpdateMedia(ctx http.Context, in *UpdateMediaRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteUpdateMedia(ctx http.Context, in *UpdateMediaRequest, out *UpdateMediaResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareDeleteMedia(ctx http.Context, in *DeleteMediaRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteDeleteMedia(ctx http.Context, in *DeleteMediaRequest, out *DeleteMediaResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareStartMetadataMining(ctx http.Context, in *StartMetadataMiningRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteStartMetadataMining(ctx http.Context, in *StartMetadataMiningRequest, out *StartMetadataMiningResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMetadataMiningStatus(ctx http.Context, in *GetMetadataMiningStatusRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMetadataMiningStatus(ctx http.Context, in *GetMetadataMiningStatusRequest, out *GetMetadataMiningStatusResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaKeyFrames(ctx http.Context, in *GetMediaKeyFramesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaKeyFrames(ctx http.Context, in *GetMediaKeyFramesRequest, out *GetMediaKeyFramesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaAudioWaveform(ctx http.Context, in *GetMediaAudioWaveformRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaAudioWaveform(ctx http.Context, in *GetMediaAudioWaveformRequest, out *GetMediaAudioWaveformResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaTextContent(ctx http.Context, in *GetMediaTextContentRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaTextContent(ctx http.Context, in *GetMediaTextContentRequest, out *GetMediaTextContentResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareGetMediaSceneChanges(ctx http.Context, in *GetMediaSceneChangesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteGetMediaSceneChanges(ctx http.Context, in *GetMediaSceneChangesRequest, out *GetMediaSceneChangesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareDeleteSubtitle(ctx http.Context, in *DeleteSubtitleRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteDeleteSubtitle(ctx http.Context, in *DeleteSubtitleRequest, out *DeleteSubtitleResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedMediaServiceHooked) PrepareListSubtitleLanguages(ctx http.Context, in *ListSubtitleLanguagesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedMediaServiceHooked) CompleteListSubtitleLanguages(ctx http.Context, in *ListSubtitleLanguagesRequest, out *ListSubtitleLanguagesResponse) error {
+	return ctx.Result(200, out)
+}
+
 func (UnimplementedMediaServiceHooked) PrepareReportMedia(ctx http.Context, in *ReportMediaRequest) (context.Context, error) {
 	return ctx, nil
 }
@@ -1383,19 +1907,19 @@ func (UnimplementedMediaServiceHooked) CompleteReportMedia(ctx http.Context, in 
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareGetMediaSpriteVTT(ctx http.Context, in *GetMediaSpriteVTTRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareGetMediaShares(ctx http.Context, in *GetMediaSharesRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteGetMediaSpriteVTT(ctx http.Context, in *GetMediaSpriteVTTRequest, out *GetMediaSpriteVTTResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteGetMediaShares(ctx http.Context, in *GetMediaSharesRequest, out *GetMediaSharesResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedMediaServiceHooked) PrepareGetMediaSpriteJPG(ctx http.Context, in *GetMediaSpriteJPGRequest) (context.Context, error) {
+func (UnimplementedMediaServiceHooked) PrepareCreateMediaShare(ctx http.Context, in *CreateMediaShareRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedMediaServiceHooked) CompleteGetMediaSpriteJPG(ctx http.Context, in *GetMediaSpriteJPGRequest, out *GetMediaSpriteJPGResponse) error {
+func (UnimplementedMediaServiceHooked) CompleteCreateMediaShare(ctx http.Context, in *CreateMediaShareRequest, out *CreateMediaShareResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1425,68 +1949,24 @@ func (c *MediaServiceHTTPBridgeImpl) ListMedias(ctx context.Context, in *ListMed
 	return c.client.ListMedias(ctx, in)
 }
 
+func (c *MediaServiceHTTPBridgeImpl) ListFeaturedMedias(ctx context.Context, in *ListFeaturedMediasRequest) (*ListFeaturedMediasResponse, error) {
+	return c.client.ListFeaturedMedias(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) ListLatestMedias(ctx context.Context, in *ListLatestMediasRequest) (*ListLatestMediasResponse, error) {
+	return c.client.ListLatestMedias(ctx, in)
+}
+
 func (c *MediaServiceHTTPBridgeImpl) GetMedia(ctx context.Context, in *GetMediaRequest) (*GetMediaResponse, error) {
 	return c.client.GetMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) CreateMedia(ctx context.Context, in *CreateMediaRequest) (*CreateMediaResponse, error) {
-	return c.client.CreateMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
-	return c.client.UpdateMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
-	return c.client.DeleteMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
-	return c.client.IncrementViewCount(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) UploadMedia(ctx context.Context, in *UploadMediaRequest) (*UploadMediaResponse, error) {
-	return c.client.UploadMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
-	return c.client.GetMediaStream(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
-	return c.client.GetMediaDownload(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
-	return c.client.GetMediaThumbnail(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error) {
-	return c.client.ListEncodingTasks(ctx, in)
 }
 
 func (c *MediaServiceHTTPBridgeImpl) GetMediaVariants(ctx context.Context, in *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error) {
 	return c.client.GetMediaVariants(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
-	return c.client.RetryEncodingTask(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
-	return c.client.GetEncodingStatus(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
-	return c.client.ListAllEncodingTasks(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
-	return c.client.RetryAllFailedTasks(ctx, in)
-}
-
-func (c *MediaServiceHTTPBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
-	return c.client.GetMediaLikes(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
+	return c.client.IncrementViewCount(ctx, in)
 }
 
 func (c *MediaServiceHTTPBridgeImpl) ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
@@ -1497,8 +1977,16 @@ func (c *MediaServiceHTTPBridgeImpl) DeleteMediaLike(ctx context.Context, in *De
 	return c.client.DeleteMediaLike(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
-	return c.client.GetMediaFavorites(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
+	return c.client.GetMediaLikes(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) ToggleMediaLikeCompat(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
+	return c.client.ToggleMediaLikeCompat(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) DeleteMediaLikeCompat(ctx context.Context, in *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error) {
+	return c.client.DeleteMediaLikeCompat(ctx, in)
 }
 
 func (c *MediaServiceHTTPBridgeImpl) ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
@@ -1509,16 +1997,60 @@ func (c *MediaServiceHTTPBridgeImpl) DeleteMediaFavorite(ctx context.Context, in
 	return c.client.DeleteMediaFavorite(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
-	return c.client.GetMediaShares(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
+	return c.client.GetMediaFavorites(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
-	return c.client.CreateMediaShare(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) ToggleMediaFavoriteCompat(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
+	return c.client.ToggleMediaFavoriteCompat(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error) {
-	return c.client.GetMediaComments(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) DeleteMediaFavoriteCompat(ctx context.Context, in *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error) {
+	return c.client.DeleteMediaFavoriteCompat(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) TranscodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
+	return c.client.TranscodingStatus(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) EncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
+	return c.client.EncodingTasks(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
+	return c.client.RetryEncodingTask(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
+	return c.client.RetryAllFailedTasks(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
+	return c.client.GetMediaSpriteVTT(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
+	return c.client.GetMediaSpriteJPG(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
+	return c.client.GetMediaDownload(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
+	return c.client.GetMediaStream(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
+	return c.client.GetMediaThumbnail(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) OwnerRegenerateThumbnail(ctx context.Context, in *OwnerRegenerateThumbnailRequest) (*OwnerRegenerateThumbnailResponse, error) {
+	return c.client.OwnerRegenerateThumbnail(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) OwnerSetThumbnail(ctx context.Context, in *OwnerSetThumbnailRequest) (*OwnerSetThumbnailResponse, error) {
+	return c.client.OwnerSetThumbnail(ctx, in)
 }
 
 func (c *MediaServiceHTTPBridgeImpl) GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error) {
@@ -1533,16 +2065,56 @@ func (c *MediaServiceHTTPBridgeImpl) GetMediaMetadata(ctx context.Context, in *G
 	return c.client.GetMediaMetadata(ctx, in)
 }
 
+func (c *MediaServiceHTTPBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
+	return c.client.UpdateMedia(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
+	return c.client.DeleteMedia(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) StartMetadataMining(ctx context.Context, in *StartMetadataMiningRequest) (*StartMetadataMiningResponse, error) {
+	return c.client.StartMetadataMining(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMetadataMiningStatus(ctx context.Context, in *GetMetadataMiningStatusRequest) (*GetMetadataMiningStatusResponse, error) {
+	return c.client.GetMetadataMiningStatus(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaKeyFrames(ctx context.Context, in *GetMediaKeyFramesRequest) (*GetMediaKeyFramesResponse, error) {
+	return c.client.GetMediaKeyFrames(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaAudioWaveform(ctx context.Context, in *GetMediaAudioWaveformRequest) (*GetMediaAudioWaveformResponse, error) {
+	return c.client.GetMediaAudioWaveform(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaTextContent(ctx context.Context, in *GetMediaTextContentRequest) (*GetMediaTextContentResponse, error) {
+	return c.client.GetMediaTextContent(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) GetMediaSceneChanges(ctx context.Context, in *GetMediaSceneChangesRequest) (*GetMediaSceneChangesResponse, error) {
+	return c.client.GetMediaSceneChanges(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) DeleteSubtitle(ctx context.Context, in *DeleteSubtitleRequest) (*DeleteSubtitleResponse, error) {
+	return c.client.DeleteSubtitle(ctx, in)
+}
+
+func (c *MediaServiceHTTPBridgeImpl) ListSubtitleLanguages(ctx context.Context, in *ListSubtitleLanguagesRequest) (*ListSubtitleLanguagesResponse, error) {
+	return c.client.ListSubtitleLanguages(ctx, in)
+}
+
 func (c *MediaServiceHTTPBridgeImpl) ReportMedia(ctx context.Context, in *ReportMediaRequest) (*ReportMediaResponse, error) {
 	return c.client.ReportMedia(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
-	return c.client.GetMediaSpriteVTT(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
+	return c.client.GetMediaShares(ctx, in)
 }
 
-func (c *MediaServiceHTTPBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
-	return c.client.GetMediaSpriteJPG(ctx, in)
+func (c *MediaServiceHTTPBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
+	return c.client.CreateMediaShare(ctx, in)
 }
 
 type MediaServiceBridgeImpl struct {
@@ -1557,68 +2129,24 @@ func (c *MediaServiceBridgeImpl) ListMedias(ctx context.Context, in *ListMediasR
 	return c.client.ListMedias(ctx, in)
 }
 
+func (c *MediaServiceBridgeImpl) ListFeaturedMedias(ctx context.Context, in *ListFeaturedMediasRequest) (*ListFeaturedMediasResponse, error) {
+	return c.client.ListFeaturedMedias(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) ListLatestMedias(ctx context.Context, in *ListLatestMediasRequest) (*ListLatestMediasResponse, error) {
+	return c.client.ListLatestMedias(ctx, in)
+}
+
 func (c *MediaServiceBridgeImpl) GetMedia(ctx context.Context, in *GetMediaRequest) (*GetMediaResponse, error) {
 	return c.client.GetMedia(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) CreateMedia(ctx context.Context, in *CreateMediaRequest) (*CreateMediaResponse, error) {
-	return c.client.CreateMedia(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
-	return c.client.UpdateMedia(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
-	return c.client.DeleteMedia(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
-	return c.client.IncrementViewCount(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) UploadMedia(ctx context.Context, in *UploadMediaRequest) (*UploadMediaResponse, error) {
-	return c.client.UploadMedia(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
-	return c.client.GetMediaStream(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
-	return c.client.GetMediaDownload(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
-	return c.client.GetMediaThumbnail(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error) {
-	return c.client.ListEncodingTasks(ctx, in)
 }
 
 func (c *MediaServiceBridgeImpl) GetMediaVariants(ctx context.Context, in *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error) {
 	return c.client.GetMediaVariants(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
-	return c.client.RetryEncodingTask(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
-	return c.client.GetEncodingStatus(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
-	return c.client.ListAllEncodingTasks(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
-	return c.client.RetryAllFailedTasks(ctx, in)
-}
-
-func (c *MediaServiceBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
-	return c.client.GetMediaLikes(ctx, in)
+func (c *MediaServiceBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
+	return c.client.IncrementViewCount(ctx, in)
 }
 
 func (c *MediaServiceBridgeImpl) ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
@@ -1629,8 +2157,16 @@ func (c *MediaServiceBridgeImpl) DeleteMediaLike(ctx context.Context, in *Delete
 	return c.client.DeleteMediaLike(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
-	return c.client.GetMediaFavorites(ctx, in)
+func (c *MediaServiceBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
+	return c.client.GetMediaLikes(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) ToggleMediaLikeCompat(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
+	return c.client.ToggleMediaLikeCompat(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) DeleteMediaLikeCompat(ctx context.Context, in *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error) {
+	return c.client.DeleteMediaLikeCompat(ctx, in)
 }
 
 func (c *MediaServiceBridgeImpl) ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
@@ -1641,16 +2177,60 @@ func (c *MediaServiceBridgeImpl) DeleteMediaFavorite(ctx context.Context, in *De
 	return c.client.DeleteMediaFavorite(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
-	return c.client.GetMediaShares(ctx, in)
+func (c *MediaServiceBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
+	return c.client.GetMediaFavorites(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
-	return c.client.CreateMediaShare(ctx, in)
+func (c *MediaServiceBridgeImpl) ToggleMediaFavoriteCompat(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
+	return c.client.ToggleMediaFavoriteCompat(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error) {
-	return c.client.GetMediaComments(ctx, in)
+func (c *MediaServiceBridgeImpl) DeleteMediaFavoriteCompat(ctx context.Context, in *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error) {
+	return c.client.DeleteMediaFavoriteCompat(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) TranscodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
+	return c.client.TranscodingStatus(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) EncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
+	return c.client.EncodingTasks(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
+	return c.client.RetryEncodingTask(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
+	return c.client.RetryAllFailedTasks(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
+	return c.client.GetMediaSpriteVTT(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
+	return c.client.GetMediaSpriteJPG(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
+	return c.client.GetMediaDownload(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
+	return c.client.GetMediaStream(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
+	return c.client.GetMediaThumbnail(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) OwnerRegenerateThumbnail(ctx context.Context, in *OwnerRegenerateThumbnailRequest) (*OwnerRegenerateThumbnailResponse, error) {
+	return c.client.OwnerRegenerateThumbnail(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) OwnerSetThumbnail(ctx context.Context, in *OwnerSetThumbnailRequest) (*OwnerSetThumbnailResponse, error) {
+	return c.client.OwnerSetThumbnail(ctx, in)
 }
 
 func (c *MediaServiceBridgeImpl) GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error) {
@@ -1665,16 +2245,56 @@ func (c *MediaServiceBridgeImpl) GetMediaMetadata(ctx context.Context, in *GetMe
 	return c.client.GetMediaMetadata(ctx, in)
 }
 
+func (c *MediaServiceBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
+	return c.client.UpdateMedia(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
+	return c.client.DeleteMedia(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) StartMetadataMining(ctx context.Context, in *StartMetadataMiningRequest) (*StartMetadataMiningResponse, error) {
+	return c.client.StartMetadataMining(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMetadataMiningStatus(ctx context.Context, in *GetMetadataMiningStatusRequest) (*GetMetadataMiningStatusResponse, error) {
+	return c.client.GetMetadataMiningStatus(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaKeyFrames(ctx context.Context, in *GetMediaKeyFramesRequest) (*GetMediaKeyFramesResponse, error) {
+	return c.client.GetMediaKeyFrames(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaAudioWaveform(ctx context.Context, in *GetMediaAudioWaveformRequest) (*GetMediaAudioWaveformResponse, error) {
+	return c.client.GetMediaAudioWaveform(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaTextContent(ctx context.Context, in *GetMediaTextContentRequest) (*GetMediaTextContentResponse, error) {
+	return c.client.GetMediaTextContent(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) GetMediaSceneChanges(ctx context.Context, in *GetMediaSceneChangesRequest) (*GetMediaSceneChangesResponse, error) {
+	return c.client.GetMediaSceneChanges(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) DeleteSubtitle(ctx context.Context, in *DeleteSubtitleRequest) (*DeleteSubtitleResponse, error) {
+	return c.client.DeleteSubtitle(ctx, in)
+}
+
+func (c *MediaServiceBridgeImpl) ListSubtitleLanguages(ctx context.Context, in *ListSubtitleLanguagesRequest) (*ListSubtitleLanguagesResponse, error) {
+	return c.client.ListSubtitleLanguages(ctx, in)
+}
+
 func (c *MediaServiceBridgeImpl) ReportMedia(ctx context.Context, in *ReportMediaRequest) (*ReportMediaResponse, error) {
 	return c.client.ReportMedia(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
-	return c.client.GetMediaSpriteVTT(ctx, in)
+func (c *MediaServiceBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
+	return c.client.GetMediaShares(ctx, in)
 }
 
-func (c *MediaServiceBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
-	return c.client.GetMediaSpriteJPG(ctx, in)
+func (c *MediaServiceBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
+	return c.client.CreateMediaShare(ctx, in)
 }
 
 func (c *MediaServiceBridgeImpl) mustEmbedUnimplementedMediaServiceServer() {}
@@ -1691,68 +2311,24 @@ func (c *MediaServiceGRPC2HTTPBridgeImpl) ListMedias(ctx context.Context, in *Li
 	return c.client.ListMedias(ctx, in)
 }
 
+func (c *MediaServiceGRPC2HTTPBridgeImpl) ListFeaturedMedias(ctx context.Context, in *ListFeaturedMediasRequest) (*ListFeaturedMediasResponse, error) {
+	return c.client.ListFeaturedMedias(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) ListLatestMedias(ctx context.Context, in *ListLatestMediasRequest) (*ListLatestMediasResponse, error) {
+	return c.client.ListLatestMedias(ctx, in)
+}
+
 func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMedia(ctx context.Context, in *GetMediaRequest) (*GetMediaResponse, error) {
 	return c.client.GetMedia(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) CreateMedia(ctx context.Context, in *CreateMediaRequest) (*CreateMediaResponse, error) {
-	return c.client.CreateMedia(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
-	return c.client.UpdateMedia(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
-	return c.client.DeleteMedia(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
-	return c.client.IncrementViewCount(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) UploadMedia(ctx context.Context, in *UploadMediaRequest) (*UploadMediaResponse, error) {
-	return c.client.UploadMedia(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
-	return c.client.GetMediaStream(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
-	return c.client.GetMediaDownload(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
-	return c.client.GetMediaThumbnail(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error) {
-	return c.client.ListEncodingTasks(ctx, in)
 }
 
 func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaVariants(ctx context.Context, in *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error) {
 	return c.client.GetMediaVariants(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
-	return c.client.RetryEncodingTask(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
-	return c.client.GetEncodingStatus(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
-	return c.client.ListAllEncodingTasks(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
-	return c.client.RetryAllFailedTasks(ctx, in)
-}
-
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
-	return c.client.GetMediaLikes(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
+	return c.client.IncrementViewCount(ctx, in)
 }
 
 func (c *MediaServiceGRPC2HTTPBridgeImpl) ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
@@ -1763,8 +2339,16 @@ func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteMediaLike(ctx context.Context, i
 	return c.client.DeleteMediaLike(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
-	return c.client.GetMediaFavorites(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
+	return c.client.GetMediaLikes(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) ToggleMediaLikeCompat(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
+	return c.client.ToggleMediaLikeCompat(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteMediaLikeCompat(ctx context.Context, in *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error) {
+	return c.client.DeleteMediaLikeCompat(ctx, in)
 }
 
 func (c *MediaServiceGRPC2HTTPBridgeImpl) ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
@@ -1775,16 +2359,60 @@ func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteMediaFavorite(ctx context.Contex
 	return c.client.DeleteMediaFavorite(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
-	return c.client.GetMediaShares(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
+	return c.client.GetMediaFavorites(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
-	return c.client.CreateMediaShare(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) ToggleMediaFavoriteCompat(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
+	return c.client.ToggleMediaFavoriteCompat(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error) {
-	return c.client.GetMediaComments(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteMediaFavoriteCompat(ctx context.Context, in *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error) {
+	return c.client.DeleteMediaFavoriteCompat(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) TranscodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
+	return c.client.TranscodingStatus(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) EncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
+	return c.client.EncodingTasks(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
+	return c.client.RetryEncodingTask(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
+	return c.client.RetryAllFailedTasks(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
+	return c.client.GetMediaSpriteVTT(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
+	return c.client.GetMediaSpriteJPG(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
+	return c.client.GetMediaDownload(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
+	return c.client.GetMediaStream(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
+	return c.client.GetMediaThumbnail(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) OwnerRegenerateThumbnail(ctx context.Context, in *OwnerRegenerateThumbnailRequest) (*OwnerRegenerateThumbnailResponse, error) {
+	return c.client.OwnerRegenerateThumbnail(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) OwnerSetThumbnail(ctx context.Context, in *OwnerSetThumbnailRequest) (*OwnerSetThumbnailResponse, error) {
+	return c.client.OwnerSetThumbnail(ctx, in)
 }
 
 func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error) {
@@ -1799,16 +2427,56 @@ func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaMetadata(ctx context.Context, 
 	return c.client.GetMediaMetadata(ctx, in)
 }
 
+func (c *MediaServiceGRPC2HTTPBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
+	return c.client.UpdateMedia(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
+	return c.client.DeleteMedia(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) StartMetadataMining(ctx context.Context, in *StartMetadataMiningRequest) (*StartMetadataMiningResponse, error) {
+	return c.client.StartMetadataMining(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMetadataMiningStatus(ctx context.Context, in *GetMetadataMiningStatusRequest) (*GetMetadataMiningStatusResponse, error) {
+	return c.client.GetMetadataMiningStatus(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaKeyFrames(ctx context.Context, in *GetMediaKeyFramesRequest) (*GetMediaKeyFramesResponse, error) {
+	return c.client.GetMediaKeyFrames(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaAudioWaveform(ctx context.Context, in *GetMediaAudioWaveformRequest) (*GetMediaAudioWaveformResponse, error) {
+	return c.client.GetMediaAudioWaveform(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaTextContent(ctx context.Context, in *GetMediaTextContentRequest) (*GetMediaTextContentResponse, error) {
+	return c.client.GetMediaTextContent(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaSceneChanges(ctx context.Context, in *GetMediaSceneChangesRequest) (*GetMediaSceneChangesResponse, error) {
+	return c.client.GetMediaSceneChanges(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) DeleteSubtitle(ctx context.Context, in *DeleteSubtitleRequest) (*DeleteSubtitleResponse, error) {
+	return c.client.DeleteSubtitle(ctx, in)
+}
+
+func (c *MediaServiceGRPC2HTTPBridgeImpl) ListSubtitleLanguages(ctx context.Context, in *ListSubtitleLanguagesRequest) (*ListSubtitleLanguagesResponse, error) {
+	return c.client.ListSubtitleLanguages(ctx, in)
+}
+
 func (c *MediaServiceGRPC2HTTPBridgeImpl) ReportMedia(ctx context.Context, in *ReportMediaRequest) (*ReportMediaResponse, error) {
 	return c.client.ReportMedia(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
-	return c.client.GetMediaSpriteVTT(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
+	return c.client.GetMediaShares(ctx, in)
 }
 
-func (c *MediaServiceGRPC2HTTPBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
-	return c.client.GetMediaSpriteJPG(ctx, in)
+func (c *MediaServiceGRPC2HTTPBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
+	return c.client.CreateMediaShare(ctx, in)
 }
 
 type MediaServiceHTTP2GRPCBridgeImpl struct {
@@ -1823,68 +2491,24 @@ func (c *MediaServiceHTTP2GRPCBridgeImpl) ListMedias(ctx context.Context, in *Li
 	return c.client.ListMedias(ctx, in)
 }
 
+func (c *MediaServiceHTTP2GRPCBridgeImpl) ListFeaturedMedias(ctx context.Context, in *ListFeaturedMediasRequest) (*ListFeaturedMediasResponse, error) {
+	return c.client.ListFeaturedMedias(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) ListLatestMedias(ctx context.Context, in *ListLatestMediasRequest) (*ListLatestMediasResponse, error) {
+	return c.client.ListLatestMedias(ctx, in)
+}
+
 func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMedia(ctx context.Context, in *GetMediaRequest) (*GetMediaResponse, error) {
 	return c.client.GetMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) CreateMedia(ctx context.Context, in *CreateMediaRequest) (*CreateMediaResponse, error) {
-	return c.client.CreateMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
-	return c.client.UpdateMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
-	return c.client.DeleteMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
-	return c.client.IncrementViewCount(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) UploadMedia(ctx context.Context, in *UploadMediaRequest) (*UploadMediaResponse, error) {
-	return c.client.UploadMedia(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
-	return c.client.GetMediaStream(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
-	return c.client.GetMediaDownload(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
-	return c.client.GetMediaThumbnail(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error) {
-	return c.client.ListEncodingTasks(ctx, in)
 }
 
 func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaVariants(ctx context.Context, in *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error) {
 	return c.client.GetMediaVariants(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
-	return c.client.RetryEncodingTask(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
-	return c.client.GetEncodingStatus(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
-	return c.client.ListAllEncodingTasks(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
-	return c.client.RetryAllFailedTasks(ctx, in)
-}
-
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
-	return c.client.GetMediaLikes(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest) (*IncrementViewCountResponse, error) {
+	return c.client.IncrementViewCount(ctx, in)
 }
 
 func (c *MediaServiceHTTP2GRPCBridgeImpl) ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
@@ -1895,8 +2519,16 @@ func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteMediaLike(ctx context.Context, i
 	return c.client.DeleteMediaLike(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
-	return c.client.GetMediaFavorites(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest) (*GetMediaLikesResponse, error) {
+	return c.client.GetMediaLikes(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) ToggleMediaLikeCompat(ctx context.Context, in *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error) {
+	return c.client.ToggleMediaLikeCompat(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteMediaLikeCompat(ctx context.Context, in *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error) {
+	return c.client.DeleteMediaLikeCompat(ctx, in)
 }
 
 func (c *MediaServiceHTTP2GRPCBridgeImpl) ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
@@ -1907,16 +2539,60 @@ func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteMediaFavorite(ctx context.Contex
 	return c.client.DeleteMediaFavorite(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
-	return c.client.GetMediaShares(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error) {
+	return c.client.GetMediaFavorites(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
-	return c.client.CreateMediaShare(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) ToggleMediaFavoriteCompat(ctx context.Context, in *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error) {
+	return c.client.ToggleMediaFavoriteCompat(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error) {
-	return c.client.GetMediaComments(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteMediaFavoriteCompat(ctx context.Context, in *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error) {
+	return c.client.DeleteMediaFavoriteCompat(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) TranscodingStatus(ctx context.Context, in *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error) {
+	return c.client.TranscodingStatus(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) EncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error) {
+	return c.client.EncodingTasks(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error) {
+	return c.client.RetryEncodingTask(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error) {
+	return c.client.RetryAllFailedTasks(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
+	return c.client.GetMediaSpriteVTT(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
+	return c.client.GetMediaSpriteJPG(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error) {
+	return c.client.GetMediaDownload(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest) (*GetMediaStreamResponse, error) {
+	return c.client.GetMediaStream(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error) {
+	return c.client.GetMediaThumbnail(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) OwnerRegenerateThumbnail(ctx context.Context, in *OwnerRegenerateThumbnailRequest) (*OwnerRegenerateThumbnailResponse, error) {
+	return c.client.OwnerRegenerateThumbnail(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) OwnerSetThumbnail(ctx context.Context, in *OwnerSetThumbnailRequest) (*OwnerSetThumbnailResponse, error) {
+	return c.client.OwnerSetThumbnail(ctx, in)
 }
 
 func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error) {
@@ -1931,16 +2607,56 @@ func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaMetadata(ctx context.Context, 
 	return c.client.GetMediaMetadata(ctx, in)
 }
 
+func (c *MediaServiceHTTP2GRPCBridgeImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest) (*UpdateMediaResponse, error) {
+	return c.client.UpdateMedia(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest) (*DeleteMediaResponse, error) {
+	return c.client.DeleteMedia(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) StartMetadataMining(ctx context.Context, in *StartMetadataMiningRequest) (*StartMetadataMiningResponse, error) {
+	return c.client.StartMetadataMining(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMetadataMiningStatus(ctx context.Context, in *GetMetadataMiningStatusRequest) (*GetMetadataMiningStatusResponse, error) {
+	return c.client.GetMetadataMiningStatus(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaKeyFrames(ctx context.Context, in *GetMediaKeyFramesRequest) (*GetMediaKeyFramesResponse, error) {
+	return c.client.GetMediaKeyFrames(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaAudioWaveform(ctx context.Context, in *GetMediaAudioWaveformRequest) (*GetMediaAudioWaveformResponse, error) {
+	return c.client.GetMediaAudioWaveform(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaTextContent(ctx context.Context, in *GetMediaTextContentRequest) (*GetMediaTextContentResponse, error) {
+	return c.client.GetMediaTextContent(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaSceneChanges(ctx context.Context, in *GetMediaSceneChangesRequest) (*GetMediaSceneChangesResponse, error) {
+	return c.client.GetMediaSceneChanges(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) DeleteSubtitle(ctx context.Context, in *DeleteSubtitleRequest) (*DeleteSubtitleResponse, error) {
+	return c.client.DeleteSubtitle(ctx, in)
+}
+
+func (c *MediaServiceHTTP2GRPCBridgeImpl) ListSubtitleLanguages(ctx context.Context, in *ListSubtitleLanguagesRequest) (*ListSubtitleLanguagesResponse, error) {
+	return c.client.ListSubtitleLanguages(ctx, in)
+}
+
 func (c *MediaServiceHTTP2GRPCBridgeImpl) ReportMedia(ctx context.Context, in *ReportMediaRequest) (*ReportMediaResponse, error) {
 	return c.client.ReportMedia(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error) {
-	return c.client.GetMediaSpriteVTT(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest) (*GetMediaSharesResponse, error) {
+	return c.client.GetMediaShares(ctx, in)
 }
 
-func (c *MediaServiceHTTP2GRPCBridgeImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error) {
-	return c.client.GetMediaSpriteJPG(ctx, in)
+func (c *MediaServiceHTTP2GRPCBridgeImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest) (*CreateMediaShareResponse, error) {
+	return c.client.CreateMediaShare(ctx, in)
 }
 
 func (c *MediaServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedMediaServiceServer() {}
@@ -1950,6 +2666,7 @@ const EncodingProfileServiceGetEncodeProfileBridgeOperation = "/api.v1.services.
 const EncodingProfileServiceCreateEncodeProfileBridgeOperation = "/api.v1.services.media.EncodingProfileService/CreateEncodeProfile"
 const EncodingProfileServiceUpdateEncodeProfileBridgeOperation = "/api.v1.services.media.EncodingProfileService/UpdateEncodeProfile"
 const EncodingProfileServiceDeleteEncodeProfileBridgeOperation = "/api.v1.services.media.EncodingProfileService/DeleteEncodeProfile"
+const EncodingProfileServicePreviewEncodeCommandBridgeOperation = "/api.v1.services.media.EncodingProfileService/PreviewEncodeCommand"
 
 type EncodingProfileServiceBridgeServer interface {
 	// ListEncodeProfiles returns a list of encoding profiles.
@@ -1962,6 +2679,8 @@ type EncodingProfileServiceBridgeServer interface {
 	UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error)
 	// DeleteEncodeProfile deletes an encoding profile.
 	DeleteEncodeProfile(context.Context, *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error)
+	// PreviewEncodeCommand previews the encoding command.
+	PreviewEncodeCommand(context.Context, *PreviewEncodeCommandRequest) (*PreviewEncodeCommandResponse, error)
 }
 
 type EncodingProfileServiceHooker interface {
@@ -1970,6 +2689,7 @@ type EncodingProfileServiceHooker interface {
 	EncodingProfileServiceCreateEncodeProfileHooker
 	EncodingProfileServiceUpdateEncodeProfileHooker
 	EncodingProfileServiceDeleteEncodeProfileHooker
+	EncodingProfileServicePreviewEncodeCommandHooker
 }
 
 type EncodingProfileServiceHookedBridger interface {
@@ -1996,6 +2716,10 @@ type EncodingProfileServiceDeleteEncodeProfileHooker interface {
 	PrepareDeleteEncodeProfile(http.Context, *DeleteEncodeProfileRequest) (context.Context, error)
 	CompleteDeleteEncodeProfile(http.Context, *DeleteEncodeProfileRequest, *DeleteEncodeProfileResponse) error
 }
+type EncodingProfileServicePreviewEncodeCommandHooker interface {
+	PreparePreviewEncodeCommand(http.Context, *PreviewEncodeCommandRequest) (context.Context, error)
+	CompletePreviewEncodeCommand(http.Context, *PreviewEncodeCommandRequest, *PreviewEncodeCommandResponse) error
+}
 
 func RegisterEncodingProfileServiceBridgeServer(s *http.Server, srv EncodingProfileServiceHookedBridger) {
 	r := s.Route("/")
@@ -2004,6 +2728,7 @@ func RegisterEncodingProfileServiceBridgeServer(s *http.Server, srv EncodingProf
 	r.POST("/api/v1/admin/encoding/profiles", _EncodingProfileService_CreateEncodeProfile0_Bridge_Handler(srv))
 	r.PUT("/api/v1/admin/encoding/profiles/:profile.id", _EncodingProfileService_UpdateEncodeProfile0_Bridge_Handler(srv))
 	r.DELETE("/api/v1/admin/encoding/profiles/:id", _EncodingProfileService_DeleteEncodeProfile0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/encoding/profiles/preview", _EncodingProfileService_PreviewEncodeCommand0_Bridge_Handler(srv))
 }
 
 func _EncodingProfileService_ListEncodeProfiles0_Bridge_Handler(srv EncodingProfileServiceHookedBridger) func(ctx http.Context) error {
@@ -2136,6 +2861,32 @@ func _EncodingProfileService_DeleteEncodeProfile0_Bridge_Handler(srv EncodingPro
 	}
 }
 
+func _EncodingProfileService_PreviewEncodeCommand0_Bridge_Handler(srv EncodingProfileServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PreviewEncodeCommandRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationEncodingProfileServicePreviewEncodeCommand)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PreviewEncodeCommand(ctx, req.(*PreviewEncodeCommandRequest))
+		})
+
+		newctx, err := srv.PreparePreviewEncodeCommand(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompletePreviewEncodeCommand(ctx, &in, out.(*PreviewEncodeCommandResponse))
+	}
+}
+
 // UnimplementedEncodingProfileServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -2183,6 +2934,14 @@ func (UnimplementedEncodingProfileServiceHooked) CompleteDeleteEncodeProfile(ctx
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedEncodingProfileServiceHooked) PreparePreviewEncodeCommand(ctx http.Context, in *PreviewEncodeCommandRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedEncodingProfileServiceHooked) CompletePreviewEncodeCommand(ctx http.Context, in *PreviewEncodeCommandRequest, out *PreviewEncodeCommandResponse) error {
+	return ctx.Result(200, out)
+}
+
 func WithEncodingProfileServiceHook(h EncodingProfileServiceHooker) func(EncodingProfileServiceBridgeServer) EncodingProfileServiceHookedBridger {
 	return func(srv EncodingProfileServiceBridgeServer) EncodingProfileServiceHookedBridger {
 		return EncodingProfileServiceHookedBridge{EncodingProfileServiceBridgeServer: srv, EncodingProfileServiceHooker: h}
@@ -2225,6 +2984,10 @@ func (c *EncodingProfileServiceHTTPBridgeImpl) DeleteEncodeProfile(ctx context.C
 	return c.client.DeleteEncodeProfile(ctx, in)
 }
 
+func (c *EncodingProfileServiceHTTPBridgeImpl) PreviewEncodeCommand(ctx context.Context, in *PreviewEncodeCommandRequest) (*PreviewEncodeCommandResponse, error) {
+	return c.client.PreviewEncodeCommand(ctx, in)
+}
+
 type EncodingProfileServiceBridgeImpl struct {
 	client EncodingProfileServiceClient
 }
@@ -2251,6 +3014,10 @@ func (c *EncodingProfileServiceBridgeImpl) UpdateEncodeProfile(ctx context.Conte
 
 func (c *EncodingProfileServiceBridgeImpl) DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error) {
 	return c.client.DeleteEncodeProfile(ctx, in)
+}
+
+func (c *EncodingProfileServiceBridgeImpl) PreviewEncodeCommand(ctx context.Context, in *PreviewEncodeCommandRequest) (*PreviewEncodeCommandResponse, error) {
+	return c.client.PreviewEncodeCommand(ctx, in)
 }
 
 func (c *EncodingProfileServiceBridgeImpl) mustEmbedUnimplementedEncodingProfileServiceServer() {}
@@ -2283,6 +3050,10 @@ func (c *EncodingProfileServiceGRPC2HTTPBridgeImpl) DeleteEncodeProfile(ctx cont
 	return c.client.DeleteEncodeProfile(ctx, in)
 }
 
+func (c *EncodingProfileServiceGRPC2HTTPBridgeImpl) PreviewEncodeCommand(ctx context.Context, in *PreviewEncodeCommandRequest) (*PreviewEncodeCommandResponse, error) {
+	return c.client.PreviewEncodeCommand(ctx, in)
+}
+
 type EncodingProfileServiceHTTP2GRPCBridgeImpl struct {
 	client EncodingProfileServiceHTTPClient
 }
@@ -2309,6 +3080,10 @@ func (c *EncodingProfileServiceHTTP2GRPCBridgeImpl) UpdateEncodeProfile(ctx cont
 
 func (c *EncodingProfileServiceHTTP2GRPCBridgeImpl) DeleteEncodeProfile(ctx context.Context, in *DeleteEncodeProfileRequest) (*DeleteEncodeProfileResponse, error) {
 	return c.client.DeleteEncodeProfile(ctx, in)
+}
+
+func (c *EncodingProfileServiceHTTP2GRPCBridgeImpl) PreviewEncodeCommand(ctx context.Context, in *PreviewEncodeCommandRequest) (*PreviewEncodeCommandResponse, error) {
+	return c.client.PreviewEncodeCommand(ctx, in)
 }
 
 func (c *EncodingProfileServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedEncodingProfileServiceServer() {
@@ -2364,10 +3139,10 @@ type CategoryServiceDeleteCategoryHooker interface {
 func RegisterCategoryServiceBridgeServer(s *http.Server, srv CategoryServiceHookedBridger) {
 	r := s.Route("/")
 	r.GET("/api/v1/categories", _CategoryService_ListCategories0_Bridge_Handler(srv))
-	r.GET("/api/v1/categories/:id", _CategoryService_GetCategory0_Bridge_Handler(srv))
+	r.GET("/api/v1/categories/:slug", _CategoryService_GetCategory0_Bridge_Handler(srv))
 	r.POST("/api/v1/categories", _CategoryService_CreateCategory0_Bridge_Handler(srv))
 	r.PUT("/api/v1/categories/:category.id", _CategoryService_UpdateCategory0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/categories/:id", _CategoryService_DeleteCategory0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/categories/:slug", _CategoryService_DeleteCategory0_Bridge_Handler(srv))
 }
 
 func _CategoryService_ListCategories0_Bridge_Handler(srv CategoryServiceHookedBridger) func(ctx http.Context) error {
@@ -2682,6 +3457,7 @@ const TagServiceGetTagBridgeOperation = "/api.v1.services.media.TagService/GetTa
 const TagServiceCreateTagBridgeOperation = "/api.v1.services.media.TagService/CreateTag"
 const TagServiceUpdateTagBridgeOperation = "/api.v1.services.media.TagService/UpdateTag"
 const TagServiceDeleteTagBridgeOperation = "/api.v1.services.media.TagService/DeleteTag"
+const TagServiceListTagMediasBridgeOperation = "/api.v1.services.media.TagService/ListTagMedias"
 
 type TagServiceBridgeServer interface {
 	ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
@@ -2689,6 +3465,9 @@ type TagServiceBridgeServer interface {
 	CreateTag(context.Context, *CreateTagRequest) (*CreateTagResponse, error)
 	UpdateTag(context.Context, *UpdateTagRequest) (*UpdateTagResponse, error)
 	DeleteTag(context.Context, *DeleteTagRequest) (*DeleteTagResponse, error)
+	// ListTagMedias returns the medias linked to a tag through the
+	// content_media_tags M2M pivot (tag-first browsing, powers /tag/{slug}).
+	ListTagMedias(context.Context, *ListTagMediasRequest) (*ListTagMediasResponse, error)
 }
 
 type TagServiceHooker interface {
@@ -2697,6 +3476,7 @@ type TagServiceHooker interface {
 	TagServiceCreateTagHooker
 	TagServiceUpdateTagHooker
 	TagServiceDeleteTagHooker
+	TagServiceListTagMediasHooker
 }
 
 type TagServiceHookedBridger interface {
@@ -2723,14 +3503,19 @@ type TagServiceDeleteTagHooker interface {
 	PrepareDeleteTag(http.Context, *DeleteTagRequest) (context.Context, error)
 	CompleteDeleteTag(http.Context, *DeleteTagRequest, *DeleteTagResponse) error
 }
+type TagServiceListTagMediasHooker interface {
+	PrepareListTagMedias(http.Context, *ListTagMediasRequest) (context.Context, error)
+	CompleteListTagMedias(http.Context, *ListTagMediasRequest, *ListTagMediasResponse) error
+}
 
 func RegisterTagServiceBridgeServer(s *http.Server, srv TagServiceHookedBridger) {
 	r := s.Route("/")
 	r.GET("/api/v1/tags", _TagService_ListTags0_Bridge_Handler(srv))
-	r.GET("/api/v1/tags/:id", _TagService_GetTag0_Bridge_Handler(srv))
+	r.GET("/api/v1/tags/:slug", _TagService_GetTag0_Bridge_Handler(srv))
 	r.POST("/api/v1/tags", _TagService_CreateTag0_Bridge_Handler(srv))
-	r.PUT("/api/v1/tags/:tag.id", _TagService_UpdateTag0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/tags/:id", _TagService_DeleteTag0_Bridge_Handler(srv))
+	r.PUT("/api/v1/tags/:tag.slug", _TagService_UpdateTag0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/tags/:slug", _TagService_DeleteTag0_Bridge_Handler(srv))
+	r.GET("/api/v1/tags/:slug/medias", _TagService_ListTagMedias0_Bridge_Handler(srv))
 }
 
 func _TagService_ListTags0_Bridge_Handler(srv TagServiceHookedBridger) func(ctx http.Context) error {
@@ -2863,6 +3648,32 @@ func _TagService_DeleteTag0_Bridge_Handler(srv TagServiceHookedBridger) func(ctx
 	}
 }
 
+func _TagService_ListTagMedias0_Bridge_Handler(srv TagServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListTagMediasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTagServiceListTagMedias)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListTagMedias(ctx, req.(*ListTagMediasRequest))
+		})
+
+		newctx, err := srv.PrepareListTagMedias(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListTagMedias(ctx, &in, out.(*ListTagMediasResponse))
+	}
+}
+
 // UnimplementedTagServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -2910,6 +3721,14 @@ func (UnimplementedTagServiceHooked) CompleteDeleteTag(ctx http.Context, in *Del
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedTagServiceHooked) PrepareListTagMedias(ctx http.Context, in *ListTagMediasRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTagServiceHooked) CompleteListTagMedias(ctx http.Context, in *ListTagMediasRequest, out *ListTagMediasResponse) error {
+	return ctx.Result(200, out)
+}
+
 func WithTagServiceHook(h TagServiceHooker) func(TagServiceBridgeServer) TagServiceHookedBridger {
 	return func(srv TagServiceBridgeServer) TagServiceHookedBridger {
 		return TagServiceHookedBridge{TagServiceBridgeServer: srv, TagServiceHooker: h}
@@ -2952,6 +3771,10 @@ func (c *TagServiceHTTPBridgeImpl) DeleteTag(ctx context.Context, in *DeleteTagR
 	return c.client.DeleteTag(ctx, in)
 }
 
+func (c *TagServiceHTTPBridgeImpl) ListTagMedias(ctx context.Context, in *ListTagMediasRequest) (*ListTagMediasResponse, error) {
+	return c.client.ListTagMedias(ctx, in)
+}
+
 type TagServiceBridgeImpl struct {
 	client TagServiceClient
 }
@@ -2978,6 +3801,10 @@ func (c *TagServiceBridgeImpl) UpdateTag(ctx context.Context, in *UpdateTagReque
 
 func (c *TagServiceBridgeImpl) DeleteTag(ctx context.Context, in *DeleteTagRequest) (*DeleteTagResponse, error) {
 	return c.client.DeleteTag(ctx, in)
+}
+
+func (c *TagServiceBridgeImpl) ListTagMedias(ctx context.Context, in *ListTagMediasRequest) (*ListTagMediasResponse, error) {
+	return c.client.ListTagMedias(ctx, in)
 }
 
 func (c *TagServiceBridgeImpl) mustEmbedUnimplementedTagServiceServer() {}
@@ -3010,6 +3837,10 @@ func (c *TagServiceGRPC2HTTPBridgeImpl) DeleteTag(ctx context.Context, in *Delet
 	return c.client.DeleteTag(ctx, in)
 }
 
+func (c *TagServiceGRPC2HTTPBridgeImpl) ListTagMedias(ctx context.Context, in *ListTagMediasRequest) (*ListTagMediasResponse, error) {
+	return c.client.ListTagMedias(ctx, in)
+}
+
 type TagServiceHTTP2GRPCBridgeImpl struct {
 	client TagServiceHTTPClient
 }
@@ -3036,6 +3867,10 @@ func (c *TagServiceHTTP2GRPCBridgeImpl) UpdateTag(ctx context.Context, in *Updat
 
 func (c *TagServiceHTTP2GRPCBridgeImpl) DeleteTag(ctx context.Context, in *DeleteTagRequest) (*DeleteTagResponse, error) {
 	return c.client.DeleteTag(ctx, in)
+}
+
+func (c *TagServiceHTTP2GRPCBridgeImpl) ListTagMedias(ctx context.Context, in *ListTagMediasRequest) (*ListTagMediasResponse, error) {
+	return c.client.ListTagMedias(ctx, in)
 }
 
 func (c *TagServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedTagServiceServer() {}
@@ -4663,62 +5498,82 @@ func (c *PlaylistServiceHTTP2GRPCBridgeImpl) ReorderMyPlaylistMedia(ctx context.
 func (c *PlaylistServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedPlaylistServiceServer() {}
 
 const ChannelServiceListChannelsBridgeOperation = "/api.v1.services.media.ChannelService/ListChannels"
-const ChannelServiceGetChannelBridgeOperation = "/api.v1.services.media.ChannelService/GetChannel"
-const ChannelServiceCreateChannelBridgeOperation = "/api.v1.services.media.ChannelService/CreateChannel"
-const ChannelServiceUpdateChannelBridgeOperation = "/api.v1.services.media.ChannelService/UpdateChannel"
-const ChannelServiceDeleteChannelBridgeOperation = "/api.v1.services.media.ChannelService/DeleteChannel"
-const ChannelServiceGetChannelMediasBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelMedias"
-const ChannelServiceAddChannelMediaBridgeOperation = "/api.v1.services.media.ChannelService/AddChannelMedia"
-const ChannelServiceRemoveChannelMediaBridgeOperation = "/api.v1.services.media.ChannelService/RemoveChannelMedia"
+const ChannelServiceGetMyChannelBridgeOperation = "/api.v1.services.media.ChannelService/GetMyChannel"
+const ChannelServiceUpdateMyChannelHandleBridgeOperation = "/api.v1.services.media.ChannelService/UpdateMyChannelHandle"
+const ChannelServiceValidateChannelHandleBridgeOperation = "/api.v1.services.media.ChannelService/ValidateChannelHandle"
+const ChannelServiceGetChannelByTokenBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelByToken"
+const ChannelServiceGetChannelVideosBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelVideos"
+const ChannelServiceGetChannelPlaylistsBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelPlaylists"
+const ChannelServiceUpdateChannelNotificationBridgeOperation = "/api.v1.services.media.ChannelService/UpdateChannelNotification"
 const ChannelServiceGetChannelSubscribersBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelSubscribers"
 const ChannelServiceGetChannelSubscriptionBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelSubscription"
 const ChannelServiceSubscribeChannelBridgeOperation = "/api.v1.services.media.ChannelService/SubscribeChannel"
 const ChannelServiceUnsubscribeChannelBridgeOperation = "/api.v1.services.media.ChannelService/UnsubscribeChannel"
-const ChannelServiceGetMyChannelBridgeOperation = "/api.v1.services.media.ChannelService/GetMyChannel"
-const ChannelServiceUpdateMyChannelHandleBridgeOperation = "/api.v1.services.media.ChannelService/UpdateMyChannelHandle"
-const ChannelServiceValidateChannelHandleBridgeOperation = "/api.v1.services.media.ChannelService/ValidateChannelHandle"
-const ChannelServiceUpdateChannelNotificationBridgeOperation = "/api.v1.services.media.ChannelService/UpdateChannelNotification"
+const ChannelServiceCreateChannelBridgeOperation = "/api.v1.services.media.ChannelService/CreateChannel"
+const ChannelServiceAddChannelMediaBridgeOperation = "/api.v1.services.media.ChannelService/AddChannelMedia"
+const ChannelServiceRemoveChannelMediaBridgeOperation = "/api.v1.services.media.ChannelService/RemoveChannelMedia"
+const ChannelServiceInviteUserToChannelBridgeOperation = "/api.v1.services.media.ChannelService/InviteUserToChannel"
+const ChannelServiceAcceptChannelInvitationBridgeOperation = "/api.v1.services.media.ChannelService/AcceptChannelInvitation"
+const ChannelServiceRejectChannelInvitationBridgeOperation = "/api.v1.services.media.ChannelService/RejectChannelInvitation"
+const ChannelServiceGetChannelInvitationsBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelInvitations"
+const ChannelServiceUpdateChannelBridgeOperation = "/api.v1.services.media.ChannelService/UpdateChannel"
+const ChannelServiceDeleteChannelBridgeOperation = "/api.v1.services.media.ChannelService/DeleteChannel"
 const ChannelServiceResolveHandleBridgeOperation = "/api.v1.services.media.ChannelService/ResolveHandle"
+const ChannelServiceGetChannelLimitsBridgeOperation = "/api.v1.services.media.ChannelService/GetChannelLimits"
+const ChannelServiceGetSubscriptionVideosBridgeOperation = "/api.v1.services.media.ChannelService/GetSubscriptionVideos"
 
 type ChannelServiceBridgeServer interface {
 	ListChannels(context.Context, *ListChannelsRequest) (*ListChannelsResponse, error)
-	GetChannel(context.Context, *GetChannelRequest) (*GetChannelResponse, error)
-	CreateChannel(context.Context, *CreateChannelRequest) (*CreateChannelResponse, error)
-	UpdateChannel(context.Context, *UpdateChannelRequest) (*UpdateChannelResponse, error)
-	DeleteChannel(context.Context, *DeleteChannelRequest) (*DeleteChannelResponse, error)
-	GetChannelMedias(context.Context, *GetChannelMediasRequest) (*GetChannelMediasResponse, error)
-	AddChannelMedia(context.Context, *AddChannelMediaRequest) (*AddChannelMediaResponse, error)
-	RemoveChannelMedia(context.Context, *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error)
+	GetMyChannel(context.Context, *GetMyChannelRequest) (*GetMyChannelResponse, error)
+	UpdateMyChannelHandle(context.Context, *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error)
+	ValidateChannelHandle(context.Context, *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error)
+	GetChannelByToken(context.Context, *GetChannelByTokenRequest) (*GetChannelByTokenResponse, error)
+	GetChannelVideos(context.Context, *GetChannelVideosRequest) (*GetChannelVideosResponse, error)
+	GetChannelPlaylists(context.Context, *GetChannelPlaylistsRequest) (*GetChannelPlaylistsResponse, error)
+	UpdateChannelNotification(context.Context, *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error)
 	GetChannelSubscribers(context.Context, *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error)
 	GetChannelSubscription(context.Context, *GetChannelSubscriptionRequest) (*GetChannelSubscriptionResponse, error)
 	SubscribeChannel(context.Context, *SubscribeChannelRequest) (*SubscribeChannelResponse, error)
 	UnsubscribeChannel(context.Context, *UnsubscribeChannelRequest) (*UnsubscribeChannelResponse, error)
-	// Channel additional routes
-	GetMyChannel(context.Context, *GetMyChannelRequest) (*GetMyChannelResponse, error)
-	UpdateMyChannelHandle(context.Context, *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error)
-	ValidateChannelHandle(context.Context, *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error)
-	UpdateChannelNotification(context.Context, *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error)
+	CreateChannel(context.Context, *CreateChannelRequest) (*CreateChannelResponse, error)
+	AddChannelMedia(context.Context, *AddChannelMediaRequest) (*AddChannelMediaResponse, error)
+	RemoveChannelMedia(context.Context, *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error)
+	InviteUserToChannel(context.Context, *InviteUserToChannelRequest) (*InviteUserToChannelResponse, error)
+	AcceptChannelInvitation(context.Context, *AcceptChannelInvitationRequest) (*AcceptChannelInvitationResponse, error)
+	RejectChannelInvitation(context.Context, *RejectChannelInvitationRequest) (*RejectChannelInvitationResponse, error)
+	GetChannelInvitations(context.Context, *GetChannelInvitationsRequest) (*GetChannelInvitationsResponse, error)
+	UpdateChannel(context.Context, *UpdateChannelRequest) (*UpdateChannelResponse, error)
+	DeleteChannel(context.Context, *DeleteChannelRequest) (*DeleteChannelResponse, error)
 	ResolveHandle(context.Context, *ResolveHandleRequest) (*ResolveHandleResponse, error)
+	GetChannelLimits(context.Context, *GetChannelLimitsRequest) (*GetChannelLimitsResponse, error)
+	GetSubscriptionVideos(context.Context, *GetSubscriptionVideosRequest) (*GetSubscriptionVideosResponse, error)
 }
 
 type ChannelServiceHooker interface {
 	ChannelServiceListChannelsHooker
-	ChannelServiceGetChannelHooker
-	ChannelServiceCreateChannelHooker
-	ChannelServiceUpdateChannelHooker
-	ChannelServiceDeleteChannelHooker
-	ChannelServiceGetChannelMediasHooker
-	ChannelServiceAddChannelMediaHooker
-	ChannelServiceRemoveChannelMediaHooker
+	ChannelServiceGetMyChannelHooker
+	ChannelServiceUpdateMyChannelHandleHooker
+	ChannelServiceValidateChannelHandleHooker
+	ChannelServiceGetChannelByTokenHooker
+	ChannelServiceGetChannelVideosHooker
+	ChannelServiceGetChannelPlaylistsHooker
+	ChannelServiceUpdateChannelNotificationHooker
 	ChannelServiceGetChannelSubscribersHooker
 	ChannelServiceGetChannelSubscriptionHooker
 	ChannelServiceSubscribeChannelHooker
 	ChannelServiceUnsubscribeChannelHooker
-	ChannelServiceGetMyChannelHooker
-	ChannelServiceUpdateMyChannelHandleHooker
-	ChannelServiceValidateChannelHandleHooker
-	ChannelServiceUpdateChannelNotificationHooker
+	ChannelServiceCreateChannelHooker
+	ChannelServiceAddChannelMediaHooker
+	ChannelServiceRemoveChannelMediaHooker
+	ChannelServiceInviteUserToChannelHooker
+	ChannelServiceAcceptChannelInvitationHooker
+	ChannelServiceRejectChannelInvitationHooker
+	ChannelServiceGetChannelInvitationsHooker
+	ChannelServiceUpdateChannelHooker
+	ChannelServiceDeleteChannelHooker
 	ChannelServiceResolveHandleHooker
+	ChannelServiceGetChannelLimitsHooker
+	ChannelServiceGetSubscriptionVideosHooker
 }
 
 type ChannelServiceHookedBridger interface {
@@ -4729,33 +5584,33 @@ type ChannelServiceListChannelsHooker interface {
 	PrepareListChannels(http.Context, *ListChannelsRequest) (context.Context, error)
 	CompleteListChannels(http.Context, *ListChannelsRequest, *ListChannelsResponse) error
 }
-type ChannelServiceGetChannelHooker interface {
-	PrepareGetChannel(http.Context, *GetChannelRequest) (context.Context, error)
-	CompleteGetChannel(http.Context, *GetChannelRequest, *GetChannelResponse) error
+type ChannelServiceGetMyChannelHooker interface {
+	PrepareGetMyChannel(http.Context, *GetMyChannelRequest) (context.Context, error)
+	CompleteGetMyChannel(http.Context, *GetMyChannelRequest, *GetMyChannelResponse) error
 }
-type ChannelServiceCreateChannelHooker interface {
-	PrepareCreateChannel(http.Context, *CreateChannelRequest) (context.Context, error)
-	CompleteCreateChannel(http.Context, *CreateChannelRequest, *CreateChannelResponse) error
+type ChannelServiceUpdateMyChannelHandleHooker interface {
+	PrepareUpdateMyChannelHandle(http.Context, *UpdateMyChannelHandleRequest) (context.Context, error)
+	CompleteUpdateMyChannelHandle(http.Context, *UpdateMyChannelHandleRequest, *UpdateMyChannelHandleResponse) error
 }
-type ChannelServiceUpdateChannelHooker interface {
-	PrepareUpdateChannel(http.Context, *UpdateChannelRequest) (context.Context, error)
-	CompleteUpdateChannel(http.Context, *UpdateChannelRequest, *UpdateChannelResponse) error
+type ChannelServiceValidateChannelHandleHooker interface {
+	PrepareValidateChannelHandle(http.Context, *ValidateChannelHandleRequest) (context.Context, error)
+	CompleteValidateChannelHandle(http.Context, *ValidateChannelHandleRequest, *ValidateChannelHandleResponse) error
 }
-type ChannelServiceDeleteChannelHooker interface {
-	PrepareDeleteChannel(http.Context, *DeleteChannelRequest) (context.Context, error)
-	CompleteDeleteChannel(http.Context, *DeleteChannelRequest, *DeleteChannelResponse) error
+type ChannelServiceGetChannelByTokenHooker interface {
+	PrepareGetChannelByToken(http.Context, *GetChannelByTokenRequest) (context.Context, error)
+	CompleteGetChannelByToken(http.Context, *GetChannelByTokenRequest, *GetChannelByTokenResponse) error
 }
-type ChannelServiceGetChannelMediasHooker interface {
-	PrepareGetChannelMedias(http.Context, *GetChannelMediasRequest) (context.Context, error)
-	CompleteGetChannelMedias(http.Context, *GetChannelMediasRequest, *GetChannelMediasResponse) error
+type ChannelServiceGetChannelVideosHooker interface {
+	PrepareGetChannelVideos(http.Context, *GetChannelVideosRequest) (context.Context, error)
+	CompleteGetChannelVideos(http.Context, *GetChannelVideosRequest, *GetChannelVideosResponse) error
 }
-type ChannelServiceAddChannelMediaHooker interface {
-	PrepareAddChannelMedia(http.Context, *AddChannelMediaRequest) (context.Context, error)
-	CompleteAddChannelMedia(http.Context, *AddChannelMediaRequest, *AddChannelMediaResponse) error
+type ChannelServiceGetChannelPlaylistsHooker interface {
+	PrepareGetChannelPlaylists(http.Context, *GetChannelPlaylistsRequest) (context.Context, error)
+	CompleteGetChannelPlaylists(http.Context, *GetChannelPlaylistsRequest, *GetChannelPlaylistsResponse) error
 }
-type ChannelServiceRemoveChannelMediaHooker interface {
-	PrepareRemoveChannelMedia(http.Context, *RemoveChannelMediaRequest) (context.Context, error)
-	CompleteRemoveChannelMedia(http.Context, *RemoveChannelMediaRequest, *RemoveChannelMediaResponse) error
+type ChannelServiceUpdateChannelNotificationHooker interface {
+	PrepareUpdateChannelNotification(http.Context, *UpdateChannelNotificationRequest) (context.Context, error)
+	CompleteUpdateChannelNotification(http.Context, *UpdateChannelNotificationRequest, *UpdateChannelNotificationResponse) error
 }
 type ChannelServiceGetChannelSubscribersHooker interface {
 	PrepareGetChannelSubscribers(http.Context, *GetChannelSubscribersRequest) (context.Context, error)
@@ -4773,46 +5628,81 @@ type ChannelServiceUnsubscribeChannelHooker interface {
 	PrepareUnsubscribeChannel(http.Context, *UnsubscribeChannelRequest) (context.Context, error)
 	CompleteUnsubscribeChannel(http.Context, *UnsubscribeChannelRequest, *UnsubscribeChannelResponse) error
 }
-type ChannelServiceGetMyChannelHooker interface {
-	PrepareGetMyChannel(http.Context, *GetMyChannelRequest) (context.Context, error)
-	CompleteGetMyChannel(http.Context, *GetMyChannelRequest, *GetMyChannelResponse) error
+type ChannelServiceCreateChannelHooker interface {
+	PrepareCreateChannel(http.Context, *CreateChannelRequest) (context.Context, error)
+	CompleteCreateChannel(http.Context, *CreateChannelRequest, *CreateChannelResponse) error
 }
-type ChannelServiceUpdateMyChannelHandleHooker interface {
-	PrepareUpdateMyChannelHandle(http.Context, *UpdateMyChannelHandleRequest) (context.Context, error)
-	CompleteUpdateMyChannelHandle(http.Context, *UpdateMyChannelHandleRequest, *UpdateMyChannelHandleResponse) error
+type ChannelServiceAddChannelMediaHooker interface {
+	PrepareAddChannelMedia(http.Context, *AddChannelMediaRequest) (context.Context, error)
+	CompleteAddChannelMedia(http.Context, *AddChannelMediaRequest, *AddChannelMediaResponse) error
 }
-type ChannelServiceValidateChannelHandleHooker interface {
-	PrepareValidateChannelHandle(http.Context, *ValidateChannelHandleRequest) (context.Context, error)
-	CompleteValidateChannelHandle(http.Context, *ValidateChannelHandleRequest, *ValidateChannelHandleResponse) error
+type ChannelServiceRemoveChannelMediaHooker interface {
+	PrepareRemoveChannelMedia(http.Context, *RemoveChannelMediaRequest) (context.Context, error)
+	CompleteRemoveChannelMedia(http.Context, *RemoveChannelMediaRequest, *RemoveChannelMediaResponse) error
 }
-type ChannelServiceUpdateChannelNotificationHooker interface {
-	PrepareUpdateChannelNotification(http.Context, *UpdateChannelNotificationRequest) (context.Context, error)
-	CompleteUpdateChannelNotification(http.Context, *UpdateChannelNotificationRequest, *UpdateChannelNotificationResponse) error
+type ChannelServiceInviteUserToChannelHooker interface {
+	PrepareInviteUserToChannel(http.Context, *InviteUserToChannelRequest) (context.Context, error)
+	CompleteInviteUserToChannel(http.Context, *InviteUserToChannelRequest, *InviteUserToChannelResponse) error
+}
+type ChannelServiceAcceptChannelInvitationHooker interface {
+	PrepareAcceptChannelInvitation(http.Context, *AcceptChannelInvitationRequest) (context.Context, error)
+	CompleteAcceptChannelInvitation(http.Context, *AcceptChannelInvitationRequest, *AcceptChannelInvitationResponse) error
+}
+type ChannelServiceRejectChannelInvitationHooker interface {
+	PrepareRejectChannelInvitation(http.Context, *RejectChannelInvitationRequest) (context.Context, error)
+	CompleteRejectChannelInvitation(http.Context, *RejectChannelInvitationRequest, *RejectChannelInvitationResponse) error
+}
+type ChannelServiceGetChannelInvitationsHooker interface {
+	PrepareGetChannelInvitations(http.Context, *GetChannelInvitationsRequest) (context.Context, error)
+	CompleteGetChannelInvitations(http.Context, *GetChannelInvitationsRequest, *GetChannelInvitationsResponse) error
+}
+type ChannelServiceUpdateChannelHooker interface {
+	PrepareUpdateChannel(http.Context, *UpdateChannelRequest) (context.Context, error)
+	CompleteUpdateChannel(http.Context, *UpdateChannelRequest, *UpdateChannelResponse) error
+}
+type ChannelServiceDeleteChannelHooker interface {
+	PrepareDeleteChannel(http.Context, *DeleteChannelRequest) (context.Context, error)
+	CompleteDeleteChannel(http.Context, *DeleteChannelRequest, *DeleteChannelResponse) error
 }
 type ChannelServiceResolveHandleHooker interface {
 	PrepareResolveHandle(http.Context, *ResolveHandleRequest) (context.Context, error)
 	CompleteResolveHandle(http.Context, *ResolveHandleRequest, *ResolveHandleResponse) error
 }
+type ChannelServiceGetChannelLimitsHooker interface {
+	PrepareGetChannelLimits(http.Context, *GetChannelLimitsRequest) (context.Context, error)
+	CompleteGetChannelLimits(http.Context, *GetChannelLimitsRequest, *GetChannelLimitsResponse) error
+}
+type ChannelServiceGetSubscriptionVideosHooker interface {
+	PrepareGetSubscriptionVideos(http.Context, *GetSubscriptionVideosRequest) (context.Context, error)
+	CompleteGetSubscriptionVideos(http.Context, *GetSubscriptionVideosRequest, *GetSubscriptionVideosResponse) error
+}
 
 func RegisterChannelServiceBridgeServer(s *http.Server, srv ChannelServiceHookedBridger) {
 	r := s.Route("/")
 	r.GET("/api/v1/channels", _ChannelService_ListChannels0_Bridge_Handler(srv))
-	r.GET("/api/v1/channels/:id", _ChannelService_GetChannel0_Bridge_Handler(srv))
-	r.POST("/api/v1/channels", _ChannelService_CreateChannel0_Bridge_Handler(srv))
-	r.PUT("/api/v1/channels/:channel.id", _ChannelService_UpdateChannel0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/channels/:id", _ChannelService_DeleteChannel0_Bridge_Handler(srv))
-	r.GET("/api/v1/channels/:id/medias", _ChannelService_GetChannelMedias0_Bridge_Handler(srv))
-	r.POST("/api/v1/channels/:id/medias", _ChannelService_AddChannelMedia0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/channels/:id/medias/:media_id", _ChannelService_RemoveChannelMedia0_Bridge_Handler(srv))
-	r.GET("/api/v1/channels/:id/subscribers", _ChannelService_GetChannelSubscribers0_Bridge_Handler(srv))
-	r.GET("/api/v1/channels/:id/subscription", _ChannelService_GetChannelSubscription0_Bridge_Handler(srv))
-	r.POST("/api/v1/channels/:id/subscription", _ChannelService_SubscribeChannel0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/channels/:id/subscription", _ChannelService_UnsubscribeChannel0_Bridge_Handler(srv))
 	r.GET("/api/v1/channels/me", _ChannelService_GetMyChannel0_Bridge_Handler(srv))
 	r.PUT("/api/v1/channels/me/handle", _ChannelService_UpdateMyChannelHandle0_Bridge_Handler(srv))
 	r.GET("/api/v1/channels/validate-handle", _ChannelService_ValidateChannelHandle0_Bridge_Handler(srv))
-	r.PATCH("/api/v1/channels/:id/notification", _ChannelService_UpdateChannelNotification0_Bridge_Handler(srv))
-	r.GET("/api/v1/resolve/@{handle}", _ChannelService_ResolveHandle0_Bridge_Handler(srv))
+	r.GET("/api/v1/channels/:token", _ChannelService_GetChannelByToken0_Bridge_Handler(srv))
+	r.GET("/api/v1/channels/:token/videos", _ChannelService_GetChannelVideos0_Bridge_Handler(srv))
+	r.GET("/api/v1/channels/:token/playlists", _ChannelService_GetChannelPlaylists0_Bridge_Handler(srv))
+	r.PUT("/api/v1/channels/:token/notification", _ChannelService_UpdateChannelNotification0_Bridge_Handler(srv))
+	r.GET("/api/v1/channels/:token/subscribers", _ChannelService_GetChannelSubscribers0_Bridge_Handler(srv))
+	r.GET("/api/v1/channels/:token/subscription", _ChannelService_GetChannelSubscription0_Bridge_Handler(srv))
+	r.POST("/api/v1/channels/:token/subscription", _ChannelService_SubscribeChannel0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/channels/:token/subscription", _ChannelService_UnsubscribeChannel0_Bridge_Handler(srv))
+	r.POST("/api/v1/channels", _ChannelService_CreateChannel0_Bridge_Handler(srv))
+	r.POST("/api/v1/channels/:token/medias", _ChannelService_AddChannelMedia0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/channels/:token/medias/:media_id", _ChannelService_RemoveChannelMedia0_Bridge_Handler(srv))
+	r.POST("/api/v1/channels/:token/invitations", _ChannelService_InviteUserToChannel0_Bridge_Handler(srv))
+	r.POST("/api/v1/channels/invitations/:id/accept", _ChannelService_AcceptChannelInvitation0_Bridge_Handler(srv))
+	r.POST("/api/v1/channels/invitations/:id/reject", _ChannelService_RejectChannelInvitation0_Bridge_Handler(srv))
+	r.GET("/api/v1/channels/invitations", _ChannelService_GetChannelInvitations0_Bridge_Handler(srv))
+	r.PUT("/api/v1/channels/:token", _ChannelService_UpdateChannel0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/channels/:token", _ChannelService_DeleteChannel0_Bridge_Handler(srv))
+	r.GET("/api/v1/resolve", _ChannelService_ResolveHandle0_Bridge_Handler(srv))
+	r.GET("/api/v1/system/config/channel-limits", _ChannelService_GetChannelLimits0_Bridge_Handler(srv))
+	r.GET("/api/v1/subscriptions/videos", _ChannelService_GetSubscriptionVideos0_Bridge_Handler(srv))
 }
 
 func _ChannelService_ListChannels0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
@@ -4838,21 +5728,18 @@ func _ChannelService_ListChannels0_Bridge_Handler(srv ChannelServiceHookedBridge
 	}
 }
 
-func _ChannelService_GetChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+func _ChannelService_GetMyChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetChannelRequest
+		var in GetMyChannelRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceGetChannel)
+		http.SetOperation(ctx, OperationChannelServiceGetMyChannel)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetChannel(ctx, req.(*GetChannelRequest))
+			return srv.GetMyChannel(ctx, req.(*GetMyChannelRequest))
 		})
 
-		newctx, err := srv.PrepareGetChannel(ctx, &in)
+		newctx, err := srv.PrepareGetMyChannel(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -4860,25 +5747,25 @@ func _ChannelService_GetChannel0_Bridge_Handler(srv ChannelServiceHookedBridger)
 		if err != nil {
 			return err
 		}
-		return srv.CompleteGetChannel(ctx, &in, out.(*GetChannelResponse))
+		return srv.CompleteGetMyChannel(ctx, &in, out.(*GetMyChannelResponse))
 	}
 }
 
-func _ChannelService_CreateChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+func _ChannelService_UpdateMyChannelHandle0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateChannelRequest
+		var in UpdateMyChannelHandleRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceCreateChannel)
+		http.SetOperation(ctx, OperationChannelServiceUpdateMyChannelHandle)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateChannel(ctx, req.(*CreateChannelRequest))
+			return srv.UpdateMyChannelHandle(ctx, req.(*UpdateMyChannelHandleRequest))
 		})
 
-		newctx, err := srv.PrepareCreateChannel(ctx, &in)
+		newctx, err := srv.PrepareUpdateMyChannelHandle(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -4886,13 +5773,114 @@ func _ChannelService_CreateChannel0_Bridge_Handler(srv ChannelServiceHookedBridg
 		if err != nil {
 			return err
 		}
-		return srv.CompleteCreateChannel(ctx, &in, out.(*CreateChannelResponse))
+		return srv.CompleteUpdateMyChannelHandle(ctx, &in, out.(*UpdateMyChannelHandleResponse))
 	}
 }
 
-func _ChannelService_UpdateChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+func _ChannelService_ValidateChannelHandle0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in UpdateChannelRequest
+		var in ValidateChannelHandleRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceValidateChannelHandle)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ValidateChannelHandle(ctx, req.(*ValidateChannelHandleRequest))
+		})
+
+		newctx, err := srv.PrepareValidateChannelHandle(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteValidateChannelHandle(ctx, &in, out.(*ValidateChannelHandleResponse))
+	}
+}
+
+func _ChannelService_GetChannelByToken0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelByTokenRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelByToken)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelByToken(ctx, req.(*GetChannelByTokenRequest))
+		})
+
+		newctx, err := srv.PrepareGetChannelByToken(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetChannelByToken(ctx, &in, out.(*GetChannelByTokenResponse))
+	}
+}
+
+func _ChannelService_GetChannelVideos0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelVideosRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelVideos)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelVideos(ctx, req.(*GetChannelVideosRequest))
+		})
+
+		newctx, err := srv.PrepareGetChannelVideos(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetChannelVideos(ctx, &in, out.(*GetChannelVideosResponse))
+	}
+}
+
+func _ChannelService_GetChannelPlaylists0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelPlaylistsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelPlaylists)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelPlaylists(ctx, req.(*GetChannelPlaylistsRequest))
+		})
+
+		newctx, err := srv.PrepareGetChannelPlaylists(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetChannelPlaylists(ctx, &in, out.(*GetChannelPlaylistsResponse))
+	}
+}
+
+func _ChannelService_UpdateChannelNotification0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateChannelNotificationRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -4902,12 +5890,12 @@ func _ChannelService_UpdateChannel0_Bridge_Handler(srv ChannelServiceHookedBridg
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceUpdateChannel)
+		http.SetOperation(ctx, OperationChannelServiceUpdateChannelNotification)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateChannel(ctx, req.(*UpdateChannelRequest))
+			return srv.UpdateChannelNotification(ctx, req.(*UpdateChannelNotificationRequest))
 		})
 
-		newctx, err := srv.PrepareUpdateChannel(ctx, &in)
+		newctx, err := srv.PrepareUpdateChannelNotification(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -4915,114 +5903,7 @@ func _ChannelService_UpdateChannel0_Bridge_Handler(srv ChannelServiceHookedBridg
 		if err != nil {
 			return err
 		}
-		return srv.CompleteUpdateChannel(ctx, &in, out.(*UpdateChannelResponse))
-	}
-}
-
-func _ChannelService_DeleteChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in DeleteChannelRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceDeleteChannel)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteChannel(ctx, req.(*DeleteChannelRequest))
-		})
-
-		newctx, err := srv.PrepareDeleteChannel(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteDeleteChannel(ctx, &in, out.(*DeleteChannelResponse))
-	}
-}
-
-func _ChannelService_GetChannelMedias0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetChannelMediasRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceGetChannelMedias)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetChannelMedias(ctx, req.(*GetChannelMediasRequest))
-		})
-
-		newctx, err := srv.PrepareGetChannelMedias(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetChannelMedias(ctx, &in, out.(*GetChannelMediasResponse))
-	}
-}
-
-func _ChannelService_AddChannelMedia0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in AddChannelMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceAddChannelMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.AddChannelMedia(ctx, req.(*AddChannelMediaRequest))
-		})
-
-		newctx, err := srv.PrepareAddChannelMedia(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteAddChannelMedia(ctx, &in, out.(*AddChannelMediaResponse))
-	}
-}
-
-func _ChannelService_RemoveChannelMedia0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RemoveChannelMediaRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceRemoveChannelMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RemoveChannelMedia(ctx, req.(*RemoveChannelMediaRequest))
-		})
-
-		newctx, err := srv.PrepareRemoveChannelMedia(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteRemoveChannelMedia(ctx, &in, out.(*RemoveChannelMediaResponse))
+		return srv.CompleteUpdateChannelNotification(ctx, &in, out.(*UpdateChannelNotificationResponse))
 	}
 }
 
@@ -5133,44 +6014,21 @@ func _ChannelService_UnsubscribeChannel0_Bridge_Handler(srv ChannelServiceHooked
 	}
 }
 
-func _ChannelService_GetMyChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+func _ChannelService_CreateChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMyChannelRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceGetMyChannel)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMyChannel(ctx, req.(*GetMyChannelRequest))
-		})
-
-		newctx, err := srv.PrepareGetMyChannel(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetMyChannel(ctx, &in, out.(*GetMyChannelResponse))
-	}
-}
-
-func _ChannelService_UpdateMyChannelHandle0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UpdateMyChannelHandleRequest
+		var in CreateChannelRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceUpdateMyChannelHandle)
+		http.SetOperation(ctx, OperationChannelServiceCreateChannel)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateMyChannelHandle(ctx, req.(*UpdateMyChannelHandleRequest))
+			return srv.CreateChannel(ctx, req.(*CreateChannelRequest))
 		})
 
-		newctx, err := srv.PrepareUpdateMyChannelHandle(ctx, &in)
+		newctx, err := srv.PrepareCreateChannel(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -5178,36 +6036,13 @@ func _ChannelService_UpdateMyChannelHandle0_Bridge_Handler(srv ChannelServiceHoo
 		if err != nil {
 			return err
 		}
-		return srv.CompleteUpdateMyChannelHandle(ctx, &in, out.(*UpdateMyChannelHandleResponse))
+		return srv.CompleteCreateChannel(ctx, &in, out.(*CreateChannelResponse))
 	}
 }
 
-func _ChannelService_ValidateChannelHandle0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+func _ChannelService_AddChannelMedia0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ValidateChannelHandleRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceValidateChannelHandle)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ValidateChannelHandle(ctx, req.(*ValidateChannelHandleRequest))
-		})
-
-		newctx, err := srv.PrepareValidateChannelHandle(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteValidateChannelHandle(ctx, &in, out.(*ValidateChannelHandleResponse))
-	}
-}
-
-func _ChannelService_UpdateChannelNotification0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UpdateChannelNotificationRequest
+		var in AddChannelMediaRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -5217,12 +6052,12 @@ func _ChannelService_UpdateChannelNotification0_Bridge_Handler(srv ChannelServic
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceUpdateChannelNotification)
+		http.SetOperation(ctx, OperationChannelServiceAddChannelMedia)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateChannelNotification(ctx, req.(*UpdateChannelNotificationRequest))
+			return srv.AddChannelMedia(ctx, req.(*AddChannelMediaRequest))
 		})
 
-		newctx, err := srv.PrepareUpdateChannelNotification(ctx, &in)
+		newctx, err := srv.PrepareAddChannelMedia(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -5230,7 +6065,198 @@ func _ChannelService_UpdateChannelNotification0_Bridge_Handler(srv ChannelServic
 		if err != nil {
 			return err
 		}
-		return srv.CompleteUpdateChannelNotification(ctx, &in, out.(*UpdateChannelNotificationResponse))
+		return srv.CompleteAddChannelMedia(ctx, &in, out.(*AddChannelMediaResponse))
+	}
+}
+
+func _ChannelService_RemoveChannelMedia0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RemoveChannelMediaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceRemoveChannelMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RemoveChannelMedia(ctx, req.(*RemoveChannelMediaRequest))
+		})
+
+		newctx, err := srv.PrepareRemoveChannelMedia(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteRemoveChannelMedia(ctx, &in, out.(*RemoveChannelMediaResponse))
+	}
+}
+
+func _ChannelService_InviteUserToChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in InviteUserToChannelRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceInviteUserToChannel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.InviteUserToChannel(ctx, req.(*InviteUserToChannelRequest))
+		})
+
+		newctx, err := srv.PrepareInviteUserToChannel(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteInviteUserToChannel(ctx, &in, out.(*InviteUserToChannelResponse))
+	}
+}
+
+func _ChannelService_AcceptChannelInvitation0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AcceptChannelInvitationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceAcceptChannelInvitation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AcceptChannelInvitation(ctx, req.(*AcceptChannelInvitationRequest))
+		})
+
+		newctx, err := srv.PrepareAcceptChannelInvitation(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteAcceptChannelInvitation(ctx, &in, out.(*AcceptChannelInvitationResponse))
+	}
+}
+
+func _ChannelService_RejectChannelInvitation0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RejectChannelInvitationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceRejectChannelInvitation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RejectChannelInvitation(ctx, req.(*RejectChannelInvitationRequest))
+		})
+
+		newctx, err := srv.PrepareRejectChannelInvitation(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteRejectChannelInvitation(ctx, &in, out.(*RejectChannelInvitationResponse))
+	}
+}
+
+func _ChannelService_GetChannelInvitations0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelInvitationsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelInvitations)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelInvitations(ctx, req.(*GetChannelInvitationsRequest))
+		})
+
+		newctx, err := srv.PrepareGetChannelInvitations(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetChannelInvitations(ctx, &in, out.(*GetChannelInvitationsResponse))
+	}
+}
+
+func _ChannelService_UpdateChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateChannelRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceUpdateChannel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateChannel(ctx, req.(*UpdateChannelRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateChannel(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateChannel(ctx, &in, out.(*UpdateChannelResponse))
+	}
+}
+
+func _ChannelService_DeleteChannel0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteChannelRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceDeleteChannel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteChannel(ctx, req.(*DeleteChannelRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteChannel(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteChannel(ctx, &in, out.(*DeleteChannelResponse))
 	}
 }
 
@@ -5238,9 +6264,6 @@ func _ChannelService_ResolveHandle0_Bridge_Handler(srv ChannelServiceHookedBridg
 	return func(ctx http.Context) error {
 		var in ResolveHandleRequest
 		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationChannelServiceResolveHandle)
@@ -5260,6 +6283,52 @@ func _ChannelService_ResolveHandle0_Bridge_Handler(srv ChannelServiceHookedBridg
 	}
 }
 
+func _ChannelService_GetChannelLimits0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelLimitsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelLimits)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelLimits(ctx, req.(*GetChannelLimitsRequest))
+		})
+
+		newctx, err := srv.PrepareGetChannelLimits(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetChannelLimits(ctx, &in, out.(*GetChannelLimitsResponse))
+	}
+}
+
+func _ChannelService_GetSubscriptionVideos0_Bridge_Handler(srv ChannelServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSubscriptionVideosRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetSubscriptionVideos)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSubscriptionVideos(ctx, req.(*GetSubscriptionVideosRequest))
+		})
+
+		newctx, err := srv.PrepareGetSubscriptionVideos(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetSubscriptionVideos(ctx, &in, out.(*GetSubscriptionVideosResponse))
+	}
+}
+
 // UnimplementedChannelServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -5275,59 +6344,59 @@ func (UnimplementedChannelServiceHooked) CompleteListChannels(ctx http.Context, 
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareGetChannel(ctx http.Context, in *GetChannelRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareGetMyChannel(ctx http.Context, in *GetMyChannelRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteGetChannel(ctx http.Context, in *GetChannelRequest, out *GetChannelResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteGetMyChannel(ctx http.Context, in *GetMyChannelRequest, out *GetMyChannelResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareCreateChannel(ctx http.Context, in *CreateChannelRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareUpdateMyChannelHandle(ctx http.Context, in *UpdateMyChannelHandleRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteCreateChannel(ctx http.Context, in *CreateChannelRequest, out *CreateChannelResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteUpdateMyChannelHandle(ctx http.Context, in *UpdateMyChannelHandleRequest, out *UpdateMyChannelHandleResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareUpdateChannel(ctx http.Context, in *UpdateChannelRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareValidateChannelHandle(ctx http.Context, in *ValidateChannelHandleRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteUpdateChannel(ctx http.Context, in *UpdateChannelRequest, out *UpdateChannelResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteValidateChannelHandle(ctx http.Context, in *ValidateChannelHandleRequest, out *ValidateChannelHandleResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareDeleteChannel(ctx http.Context, in *DeleteChannelRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareGetChannelByToken(ctx http.Context, in *GetChannelByTokenRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteDeleteChannel(ctx http.Context, in *DeleteChannelRequest, out *DeleteChannelResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteGetChannelByToken(ctx http.Context, in *GetChannelByTokenRequest, out *GetChannelByTokenResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareGetChannelMedias(ctx http.Context, in *GetChannelMediasRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareGetChannelVideos(ctx http.Context, in *GetChannelVideosRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteGetChannelMedias(ctx http.Context, in *GetChannelMediasRequest, out *GetChannelMediasResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteGetChannelVideos(ctx http.Context, in *GetChannelVideosRequest, out *GetChannelVideosResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareAddChannelMedia(ctx http.Context, in *AddChannelMediaRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareGetChannelPlaylists(ctx http.Context, in *GetChannelPlaylistsRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteAddChannelMedia(ctx http.Context, in *AddChannelMediaRequest, out *AddChannelMediaResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteGetChannelPlaylists(ctx http.Context, in *GetChannelPlaylistsRequest, out *GetChannelPlaylistsResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareRemoveChannelMedia(ctx http.Context, in *RemoveChannelMediaRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareUpdateChannelNotification(ctx http.Context, in *UpdateChannelNotificationRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteRemoveChannelMedia(ctx http.Context, in *RemoveChannelMediaRequest, out *RemoveChannelMediaResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteUpdateChannelNotification(ctx http.Context, in *UpdateChannelNotificationRequest, out *UpdateChannelNotificationResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -5363,35 +6432,75 @@ func (UnimplementedChannelServiceHooked) CompleteUnsubscribeChannel(ctx http.Con
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareGetMyChannel(ctx http.Context, in *GetMyChannelRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareCreateChannel(ctx http.Context, in *CreateChannelRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteGetMyChannel(ctx http.Context, in *GetMyChannelRequest, out *GetMyChannelResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteCreateChannel(ctx http.Context, in *CreateChannelRequest, out *CreateChannelResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareUpdateMyChannelHandle(ctx http.Context, in *UpdateMyChannelHandleRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareAddChannelMedia(ctx http.Context, in *AddChannelMediaRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteUpdateMyChannelHandle(ctx http.Context, in *UpdateMyChannelHandleRequest, out *UpdateMyChannelHandleResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteAddChannelMedia(ctx http.Context, in *AddChannelMediaRequest, out *AddChannelMediaResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareValidateChannelHandle(ctx http.Context, in *ValidateChannelHandleRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareRemoveChannelMedia(ctx http.Context, in *RemoveChannelMediaRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteValidateChannelHandle(ctx http.Context, in *ValidateChannelHandleRequest, out *ValidateChannelHandleResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteRemoveChannelMedia(ctx http.Context, in *RemoveChannelMediaRequest, out *RemoveChannelMediaResponse) error {
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedChannelServiceHooked) PrepareUpdateChannelNotification(ctx http.Context, in *UpdateChannelNotificationRequest) (context.Context, error) {
+func (UnimplementedChannelServiceHooked) PrepareInviteUserToChannel(ctx http.Context, in *InviteUserToChannelRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedChannelServiceHooked) CompleteUpdateChannelNotification(ctx http.Context, in *UpdateChannelNotificationRequest, out *UpdateChannelNotificationResponse) error {
+func (UnimplementedChannelServiceHooked) CompleteInviteUserToChannel(ctx http.Context, in *InviteUserToChannelRequest, out *InviteUserToChannelResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareAcceptChannelInvitation(ctx http.Context, in *AcceptChannelInvitationRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteAcceptChannelInvitation(ctx http.Context, in *AcceptChannelInvitationRequest, out *AcceptChannelInvitationResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareRejectChannelInvitation(ctx http.Context, in *RejectChannelInvitationRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteRejectChannelInvitation(ctx http.Context, in *RejectChannelInvitationRequest, out *RejectChannelInvitationResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareGetChannelInvitations(ctx http.Context, in *GetChannelInvitationsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteGetChannelInvitations(ctx http.Context, in *GetChannelInvitationsRequest, out *GetChannelInvitationsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareUpdateChannel(ctx http.Context, in *UpdateChannelRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteUpdateChannel(ctx http.Context, in *UpdateChannelRequest, out *UpdateChannelResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareDeleteChannel(ctx http.Context, in *DeleteChannelRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteDeleteChannel(ctx http.Context, in *DeleteChannelRequest, out *DeleteChannelResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -5400,6 +6509,22 @@ func (UnimplementedChannelServiceHooked) PrepareResolveHandle(ctx http.Context, 
 }
 
 func (UnimplementedChannelServiceHooked) CompleteResolveHandle(ctx http.Context, in *ResolveHandleRequest, out *ResolveHandleResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareGetChannelLimits(ctx http.Context, in *GetChannelLimitsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteGetChannelLimits(ctx http.Context, in *GetChannelLimitsRequest, out *GetChannelLimitsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedChannelServiceHooked) PrepareGetSubscriptionVideos(ctx http.Context, in *GetSubscriptionVideosRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedChannelServiceHooked) CompleteGetSubscriptionVideos(ctx http.Context, in *GetSubscriptionVideosRequest, out *GetSubscriptionVideosResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -5429,32 +6554,32 @@ func (c *ChannelServiceHTTPBridgeImpl) ListChannels(ctx context.Context, in *Lis
 	return c.client.ListChannels(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) GetChannel(ctx context.Context, in *GetChannelRequest) (*GetChannelResponse, error) {
-	return c.client.GetChannel(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
+	return c.client.GetMyChannel(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
-	return c.client.CreateChannel(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
+	return c.client.UpdateMyChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
-	return c.client.UpdateChannel(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
+	return c.client.ValidateChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
-	return c.client.DeleteChannel(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) GetChannelByToken(ctx context.Context, in *GetChannelByTokenRequest) (*GetChannelByTokenResponse, error) {
+	return c.client.GetChannelByToken(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest) (*GetChannelMediasResponse, error) {
-	return c.client.GetChannelMedias(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) GetChannelVideos(ctx context.Context, in *GetChannelVideosRequest) (*GetChannelVideosResponse, error) {
+	return c.client.GetChannelVideos(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
-	return c.client.AddChannelMedia(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) GetChannelPlaylists(ctx context.Context, in *GetChannelPlaylistsRequest) (*GetChannelPlaylistsResponse, error) {
+	return c.client.GetChannelPlaylists(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
-	return c.client.RemoveChannelMedia(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
+	return c.client.UpdateChannelNotification(ctx, in)
 }
 
 func (c *ChannelServiceHTTPBridgeImpl) GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error) {
@@ -5473,24 +6598,52 @@ func (c *ChannelServiceHTTPBridgeImpl) UnsubscribeChannel(ctx context.Context, i
 	return c.client.UnsubscribeChannel(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
-	return c.client.GetMyChannel(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
+	return c.client.CreateChannel(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
-	return c.client.UpdateMyChannelHandle(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
+	return c.client.AddChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
-	return c.client.ValidateChannelHandle(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
+	return c.client.RemoveChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceHTTPBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
-	return c.client.UpdateChannelNotification(ctx, in)
+func (c *ChannelServiceHTTPBridgeImpl) InviteUserToChannel(ctx context.Context, in *InviteUserToChannelRequest) (*InviteUserToChannelResponse, error) {
+	return c.client.InviteUserToChannel(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) AcceptChannelInvitation(ctx context.Context, in *AcceptChannelInvitationRequest) (*AcceptChannelInvitationResponse, error) {
+	return c.client.AcceptChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) RejectChannelInvitation(ctx context.Context, in *RejectChannelInvitationRequest) (*RejectChannelInvitationResponse, error) {
+	return c.client.RejectChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) GetChannelInvitations(ctx context.Context, in *GetChannelInvitationsRequest) (*GetChannelInvitationsResponse, error) {
+	return c.client.GetChannelInvitations(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
+	return c.client.UpdateChannel(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
+	return c.client.DeleteChannel(ctx, in)
 }
 
 func (c *ChannelServiceHTTPBridgeImpl) ResolveHandle(ctx context.Context, in *ResolveHandleRequest) (*ResolveHandleResponse, error) {
 	return c.client.ResolveHandle(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) GetChannelLimits(ctx context.Context, in *GetChannelLimitsRequest) (*GetChannelLimitsResponse, error) {
+	return c.client.GetChannelLimits(ctx, in)
+}
+
+func (c *ChannelServiceHTTPBridgeImpl) GetSubscriptionVideos(ctx context.Context, in *GetSubscriptionVideosRequest) (*GetSubscriptionVideosResponse, error) {
+	return c.client.GetSubscriptionVideos(ctx, in)
 }
 
 type ChannelServiceBridgeImpl struct {
@@ -5505,32 +6658,32 @@ func (c *ChannelServiceBridgeImpl) ListChannels(ctx context.Context, in *ListCha
 	return c.client.ListChannels(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) GetChannel(ctx context.Context, in *GetChannelRequest) (*GetChannelResponse, error) {
-	return c.client.GetChannel(ctx, in)
+func (c *ChannelServiceBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
+	return c.client.GetMyChannel(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
-	return c.client.CreateChannel(ctx, in)
+func (c *ChannelServiceBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
+	return c.client.UpdateMyChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
-	return c.client.UpdateChannel(ctx, in)
+func (c *ChannelServiceBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
+	return c.client.ValidateChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
-	return c.client.DeleteChannel(ctx, in)
+func (c *ChannelServiceBridgeImpl) GetChannelByToken(ctx context.Context, in *GetChannelByTokenRequest) (*GetChannelByTokenResponse, error) {
+	return c.client.GetChannelByToken(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest) (*GetChannelMediasResponse, error) {
-	return c.client.GetChannelMedias(ctx, in)
+func (c *ChannelServiceBridgeImpl) GetChannelVideos(ctx context.Context, in *GetChannelVideosRequest) (*GetChannelVideosResponse, error) {
+	return c.client.GetChannelVideos(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
-	return c.client.AddChannelMedia(ctx, in)
+func (c *ChannelServiceBridgeImpl) GetChannelPlaylists(ctx context.Context, in *GetChannelPlaylistsRequest) (*GetChannelPlaylistsResponse, error) {
+	return c.client.GetChannelPlaylists(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
-	return c.client.RemoveChannelMedia(ctx, in)
+func (c *ChannelServiceBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
+	return c.client.UpdateChannelNotification(ctx, in)
 }
 
 func (c *ChannelServiceBridgeImpl) GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error) {
@@ -5549,24 +6702,52 @@ func (c *ChannelServiceBridgeImpl) UnsubscribeChannel(ctx context.Context, in *U
 	return c.client.UnsubscribeChannel(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
-	return c.client.GetMyChannel(ctx, in)
+func (c *ChannelServiceBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
+	return c.client.CreateChannel(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
-	return c.client.UpdateMyChannelHandle(ctx, in)
+func (c *ChannelServiceBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
+	return c.client.AddChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
-	return c.client.ValidateChannelHandle(ctx, in)
+func (c *ChannelServiceBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
+	return c.client.RemoveChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
-	return c.client.UpdateChannelNotification(ctx, in)
+func (c *ChannelServiceBridgeImpl) InviteUserToChannel(ctx context.Context, in *InviteUserToChannelRequest) (*InviteUserToChannelResponse, error) {
+	return c.client.InviteUserToChannel(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) AcceptChannelInvitation(ctx context.Context, in *AcceptChannelInvitationRequest) (*AcceptChannelInvitationResponse, error) {
+	return c.client.AcceptChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) RejectChannelInvitation(ctx context.Context, in *RejectChannelInvitationRequest) (*RejectChannelInvitationResponse, error) {
+	return c.client.RejectChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) GetChannelInvitations(ctx context.Context, in *GetChannelInvitationsRequest) (*GetChannelInvitationsResponse, error) {
+	return c.client.GetChannelInvitations(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
+	return c.client.UpdateChannel(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
+	return c.client.DeleteChannel(ctx, in)
 }
 
 func (c *ChannelServiceBridgeImpl) ResolveHandle(ctx context.Context, in *ResolveHandleRequest) (*ResolveHandleResponse, error) {
 	return c.client.ResolveHandle(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) GetChannelLimits(ctx context.Context, in *GetChannelLimitsRequest) (*GetChannelLimitsResponse, error) {
+	return c.client.GetChannelLimits(ctx, in)
+}
+
+func (c *ChannelServiceBridgeImpl) GetSubscriptionVideos(ctx context.Context, in *GetSubscriptionVideosRequest) (*GetSubscriptionVideosResponse, error) {
+	return c.client.GetSubscriptionVideos(ctx, in)
 }
 
 func (c *ChannelServiceBridgeImpl) mustEmbedUnimplementedChannelServiceServer() {}
@@ -5583,32 +6764,32 @@ func (c *ChannelServiceGRPC2HTTPBridgeImpl) ListChannels(ctx context.Context, in
 	return c.client.ListChannels(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannel(ctx context.Context, in *GetChannelRequest) (*GetChannelResponse, error) {
-	return c.client.GetChannel(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
+	return c.client.GetMyChannel(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
-	return c.client.CreateChannel(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
+	return c.client.UpdateMyChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
-	return c.client.UpdateChannel(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
+	return c.client.ValidateChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
-	return c.client.DeleteChannel(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelByToken(ctx context.Context, in *GetChannelByTokenRequest) (*GetChannelByTokenResponse, error) {
+	return c.client.GetChannelByToken(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest) (*GetChannelMediasResponse, error) {
-	return c.client.GetChannelMedias(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelVideos(ctx context.Context, in *GetChannelVideosRequest) (*GetChannelVideosResponse, error) {
+	return c.client.GetChannelVideos(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
-	return c.client.AddChannelMedia(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelPlaylists(ctx context.Context, in *GetChannelPlaylistsRequest) (*GetChannelPlaylistsResponse, error) {
+	return c.client.GetChannelPlaylists(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
-	return c.client.RemoveChannelMedia(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
+	return c.client.UpdateChannelNotification(ctx, in)
 }
 
 func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error) {
@@ -5627,24 +6808,52 @@ func (c *ChannelServiceGRPC2HTTPBridgeImpl) UnsubscribeChannel(ctx context.Conte
 	return c.client.UnsubscribeChannel(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
-	return c.client.GetMyChannel(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
+	return c.client.CreateChannel(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
-	return c.client.UpdateMyChannelHandle(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
+	return c.client.AddChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
-	return c.client.ValidateChannelHandle(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
+	return c.client.RemoveChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceGRPC2HTTPBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
-	return c.client.UpdateChannelNotification(ctx, in)
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) InviteUserToChannel(ctx context.Context, in *InviteUserToChannelRequest) (*InviteUserToChannelResponse, error) {
+	return c.client.InviteUserToChannel(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) AcceptChannelInvitation(ctx context.Context, in *AcceptChannelInvitationRequest) (*AcceptChannelInvitationResponse, error) {
+	return c.client.AcceptChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) RejectChannelInvitation(ctx context.Context, in *RejectChannelInvitationRequest) (*RejectChannelInvitationResponse, error) {
+	return c.client.RejectChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelInvitations(ctx context.Context, in *GetChannelInvitationsRequest) (*GetChannelInvitationsResponse, error) {
+	return c.client.GetChannelInvitations(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
+	return c.client.UpdateChannel(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
+	return c.client.DeleteChannel(ctx, in)
 }
 
 func (c *ChannelServiceGRPC2HTTPBridgeImpl) ResolveHandle(ctx context.Context, in *ResolveHandleRequest) (*ResolveHandleResponse, error) {
 	return c.client.ResolveHandle(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetChannelLimits(ctx context.Context, in *GetChannelLimitsRequest) (*GetChannelLimitsResponse, error) {
+	return c.client.GetChannelLimits(ctx, in)
+}
+
+func (c *ChannelServiceGRPC2HTTPBridgeImpl) GetSubscriptionVideos(ctx context.Context, in *GetSubscriptionVideosRequest) (*GetSubscriptionVideosResponse, error) {
+	return c.client.GetSubscriptionVideos(ctx, in)
 }
 
 type ChannelServiceHTTP2GRPCBridgeImpl struct {
@@ -5659,32 +6868,32 @@ func (c *ChannelServiceHTTP2GRPCBridgeImpl) ListChannels(ctx context.Context, in
 	return c.client.ListChannels(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannel(ctx context.Context, in *GetChannelRequest) (*GetChannelResponse, error) {
-	return c.client.GetChannel(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
+	return c.client.GetMyChannel(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
-	return c.client.CreateChannel(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
+	return c.client.UpdateMyChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
-	return c.client.UpdateChannel(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
+	return c.client.ValidateChannelHandle(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
-	return c.client.DeleteChannel(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelByToken(ctx context.Context, in *GetChannelByTokenRequest) (*GetChannelByTokenResponse, error) {
+	return c.client.GetChannelByToken(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest) (*GetChannelMediasResponse, error) {
-	return c.client.GetChannelMedias(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelVideos(ctx context.Context, in *GetChannelVideosRequest) (*GetChannelVideosResponse, error) {
+	return c.client.GetChannelVideos(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
-	return c.client.AddChannelMedia(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelPlaylists(ctx context.Context, in *GetChannelPlaylistsRequest) (*GetChannelPlaylistsResponse, error) {
+	return c.client.GetChannelPlaylists(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
-	return c.client.RemoveChannelMedia(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
+	return c.client.UpdateChannelNotification(ctx, in)
 }
 
 func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error) {
@@ -5703,24 +6912,52 @@ func (c *ChannelServiceHTTP2GRPCBridgeImpl) UnsubscribeChannel(ctx context.Conte
 	return c.client.UnsubscribeChannel(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest) (*GetMyChannelResponse, error) {
-	return c.client.GetMyChannel(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) CreateChannel(ctx context.Context, in *CreateChannelRequest) (*CreateChannelResponse, error) {
+	return c.client.CreateChannel(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) UpdateMyChannelHandle(ctx context.Context, in *UpdateMyChannelHandleRequest) (*UpdateMyChannelHandleResponse, error) {
-	return c.client.UpdateMyChannelHandle(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest) (*AddChannelMediaResponse, error) {
+	return c.client.AddChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) ValidateChannelHandle(ctx context.Context, in *ValidateChannelHandleRequest) (*ValidateChannelHandleResponse, error) {
-	return c.client.ValidateChannelHandle(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error) {
+	return c.client.RemoveChannelMedia(ctx, in)
 }
 
-func (c *ChannelServiceHTTP2GRPCBridgeImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest) (*UpdateChannelNotificationResponse, error) {
-	return c.client.UpdateChannelNotification(ctx, in)
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) InviteUserToChannel(ctx context.Context, in *InviteUserToChannelRequest) (*InviteUserToChannelResponse, error) {
+	return c.client.InviteUserToChannel(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) AcceptChannelInvitation(ctx context.Context, in *AcceptChannelInvitationRequest) (*AcceptChannelInvitationResponse, error) {
+	return c.client.AcceptChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) RejectChannelInvitation(ctx context.Context, in *RejectChannelInvitationRequest) (*RejectChannelInvitationResponse, error) {
+	return c.client.RejectChannelInvitation(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelInvitations(ctx context.Context, in *GetChannelInvitationsRequest) (*GetChannelInvitationsResponse, error) {
+	return c.client.GetChannelInvitations(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest) (*UpdateChannelResponse, error) {
+	return c.client.UpdateChannel(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest) (*DeleteChannelResponse, error) {
+	return c.client.DeleteChannel(ctx, in)
 }
 
 func (c *ChannelServiceHTTP2GRPCBridgeImpl) ResolveHandle(ctx context.Context, in *ResolveHandleRequest) (*ResolveHandleResponse, error) {
 	return c.client.ResolveHandle(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetChannelLimits(ctx context.Context, in *GetChannelLimitsRequest) (*GetChannelLimitsResponse, error) {
+	return c.client.GetChannelLimits(ctx, in)
+}
+
+func (c *ChannelServiceHTTP2GRPCBridgeImpl) GetSubscriptionVideos(ctx context.Context, in *GetSubscriptionVideosRequest) (*GetSubscriptionVideosResponse, error) {
+	return c.client.GetSubscriptionVideos(ctx, in)
 }
 
 func (c *ChannelServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedChannelServiceServer() {}
@@ -5913,6 +7150,10 @@ const AdminServiceGetMediaStatsBridgeOperation = "/api.v1.services.media.AdminSe
 const AdminServiceGetUserStatsBridgeOperation = "/api.v1.services.media.AdminService/GetUserStats"
 const AdminServiceGetTrafficStatsBridgeOperation = "/api.v1.services.media.AdminService/GetTrafficStats"
 const AdminServiceGetRevenueStatsBridgeOperation = "/api.v1.services.media.AdminService/GetRevenueStats"
+const AdminServiceGetPromotionStatsBridgeOperation = "/api.v1.services.media.AdminService/GetPromotionStats"
+const AdminServiceGetChannelStatsBridgeOperation = "/api.v1.services.media.AdminService/GetChannelStats"
+const AdminServiceGetTagStatsBridgeOperation = "/api.v1.services.media.AdminService/GetTagStats"
+const AdminServiceGetPlaylistStatsBridgeOperation = "/api.v1.services.media.AdminService/GetPlaylistStats"
 const AdminServiceGetPendingReviewsBridgeOperation = "/api.v1.services.media.AdminService/GetPendingReviews"
 const AdminServiceGetReviewHistoryBridgeOperation = "/api.v1.services.media.AdminService/GetReviewHistory"
 const AdminServiceGetReviewBridgeOperation = "/api.v1.services.media.AdminService/GetReview"
@@ -5920,6 +7161,7 @@ const AdminServiceUpdateReviewBridgeOperation = "/api.v1.services.media.AdminSer
 const AdminServiceBatchUpdateReviewsBridgeOperation = "/api.v1.services.media.AdminService/BatchUpdateReviews"
 const AdminServiceGetSettingsBridgeOperation = "/api.v1.services.media.AdminService/GetSettings"
 const AdminServiceUpdateSettingsBridgeOperation = "/api.v1.services.media.AdminService/UpdateSettings"
+const AdminServiceGetSystemInfoBridgeOperation = "/api.v1.services.media.AdminService/GetSystemInfo"
 
 type AdminServiceBridgeServer interface {
 	// Stats
@@ -5928,6 +7170,11 @@ type AdminServiceBridgeServer interface {
 	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
 	GetTrafficStats(context.Context, *GetTrafficStatsRequest) (*GetTrafficStatsResponse, error)
 	GetRevenueStats(context.Context, *GetRevenueStatsRequest) (*GetRevenueStatsResponse, error)
+	GetPromotionStats(context.Context, *GetPromotionStatsRequest) (*GetPromotionStatsResponse, error)
+	// BUG-211: page-level stats card endpoints (independent, not derived from list).
+	GetChannelStats(context.Context, *GetChannelStatsRequest) (*GetChannelStatsResponse, error)
+	GetTagStats(context.Context, *GetTagStatsRequest) (*GetTagStatsResponse, error)
+	GetPlaylistStats(context.Context, *GetPlaylistStatsRequest) (*GetPlaylistStatsResponse, error)
 	// Review
 	GetPendingReviews(context.Context, *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error)
 	GetReviewHistory(context.Context, *GetReviewHistoryRequest) (*GetReviewHistoryResponse, error)
@@ -5937,6 +7184,8 @@ type AdminServiceBridgeServer interface {
 	// Settings
 	GetSettings(context.Context, *GetSettingsRequest) (*GetSettingsResponse, error)
 	UpdateSettings(context.Context, *UpdateSettingsRequest) (*UpdateSettingsResponse, error)
+	// GetSystemInfo returns system information.
+	GetSystemInfo(context.Context, *GetSystemInfoRequest) (*GetSystemInfoResponse, error)
 }
 
 type AdminServiceHooker interface {
@@ -5945,6 +7194,10 @@ type AdminServiceHooker interface {
 	AdminServiceGetUserStatsHooker
 	AdminServiceGetTrafficStatsHooker
 	AdminServiceGetRevenueStatsHooker
+	AdminServiceGetPromotionStatsHooker
+	AdminServiceGetChannelStatsHooker
+	AdminServiceGetTagStatsHooker
+	AdminServiceGetPlaylistStatsHooker
 	AdminServiceGetPendingReviewsHooker
 	AdminServiceGetReviewHistoryHooker
 	AdminServiceGetReviewHooker
@@ -5952,6 +7205,7 @@ type AdminServiceHooker interface {
 	AdminServiceBatchUpdateReviewsHooker
 	AdminServiceGetSettingsHooker
 	AdminServiceUpdateSettingsHooker
+	AdminServiceGetSystemInfoHooker
 }
 
 type AdminServiceHookedBridger interface {
@@ -5977,6 +7231,22 @@ type AdminServiceGetTrafficStatsHooker interface {
 type AdminServiceGetRevenueStatsHooker interface {
 	PrepareGetRevenueStats(http.Context, *GetRevenueStatsRequest) (context.Context, error)
 	CompleteGetRevenueStats(http.Context, *GetRevenueStatsRequest, *GetRevenueStatsResponse) error
+}
+type AdminServiceGetPromotionStatsHooker interface {
+	PrepareGetPromotionStats(http.Context, *GetPromotionStatsRequest) (context.Context, error)
+	CompleteGetPromotionStats(http.Context, *GetPromotionStatsRequest, *GetPromotionStatsResponse) error
+}
+type AdminServiceGetChannelStatsHooker interface {
+	PrepareGetChannelStats(http.Context, *GetChannelStatsRequest) (context.Context, error)
+	CompleteGetChannelStats(http.Context, *GetChannelStatsRequest, *GetChannelStatsResponse) error
+}
+type AdminServiceGetTagStatsHooker interface {
+	PrepareGetTagStats(http.Context, *GetTagStatsRequest) (context.Context, error)
+	CompleteGetTagStats(http.Context, *GetTagStatsRequest, *GetTagStatsResponse) error
+}
+type AdminServiceGetPlaylistStatsHooker interface {
+	PrepareGetPlaylistStats(http.Context, *GetPlaylistStatsRequest) (context.Context, error)
+	CompleteGetPlaylistStats(http.Context, *GetPlaylistStatsRequest, *GetPlaylistStatsResponse) error
 }
 type AdminServiceGetPendingReviewsHooker interface {
 	PrepareGetPendingReviews(http.Context, *GetPendingReviewsRequest) (context.Context, error)
@@ -6006,6 +7276,10 @@ type AdminServiceUpdateSettingsHooker interface {
 	PrepareUpdateSettings(http.Context, *UpdateSettingsRequest) (context.Context, error)
 	CompleteUpdateSettings(http.Context, *UpdateSettingsRequest, *UpdateSettingsResponse) error
 }
+type AdminServiceGetSystemInfoHooker interface {
+	PrepareGetSystemInfo(http.Context, *GetSystemInfoRequest) (context.Context, error)
+	CompleteGetSystemInfo(http.Context, *GetSystemInfoRequest, *GetSystemInfoResponse) error
+}
 
 func RegisterAdminServiceBridgeServer(s *http.Server, srv AdminServiceHookedBridger) {
 	r := s.Route("/")
@@ -6014,6 +7288,10 @@ func RegisterAdminServiceBridgeServer(s *http.Server, srv AdminServiceHookedBrid
 	r.GET("/api/v1/admin/stats/users", _AdminService_GetUserStats0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/stats/traffic", _AdminService_GetTrafficStats0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/stats/revenue", _AdminService_GetRevenueStats0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/stats/promotion", _AdminService_GetPromotionStats0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/stats/channels", _AdminService_GetChannelStats0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/stats/tags", _AdminService_GetTagStats0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/stats/playlists", _AdminService_GetPlaylistStats0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/medias/review/pending", _AdminService_GetPendingReviews0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/medias/review/history", _AdminService_GetReviewHistory0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/medias/review/:id", _AdminService_GetReview0_Bridge_Handler(srv))
@@ -6021,6 +7299,7 @@ func RegisterAdminServiceBridgeServer(s *http.Server, srv AdminServiceHookedBrid
 	r.POST("/api/v1/admin/medias/review/batch", _AdminService_BatchUpdateReviews0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/settings", _AdminService_GetSettings0_Bridge_Handler(srv))
 	r.PUT("/api/v1/admin/settings", _AdminService_UpdateSettings0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/settings/info", _AdminService_GetSystemInfo0_Bridge_Handler(srv))
 }
 
 func _AdminService_GetDashboardStats0_Bridge_Handler(srv AdminServiceHookedBridger) func(ctx http.Context) error {
@@ -6135,6 +7414,98 @@ func _AdminService_GetRevenueStats0_Bridge_Handler(srv AdminServiceHookedBridger
 			return err
 		}
 		return srv.CompleteGetRevenueStats(ctx, &in, out.(*GetRevenueStatsResponse))
+	}
+}
+
+func _AdminService_GetPromotionStats0_Bridge_Handler(srv AdminServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPromotionStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetPromotionStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPromotionStats(ctx, req.(*GetPromotionStatsRequest))
+		})
+
+		newctx, err := srv.PrepareGetPromotionStats(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetPromotionStats(ctx, &in, out.(*GetPromotionStatsResponse))
+	}
+}
+
+func _AdminService_GetChannelStats0_Bridge_Handler(srv AdminServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetChannelStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelStats(ctx, req.(*GetChannelStatsRequest))
+		})
+
+		newctx, err := srv.PrepareGetChannelStats(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetChannelStats(ctx, &in, out.(*GetChannelStatsResponse))
+	}
+}
+
+func _AdminService_GetTagStats0_Bridge_Handler(srv AdminServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTagStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetTagStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetTagStats(ctx, req.(*GetTagStatsRequest))
+		})
+
+		newctx, err := srv.PrepareGetTagStats(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetTagStats(ctx, &in, out.(*GetTagStatsResponse))
+	}
+}
+
+func _AdminService_GetPlaylistStats0_Bridge_Handler(srv AdminServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPlaylistStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetPlaylistStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPlaylistStats(ctx, req.(*GetPlaylistStatsRequest))
+		})
+
+		newctx, err := srv.PrepareGetPlaylistStats(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetPlaylistStats(ctx, &in, out.(*GetPlaylistStatsResponse))
 	}
 }
 
@@ -6314,6 +7685,29 @@ func _AdminService_UpdateSettings0_Bridge_Handler(srv AdminServiceHookedBridger)
 	}
 }
 
+func _AdminService_GetSystemInfo0_Bridge_Handler(srv AdminServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSystemInfoRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetSystemInfo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSystemInfo(ctx, req.(*GetSystemInfoRequest))
+		})
+
+		newctx, err := srv.PrepareGetSystemInfo(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetSystemInfo(ctx, &in, out.(*GetSystemInfoResponse))
+	}
+}
+
 // UnimplementedAdminServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -6358,6 +7752,38 @@ func (UnimplementedAdminServiceHooked) PrepareGetRevenueStats(ctx http.Context, 
 }
 
 func (UnimplementedAdminServiceHooked) CompleteGetRevenueStats(ctx http.Context, in *GetRevenueStatsRequest, out *GetRevenueStatsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminServiceHooked) PrepareGetPromotionStats(ctx http.Context, in *GetPromotionStatsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminServiceHooked) CompleteGetPromotionStats(ctx http.Context, in *GetPromotionStatsRequest, out *GetPromotionStatsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminServiceHooked) PrepareGetChannelStats(ctx http.Context, in *GetChannelStatsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminServiceHooked) CompleteGetChannelStats(ctx http.Context, in *GetChannelStatsRequest, out *GetChannelStatsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminServiceHooked) PrepareGetTagStats(ctx http.Context, in *GetTagStatsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminServiceHooked) CompleteGetTagStats(ctx http.Context, in *GetTagStatsRequest, out *GetTagStatsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminServiceHooked) PrepareGetPlaylistStats(ctx http.Context, in *GetPlaylistStatsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminServiceHooked) CompleteGetPlaylistStats(ctx http.Context, in *GetPlaylistStatsRequest, out *GetPlaylistStatsResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -6417,6 +7843,14 @@ func (UnimplementedAdminServiceHooked) CompleteUpdateSettings(ctx http.Context, 
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedAdminServiceHooked) PrepareGetSystemInfo(ctx http.Context, in *GetSystemInfoRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminServiceHooked) CompleteGetSystemInfo(ctx http.Context, in *GetSystemInfoRequest, out *GetSystemInfoResponse) error {
+	return ctx.Result(200, out)
+}
+
 func WithAdminServiceHook(h AdminServiceHooker) func(AdminServiceBridgeServer) AdminServiceHookedBridger {
 	return func(srv AdminServiceBridgeServer) AdminServiceHookedBridger {
 		return AdminServiceHookedBridge{AdminServiceBridgeServer: srv, AdminServiceHooker: h}
@@ -6459,6 +7893,22 @@ func (c *AdminServiceHTTPBridgeImpl) GetRevenueStats(ctx context.Context, in *Ge
 	return c.client.GetRevenueStats(ctx, in)
 }
 
+func (c *AdminServiceHTTPBridgeImpl) GetPromotionStats(ctx context.Context, in *GetPromotionStatsRequest) (*GetPromotionStatsResponse, error) {
+	return c.client.GetPromotionStats(ctx, in)
+}
+
+func (c *AdminServiceHTTPBridgeImpl) GetChannelStats(ctx context.Context, in *GetChannelStatsRequest) (*GetChannelStatsResponse, error) {
+	return c.client.GetChannelStats(ctx, in)
+}
+
+func (c *AdminServiceHTTPBridgeImpl) GetTagStats(ctx context.Context, in *GetTagStatsRequest) (*GetTagStatsResponse, error) {
+	return c.client.GetTagStats(ctx, in)
+}
+
+func (c *AdminServiceHTTPBridgeImpl) GetPlaylistStats(ctx context.Context, in *GetPlaylistStatsRequest) (*GetPlaylistStatsResponse, error) {
+	return c.client.GetPlaylistStats(ctx, in)
+}
+
 func (c *AdminServiceHTTPBridgeImpl) GetPendingReviews(ctx context.Context, in *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error) {
 	return c.client.GetPendingReviews(ctx, in)
 }
@@ -6485,6 +7935,10 @@ func (c *AdminServiceHTTPBridgeImpl) GetSettings(ctx context.Context, in *GetSet
 
 func (c *AdminServiceHTTPBridgeImpl) UpdateSettings(ctx context.Context, in *UpdateSettingsRequest) (*UpdateSettingsResponse, error) {
 	return c.client.UpdateSettings(ctx, in)
+}
+
+func (c *AdminServiceHTTPBridgeImpl) GetSystemInfo(ctx context.Context, in *GetSystemInfoRequest) (*GetSystemInfoResponse, error) {
+	return c.client.GetSystemInfo(ctx, in)
 }
 
 type AdminServiceBridgeImpl struct {
@@ -6515,6 +7969,22 @@ func (c *AdminServiceBridgeImpl) GetRevenueStats(ctx context.Context, in *GetRev
 	return c.client.GetRevenueStats(ctx, in)
 }
 
+func (c *AdminServiceBridgeImpl) GetPromotionStats(ctx context.Context, in *GetPromotionStatsRequest) (*GetPromotionStatsResponse, error) {
+	return c.client.GetPromotionStats(ctx, in)
+}
+
+func (c *AdminServiceBridgeImpl) GetChannelStats(ctx context.Context, in *GetChannelStatsRequest) (*GetChannelStatsResponse, error) {
+	return c.client.GetChannelStats(ctx, in)
+}
+
+func (c *AdminServiceBridgeImpl) GetTagStats(ctx context.Context, in *GetTagStatsRequest) (*GetTagStatsResponse, error) {
+	return c.client.GetTagStats(ctx, in)
+}
+
+func (c *AdminServiceBridgeImpl) GetPlaylistStats(ctx context.Context, in *GetPlaylistStatsRequest) (*GetPlaylistStatsResponse, error) {
+	return c.client.GetPlaylistStats(ctx, in)
+}
+
 func (c *AdminServiceBridgeImpl) GetPendingReviews(ctx context.Context, in *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error) {
 	return c.client.GetPendingReviews(ctx, in)
 }
@@ -6541,6 +8011,10 @@ func (c *AdminServiceBridgeImpl) GetSettings(ctx context.Context, in *GetSetting
 
 func (c *AdminServiceBridgeImpl) UpdateSettings(ctx context.Context, in *UpdateSettingsRequest) (*UpdateSettingsResponse, error) {
 	return c.client.UpdateSettings(ctx, in)
+}
+
+func (c *AdminServiceBridgeImpl) GetSystemInfo(ctx context.Context, in *GetSystemInfoRequest) (*GetSystemInfoResponse, error) {
+	return c.client.GetSystemInfo(ctx, in)
 }
 
 func (c *AdminServiceBridgeImpl) mustEmbedUnimplementedAdminServiceServer() {}
@@ -6573,6 +8047,22 @@ func (c *AdminServiceGRPC2HTTPBridgeImpl) GetRevenueStats(ctx context.Context, i
 	return c.client.GetRevenueStats(ctx, in)
 }
 
+func (c *AdminServiceGRPC2HTTPBridgeImpl) GetPromotionStats(ctx context.Context, in *GetPromotionStatsRequest) (*GetPromotionStatsResponse, error) {
+	return c.client.GetPromotionStats(ctx, in)
+}
+
+func (c *AdminServiceGRPC2HTTPBridgeImpl) GetChannelStats(ctx context.Context, in *GetChannelStatsRequest) (*GetChannelStatsResponse, error) {
+	return c.client.GetChannelStats(ctx, in)
+}
+
+func (c *AdminServiceGRPC2HTTPBridgeImpl) GetTagStats(ctx context.Context, in *GetTagStatsRequest) (*GetTagStatsResponse, error) {
+	return c.client.GetTagStats(ctx, in)
+}
+
+func (c *AdminServiceGRPC2HTTPBridgeImpl) GetPlaylistStats(ctx context.Context, in *GetPlaylistStatsRequest) (*GetPlaylistStatsResponse, error) {
+	return c.client.GetPlaylistStats(ctx, in)
+}
+
 func (c *AdminServiceGRPC2HTTPBridgeImpl) GetPendingReviews(ctx context.Context, in *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error) {
 	return c.client.GetPendingReviews(ctx, in)
 }
@@ -6599,6 +8089,10 @@ func (c *AdminServiceGRPC2HTTPBridgeImpl) GetSettings(ctx context.Context, in *G
 
 func (c *AdminServiceGRPC2HTTPBridgeImpl) UpdateSettings(ctx context.Context, in *UpdateSettingsRequest) (*UpdateSettingsResponse, error) {
 	return c.client.UpdateSettings(ctx, in)
+}
+
+func (c *AdminServiceGRPC2HTTPBridgeImpl) GetSystemInfo(ctx context.Context, in *GetSystemInfoRequest) (*GetSystemInfoResponse, error) {
+	return c.client.GetSystemInfo(ctx, in)
 }
 
 type AdminServiceHTTP2GRPCBridgeImpl struct {
@@ -6629,6 +8123,22 @@ func (c *AdminServiceHTTP2GRPCBridgeImpl) GetRevenueStats(ctx context.Context, i
 	return c.client.GetRevenueStats(ctx, in)
 }
 
+func (c *AdminServiceHTTP2GRPCBridgeImpl) GetPromotionStats(ctx context.Context, in *GetPromotionStatsRequest) (*GetPromotionStatsResponse, error) {
+	return c.client.GetPromotionStats(ctx, in)
+}
+
+func (c *AdminServiceHTTP2GRPCBridgeImpl) GetChannelStats(ctx context.Context, in *GetChannelStatsRequest) (*GetChannelStatsResponse, error) {
+	return c.client.GetChannelStats(ctx, in)
+}
+
+func (c *AdminServiceHTTP2GRPCBridgeImpl) GetTagStats(ctx context.Context, in *GetTagStatsRequest) (*GetTagStatsResponse, error) {
+	return c.client.GetTagStats(ctx, in)
+}
+
+func (c *AdminServiceHTTP2GRPCBridgeImpl) GetPlaylistStats(ctx context.Context, in *GetPlaylistStatsRequest) (*GetPlaylistStatsResponse, error) {
+	return c.client.GetPlaylistStats(ctx, in)
+}
+
 func (c *AdminServiceHTTP2GRPCBridgeImpl) GetPendingReviews(ctx context.Context, in *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error) {
 	return c.client.GetPendingReviews(ctx, in)
 }
@@ -6655,6 +8165,10 @@ func (c *AdminServiceHTTP2GRPCBridgeImpl) GetSettings(ctx context.Context, in *G
 
 func (c *AdminServiceHTTP2GRPCBridgeImpl) UpdateSettings(ctx context.Context, in *UpdateSettingsRequest) (*UpdateSettingsResponse, error) {
 	return c.client.UpdateSettings(ctx, in)
+}
+
+func (c *AdminServiceHTTP2GRPCBridgeImpl) GetSystemInfo(ctx context.Context, in *GetSystemInfoRequest) (*GetSystemInfoResponse, error) {
+	return c.client.GetSystemInfo(ctx, in)
 }
 
 func (c *AdminServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedAdminServiceServer() {}
@@ -7036,7 +8550,11 @@ const AdminMediaServiceReviewMediaBridgeOperation = "/api.v1.services.media.Admi
 const AdminMediaServiceGetMediaReviewLogsBridgeOperation = "/api.v1.services.media.AdminMediaService/GetMediaReviewLogs"
 const AdminMediaServiceRegenerateSpriteBridgeOperation = "/api.v1.services.media.AdminMediaService/RegenerateSprite"
 const AdminMediaServiceRegenerateThumbnailBridgeOperation = "/api.v1.services.media.AdminMediaService/RegenerateThumbnail"
+const AdminMediaServiceSetThumbnailBridgeOperation = "/api.v1.services.media.AdminMediaService/SetThumbnail"
+const AdminMediaServiceGetAdminThumbnailBridgeOperation = "/api.v1.services.media.AdminMediaService/GetAdminThumbnail"
 const AdminMediaServiceGetTranscodingEventsBridgeOperation = "/api.v1.services.media.AdminMediaService/GetTranscodingEvents"
+const AdminMediaServiceUpdateAdminMediaBridgeOperation = "/api.v1.services.media.AdminMediaService/UpdateAdminMedia"
+const AdminMediaServiceDeleteAdminMediaBridgeOperation = "/api.v1.services.media.AdminMediaService/DeleteAdminMedia"
 
 type AdminMediaServiceBridgeServer interface {
 	ListAdminMedias(context.Context, *ListAdminMediasRequest) (*ListAdminMediasResponse, error)
@@ -7050,6 +8568,14 @@ type AdminMediaServiceBridgeServer interface {
 	GetMediaReviewLogs(context.Context, *GetMediaReviewLogsRequest) (*GetMediaReviewLogsResponse, error)
 	RegenerateSprite(context.Context, *RegenerateSpriteRequest) (*RegenerateSpriteResponse, error)
 	RegenerateThumbnail(context.Context, *RegenerateThumbnailRequest) (*RegenerateThumbnailResponse, error)
+	// Admin cover selection from sprite sheet (uuid; admin scope).
+	SetThumbnail(context.Context, *SetThumbnailRequest) (*SetThumbnailResponse, error)
+	// Admin get thumbnail URL (uuid; admin scope).
+	GetAdminThumbnail(context.Context, *GetAdminThumbnailRequest) (*GetAdminThumbnailResponse, error)
+	// UpdateAdminMedia updates a media (admin).
+	UpdateAdminMedia(context.Context, *UpdateAdminMediaRequest) (*UpdateAdminMediaResponse, error)
+	// DeleteAdminMedia deletes a media (admin).
+	DeleteAdminMedia(context.Context, *DeleteAdminMediaRequest) (*DeleteAdminMediaResponse, error)
 }
 
 type AdminMediaServiceHooker interface {
@@ -7064,6 +8590,10 @@ type AdminMediaServiceHooker interface {
 	AdminMediaServiceGetMediaReviewLogsHooker
 	AdminMediaServiceRegenerateSpriteHooker
 	AdminMediaServiceRegenerateThumbnailHooker
+	AdminMediaServiceSetThumbnailHooker
+	AdminMediaServiceGetAdminThumbnailHooker
+	AdminMediaServiceUpdateAdminMediaHooker
+	AdminMediaServiceDeleteAdminMediaHooker
 }
 
 type AdminMediaServiceHookedBridger interface {
@@ -7114,6 +8644,22 @@ type AdminMediaServiceRegenerateThumbnailHooker interface {
 	PrepareRegenerateThumbnail(http.Context, *RegenerateThumbnailRequest) (context.Context, error)
 	CompleteRegenerateThumbnail(http.Context, *RegenerateThumbnailRequest, *RegenerateThumbnailResponse) error
 }
+type AdminMediaServiceSetThumbnailHooker interface {
+	PrepareSetThumbnail(http.Context, *SetThumbnailRequest) (context.Context, error)
+	CompleteSetThumbnail(http.Context, *SetThumbnailRequest, *SetThumbnailResponse) error
+}
+type AdminMediaServiceGetAdminThumbnailHooker interface {
+	PrepareGetAdminThumbnail(http.Context, *GetAdminThumbnailRequest) (context.Context, error)
+	CompleteGetAdminThumbnail(http.Context, *GetAdminThumbnailRequest, *GetAdminThumbnailResponse) error
+}
+type AdminMediaServiceUpdateAdminMediaHooker interface {
+	PrepareUpdateAdminMedia(http.Context, *UpdateAdminMediaRequest) (context.Context, error)
+	CompleteUpdateAdminMedia(http.Context, *UpdateAdminMediaRequest, *UpdateAdminMediaResponse) error
+}
+type AdminMediaServiceDeleteAdminMediaHooker interface {
+	PrepareDeleteAdminMedia(http.Context, *DeleteAdminMediaRequest) (context.Context, error)
+	CompleteDeleteAdminMedia(http.Context, *DeleteAdminMediaRequest, *DeleteAdminMediaResponse) error
+}
 
 func RegisterAdminMediaServiceBridgeServer(s *http.Server, srv AdminMediaServiceHookedBridger) {
 	r := s.Route("/")
@@ -7127,7 +8673,11 @@ func RegisterAdminMediaServiceBridgeServer(s *http.Server, srv AdminMediaService
 	r.PUT("/api/v1/admin/medias/:id/review", _AdminMediaService_ReviewMedia0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/medias/:id/review-logs", _AdminMediaService_GetMediaReviewLogs0_Bridge_Handler(srv))
 	r.POST("/api/v1/admin/medias/:id/regenerate-sprite", _AdminMediaService_RegenerateSprite0_Bridge_Handler(srv))
-	r.POST("/api/v1/admin/medias/:id/regenerate-thumbnail", _AdminMediaService_RegenerateThumbnail0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/medias/:id/regen-thumbnail", _AdminMediaService_RegenerateThumbnail0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/medias/:id/set-thumbnail", _AdminMediaService_SetThumbnail0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/medias/:id/thumbnail", _AdminMediaService_GetAdminThumbnail0_Bridge_Handler(srv))
+	r.PUT("/api/v1/admin/medias/:id", _AdminMediaService_UpdateAdminMedia0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/admin/medias/:id", _AdminMediaService_DeleteAdminMedia0_Bridge_Handler(srv))
 }
 
 func _AdminMediaService_ListAdminMedias0_Bridge_Handler(srv AdminMediaServiceHookedBridger) func(ctx http.Context) error {
@@ -7428,6 +8978,116 @@ func _AdminMediaService_RegenerateThumbnail0_Bridge_Handler(srv AdminMediaServic
 	}
 }
 
+func _AdminMediaService_SetThumbnail0_Bridge_Handler(srv AdminMediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SetThumbnailRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceSetThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SetThumbnail(ctx, req.(*SetThumbnailRequest))
+		})
+
+		newctx, err := srv.PrepareSetThumbnail(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteSetThumbnail(ctx, &in, out.(*SetThumbnailResponse))
+	}
+}
+
+func _AdminMediaService_GetAdminThumbnail0_Bridge_Handler(srv AdminMediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetAdminThumbnailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceGetAdminThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetAdminThumbnail(ctx, req.(*GetAdminThumbnailRequest))
+		})
+
+		newctx, err := srv.PrepareGetAdminThumbnail(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetAdminThumbnail(ctx, &in, out.(*GetAdminThumbnailResponse))
+	}
+}
+
+func _AdminMediaService_UpdateAdminMedia0_Bridge_Handler(srv AdminMediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAdminMediaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceUpdateAdminMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateAdminMedia(ctx, req.(*UpdateAdminMediaRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateAdminMedia(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateAdminMedia(ctx, &in, out.(*UpdateAdminMediaResponse))
+	}
+}
+
+func _AdminMediaService_DeleteAdminMedia0_Bridge_Handler(srv AdminMediaServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteAdminMediaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceDeleteAdminMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteAdminMedia(ctx, req.(*DeleteAdminMediaRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteAdminMedia(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteAdminMedia(ctx, &in, out.(*DeleteAdminMediaResponse))
+	}
+}
+
 // UnimplementedAdminMediaServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -7523,6 +9183,38 @@ func (UnimplementedAdminMediaServiceHooked) CompleteRegenerateThumbnail(ctx http
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedAdminMediaServiceHooked) PrepareSetThumbnail(ctx http.Context, in *SetThumbnailRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminMediaServiceHooked) CompleteSetThumbnail(ctx http.Context, in *SetThumbnailRequest, out *SetThumbnailResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminMediaServiceHooked) PrepareGetAdminThumbnail(ctx http.Context, in *GetAdminThumbnailRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminMediaServiceHooked) CompleteGetAdminThumbnail(ctx http.Context, in *GetAdminThumbnailRequest, out *GetAdminThumbnailResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminMediaServiceHooked) PrepareUpdateAdminMedia(ctx http.Context, in *UpdateAdminMediaRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminMediaServiceHooked) CompleteUpdateAdminMedia(ctx http.Context, in *UpdateAdminMediaRequest, out *UpdateAdminMediaResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdminMediaServiceHooked) PrepareDeleteAdminMedia(ctx http.Context, in *DeleteAdminMediaRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminMediaServiceHooked) CompleteDeleteAdminMedia(ctx http.Context, in *DeleteAdminMediaRequest, out *DeleteAdminMediaResponse) error {
+	return ctx.Result(200, out)
+}
+
 func WithAdminMediaServiceHook(h AdminMediaServiceHooker) func(AdminMediaServiceBridgeServer) AdminMediaServiceHookedBridger {
 	return func(srv AdminMediaServiceBridgeServer) AdminMediaServiceHookedBridger {
 		return AdminMediaServiceHookedBridge{AdminMediaServiceBridgeServer: srv, AdminMediaServiceHooker: h}
@@ -7589,6 +9281,22 @@ func (c *AdminMediaServiceHTTPBridgeImpl) RegenerateThumbnail(ctx context.Contex
 	return c.client.RegenerateThumbnail(ctx, in)
 }
 
+func (c *AdminMediaServiceHTTPBridgeImpl) SetThumbnail(ctx context.Context, in *SetThumbnailRequest) (*SetThumbnailResponse, error) {
+	return c.client.SetThumbnail(ctx, in)
+}
+
+func (c *AdminMediaServiceHTTPBridgeImpl) GetAdminThumbnail(ctx context.Context, in *GetAdminThumbnailRequest) (*GetAdminThumbnailResponse, error) {
+	return c.client.GetAdminThumbnail(ctx, in)
+}
+
+func (c *AdminMediaServiceHTTPBridgeImpl) UpdateAdminMedia(ctx context.Context, in *UpdateAdminMediaRequest) (*UpdateAdminMediaResponse, error) {
+	return c.client.UpdateAdminMedia(ctx, in)
+}
+
+func (c *AdminMediaServiceHTTPBridgeImpl) DeleteAdminMedia(ctx context.Context, in *DeleteAdminMediaRequest) (*DeleteAdminMediaResponse, error) {
+	return c.client.DeleteAdminMedia(ctx, in)
+}
+
 type AdminMediaServiceBridgeImpl struct {
 	client AdminMediaServiceClient
 }
@@ -7641,6 +9349,14 @@ func (c *AdminMediaServiceBridgeImpl) RegenerateThumbnail(ctx context.Context, i
 	return c.client.RegenerateThumbnail(ctx, in)
 }
 
+func (c *AdminMediaServiceBridgeImpl) SetThumbnail(ctx context.Context, in *SetThumbnailRequest) (*SetThumbnailResponse, error) {
+	return c.client.SetThumbnail(ctx, in)
+}
+
+func (c *AdminMediaServiceBridgeImpl) GetAdminThumbnail(ctx context.Context, in *GetAdminThumbnailRequest) (*GetAdminThumbnailResponse, error) {
+	return c.client.GetAdminThumbnail(ctx, in)
+}
+
 func (c *AdminMediaServiceBridgeImpl) GetTranscodingEvents(request *GetTranscodingEventsRequest, g grpc.ServerStreamingServer[TranscodingEvent]) error {
 	stream, err := c.client.GetTranscodingEvents(g.Context(), request)
 	if err != nil {
@@ -7659,6 +9375,14 @@ func (c *AdminMediaServiceBridgeImpl) GetTranscodingEvents(request *GetTranscodi
 		}
 	}
 	return nil
+}
+
+func (c *AdminMediaServiceBridgeImpl) UpdateAdminMedia(ctx context.Context, in *UpdateAdminMediaRequest) (*UpdateAdminMediaResponse, error) {
+	return c.client.UpdateAdminMedia(ctx, in)
+}
+
+func (c *AdminMediaServiceBridgeImpl) DeleteAdminMedia(ctx context.Context, in *DeleteAdminMediaRequest) (*DeleteAdminMediaResponse, error) {
+	return c.client.DeleteAdminMedia(ctx, in)
 }
 
 func (c *AdminMediaServiceBridgeImpl) mustEmbedUnimplementedAdminMediaServiceServer() {}
@@ -7715,6 +9439,22 @@ func (c *AdminMediaServiceGRPC2HTTPBridgeImpl) RegenerateThumbnail(ctx context.C
 	return c.client.RegenerateThumbnail(ctx, in)
 }
 
+func (c *AdminMediaServiceGRPC2HTTPBridgeImpl) SetThumbnail(ctx context.Context, in *SetThumbnailRequest) (*SetThumbnailResponse, error) {
+	return c.client.SetThumbnail(ctx, in)
+}
+
+func (c *AdminMediaServiceGRPC2HTTPBridgeImpl) GetAdminThumbnail(ctx context.Context, in *GetAdminThumbnailRequest) (*GetAdminThumbnailResponse, error) {
+	return c.client.GetAdminThumbnail(ctx, in)
+}
+
+func (c *AdminMediaServiceGRPC2HTTPBridgeImpl) UpdateAdminMedia(ctx context.Context, in *UpdateAdminMediaRequest) (*UpdateAdminMediaResponse, error) {
+	return c.client.UpdateAdminMedia(ctx, in)
+}
+
+func (c *AdminMediaServiceGRPC2HTTPBridgeImpl) DeleteAdminMedia(ctx context.Context, in *DeleteAdminMediaRequest) (*DeleteAdminMediaResponse, error) {
+	return c.client.DeleteAdminMedia(ctx, in)
+}
+
 type AdminMediaServiceHTTP2GRPCBridgeImpl struct {
 	client AdminMediaServiceHTTPClient
 }
@@ -7767,8 +9507,24 @@ func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) RegenerateThumbnail(ctx context.C
 	return c.client.RegenerateThumbnail(ctx, in)
 }
 
+func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) SetThumbnail(ctx context.Context, in *SetThumbnailRequest) (*SetThumbnailResponse, error) {
+	return c.client.SetThumbnail(ctx, in)
+}
+
+func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) GetAdminThumbnail(ctx context.Context, in *GetAdminThumbnailRequest) (*GetAdminThumbnailResponse, error) {
+	return c.client.GetAdminThumbnail(ctx, in)
+}
+
 func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) GetTranscodingEvents(request *GetTranscodingEventsRequest, g grpc.ServerStreamingServer[TranscodingEvent]) error {
 	return status.Errorf(codes.Unimplemented, "StreamRules not implemented")
+}
+
+func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) UpdateAdminMedia(ctx context.Context, in *UpdateAdminMediaRequest) (*UpdateAdminMediaResponse, error) {
+	return c.client.UpdateAdminMedia(ctx, in)
+}
+
+func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) DeleteAdminMedia(ctx context.Context, in *DeleteAdminMediaRequest) (*DeleteAdminMediaResponse, error) {
+	return c.client.DeleteAdminMedia(ctx, in)
 }
 
 func (c *AdminMediaServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedAdminMediaServiceServer() {}
@@ -8498,6 +10254,7 @@ const AdminTagServiceGetAdminTagBridgeOperation = "/api.v1.services.media.AdminT
 const AdminTagServiceCreateAdminTagBridgeOperation = "/api.v1.services.media.AdminTagService/CreateAdminTag"
 const AdminTagServiceUpdateAdminTagBridgeOperation = "/api.v1.services.media.AdminTagService/UpdateAdminTag"
 const AdminTagServiceDeleteAdminTagBridgeOperation = "/api.v1.services.media.AdminTagService/DeleteAdminTag"
+const AdminTagServicePatchAdminTagBridgeOperation = "/api.v1.services.media.AdminTagService/PatchAdminTag"
 const AdminTagServiceBulkUpdateTagsBridgeOperation = "/api.v1.services.media.AdminTagService/BulkUpdateTags"
 const AdminTagServiceImportTagsBridgeOperation = "/api.v1.services.media.AdminTagService/ImportTags"
 
@@ -8507,6 +10264,8 @@ type AdminTagServiceBridgeServer interface {
 	CreateAdminTag(context.Context, *CreateAdminTagRequest) (*CreateAdminTagResponse, error)
 	UpdateAdminTag(context.Context, *UpdateAdminTagRequest) (*UpdateAdminTagResponse, error)
 	DeleteAdminTag(context.Context, *DeleteAdminTagRequest) (*DeleteAdminTagResponse, error)
+	// PatchAdminTag partially updates a tag (admin).
+	PatchAdminTag(context.Context, *PatchAdminTagRequest) (*PatchAdminTagResponse, error)
 	BulkUpdateTags(context.Context, *BulkUpdateTagsRequest) (*BulkUpdateTagsResponse, error)
 	ImportTags(context.Context, *ImportTagsRequest) (*ImportTagsResponse, error)
 }
@@ -8517,6 +10276,7 @@ type AdminTagServiceHooker interface {
 	AdminTagServiceCreateAdminTagHooker
 	AdminTagServiceUpdateAdminTagHooker
 	AdminTagServiceDeleteAdminTagHooker
+	AdminTagServicePatchAdminTagHooker
 	AdminTagServiceBulkUpdateTagsHooker
 	AdminTagServiceImportTagsHooker
 }
@@ -8545,6 +10305,10 @@ type AdminTagServiceDeleteAdminTagHooker interface {
 	PrepareDeleteAdminTag(http.Context, *DeleteAdminTagRequest) (context.Context, error)
 	CompleteDeleteAdminTag(http.Context, *DeleteAdminTagRequest, *DeleteAdminTagResponse) error
 }
+type AdminTagServicePatchAdminTagHooker interface {
+	PreparePatchAdminTag(http.Context, *PatchAdminTagRequest) (context.Context, error)
+	CompletePatchAdminTag(http.Context, *PatchAdminTagRequest, *PatchAdminTagResponse) error
+}
 type AdminTagServiceBulkUpdateTagsHooker interface {
 	PrepareBulkUpdateTags(http.Context, *BulkUpdateTagsRequest) (context.Context, error)
 	CompleteBulkUpdateTags(http.Context, *BulkUpdateTagsRequest, *BulkUpdateTagsResponse) error
@@ -8561,6 +10325,7 @@ func RegisterAdminTagServiceBridgeServer(s *http.Server, srv AdminTagServiceHook
 	r.POST("/api/v1/admin/tags", _AdminTagService_CreateAdminTag0_Bridge_Handler(srv))
 	r.PUT("/api/v1/admin/tags/:id", _AdminTagService_UpdateAdminTag0_Bridge_Handler(srv))
 	r.DELETE("/api/v1/admin/tags/:id", _AdminTagService_DeleteAdminTag0_Bridge_Handler(srv))
+	r.PATCH("/api/v1/admin/tags/:id", _AdminTagService_PatchAdminTag0_Bridge_Handler(srv))
 	r.POST("/api/v1/admin/tags/bulk", _AdminTagService_BulkUpdateTags0_Bridge_Handler(srv))
 	r.POST("/api/v1/admin/tags/import", _AdminTagService_ImportTags0_Bridge_Handler(srv))
 }
@@ -8695,6 +10460,35 @@ func _AdminTagService_DeleteAdminTag0_Bridge_Handler(srv AdminTagServiceHookedBr
 	}
 }
 
+func _AdminTagService_PatchAdminTag0_Bridge_Handler(srv AdminTagServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PatchAdminTagRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminTagServicePatchAdminTag)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PatchAdminTag(ctx, req.(*PatchAdminTagRequest))
+		})
+
+		newctx, err := srv.PreparePatchAdminTag(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompletePatchAdminTag(ctx, &in, out.(*PatchAdminTagResponse))
+	}
+}
+
 func _AdminTagService_BulkUpdateTags0_Bridge_Handler(srv AdminTagServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in BulkUpdateTagsRequest
@@ -8794,6 +10588,14 @@ func (UnimplementedAdminTagServiceHooked) CompleteDeleteAdminTag(ctx http.Contex
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedAdminTagServiceHooked) PreparePatchAdminTag(ctx http.Context, in *PatchAdminTagRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminTagServiceHooked) CompletePatchAdminTag(ctx http.Context, in *PatchAdminTagRequest, out *PatchAdminTagResponse) error {
+	return ctx.Result(200, out)
+}
+
 func (UnimplementedAdminTagServiceHooked) PrepareBulkUpdateTags(ctx http.Context, in *BulkUpdateTagsRequest) (context.Context, error) {
 	return ctx, nil
 }
@@ -8852,6 +10654,10 @@ func (c *AdminTagServiceHTTPBridgeImpl) DeleteAdminTag(ctx context.Context, in *
 	return c.client.DeleteAdminTag(ctx, in)
 }
 
+func (c *AdminTagServiceHTTPBridgeImpl) PatchAdminTag(ctx context.Context, in *PatchAdminTagRequest) (*PatchAdminTagResponse, error) {
+	return c.client.PatchAdminTag(ctx, in)
+}
+
 func (c *AdminTagServiceHTTPBridgeImpl) BulkUpdateTags(ctx context.Context, in *BulkUpdateTagsRequest) (*BulkUpdateTagsResponse, error) {
 	return c.client.BulkUpdateTags(ctx, in)
 }
@@ -8886,6 +10692,10 @@ func (c *AdminTagServiceBridgeImpl) UpdateAdminTag(ctx context.Context, in *Upda
 
 func (c *AdminTagServiceBridgeImpl) DeleteAdminTag(ctx context.Context, in *DeleteAdminTagRequest) (*DeleteAdminTagResponse, error) {
 	return c.client.DeleteAdminTag(ctx, in)
+}
+
+func (c *AdminTagServiceBridgeImpl) PatchAdminTag(ctx context.Context, in *PatchAdminTagRequest) (*PatchAdminTagResponse, error) {
+	return c.client.PatchAdminTag(ctx, in)
 }
 
 func (c *AdminTagServiceBridgeImpl) BulkUpdateTags(ctx context.Context, in *BulkUpdateTagsRequest) (*BulkUpdateTagsResponse, error) {
@@ -8926,6 +10736,10 @@ func (c *AdminTagServiceGRPC2HTTPBridgeImpl) DeleteAdminTag(ctx context.Context,
 	return c.client.DeleteAdminTag(ctx, in)
 }
 
+func (c *AdminTagServiceGRPC2HTTPBridgeImpl) PatchAdminTag(ctx context.Context, in *PatchAdminTagRequest) (*PatchAdminTagResponse, error) {
+	return c.client.PatchAdminTag(ctx, in)
+}
+
 func (c *AdminTagServiceGRPC2HTTPBridgeImpl) BulkUpdateTags(ctx context.Context, in *BulkUpdateTagsRequest) (*BulkUpdateTagsResponse, error) {
 	return c.client.BulkUpdateTags(ctx, in)
 }
@@ -8962,6 +10776,10 @@ func (c *AdminTagServiceHTTP2GRPCBridgeImpl) DeleteAdminTag(ctx context.Context,
 	return c.client.DeleteAdminTag(ctx, in)
 }
 
+func (c *AdminTagServiceHTTP2GRPCBridgeImpl) PatchAdminTag(ctx context.Context, in *PatchAdminTagRequest) (*PatchAdminTagResponse, error) {
+	return c.client.PatchAdminTag(ctx, in)
+}
+
 func (c *AdminTagServiceHTTP2GRPCBridgeImpl) BulkUpdateTags(ctx context.Context, in *BulkUpdateTagsRequest) (*BulkUpdateTagsResponse, error) {
 	return c.client.BulkUpdateTags(ctx, in)
 }
@@ -8977,6 +10795,7 @@ const AdminCategoryServiceGetAdminCategoryBridgeOperation = "/api.v1.services.me
 const AdminCategoryServiceCreateAdminCategoryBridgeOperation = "/api.v1.services.media.AdminCategoryService/CreateAdminCategory"
 const AdminCategoryServiceUpdateAdminCategoryBridgeOperation = "/api.v1.services.media.AdminCategoryService/UpdateAdminCategory"
 const AdminCategoryServiceDeleteAdminCategoryBridgeOperation = "/api.v1.services.media.AdminCategoryService/DeleteAdminCategory"
+const AdminCategoryServicePatchAdminCategoryBridgeOperation = "/api.v1.services.media.AdminCategoryService/PatchAdminCategory"
 
 type AdminCategoryServiceBridgeServer interface {
 	ListAdminCategories(context.Context, *ListAdminCategoriesRequest) (*ListAdminCategoriesResponse, error)
@@ -8984,6 +10803,8 @@ type AdminCategoryServiceBridgeServer interface {
 	CreateAdminCategory(context.Context, *CreateAdminCategoryRequest) (*CreateAdminCategoryResponse, error)
 	UpdateAdminCategory(context.Context, *UpdateAdminCategoryRequest) (*UpdateAdminCategoryResponse, error)
 	DeleteAdminCategory(context.Context, *DeleteAdminCategoryRequest) (*DeleteAdminCategoryResponse, error)
+	// PatchAdminCategory partially updates a category (admin).
+	PatchAdminCategory(context.Context, *PatchAdminCategoryRequest) (*PatchAdminCategoryResponse, error)
 }
 
 type AdminCategoryServiceHooker interface {
@@ -8992,6 +10813,7 @@ type AdminCategoryServiceHooker interface {
 	AdminCategoryServiceCreateAdminCategoryHooker
 	AdminCategoryServiceUpdateAdminCategoryHooker
 	AdminCategoryServiceDeleteAdminCategoryHooker
+	AdminCategoryServicePatchAdminCategoryHooker
 }
 
 type AdminCategoryServiceHookedBridger interface {
@@ -9018,6 +10840,10 @@ type AdminCategoryServiceDeleteAdminCategoryHooker interface {
 	PrepareDeleteAdminCategory(http.Context, *DeleteAdminCategoryRequest) (context.Context, error)
 	CompleteDeleteAdminCategory(http.Context, *DeleteAdminCategoryRequest, *DeleteAdminCategoryResponse) error
 }
+type AdminCategoryServicePatchAdminCategoryHooker interface {
+	PreparePatchAdminCategory(http.Context, *PatchAdminCategoryRequest) (context.Context, error)
+	CompletePatchAdminCategory(http.Context, *PatchAdminCategoryRequest, *PatchAdminCategoryResponse) error
+}
 
 func RegisterAdminCategoryServiceBridgeServer(s *http.Server, srv AdminCategoryServiceHookedBridger) {
 	r := s.Route("/")
@@ -9026,6 +10852,7 @@ func RegisterAdminCategoryServiceBridgeServer(s *http.Server, srv AdminCategoryS
 	r.POST("/api/v1/admin/categories", _AdminCategoryService_CreateAdminCategory0_Bridge_Handler(srv))
 	r.PUT("/api/v1/admin/categories/:id", _AdminCategoryService_UpdateAdminCategory0_Bridge_Handler(srv))
 	r.DELETE("/api/v1/admin/categories/:id", _AdminCategoryService_DeleteAdminCategory0_Bridge_Handler(srv))
+	r.PATCH("/api/v1/admin/categories/:id", _AdminCategoryService_PatchAdminCategory0_Bridge_Handler(srv))
 }
 
 func _AdminCategoryService_ListAdminCategories0_Bridge_Handler(srv AdminCategoryServiceHookedBridger) func(ctx http.Context) error {
@@ -9158,6 +10985,35 @@ func _AdminCategoryService_DeleteAdminCategory0_Bridge_Handler(srv AdminCategory
 	}
 }
 
+func _AdminCategoryService_PatchAdminCategory0_Bridge_Handler(srv AdminCategoryServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PatchAdminCategoryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminCategoryServicePatchAdminCategory)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PatchAdminCategory(ctx, req.(*PatchAdminCategoryRequest))
+		})
+
+		newctx, err := srv.PreparePatchAdminCategory(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompletePatchAdminCategory(ctx, &in, out.(*PatchAdminCategoryResponse))
+	}
+}
+
 // UnimplementedAdminCategoryServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -9205,6 +11061,14 @@ func (UnimplementedAdminCategoryServiceHooked) CompleteDeleteAdminCategory(ctx h
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedAdminCategoryServiceHooked) PreparePatchAdminCategory(ctx http.Context, in *PatchAdminCategoryRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdminCategoryServiceHooked) CompletePatchAdminCategory(ctx http.Context, in *PatchAdminCategoryRequest, out *PatchAdminCategoryResponse) error {
+	return ctx.Result(200, out)
+}
+
 func WithAdminCategoryServiceHook(h AdminCategoryServiceHooker) func(AdminCategoryServiceBridgeServer) AdminCategoryServiceHookedBridger {
 	return func(srv AdminCategoryServiceBridgeServer) AdminCategoryServiceHookedBridger {
 		return AdminCategoryServiceHookedBridge{AdminCategoryServiceBridgeServer: srv, AdminCategoryServiceHooker: h}
@@ -9247,6 +11111,10 @@ func (c *AdminCategoryServiceHTTPBridgeImpl) DeleteAdminCategory(ctx context.Con
 	return c.client.DeleteAdminCategory(ctx, in)
 }
 
+func (c *AdminCategoryServiceHTTPBridgeImpl) PatchAdminCategory(ctx context.Context, in *PatchAdminCategoryRequest) (*PatchAdminCategoryResponse, error) {
+	return c.client.PatchAdminCategory(ctx, in)
+}
+
 type AdminCategoryServiceBridgeImpl struct {
 	client AdminCategoryServiceClient
 }
@@ -9273,6 +11141,10 @@ func (c *AdminCategoryServiceBridgeImpl) UpdateAdminCategory(ctx context.Context
 
 func (c *AdminCategoryServiceBridgeImpl) DeleteAdminCategory(ctx context.Context, in *DeleteAdminCategoryRequest) (*DeleteAdminCategoryResponse, error) {
 	return c.client.DeleteAdminCategory(ctx, in)
+}
+
+func (c *AdminCategoryServiceBridgeImpl) PatchAdminCategory(ctx context.Context, in *PatchAdminCategoryRequest) (*PatchAdminCategoryResponse, error) {
+	return c.client.PatchAdminCategory(ctx, in)
 }
 
 func (c *AdminCategoryServiceBridgeImpl) mustEmbedUnimplementedAdminCategoryServiceServer() {}
@@ -9305,6 +11177,10 @@ func (c *AdminCategoryServiceGRPC2HTTPBridgeImpl) DeleteAdminCategory(ctx contex
 	return c.client.DeleteAdminCategory(ctx, in)
 }
 
+func (c *AdminCategoryServiceGRPC2HTTPBridgeImpl) PatchAdminCategory(ctx context.Context, in *PatchAdminCategoryRequest) (*PatchAdminCategoryResponse, error) {
+	return c.client.PatchAdminCategory(ctx, in)
+}
+
 type AdminCategoryServiceHTTP2GRPCBridgeImpl struct {
 	client AdminCategoryServiceHTTPClient
 }
@@ -9331,6 +11207,10 @@ func (c *AdminCategoryServiceHTTP2GRPCBridgeImpl) UpdateAdminCategory(ctx contex
 
 func (c *AdminCategoryServiceHTTP2GRPCBridgeImpl) DeleteAdminCategory(ctx context.Context, in *DeleteAdminCategoryRequest) (*DeleteAdminCategoryResponse, error) {
 	return c.client.DeleteAdminCategory(ctx, in)
+}
+
+func (c *AdminCategoryServiceHTTP2GRPCBridgeImpl) PatchAdminCategory(ctx context.Context, in *PatchAdminCategoryRequest) (*PatchAdminCategoryResponse, error) {
+	return c.client.PatchAdminCategory(ctx, in)
 }
 
 func (c *AdminCategoryServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedAdminCategoryServiceServer() {
@@ -12266,7 +14146,6 @@ func (c *PortalManagementServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedPorta
 
 const ArticleServiceListArticlesBridgeOperation = "/api.v1.services.media.ArticleService/ListArticles"
 const ArticleServiceGetArticleBridgeOperation = "/api.v1.services.media.ArticleService/GetArticle"
-const ArticleServiceGetArticleBySlugBridgeOperation = "/api.v1.services.media.ArticleService/GetArticleBySlug"
 const ArticleServiceGetFeaturedArticlesBridgeOperation = "/api.v1.services.media.ArticleService/GetFeaturedArticles"
 const ArticleServiceGetLatestArticlesBridgeOperation = "/api.v1.services.media.ArticleService/GetLatestArticles"
 const ArticleServiceGetMyArticlesBridgeOperation = "/api.v1.services.media.ArticleService/GetMyArticles"
@@ -12284,7 +14163,6 @@ const ArticleServiceUpdateAdminArticleStateBridgeOperation = "/api.v1.services.m
 type ArticleServiceBridgeServer interface {
 	ListArticles(context.Context, *ListArticlesRequest) (*ListArticlesResponse, error)
 	GetArticle(context.Context, *GetArticleRequest) (*GetArticleResponse, error)
-	GetArticleBySlug(context.Context, *GetArticleBySlugRequest) (*GetArticleBySlugResponse, error)
 	GetFeaturedArticles(context.Context, *GetFeaturedArticlesRequest) (*GetFeaturedArticlesResponse, error)
 	GetLatestArticles(context.Context, *GetLatestArticlesRequest) (*GetLatestArticlesResponse, error)
 	GetMyArticles(context.Context, *GetMyArticlesRequest) (*GetMyArticlesResponse, error)
@@ -12303,7 +14181,6 @@ type ArticleServiceBridgeServer interface {
 type ArticleServiceHooker interface {
 	ArticleServiceListArticlesHooker
 	ArticleServiceGetArticleHooker
-	ArticleServiceGetArticleBySlugHooker
 	ArticleServiceGetFeaturedArticlesHooker
 	ArticleServiceGetLatestArticlesHooker
 	ArticleServiceGetMyArticlesHooker
@@ -12330,10 +14207,6 @@ type ArticleServiceListArticlesHooker interface {
 type ArticleServiceGetArticleHooker interface {
 	PrepareGetArticle(http.Context, *GetArticleRequest) (context.Context, error)
 	CompleteGetArticle(http.Context, *GetArticleRequest, *GetArticleResponse) error
-}
-type ArticleServiceGetArticleBySlugHooker interface {
-	PrepareGetArticleBySlug(http.Context, *GetArticleBySlugRequest) (context.Context, error)
-	CompleteGetArticleBySlug(http.Context, *GetArticleBySlugRequest, *GetArticleBySlugResponse) error
 }
 type ArticleServiceGetFeaturedArticlesHooker interface {
 	PrepareGetFeaturedArticles(http.Context, *GetFeaturedArticlesRequest) (context.Context, error)
@@ -12391,15 +14264,14 @@ type ArticleServiceUpdateAdminArticleStateHooker interface {
 func RegisterArticleServiceBridgeServer(s *http.Server, srv ArticleServiceHookedBridger) {
 	r := s.Route("/")
 	r.GET("/api/v1/articles", _ArticleService_ListArticles0_Bridge_Handler(srv))
-	r.GET("/api/v1/articles/:id", _ArticleService_GetArticle0_Bridge_Handler(srv))
-	r.GET("/api/v1/articles/slug/:slug", _ArticleService_GetArticleBySlug0_Bridge_Handler(srv))
+	r.GET("/api/v1/articles/:slug", _ArticleService_GetArticle0_Bridge_Handler(srv))
 	r.GET("/api/v1/articles/featured", _ArticleService_GetFeaturedArticles0_Bridge_Handler(srv))
 	r.GET("/api/v1/articles/latest", _ArticleService_GetLatestArticles0_Bridge_Handler(srv))
 	r.GET("/api/v1/articles/me", _ArticleService_GetMyArticles0_Bridge_Handler(srv))
 	r.POST("/api/v1/articles", _ArticleService_CreateArticle0_Bridge_Handler(srv))
-	r.PUT("/api/v1/articles/:id", _ArticleService_UpdateArticle0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/articles/:id", _ArticleService_DeleteArticle0_Bridge_Handler(srv))
-	r.PATCH("/api/v1/articles/:id/state", _ArticleService_UpdateArticleState0_Bridge_Handler(srv))
+	r.PUT("/api/v1/articles/:slug", _ArticleService_UpdateArticle0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/articles/:slug", _ArticleService_DeleteArticle0_Bridge_Handler(srv))
+	r.PATCH("/api/v1/articles/:slug/state", _ArticleService_UpdateArticleState0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/articles", _ArticleService_ListAdminArticles0_Bridge_Handler(srv))
 	r.GET("/api/v1/admin/articles/:id", _ArticleService_GetAdminArticle0_Bridge_Handler(srv))
 	r.POST("/api/v1/admin/articles", _ArticleService_CreateAdminArticle0_Bridge_Handler(srv))
@@ -12454,32 +14326,6 @@ func _ArticleService_GetArticle0_Bridge_Handler(srv ArticleServiceHookedBridger)
 			return err
 		}
 		return srv.CompleteGetArticle(ctx, &in, out.(*GetArticleResponse))
-	}
-}
-
-func _ArticleService_GetArticleBySlug0_Bridge_Handler(srv ArticleServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetArticleBySlugRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationArticleServiceGetArticleBySlug)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetArticleBySlug(ctx, req.(*GetArticleBySlugRequest))
-		})
-
-		newctx, err := srv.PrepareGetArticleBySlug(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteGetArticleBySlug(ctx, &in, out.(*GetArticleBySlugResponse))
 	}
 }
 
@@ -12844,14 +14690,6 @@ func (UnimplementedArticleServiceHooked) CompleteGetArticle(ctx http.Context, in
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedArticleServiceHooked) PrepareGetArticleBySlug(ctx http.Context, in *GetArticleBySlugRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedArticleServiceHooked) CompleteGetArticleBySlug(ctx http.Context, in *GetArticleBySlugRequest, out *GetArticleBySlugResponse) error {
-	return ctx.Result(200, out)
-}
-
 func (UnimplementedArticleServiceHooked) PrepareGetFeaturedArticles(ctx http.Context, in *GetFeaturedArticlesRequest) (context.Context, error) {
 	return ctx, nil
 }
@@ -12986,10 +14824,6 @@ func (c *ArticleServiceHTTPBridgeImpl) GetArticle(ctx context.Context, in *GetAr
 	return c.client.GetArticle(ctx, in)
 }
 
-func (c *ArticleServiceHTTPBridgeImpl) GetArticleBySlug(ctx context.Context, in *GetArticleBySlugRequest) (*GetArticleBySlugResponse, error) {
-	return c.client.GetArticleBySlug(ctx, in)
-}
-
 func (c *ArticleServiceHTTPBridgeImpl) GetFeaturedArticles(ctx context.Context, in *GetFeaturedArticlesRequest) (*GetFeaturedArticlesResponse, error) {
 	return c.client.GetFeaturedArticles(ctx, in)
 }
@@ -13056,10 +14890,6 @@ func (c *ArticleServiceBridgeImpl) ListArticles(ctx context.Context, in *ListArt
 
 func (c *ArticleServiceBridgeImpl) GetArticle(ctx context.Context, in *GetArticleRequest) (*GetArticleResponse, error) {
 	return c.client.GetArticle(ctx, in)
-}
-
-func (c *ArticleServiceBridgeImpl) GetArticleBySlug(ctx context.Context, in *GetArticleBySlugRequest) (*GetArticleBySlugResponse, error) {
-	return c.client.GetArticleBySlug(ctx, in)
 }
 
 func (c *ArticleServiceBridgeImpl) GetFeaturedArticles(ctx context.Context, in *GetFeaturedArticlesRequest) (*GetFeaturedArticlesResponse, error) {
@@ -13132,10 +14962,6 @@ func (c *ArticleServiceGRPC2HTTPBridgeImpl) GetArticle(ctx context.Context, in *
 	return c.client.GetArticle(ctx, in)
 }
 
-func (c *ArticleServiceGRPC2HTTPBridgeImpl) GetArticleBySlug(ctx context.Context, in *GetArticleBySlugRequest) (*GetArticleBySlugResponse, error) {
-	return c.client.GetArticleBySlug(ctx, in)
-}
-
 func (c *ArticleServiceGRPC2HTTPBridgeImpl) GetFeaturedArticles(ctx context.Context, in *GetFeaturedArticlesRequest) (*GetFeaturedArticlesResponse, error) {
 	return c.client.GetFeaturedArticles(ctx, in)
 }
@@ -13202,10 +15028,6 @@ func (c *ArticleServiceHTTP2GRPCBridgeImpl) ListArticles(ctx context.Context, in
 
 func (c *ArticleServiceHTTP2GRPCBridgeImpl) GetArticle(ctx context.Context, in *GetArticleRequest) (*GetArticleResponse, error) {
 	return c.client.GetArticle(ctx, in)
-}
-
-func (c *ArticleServiceHTTP2GRPCBridgeImpl) GetArticleBySlug(ctx context.Context, in *GetArticleBySlugRequest) (*GetArticleBySlugResponse, error) {
-	return c.client.GetArticleBySlug(ctx, in)
 }
 
 func (c *ArticleServiceHTTP2GRPCBridgeImpl) GetFeaturedArticles(ctx context.Context, in *GetFeaturedArticlesRequest) (*GetFeaturedArticlesResponse, error) {
@@ -13347,7 +15169,7 @@ func RegisterSystemConfigServiceBridgeServer(s *http.Server, srv SystemConfigSer
 	r.POST("/api/v1/system/settings/:key/reset", _SystemConfigService_ResetSystemSetting0_Bridge_Handler(srv))
 	r.GET("/api/v1/system/settings/email/status", _SystemConfigService_GetEmailStatus0_Bridge_Handler(srv))
 	r.POST("/api/v1/system/settings/email/test", _SystemConfigService_TestEmail0_Bridge_Handler(srv))
-	r.GET("/api/v1/system/config/channel-limits", _SystemConfigService_GetChannelLimits0_Bridge_Handler(srv))
+	r.GET("/api/v1/system/config/channel-limits", _SystemConfigService_GetChannelLimits1_Bridge_Handler(srv))
 }
 
 func _SystemConfigService_GetSettingsByCategory0_Bridge_Handler(srv SystemConfigServiceHookedBridger) func(ctx http.Context) error {
@@ -13561,7 +15383,7 @@ func _SystemConfigService_TestEmail0_Bridge_Handler(srv SystemConfigServiceHooke
 	}
 }
 
-func _SystemConfigService_GetChannelLimits0_Bridge_Handler(srv SystemConfigServiceHookedBridger) func(ctx http.Context) error {
+func _SystemConfigService_GetChannelLimits1_Bridge_Handler(srv SystemConfigServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetChannelLimitsRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -13856,3 +15678,3222 @@ func (c *SystemConfigServiceHTTP2GRPCBridgeImpl) GetChannelLimits(ctx context.Co
 }
 
 func (c *SystemConfigServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedSystemConfigServiceServer() {}
+
+const AdServiceListAdPlacementsBridgeOperation = "/api.v1.services.media.AdService/ListAdPlacements"
+const AdServiceCreateAdPlacementBridgeOperation = "/api.v1.services.media.AdService/CreateAdPlacement"
+const AdServiceUpdateAdPlacementBridgeOperation = "/api.v1.services.media.AdService/UpdateAdPlacement"
+const AdServiceToggleAdPlacementBridgeOperation = "/api.v1.services.media.AdService/ToggleAdPlacement"
+const AdServiceDeleteAdPlacementBridgeOperation = "/api.v1.services.media.AdService/DeleteAdPlacement"
+const AdServiceListAdsBridgeOperation = "/api.v1.services.media.AdService/ListAds"
+const AdServiceCreateAdBridgeOperation = "/api.v1.services.media.AdService/CreateAd"
+const AdServiceUpdateAdBridgeOperation = "/api.v1.services.media.AdService/UpdateAd"
+const AdServiceToggleAdBridgeOperation = "/api.v1.services.media.AdService/ToggleAd"
+const AdServiceDeleteAdBridgeOperation = "/api.v1.services.media.AdService/DeleteAd"
+const AdServiceListAdClickLogsBridgeOperation = "/api.v1.services.media.AdService/ListAdClickLogs"
+const AdServiceListActiveAdsByPlacementBridgeOperation = "/api.v1.services.media.AdService/ListActiveAdsByPlacement"
+const AdServiceRecordAdImpressionBridgeOperation = "/api.v1.services.media.AdService/RecordAdImpression"
+const AdServiceRecordAdClickBridgeOperation = "/api.v1.services.media.AdService/RecordAdClick"
+
+type AdServiceBridgeServer interface {
+	// Admin placement management
+	ListAdPlacements(context.Context, *ListAdPlacementsRequest) (*ListAdPlacementsResponse, error)
+	CreateAdPlacement(context.Context, *CreateAdPlacementRequest) (*CreateAdPlacementResponse, error)
+	UpdateAdPlacement(context.Context, *UpdateAdPlacementRequest) (*UpdateAdPlacementResponse, error)
+	ToggleAdPlacement(context.Context, *ToggleAdPlacementRequest) (*ToggleAdPlacementResponse, error)
+	DeleteAdPlacement(context.Context, *DeleteAdPlacementRequest) (*DeleteAdPlacementResponse, error)
+	// Admin ad management
+	ListAds(context.Context, *ListAdsRequest) (*ListAdsResponse, error)
+	CreateAd(context.Context, *CreateAdRequest) (*CreateAdResponse, error)
+	UpdateAd(context.Context, *UpdateAdRequest) (*UpdateAdResponse, error)
+	ToggleAd(context.Context, *ToggleAdRequest) (*ToggleAdResponse, error)
+	DeleteAd(context.Context, *DeleteAdRequest) (*DeleteAdResponse, error)
+	ListAdClickLogs(context.Context, *ListAdClickLogsRequest) (*ListAdClickLogsResponse, error)
+	// Public ad endpoints
+	ListActiveAdsByPlacement(context.Context, *ListActiveAdsByPlacementRequest) (*ListActiveAdsByPlacementResponse, error)
+	RecordAdImpression(context.Context, *RecordAdImpressionRequest) (*RecordAdImpressionResponse, error)
+	RecordAdClick(context.Context, *RecordAdClickRequest) (*RecordAdClickResponse, error)
+}
+
+type AdServiceHooker interface {
+	AdServiceListAdPlacementsHooker
+	AdServiceCreateAdPlacementHooker
+	AdServiceUpdateAdPlacementHooker
+	AdServiceToggleAdPlacementHooker
+	AdServiceDeleteAdPlacementHooker
+	AdServiceListAdsHooker
+	AdServiceCreateAdHooker
+	AdServiceUpdateAdHooker
+	AdServiceToggleAdHooker
+	AdServiceDeleteAdHooker
+	AdServiceListAdClickLogsHooker
+	AdServiceListActiveAdsByPlacementHooker
+	AdServiceRecordAdImpressionHooker
+	AdServiceRecordAdClickHooker
+}
+
+type AdServiceHookedBridger interface {
+	AdServiceHooker
+	AdServiceBridgeServer
+}
+type AdServiceListAdPlacementsHooker interface {
+	PrepareListAdPlacements(http.Context, *ListAdPlacementsRequest) (context.Context, error)
+	CompleteListAdPlacements(http.Context, *ListAdPlacementsRequest, *ListAdPlacementsResponse) error
+}
+type AdServiceCreateAdPlacementHooker interface {
+	PrepareCreateAdPlacement(http.Context, *CreateAdPlacementRequest) (context.Context, error)
+	CompleteCreateAdPlacement(http.Context, *CreateAdPlacementRequest, *CreateAdPlacementResponse) error
+}
+type AdServiceUpdateAdPlacementHooker interface {
+	PrepareUpdateAdPlacement(http.Context, *UpdateAdPlacementRequest) (context.Context, error)
+	CompleteUpdateAdPlacement(http.Context, *UpdateAdPlacementRequest, *UpdateAdPlacementResponse) error
+}
+type AdServiceToggleAdPlacementHooker interface {
+	PrepareToggleAdPlacement(http.Context, *ToggleAdPlacementRequest) (context.Context, error)
+	CompleteToggleAdPlacement(http.Context, *ToggleAdPlacementRequest, *ToggleAdPlacementResponse) error
+}
+type AdServiceDeleteAdPlacementHooker interface {
+	PrepareDeleteAdPlacement(http.Context, *DeleteAdPlacementRequest) (context.Context, error)
+	CompleteDeleteAdPlacement(http.Context, *DeleteAdPlacementRequest, *DeleteAdPlacementResponse) error
+}
+type AdServiceListAdsHooker interface {
+	PrepareListAds(http.Context, *ListAdsRequest) (context.Context, error)
+	CompleteListAds(http.Context, *ListAdsRequest, *ListAdsResponse) error
+}
+type AdServiceCreateAdHooker interface {
+	PrepareCreateAd(http.Context, *CreateAdRequest) (context.Context, error)
+	CompleteCreateAd(http.Context, *CreateAdRequest, *CreateAdResponse) error
+}
+type AdServiceUpdateAdHooker interface {
+	PrepareUpdateAd(http.Context, *UpdateAdRequest) (context.Context, error)
+	CompleteUpdateAd(http.Context, *UpdateAdRequest, *UpdateAdResponse) error
+}
+type AdServiceToggleAdHooker interface {
+	PrepareToggleAd(http.Context, *ToggleAdRequest) (context.Context, error)
+	CompleteToggleAd(http.Context, *ToggleAdRequest, *ToggleAdResponse) error
+}
+type AdServiceDeleteAdHooker interface {
+	PrepareDeleteAd(http.Context, *DeleteAdRequest) (context.Context, error)
+	CompleteDeleteAd(http.Context, *DeleteAdRequest, *DeleteAdResponse) error
+}
+type AdServiceListAdClickLogsHooker interface {
+	PrepareListAdClickLogs(http.Context, *ListAdClickLogsRequest) (context.Context, error)
+	CompleteListAdClickLogs(http.Context, *ListAdClickLogsRequest, *ListAdClickLogsResponse) error
+}
+type AdServiceListActiveAdsByPlacementHooker interface {
+	PrepareListActiveAdsByPlacement(http.Context, *ListActiveAdsByPlacementRequest) (context.Context, error)
+	CompleteListActiveAdsByPlacement(http.Context, *ListActiveAdsByPlacementRequest, *ListActiveAdsByPlacementResponse) error
+}
+type AdServiceRecordAdImpressionHooker interface {
+	PrepareRecordAdImpression(http.Context, *RecordAdImpressionRequest) (context.Context, error)
+	CompleteRecordAdImpression(http.Context, *RecordAdImpressionRequest, *RecordAdImpressionResponse) error
+}
+type AdServiceRecordAdClickHooker interface {
+	PrepareRecordAdClick(http.Context, *RecordAdClickRequest) (context.Context, error)
+	CompleteRecordAdClick(http.Context, *RecordAdClickRequest, *RecordAdClickResponse) error
+}
+
+func RegisterAdServiceBridgeServer(s *http.Server, srv AdServiceHookedBridger) {
+	r := s.Route("/")
+	r.GET("/api/v1/admin/ad-placements", _AdService_ListAdPlacements0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/ad-placements", _AdService_CreateAdPlacement0_Bridge_Handler(srv))
+	r.PUT("/api/v1/admin/ad-placements/:id", _AdService_UpdateAdPlacement0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/ad-placements/:id/toggle", _AdService_ToggleAdPlacement0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/admin/ad-placements/:id", _AdService_DeleteAdPlacement0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/ads", _AdService_ListAds0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/ads", _AdService_CreateAd0_Bridge_Handler(srv))
+	r.PUT("/api/v1/admin/ads/:id", _AdService_UpdateAd0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/ads/:id/toggle", _AdService_ToggleAd0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/admin/ads/:id", _AdService_DeleteAd0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/ads/:id/click-logs", _AdService_ListAdClickLogs0_Bridge_Handler(srv))
+	r.GET("/api/v1/ads", _AdService_ListActiveAdsByPlacement0_Bridge_Handler(srv))
+	r.POST("/api/v1/ads/:id/impression", _AdService_RecordAdImpression0_Bridge_Handler(srv))
+	r.POST("/api/v1/ads/:id/click", _AdService_RecordAdClick0_Bridge_Handler(srv))
+}
+
+func _AdService_ListAdPlacements0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAdPlacementsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListAdPlacements)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAdPlacements(ctx, req.(*ListAdPlacementsRequest))
+		})
+
+		newctx, err := srv.PrepareListAdPlacements(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListAdPlacements(ctx, &in, out.(*ListAdPlacementsResponse))
+	}
+}
+
+func _AdService_CreateAdPlacement0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateAdPlacementRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceCreateAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateAdPlacement(ctx, req.(*CreateAdPlacementRequest))
+		})
+
+		newctx, err := srv.PrepareCreateAdPlacement(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCreateAdPlacement(ctx, &in, out.(*CreateAdPlacementResponse))
+	}
+}
+
+func _AdService_UpdateAdPlacement0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAdPlacementRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceUpdateAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateAdPlacement(ctx, req.(*UpdateAdPlacementRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateAdPlacement(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateAdPlacement(ctx, &in, out.(*UpdateAdPlacementResponse))
+	}
+}
+
+func _AdService_ToggleAdPlacement0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleAdPlacementRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceToggleAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleAdPlacement(ctx, req.(*ToggleAdPlacementRequest))
+		})
+
+		newctx, err := srv.PrepareToggleAdPlacement(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleAdPlacement(ctx, &in, out.(*ToggleAdPlacementResponse))
+	}
+}
+
+func _AdService_DeleteAdPlacement0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteAdPlacementRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceDeleteAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteAdPlacement(ctx, req.(*DeleteAdPlacementRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteAdPlacement(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteAdPlacement(ctx, &in, out.(*DeleteAdPlacementResponse))
+	}
+}
+
+func _AdService_ListAds0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAdsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListAds)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAds(ctx, req.(*ListAdsRequest))
+		})
+
+		newctx, err := srv.PrepareListAds(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListAds(ctx, &in, out.(*ListAdsResponse))
+	}
+}
+
+func _AdService_CreateAd0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateAdRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceCreateAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateAd(ctx, req.(*CreateAdRequest))
+		})
+
+		newctx, err := srv.PrepareCreateAd(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCreateAd(ctx, &in, out.(*CreateAdResponse))
+	}
+}
+
+func _AdService_UpdateAd0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAdRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceUpdateAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateAd(ctx, req.(*UpdateAdRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateAd(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateAd(ctx, &in, out.(*UpdateAdResponse))
+	}
+}
+
+func _AdService_ToggleAd0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleAdRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceToggleAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleAd(ctx, req.(*ToggleAdRequest))
+		})
+
+		newctx, err := srv.PrepareToggleAd(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleAd(ctx, &in, out.(*ToggleAdResponse))
+	}
+}
+
+func _AdService_DeleteAd0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteAdRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceDeleteAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteAd(ctx, req.(*DeleteAdRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteAd(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteAd(ctx, &in, out.(*DeleteAdResponse))
+	}
+}
+
+func _AdService_ListAdClickLogs0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAdClickLogsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListAdClickLogs)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAdClickLogs(ctx, req.(*ListAdClickLogsRequest))
+		})
+
+		newctx, err := srv.PrepareListAdClickLogs(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListAdClickLogs(ctx, &in, out.(*ListAdClickLogsResponse))
+	}
+}
+
+func _AdService_ListActiveAdsByPlacement0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListActiveAdsByPlacementRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListActiveAdsByPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListActiveAdsByPlacement(ctx, req.(*ListActiveAdsByPlacementRequest))
+		})
+
+		newctx, err := srv.PrepareListActiveAdsByPlacement(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListActiveAdsByPlacement(ctx, &in, out.(*ListActiveAdsByPlacementResponse))
+	}
+}
+
+func _AdService_RecordAdImpression0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RecordAdImpressionRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceRecordAdImpression)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RecordAdImpression(ctx, req.(*RecordAdImpressionRequest))
+		})
+
+		newctx, err := srv.PrepareRecordAdImpression(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteRecordAdImpression(ctx, &in, out.(*RecordAdImpressionResponse))
+	}
+}
+
+func _AdService_RecordAdClick0_Bridge_Handler(srv AdServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RecordAdClickRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceRecordAdClick)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RecordAdClick(ctx, req.(*RecordAdClickRequest))
+		})
+
+		newctx, err := srv.PrepareRecordAdClick(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteRecordAdClick(ctx, &in, out.(*RecordAdClickResponse))
+	}
+}
+
+// UnimplementedAdServiceHooked must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedAdServiceHooked struct{}
+
+func (UnimplementedAdServiceHooked) PrepareListAdPlacements(ctx http.Context, in *ListAdPlacementsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteListAdPlacements(ctx http.Context, in *ListAdPlacementsRequest, out *ListAdPlacementsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareCreateAdPlacement(ctx http.Context, in *CreateAdPlacementRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteCreateAdPlacement(ctx http.Context, in *CreateAdPlacementRequest, out *CreateAdPlacementResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareUpdateAdPlacement(ctx http.Context, in *UpdateAdPlacementRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteUpdateAdPlacement(ctx http.Context, in *UpdateAdPlacementRequest, out *UpdateAdPlacementResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareToggleAdPlacement(ctx http.Context, in *ToggleAdPlacementRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteToggleAdPlacement(ctx http.Context, in *ToggleAdPlacementRequest, out *ToggleAdPlacementResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareDeleteAdPlacement(ctx http.Context, in *DeleteAdPlacementRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteDeleteAdPlacement(ctx http.Context, in *DeleteAdPlacementRequest, out *DeleteAdPlacementResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareListAds(ctx http.Context, in *ListAdsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteListAds(ctx http.Context, in *ListAdsRequest, out *ListAdsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareCreateAd(ctx http.Context, in *CreateAdRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteCreateAd(ctx http.Context, in *CreateAdRequest, out *CreateAdResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareUpdateAd(ctx http.Context, in *UpdateAdRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteUpdateAd(ctx http.Context, in *UpdateAdRequest, out *UpdateAdResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareToggleAd(ctx http.Context, in *ToggleAdRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteToggleAd(ctx http.Context, in *ToggleAdRequest, out *ToggleAdResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareDeleteAd(ctx http.Context, in *DeleteAdRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteDeleteAd(ctx http.Context, in *DeleteAdRequest, out *DeleteAdResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareListAdClickLogs(ctx http.Context, in *ListAdClickLogsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteListAdClickLogs(ctx http.Context, in *ListAdClickLogsRequest, out *ListAdClickLogsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareListActiveAdsByPlacement(ctx http.Context, in *ListActiveAdsByPlacementRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteListActiveAdsByPlacement(ctx http.Context, in *ListActiveAdsByPlacementRequest, out *ListActiveAdsByPlacementResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareRecordAdImpression(ctx http.Context, in *RecordAdImpressionRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteRecordAdImpression(ctx http.Context, in *RecordAdImpressionRequest, out *RecordAdImpressionResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedAdServiceHooked) PrepareRecordAdClick(ctx http.Context, in *RecordAdClickRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedAdServiceHooked) CompleteRecordAdClick(ctx http.Context, in *RecordAdClickRequest, out *RecordAdClickResponse) error {
+	return ctx.Result(200, out)
+}
+
+func WithAdServiceHook(h AdServiceHooker) func(AdServiceBridgeServer) AdServiceHookedBridger {
+	return func(srv AdServiceBridgeServer) AdServiceHookedBridger {
+		return AdServiceHookedBridge{AdServiceBridgeServer: srv, AdServiceHooker: h}
+	}
+}
+
+// AdServiceHookedBridge is a bridge between the HTTP and gRPC implementations of AdService.
+// It implements the HTTP and gRPC implementations of AdService.
+// It forwards requests and responses between the two implementations.
+type AdServiceHookedBridge struct {
+	AdServiceBridgeServer
+	AdServiceHooker
+}
+
+type AdServiceHTTPBridgeImpl struct {
+	client AdServiceHTTPClient
+}
+
+func NewAdServiceHTTPBridge(client *http.Client) AdServiceHTTPServer {
+	return &AdServiceHTTPBridgeImpl{client: NewAdServiceHTTPClient(client)}
+}
+
+func (c *AdServiceHTTPBridgeImpl) ListAdPlacements(ctx context.Context, in *ListAdPlacementsRequest) (*ListAdPlacementsResponse, error) {
+	return c.client.ListAdPlacements(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) CreateAdPlacement(ctx context.Context, in *CreateAdPlacementRequest) (*CreateAdPlacementResponse, error) {
+	return c.client.CreateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) UpdateAdPlacement(ctx context.Context, in *UpdateAdPlacementRequest) (*UpdateAdPlacementResponse, error) {
+	return c.client.UpdateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) ToggleAdPlacement(ctx context.Context, in *ToggleAdPlacementRequest) (*ToggleAdPlacementResponse, error) {
+	return c.client.ToggleAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) DeleteAdPlacement(ctx context.Context, in *DeleteAdPlacementRequest) (*DeleteAdPlacementResponse, error) {
+	return c.client.DeleteAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) ListAds(ctx context.Context, in *ListAdsRequest) (*ListAdsResponse, error) {
+	return c.client.ListAds(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) CreateAd(ctx context.Context, in *CreateAdRequest) (*CreateAdResponse, error) {
+	return c.client.CreateAd(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) UpdateAd(ctx context.Context, in *UpdateAdRequest) (*UpdateAdResponse, error) {
+	return c.client.UpdateAd(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) ToggleAd(ctx context.Context, in *ToggleAdRequest) (*ToggleAdResponse, error) {
+	return c.client.ToggleAd(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) DeleteAd(ctx context.Context, in *DeleteAdRequest) (*DeleteAdResponse, error) {
+	return c.client.DeleteAd(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) ListAdClickLogs(ctx context.Context, in *ListAdClickLogsRequest) (*ListAdClickLogsResponse, error) {
+	return c.client.ListAdClickLogs(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) ListActiveAdsByPlacement(ctx context.Context, in *ListActiveAdsByPlacementRequest) (*ListActiveAdsByPlacementResponse, error) {
+	return c.client.ListActiveAdsByPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) RecordAdImpression(ctx context.Context, in *RecordAdImpressionRequest) (*RecordAdImpressionResponse, error) {
+	return c.client.RecordAdImpression(ctx, in)
+}
+
+func (c *AdServiceHTTPBridgeImpl) RecordAdClick(ctx context.Context, in *RecordAdClickRequest) (*RecordAdClickResponse, error) {
+	return c.client.RecordAdClick(ctx, in)
+}
+
+type AdServiceBridgeImpl struct {
+	client AdServiceClient
+}
+
+func NewAdServiceBridge(client grpc.ClientConnInterface) AdServiceServer {
+	return &AdServiceBridgeImpl{client: NewAdServiceClient(client)}
+}
+
+func (c *AdServiceBridgeImpl) ListAdPlacements(ctx context.Context, in *ListAdPlacementsRequest) (*ListAdPlacementsResponse, error) {
+	return c.client.ListAdPlacements(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) CreateAdPlacement(ctx context.Context, in *CreateAdPlacementRequest) (*CreateAdPlacementResponse, error) {
+	return c.client.CreateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) UpdateAdPlacement(ctx context.Context, in *UpdateAdPlacementRequest) (*UpdateAdPlacementResponse, error) {
+	return c.client.UpdateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) ToggleAdPlacement(ctx context.Context, in *ToggleAdPlacementRequest) (*ToggleAdPlacementResponse, error) {
+	return c.client.ToggleAdPlacement(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) DeleteAdPlacement(ctx context.Context, in *DeleteAdPlacementRequest) (*DeleteAdPlacementResponse, error) {
+	return c.client.DeleteAdPlacement(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) ListAds(ctx context.Context, in *ListAdsRequest) (*ListAdsResponse, error) {
+	return c.client.ListAds(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) CreateAd(ctx context.Context, in *CreateAdRequest) (*CreateAdResponse, error) {
+	return c.client.CreateAd(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) UpdateAd(ctx context.Context, in *UpdateAdRequest) (*UpdateAdResponse, error) {
+	return c.client.UpdateAd(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) ToggleAd(ctx context.Context, in *ToggleAdRequest) (*ToggleAdResponse, error) {
+	return c.client.ToggleAd(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) DeleteAd(ctx context.Context, in *DeleteAdRequest) (*DeleteAdResponse, error) {
+	return c.client.DeleteAd(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) ListAdClickLogs(ctx context.Context, in *ListAdClickLogsRequest) (*ListAdClickLogsResponse, error) {
+	return c.client.ListAdClickLogs(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) ListActiveAdsByPlacement(ctx context.Context, in *ListActiveAdsByPlacementRequest) (*ListActiveAdsByPlacementResponse, error) {
+	return c.client.ListActiveAdsByPlacement(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) RecordAdImpression(ctx context.Context, in *RecordAdImpressionRequest) (*RecordAdImpressionResponse, error) {
+	return c.client.RecordAdImpression(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) RecordAdClick(ctx context.Context, in *RecordAdClickRequest) (*RecordAdClickResponse, error) {
+	return c.client.RecordAdClick(ctx, in)
+}
+
+func (c *AdServiceBridgeImpl) mustEmbedUnimplementedAdServiceServer() {}
+
+type AdServiceGRPC2HTTPBridgeImpl struct {
+	client AdServiceClient
+}
+
+func NewAdServiceGRPC2HTTP(client grpc.ClientConnInterface) AdServiceHTTPServer {
+	return &AdServiceGRPC2HTTPBridgeImpl{client: NewAdServiceClient(client)}
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) ListAdPlacements(ctx context.Context, in *ListAdPlacementsRequest) (*ListAdPlacementsResponse, error) {
+	return c.client.ListAdPlacements(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) CreateAdPlacement(ctx context.Context, in *CreateAdPlacementRequest) (*CreateAdPlacementResponse, error) {
+	return c.client.CreateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) UpdateAdPlacement(ctx context.Context, in *UpdateAdPlacementRequest) (*UpdateAdPlacementResponse, error) {
+	return c.client.UpdateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) ToggleAdPlacement(ctx context.Context, in *ToggleAdPlacementRequest) (*ToggleAdPlacementResponse, error) {
+	return c.client.ToggleAdPlacement(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) DeleteAdPlacement(ctx context.Context, in *DeleteAdPlacementRequest) (*DeleteAdPlacementResponse, error) {
+	return c.client.DeleteAdPlacement(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) ListAds(ctx context.Context, in *ListAdsRequest) (*ListAdsResponse, error) {
+	return c.client.ListAds(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) CreateAd(ctx context.Context, in *CreateAdRequest) (*CreateAdResponse, error) {
+	return c.client.CreateAd(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) UpdateAd(ctx context.Context, in *UpdateAdRequest) (*UpdateAdResponse, error) {
+	return c.client.UpdateAd(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) ToggleAd(ctx context.Context, in *ToggleAdRequest) (*ToggleAdResponse, error) {
+	return c.client.ToggleAd(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) DeleteAd(ctx context.Context, in *DeleteAdRequest) (*DeleteAdResponse, error) {
+	return c.client.DeleteAd(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) ListAdClickLogs(ctx context.Context, in *ListAdClickLogsRequest) (*ListAdClickLogsResponse, error) {
+	return c.client.ListAdClickLogs(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) ListActiveAdsByPlacement(ctx context.Context, in *ListActiveAdsByPlacementRequest) (*ListActiveAdsByPlacementResponse, error) {
+	return c.client.ListActiveAdsByPlacement(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) RecordAdImpression(ctx context.Context, in *RecordAdImpressionRequest) (*RecordAdImpressionResponse, error) {
+	return c.client.RecordAdImpression(ctx, in)
+}
+
+func (c *AdServiceGRPC2HTTPBridgeImpl) RecordAdClick(ctx context.Context, in *RecordAdClickRequest) (*RecordAdClickResponse, error) {
+	return c.client.RecordAdClick(ctx, in)
+}
+
+type AdServiceHTTP2GRPCBridgeImpl struct {
+	client AdServiceHTTPClient
+}
+
+func NewAdServiceHTTP2GRPC(client *http.Client) AdServiceServer {
+	return &AdServiceHTTP2GRPCBridgeImpl{client: NewAdServiceHTTPClient(client)}
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) ListAdPlacements(ctx context.Context, in *ListAdPlacementsRequest) (*ListAdPlacementsResponse, error) {
+	return c.client.ListAdPlacements(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) CreateAdPlacement(ctx context.Context, in *CreateAdPlacementRequest) (*CreateAdPlacementResponse, error) {
+	return c.client.CreateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) UpdateAdPlacement(ctx context.Context, in *UpdateAdPlacementRequest) (*UpdateAdPlacementResponse, error) {
+	return c.client.UpdateAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) ToggleAdPlacement(ctx context.Context, in *ToggleAdPlacementRequest) (*ToggleAdPlacementResponse, error) {
+	return c.client.ToggleAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) DeleteAdPlacement(ctx context.Context, in *DeleteAdPlacementRequest) (*DeleteAdPlacementResponse, error) {
+	return c.client.DeleteAdPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) ListAds(ctx context.Context, in *ListAdsRequest) (*ListAdsResponse, error) {
+	return c.client.ListAds(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) CreateAd(ctx context.Context, in *CreateAdRequest) (*CreateAdResponse, error) {
+	return c.client.CreateAd(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) UpdateAd(ctx context.Context, in *UpdateAdRequest) (*UpdateAdResponse, error) {
+	return c.client.UpdateAd(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) ToggleAd(ctx context.Context, in *ToggleAdRequest) (*ToggleAdResponse, error) {
+	return c.client.ToggleAd(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) DeleteAd(ctx context.Context, in *DeleteAdRequest) (*DeleteAdResponse, error) {
+	return c.client.DeleteAd(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) ListAdClickLogs(ctx context.Context, in *ListAdClickLogsRequest) (*ListAdClickLogsResponse, error) {
+	return c.client.ListAdClickLogs(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) ListActiveAdsByPlacement(ctx context.Context, in *ListActiveAdsByPlacementRequest) (*ListActiveAdsByPlacementResponse, error) {
+	return c.client.ListActiveAdsByPlacement(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) RecordAdImpression(ctx context.Context, in *RecordAdImpressionRequest) (*RecordAdImpressionResponse, error) {
+	return c.client.RecordAdImpression(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) RecordAdClick(ctx context.Context, in *RecordAdClickRequest) (*RecordAdClickResponse, error) {
+	return c.client.RecordAdClick(ctx, in)
+}
+
+func (c *AdServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedAdServiceServer() {}
+
+const FeatureFlagServiceGetFeatureFlagsBridgeOperation = "/api.v1.services.media.FeatureFlagService/GetFeatureFlags"
+const FeatureFlagServiceUpdateFeatureFlagBridgeOperation = "/api.v1.services.media.FeatureFlagService/UpdateFeatureFlag"
+
+type FeatureFlagServiceBridgeServer interface {
+	GetFeatureFlags(context.Context, *GetFeatureFlagsRequest) (*GetFeatureFlagsResponse, error)
+	UpdateFeatureFlag(context.Context, *UpdateFeatureFlagRequest) (*UpdateFeatureFlagResponse, error)
+}
+
+type FeatureFlagServiceHooker interface {
+	FeatureFlagServiceGetFeatureFlagsHooker
+	FeatureFlagServiceUpdateFeatureFlagHooker
+}
+
+type FeatureFlagServiceHookedBridger interface {
+	FeatureFlagServiceHooker
+	FeatureFlagServiceBridgeServer
+}
+type FeatureFlagServiceGetFeatureFlagsHooker interface {
+	PrepareGetFeatureFlags(http.Context, *GetFeatureFlagsRequest) (context.Context, error)
+	CompleteGetFeatureFlags(http.Context, *GetFeatureFlagsRequest, *GetFeatureFlagsResponse) error
+}
+type FeatureFlagServiceUpdateFeatureFlagHooker interface {
+	PrepareUpdateFeatureFlag(http.Context, *UpdateFeatureFlagRequest) (context.Context, error)
+	CompleteUpdateFeatureFlag(http.Context, *UpdateFeatureFlagRequest, *UpdateFeatureFlagResponse) error
+}
+
+func RegisterFeatureFlagServiceBridgeServer(s *http.Server, srv FeatureFlagServiceHookedBridger) {
+	r := s.Route("/")
+	r.GET("/api/v1/features", _FeatureFlagService_GetFeatureFlags0_Bridge_Handler(srv))
+	r.PUT("/api/v1/features", _FeatureFlagService_UpdateFeatureFlag0_Bridge_Handler(srv))
+}
+
+func _FeatureFlagService_GetFeatureFlags0_Bridge_Handler(srv FeatureFlagServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetFeatureFlagsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFeatureFlagServiceGetFeatureFlags)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetFeatureFlags(ctx, req.(*GetFeatureFlagsRequest))
+		})
+
+		newctx, err := srv.PrepareGetFeatureFlags(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetFeatureFlags(ctx, &in, out.(*GetFeatureFlagsResponse))
+	}
+}
+
+func _FeatureFlagService_UpdateFeatureFlag0_Bridge_Handler(srv FeatureFlagServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateFeatureFlagRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFeatureFlagServiceUpdateFeatureFlag)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateFeatureFlag(ctx, req.(*UpdateFeatureFlagRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateFeatureFlag(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateFeatureFlag(ctx, &in, out.(*UpdateFeatureFlagResponse))
+	}
+}
+
+// UnimplementedFeatureFlagServiceHooked must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedFeatureFlagServiceHooked struct{}
+
+func (UnimplementedFeatureFlagServiceHooked) PrepareGetFeatureFlags(ctx http.Context, in *GetFeatureFlagsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedFeatureFlagServiceHooked) CompleteGetFeatureFlags(ctx http.Context, in *GetFeatureFlagsRequest, out *GetFeatureFlagsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedFeatureFlagServiceHooked) PrepareUpdateFeatureFlag(ctx http.Context, in *UpdateFeatureFlagRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedFeatureFlagServiceHooked) CompleteUpdateFeatureFlag(ctx http.Context, in *UpdateFeatureFlagRequest, out *UpdateFeatureFlagResponse) error {
+	return ctx.Result(200, out)
+}
+
+func WithFeatureFlagServiceHook(h FeatureFlagServiceHooker) func(FeatureFlagServiceBridgeServer) FeatureFlagServiceHookedBridger {
+	return func(srv FeatureFlagServiceBridgeServer) FeatureFlagServiceHookedBridger {
+		return FeatureFlagServiceHookedBridge{FeatureFlagServiceBridgeServer: srv, FeatureFlagServiceHooker: h}
+	}
+}
+
+// FeatureFlagServiceHookedBridge is a bridge between the HTTP and gRPC implementations of FeatureFlagService.
+// It implements the HTTP and gRPC implementations of FeatureFlagService.
+// It forwards requests and responses between the two implementations.
+type FeatureFlagServiceHookedBridge struct {
+	FeatureFlagServiceBridgeServer
+	FeatureFlagServiceHooker
+}
+
+type FeatureFlagServiceHTTPBridgeImpl struct {
+	client FeatureFlagServiceHTTPClient
+}
+
+func NewFeatureFlagServiceHTTPBridge(client *http.Client) FeatureFlagServiceHTTPServer {
+	return &FeatureFlagServiceHTTPBridgeImpl{client: NewFeatureFlagServiceHTTPClient(client)}
+}
+
+func (c *FeatureFlagServiceHTTPBridgeImpl) GetFeatureFlags(ctx context.Context, in *GetFeatureFlagsRequest) (*GetFeatureFlagsResponse, error) {
+	return c.client.GetFeatureFlags(ctx, in)
+}
+
+func (c *FeatureFlagServiceHTTPBridgeImpl) UpdateFeatureFlag(ctx context.Context, in *UpdateFeatureFlagRequest) (*UpdateFeatureFlagResponse, error) {
+	return c.client.UpdateFeatureFlag(ctx, in)
+}
+
+type FeatureFlagServiceBridgeImpl struct {
+	client FeatureFlagServiceClient
+}
+
+func NewFeatureFlagServiceBridge(client grpc.ClientConnInterface) FeatureFlagServiceServer {
+	return &FeatureFlagServiceBridgeImpl{client: NewFeatureFlagServiceClient(client)}
+}
+
+func (c *FeatureFlagServiceBridgeImpl) GetFeatureFlags(ctx context.Context, in *GetFeatureFlagsRequest) (*GetFeatureFlagsResponse, error) {
+	return c.client.GetFeatureFlags(ctx, in)
+}
+
+func (c *FeatureFlagServiceBridgeImpl) UpdateFeatureFlag(ctx context.Context, in *UpdateFeatureFlagRequest) (*UpdateFeatureFlagResponse, error) {
+	return c.client.UpdateFeatureFlag(ctx, in)
+}
+
+func (c *FeatureFlagServiceBridgeImpl) mustEmbedUnimplementedFeatureFlagServiceServer() {}
+
+type FeatureFlagServiceGRPC2HTTPBridgeImpl struct {
+	client FeatureFlagServiceClient
+}
+
+func NewFeatureFlagServiceGRPC2HTTP(client grpc.ClientConnInterface) FeatureFlagServiceHTTPServer {
+	return &FeatureFlagServiceGRPC2HTTPBridgeImpl{client: NewFeatureFlagServiceClient(client)}
+}
+
+func (c *FeatureFlagServiceGRPC2HTTPBridgeImpl) GetFeatureFlags(ctx context.Context, in *GetFeatureFlagsRequest) (*GetFeatureFlagsResponse, error) {
+	return c.client.GetFeatureFlags(ctx, in)
+}
+
+func (c *FeatureFlagServiceGRPC2HTTPBridgeImpl) UpdateFeatureFlag(ctx context.Context, in *UpdateFeatureFlagRequest) (*UpdateFeatureFlagResponse, error) {
+	return c.client.UpdateFeatureFlag(ctx, in)
+}
+
+type FeatureFlagServiceHTTP2GRPCBridgeImpl struct {
+	client FeatureFlagServiceHTTPClient
+}
+
+func NewFeatureFlagServiceHTTP2GRPC(client *http.Client) FeatureFlagServiceServer {
+	return &FeatureFlagServiceHTTP2GRPCBridgeImpl{client: NewFeatureFlagServiceHTTPClient(client)}
+}
+
+func (c *FeatureFlagServiceHTTP2GRPCBridgeImpl) GetFeatureFlags(ctx context.Context, in *GetFeatureFlagsRequest) (*GetFeatureFlagsResponse, error) {
+	return c.client.GetFeatureFlags(ctx, in)
+}
+
+func (c *FeatureFlagServiceHTTP2GRPCBridgeImpl) UpdateFeatureFlag(ctx context.Context, in *UpdateFeatureFlagRequest) (*UpdateFeatureFlagResponse, error) {
+	return c.client.UpdateFeatureFlag(ctx, in)
+}
+
+func (c *FeatureFlagServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedFeatureFlagServiceServer() {}
+
+const TenantServiceListTenantsBridgeOperation = "/api.v1.services.media.TenantService/ListTenants"
+const TenantServiceCreateTenantBridgeOperation = "/api.v1.services.media.TenantService/CreateTenant"
+const TenantServiceGetTenantBridgeOperation = "/api.v1.services.media.TenantService/GetTenant"
+const TenantServiceUpdateTenantBridgeOperation = "/api.v1.services.media.TenantService/UpdateTenant"
+const TenantServiceDeleteTenantBridgeOperation = "/api.v1.services.media.TenantService/DeleteTenant"
+const TenantServiceGetCurrentTenantBridgeOperation = "/api.v1.services.media.TenantService/GetCurrentTenant"
+
+type TenantServiceBridgeServer interface {
+	ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsResponse, error)
+	CreateTenant(context.Context, *CreateTenantRequest) (*CreateTenantResponse, error)
+	GetTenant(context.Context, *GetTenantRequest) (*GetTenantResponse, error)
+	UpdateTenant(context.Context, *UpdateTenantRequest) (*UpdateTenantResponse, error)
+	DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error)
+	GetCurrentTenant(context.Context, *GetCurrentTenantRequest) (*GetCurrentTenantResponse, error)
+}
+
+type TenantServiceHooker interface {
+	TenantServiceListTenantsHooker
+	TenantServiceCreateTenantHooker
+	TenantServiceGetTenantHooker
+	TenantServiceUpdateTenantHooker
+	TenantServiceDeleteTenantHooker
+	TenantServiceGetCurrentTenantHooker
+}
+
+type TenantServiceHookedBridger interface {
+	TenantServiceHooker
+	TenantServiceBridgeServer
+}
+type TenantServiceListTenantsHooker interface {
+	PrepareListTenants(http.Context, *ListTenantsRequest) (context.Context, error)
+	CompleteListTenants(http.Context, *ListTenantsRequest, *ListTenantsResponse) error
+}
+type TenantServiceCreateTenantHooker interface {
+	PrepareCreateTenant(http.Context, *CreateTenantRequest) (context.Context, error)
+	CompleteCreateTenant(http.Context, *CreateTenantRequest, *CreateTenantResponse) error
+}
+type TenantServiceGetTenantHooker interface {
+	PrepareGetTenant(http.Context, *GetTenantRequest) (context.Context, error)
+	CompleteGetTenant(http.Context, *GetTenantRequest, *GetTenantResponse) error
+}
+type TenantServiceUpdateTenantHooker interface {
+	PrepareUpdateTenant(http.Context, *UpdateTenantRequest) (context.Context, error)
+	CompleteUpdateTenant(http.Context, *UpdateTenantRequest, *UpdateTenantResponse) error
+}
+type TenantServiceDeleteTenantHooker interface {
+	PrepareDeleteTenant(http.Context, *DeleteTenantRequest) (context.Context, error)
+	CompleteDeleteTenant(http.Context, *DeleteTenantRequest, *DeleteTenantResponse) error
+}
+type TenantServiceGetCurrentTenantHooker interface {
+	PrepareGetCurrentTenant(http.Context, *GetCurrentTenantRequest) (context.Context, error)
+	CompleteGetCurrentTenant(http.Context, *GetCurrentTenantRequest, *GetCurrentTenantResponse) error
+}
+
+func RegisterTenantServiceBridgeServer(s *http.Server, srv TenantServiceHookedBridger) {
+	r := s.Route("/")
+	r.GET("/api/v1/admin/tenants", _TenantService_ListTenants0_Bridge_Handler(srv))
+	r.POST("/api/v1/admin/tenants", _TenantService_CreateTenant0_Bridge_Handler(srv))
+	r.GET("/api/v1/admin/tenants/:id", _TenantService_GetTenant0_Bridge_Handler(srv))
+	r.PUT("/api/v1/admin/tenants/:id", _TenantService_UpdateTenant0_Bridge_Handler(srv))
+	r.DELETE("/api/v1/admin/tenants/:id", _TenantService_DeleteTenant0_Bridge_Handler(srv))
+	r.GET("/api/v1/tenant/current", _TenantService_GetCurrentTenant0_Bridge_Handler(srv))
+}
+
+func _TenantService_ListTenants0_Bridge_Handler(srv TenantServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListTenantsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceListTenants)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListTenants(ctx, req.(*ListTenantsRequest))
+		})
+
+		newctx, err := srv.PrepareListTenants(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListTenants(ctx, &in, out.(*ListTenantsResponse))
+	}
+}
+
+func _TenantService_CreateTenant0_Bridge_Handler(srv TenantServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateTenantRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceCreateTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateTenant(ctx, req.(*CreateTenantRequest))
+		})
+
+		newctx, err := srv.PrepareCreateTenant(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCreateTenant(ctx, &in, out.(*CreateTenantResponse))
+	}
+}
+
+func _TenantService_GetTenant0_Bridge_Handler(srv TenantServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTenantRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceGetTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetTenant(ctx, req.(*GetTenantRequest))
+		})
+
+		newctx, err := srv.PrepareGetTenant(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetTenant(ctx, &in, out.(*GetTenantResponse))
+	}
+}
+
+func _TenantService_UpdateTenant0_Bridge_Handler(srv TenantServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateTenantRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceUpdateTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateTenant(ctx, req.(*UpdateTenantRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateTenant(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateTenant(ctx, &in, out.(*UpdateTenantResponse))
+	}
+}
+
+func _TenantService_DeleteTenant0_Bridge_Handler(srv TenantServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteTenantRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceDeleteTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteTenant(ctx, req.(*DeleteTenantRequest))
+		})
+
+		newctx, err := srv.PrepareDeleteTenant(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteDeleteTenant(ctx, &in, out.(*DeleteTenantResponse))
+	}
+}
+
+func _TenantService_GetCurrentTenant0_Bridge_Handler(srv TenantServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetCurrentTenantRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceGetCurrentTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetCurrentTenant(ctx, req.(*GetCurrentTenantRequest))
+		})
+
+		newctx, err := srv.PrepareGetCurrentTenant(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetCurrentTenant(ctx, &in, out.(*GetCurrentTenantResponse))
+	}
+}
+
+// UnimplementedTenantServiceHooked must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedTenantServiceHooked struct{}
+
+func (UnimplementedTenantServiceHooked) PrepareListTenants(ctx http.Context, in *ListTenantsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTenantServiceHooked) CompleteListTenants(ctx http.Context, in *ListTenantsRequest, out *ListTenantsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedTenantServiceHooked) PrepareCreateTenant(ctx http.Context, in *CreateTenantRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTenantServiceHooked) CompleteCreateTenant(ctx http.Context, in *CreateTenantRequest, out *CreateTenantResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedTenantServiceHooked) PrepareGetTenant(ctx http.Context, in *GetTenantRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTenantServiceHooked) CompleteGetTenant(ctx http.Context, in *GetTenantRequest, out *GetTenantResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedTenantServiceHooked) PrepareUpdateTenant(ctx http.Context, in *UpdateTenantRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTenantServiceHooked) CompleteUpdateTenant(ctx http.Context, in *UpdateTenantRequest, out *UpdateTenantResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedTenantServiceHooked) PrepareDeleteTenant(ctx http.Context, in *DeleteTenantRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTenantServiceHooked) CompleteDeleteTenant(ctx http.Context, in *DeleteTenantRequest, out *DeleteTenantResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedTenantServiceHooked) PrepareGetCurrentTenant(ctx http.Context, in *GetCurrentTenantRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedTenantServiceHooked) CompleteGetCurrentTenant(ctx http.Context, in *GetCurrentTenantRequest, out *GetCurrentTenantResponse) error {
+	return ctx.Result(200, out)
+}
+
+func WithTenantServiceHook(h TenantServiceHooker) func(TenantServiceBridgeServer) TenantServiceHookedBridger {
+	return func(srv TenantServiceBridgeServer) TenantServiceHookedBridger {
+		return TenantServiceHookedBridge{TenantServiceBridgeServer: srv, TenantServiceHooker: h}
+	}
+}
+
+// TenantServiceHookedBridge is a bridge between the HTTP and gRPC implementations of TenantService.
+// It implements the HTTP and gRPC implementations of TenantService.
+// It forwards requests and responses between the two implementations.
+type TenantServiceHookedBridge struct {
+	TenantServiceBridgeServer
+	TenantServiceHooker
+}
+
+type TenantServiceHTTPBridgeImpl struct {
+	client TenantServiceHTTPClient
+}
+
+func NewTenantServiceHTTPBridge(client *http.Client) TenantServiceHTTPServer {
+	return &TenantServiceHTTPBridgeImpl{client: NewTenantServiceHTTPClient(client)}
+}
+
+func (c *TenantServiceHTTPBridgeImpl) ListTenants(ctx context.Context, in *ListTenantsRequest) (*ListTenantsResponse, error) {
+	return c.client.ListTenants(ctx, in)
+}
+
+func (c *TenantServiceHTTPBridgeImpl) CreateTenant(ctx context.Context, in *CreateTenantRequest) (*CreateTenantResponse, error) {
+	return c.client.CreateTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTPBridgeImpl) GetTenant(ctx context.Context, in *GetTenantRequest) (*GetTenantResponse, error) {
+	return c.client.GetTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTPBridgeImpl) UpdateTenant(ctx context.Context, in *UpdateTenantRequest) (*UpdateTenantResponse, error) {
+	return c.client.UpdateTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTPBridgeImpl) DeleteTenant(ctx context.Context, in *DeleteTenantRequest) (*DeleteTenantResponse, error) {
+	return c.client.DeleteTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTPBridgeImpl) GetCurrentTenant(ctx context.Context, in *GetCurrentTenantRequest) (*GetCurrentTenantResponse, error) {
+	return c.client.GetCurrentTenant(ctx, in)
+}
+
+type TenantServiceBridgeImpl struct {
+	client TenantServiceClient
+}
+
+func NewTenantServiceBridge(client grpc.ClientConnInterface) TenantServiceServer {
+	return &TenantServiceBridgeImpl{client: NewTenantServiceClient(client)}
+}
+
+func (c *TenantServiceBridgeImpl) ListTenants(ctx context.Context, in *ListTenantsRequest) (*ListTenantsResponse, error) {
+	return c.client.ListTenants(ctx, in)
+}
+
+func (c *TenantServiceBridgeImpl) CreateTenant(ctx context.Context, in *CreateTenantRequest) (*CreateTenantResponse, error) {
+	return c.client.CreateTenant(ctx, in)
+}
+
+func (c *TenantServiceBridgeImpl) GetTenant(ctx context.Context, in *GetTenantRequest) (*GetTenantResponse, error) {
+	return c.client.GetTenant(ctx, in)
+}
+
+func (c *TenantServiceBridgeImpl) UpdateTenant(ctx context.Context, in *UpdateTenantRequest) (*UpdateTenantResponse, error) {
+	return c.client.UpdateTenant(ctx, in)
+}
+
+func (c *TenantServiceBridgeImpl) DeleteTenant(ctx context.Context, in *DeleteTenantRequest) (*DeleteTenantResponse, error) {
+	return c.client.DeleteTenant(ctx, in)
+}
+
+func (c *TenantServiceBridgeImpl) GetCurrentTenant(ctx context.Context, in *GetCurrentTenantRequest) (*GetCurrentTenantResponse, error) {
+	return c.client.GetCurrentTenant(ctx, in)
+}
+
+func (c *TenantServiceBridgeImpl) mustEmbedUnimplementedTenantServiceServer() {}
+
+type TenantServiceGRPC2HTTPBridgeImpl struct {
+	client TenantServiceClient
+}
+
+func NewTenantServiceGRPC2HTTP(client grpc.ClientConnInterface) TenantServiceHTTPServer {
+	return &TenantServiceGRPC2HTTPBridgeImpl{client: NewTenantServiceClient(client)}
+}
+
+func (c *TenantServiceGRPC2HTTPBridgeImpl) ListTenants(ctx context.Context, in *ListTenantsRequest) (*ListTenantsResponse, error) {
+	return c.client.ListTenants(ctx, in)
+}
+
+func (c *TenantServiceGRPC2HTTPBridgeImpl) CreateTenant(ctx context.Context, in *CreateTenantRequest) (*CreateTenantResponse, error) {
+	return c.client.CreateTenant(ctx, in)
+}
+
+func (c *TenantServiceGRPC2HTTPBridgeImpl) GetTenant(ctx context.Context, in *GetTenantRequest) (*GetTenantResponse, error) {
+	return c.client.GetTenant(ctx, in)
+}
+
+func (c *TenantServiceGRPC2HTTPBridgeImpl) UpdateTenant(ctx context.Context, in *UpdateTenantRequest) (*UpdateTenantResponse, error) {
+	return c.client.UpdateTenant(ctx, in)
+}
+
+func (c *TenantServiceGRPC2HTTPBridgeImpl) DeleteTenant(ctx context.Context, in *DeleteTenantRequest) (*DeleteTenantResponse, error) {
+	return c.client.DeleteTenant(ctx, in)
+}
+
+func (c *TenantServiceGRPC2HTTPBridgeImpl) GetCurrentTenant(ctx context.Context, in *GetCurrentTenantRequest) (*GetCurrentTenantResponse, error) {
+	return c.client.GetCurrentTenant(ctx, in)
+}
+
+type TenantServiceHTTP2GRPCBridgeImpl struct {
+	client TenantServiceHTTPClient
+}
+
+func NewTenantServiceHTTP2GRPC(client *http.Client) TenantServiceServer {
+	return &TenantServiceHTTP2GRPCBridgeImpl{client: NewTenantServiceHTTPClient(client)}
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) ListTenants(ctx context.Context, in *ListTenantsRequest) (*ListTenantsResponse, error) {
+	return c.client.ListTenants(ctx, in)
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) CreateTenant(ctx context.Context, in *CreateTenantRequest) (*CreateTenantResponse, error) {
+	return c.client.CreateTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) GetTenant(ctx context.Context, in *GetTenantRequest) (*GetTenantResponse, error) {
+	return c.client.GetTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) UpdateTenant(ctx context.Context, in *UpdateTenantRequest) (*UpdateTenantResponse, error) {
+	return c.client.UpdateTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) DeleteTenant(ctx context.Context, in *DeleteTenantRequest) (*DeleteTenantResponse, error) {
+	return c.client.DeleteTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) GetCurrentTenant(ctx context.Context, in *GetCurrentTenantRequest) (*GetCurrentTenantResponse, error) {
+	return c.client.GetCurrentTenant(ctx, in)
+}
+
+func (c *TenantServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedTenantServiceServer() {}
+
+const SystemSettingsServiceGetSystemSettingsBridgeOperation = "/api.v1.services.media.SystemSettingsService/GetSystemSettings"
+const SystemSettingsServiceUpdateSystemSettingsBridgeOperation = "/api.v1.services.media.SystemSettingsService/UpdateSystemSettings"
+const SystemSettingsServiceGetSystemSettingByKeyBridgeOperation = "/api.v1.services.media.SystemSettingsService/GetSystemSettingByKey"
+const SystemSettingsServiceResetSystemSettingBridgeOperation = "/api.v1.services.media.SystemSettingsService/ResetSystemSetting"
+const SystemSettingsServiceGetStorageCapabilitiesBridgeOperation = "/api.v1.services.media.SystemSettingsService/GetStorageCapabilities"
+const SystemSettingsServiceGetPublicConfigBridgeOperation = "/api.v1.services.media.SystemSettingsService/GetPublicConfig"
+
+type SystemSettingsServiceBridgeServer interface {
+	GetSystemSettings(context.Context, *GetSystemSettingsRequest) (*GetSystemSettingsResponse, error)
+	UpdateSystemSettings(context.Context, *UpdateSystemSettingsRequest) (*UpdateSystemSettingsResponse, error)
+	GetSystemSettingByKey(context.Context, *GetSystemSettingByKeyRequest) (*GetSystemSettingByKeyResponse, error)
+	ResetSystemSetting(context.Context, *ResetSystemSettingRequest) (*ResetSystemSettingResponse, error)
+	GetStorageCapabilities(context.Context, *GetStorageCapabilitiesRequest) (*GetStorageCapabilitiesResponse, error)
+	GetPublicConfig(context.Context, *GetPublicConfigRequest) (*GetPublicConfigResponse, error)
+}
+
+type SystemSettingsServiceHooker interface {
+	SystemSettingsServiceGetSystemSettingsHooker
+	SystemSettingsServiceUpdateSystemSettingsHooker
+	SystemSettingsServiceGetSystemSettingByKeyHooker
+	SystemSettingsServiceResetSystemSettingHooker
+	SystemSettingsServiceGetStorageCapabilitiesHooker
+	SystemSettingsServiceGetPublicConfigHooker
+}
+
+type SystemSettingsServiceHookedBridger interface {
+	SystemSettingsServiceHooker
+	SystemSettingsServiceBridgeServer
+}
+type SystemSettingsServiceGetSystemSettingsHooker interface {
+	PrepareGetSystemSettings(http.Context, *GetSystemSettingsRequest) (context.Context, error)
+	CompleteGetSystemSettings(http.Context, *GetSystemSettingsRequest, *GetSystemSettingsResponse) error
+}
+type SystemSettingsServiceUpdateSystemSettingsHooker interface {
+	PrepareUpdateSystemSettings(http.Context, *UpdateSystemSettingsRequest) (context.Context, error)
+	CompleteUpdateSystemSettings(http.Context, *UpdateSystemSettingsRequest, *UpdateSystemSettingsResponse) error
+}
+type SystemSettingsServiceGetSystemSettingByKeyHooker interface {
+	PrepareGetSystemSettingByKey(http.Context, *GetSystemSettingByKeyRequest) (context.Context, error)
+	CompleteGetSystemSettingByKey(http.Context, *GetSystemSettingByKeyRequest, *GetSystemSettingByKeyResponse) error
+}
+type SystemSettingsServiceResetSystemSettingHooker interface {
+	PrepareResetSystemSetting(http.Context, *ResetSystemSettingRequest) (context.Context, error)
+	CompleteResetSystemSetting(http.Context, *ResetSystemSettingRequest, *ResetSystemSettingResponse) error
+}
+type SystemSettingsServiceGetStorageCapabilitiesHooker interface {
+	PrepareGetStorageCapabilities(http.Context, *GetStorageCapabilitiesRequest) (context.Context, error)
+	CompleteGetStorageCapabilities(http.Context, *GetStorageCapabilitiesRequest, *GetStorageCapabilitiesResponse) error
+}
+type SystemSettingsServiceGetPublicConfigHooker interface {
+	PrepareGetPublicConfig(http.Context, *GetPublicConfigRequest) (context.Context, error)
+	CompleteGetPublicConfig(http.Context, *GetPublicConfigRequest, *GetPublicConfigResponse) error
+}
+
+func RegisterSystemSettingsServiceBridgeServer(s *http.Server, srv SystemSettingsServiceHookedBridger) {
+	r := s.Route("/")
+	r.GET("/api/v1/system/settings", _SystemSettingsService_GetSystemSettings0_Bridge_Handler(srv))
+	r.PUT("/api/v1/system/settings", _SystemSettingsService_UpdateSystemSettings0_Bridge_Handler(srv))
+	r.GET("/api/v1/system/settings/:key", _SystemSettingsService_GetSystemSettingByKey0_Bridge_Handler(srv))
+	r.POST("/api/v1/system/settings/:key/reset", _SystemSettingsService_ResetSystemSetting1_Bridge_Handler(srv))
+	r.GET("/api/v1/system/settings/storage/capabilities", _SystemSettingsService_GetStorageCapabilities0_Bridge_Handler(srv))
+	r.GET("/api/v1/config", _SystemSettingsService_GetPublicConfig0_Bridge_Handler(srv))
+}
+
+func _SystemSettingsService_GetSystemSettings0_Bridge_Handler(srv SystemSettingsServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSystemSettingsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetSystemSettings)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSystemSettings(ctx, req.(*GetSystemSettingsRequest))
+		})
+
+		newctx, err := srv.PrepareGetSystemSettings(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetSystemSettings(ctx, &in, out.(*GetSystemSettingsResponse))
+	}
+}
+
+func _SystemSettingsService_UpdateSystemSettings0_Bridge_Handler(srv SystemSettingsServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateSystemSettingsRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceUpdateSystemSettings)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateSystemSettings(ctx, req.(*UpdateSystemSettingsRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateSystemSettings(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateSystemSettings(ctx, &in, out.(*UpdateSystemSettingsResponse))
+	}
+}
+
+func _SystemSettingsService_GetSystemSettingByKey0_Bridge_Handler(srv SystemSettingsServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSystemSettingByKeyRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetSystemSettingByKey)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSystemSettingByKey(ctx, req.(*GetSystemSettingByKeyRequest))
+		})
+
+		newctx, err := srv.PrepareGetSystemSettingByKey(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetSystemSettingByKey(ctx, &in, out.(*GetSystemSettingByKeyResponse))
+	}
+}
+
+func _SystemSettingsService_ResetSystemSetting1_Bridge_Handler(srv SystemSettingsServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ResetSystemSettingRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceResetSystemSetting)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ResetSystemSetting(ctx, req.(*ResetSystemSettingRequest))
+		})
+
+		newctx, err := srv.PrepareResetSystemSetting(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteResetSystemSetting(ctx, &in, out.(*ResetSystemSettingResponse))
+	}
+}
+
+func _SystemSettingsService_GetStorageCapabilities0_Bridge_Handler(srv SystemSettingsServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetStorageCapabilitiesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetStorageCapabilities)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetStorageCapabilities(ctx, req.(*GetStorageCapabilitiesRequest))
+		})
+
+		newctx, err := srv.PrepareGetStorageCapabilities(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetStorageCapabilities(ctx, &in, out.(*GetStorageCapabilitiesResponse))
+	}
+}
+
+func _SystemSettingsService_GetPublicConfig0_Bridge_Handler(srv SystemSettingsServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPublicConfigRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetPublicConfig)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPublicConfig(ctx, req.(*GetPublicConfigRequest))
+		})
+
+		newctx, err := srv.PrepareGetPublicConfig(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetPublicConfig(ctx, &in, out.(*GetPublicConfigResponse))
+	}
+}
+
+// UnimplementedSystemSettingsServiceHooked must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedSystemSettingsServiceHooked struct{}
+
+func (UnimplementedSystemSettingsServiceHooked) PrepareGetSystemSettings(ctx http.Context, in *GetSystemSettingsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedSystemSettingsServiceHooked) CompleteGetSystemSettings(ctx http.Context, in *GetSystemSettingsRequest, out *GetSystemSettingsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedSystemSettingsServiceHooked) PrepareUpdateSystemSettings(ctx http.Context, in *UpdateSystemSettingsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedSystemSettingsServiceHooked) CompleteUpdateSystemSettings(ctx http.Context, in *UpdateSystemSettingsRequest, out *UpdateSystemSettingsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedSystemSettingsServiceHooked) PrepareGetSystemSettingByKey(ctx http.Context, in *GetSystemSettingByKeyRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedSystemSettingsServiceHooked) CompleteGetSystemSettingByKey(ctx http.Context, in *GetSystemSettingByKeyRequest, out *GetSystemSettingByKeyResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedSystemSettingsServiceHooked) PrepareResetSystemSetting(ctx http.Context, in *ResetSystemSettingRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedSystemSettingsServiceHooked) CompleteResetSystemSetting(ctx http.Context, in *ResetSystemSettingRequest, out *ResetSystemSettingResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedSystemSettingsServiceHooked) PrepareGetStorageCapabilities(ctx http.Context, in *GetStorageCapabilitiesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedSystemSettingsServiceHooked) CompleteGetStorageCapabilities(ctx http.Context, in *GetStorageCapabilitiesRequest, out *GetStorageCapabilitiesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedSystemSettingsServiceHooked) PrepareGetPublicConfig(ctx http.Context, in *GetPublicConfigRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedSystemSettingsServiceHooked) CompleteGetPublicConfig(ctx http.Context, in *GetPublicConfigRequest, out *GetPublicConfigResponse) error {
+	return ctx.Result(200, out)
+}
+
+func WithSystemSettingsServiceHook(h SystemSettingsServiceHooker) func(SystemSettingsServiceBridgeServer) SystemSettingsServiceHookedBridger {
+	return func(srv SystemSettingsServiceBridgeServer) SystemSettingsServiceHookedBridger {
+		return SystemSettingsServiceHookedBridge{SystemSettingsServiceBridgeServer: srv, SystemSettingsServiceHooker: h}
+	}
+}
+
+// SystemSettingsServiceHookedBridge is a bridge between the HTTP and gRPC implementations of SystemSettingsService.
+// It implements the HTTP and gRPC implementations of SystemSettingsService.
+// It forwards requests and responses between the two implementations.
+type SystemSettingsServiceHookedBridge struct {
+	SystemSettingsServiceBridgeServer
+	SystemSettingsServiceHooker
+}
+
+type SystemSettingsServiceHTTPBridgeImpl struct {
+	client SystemSettingsServiceHTTPClient
+}
+
+func NewSystemSettingsServiceHTTPBridge(client *http.Client) SystemSettingsServiceHTTPServer {
+	return &SystemSettingsServiceHTTPBridgeImpl{client: NewSystemSettingsServiceHTTPClient(client)}
+}
+
+func (c *SystemSettingsServiceHTTPBridgeImpl) GetSystemSettings(ctx context.Context, in *GetSystemSettingsRequest) (*GetSystemSettingsResponse, error) {
+	return c.client.GetSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTPBridgeImpl) UpdateSystemSettings(ctx context.Context, in *UpdateSystemSettingsRequest) (*UpdateSystemSettingsResponse, error) {
+	return c.client.UpdateSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTPBridgeImpl) GetSystemSettingByKey(ctx context.Context, in *GetSystemSettingByKeyRequest) (*GetSystemSettingByKeyResponse, error) {
+	return c.client.GetSystemSettingByKey(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTPBridgeImpl) ResetSystemSetting(ctx context.Context, in *ResetSystemSettingRequest) (*ResetSystemSettingResponse, error) {
+	return c.client.ResetSystemSetting(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTPBridgeImpl) GetStorageCapabilities(ctx context.Context, in *GetStorageCapabilitiesRequest) (*GetStorageCapabilitiesResponse, error) {
+	return c.client.GetStorageCapabilities(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTPBridgeImpl) GetPublicConfig(ctx context.Context, in *GetPublicConfigRequest) (*GetPublicConfigResponse, error) {
+	return c.client.GetPublicConfig(ctx, in)
+}
+
+type SystemSettingsServiceBridgeImpl struct {
+	client SystemSettingsServiceClient
+}
+
+func NewSystemSettingsServiceBridge(client grpc.ClientConnInterface) SystemSettingsServiceServer {
+	return &SystemSettingsServiceBridgeImpl{client: NewSystemSettingsServiceClient(client)}
+}
+
+func (c *SystemSettingsServiceBridgeImpl) GetSystemSettings(ctx context.Context, in *GetSystemSettingsRequest) (*GetSystemSettingsResponse, error) {
+	return c.client.GetSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceBridgeImpl) UpdateSystemSettings(ctx context.Context, in *UpdateSystemSettingsRequest) (*UpdateSystemSettingsResponse, error) {
+	return c.client.UpdateSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceBridgeImpl) GetSystemSettingByKey(ctx context.Context, in *GetSystemSettingByKeyRequest) (*GetSystemSettingByKeyResponse, error) {
+	return c.client.GetSystemSettingByKey(ctx, in)
+}
+
+func (c *SystemSettingsServiceBridgeImpl) ResetSystemSetting(ctx context.Context, in *ResetSystemSettingRequest) (*ResetSystemSettingResponse, error) {
+	return c.client.ResetSystemSetting(ctx, in)
+}
+
+func (c *SystemSettingsServiceBridgeImpl) GetStorageCapabilities(ctx context.Context, in *GetStorageCapabilitiesRequest) (*GetStorageCapabilitiesResponse, error) {
+	return c.client.GetStorageCapabilities(ctx, in)
+}
+
+func (c *SystemSettingsServiceBridgeImpl) GetPublicConfig(ctx context.Context, in *GetPublicConfigRequest) (*GetPublicConfigResponse, error) {
+	return c.client.GetPublicConfig(ctx, in)
+}
+
+func (c *SystemSettingsServiceBridgeImpl) mustEmbedUnimplementedSystemSettingsServiceServer() {}
+
+type SystemSettingsServiceGRPC2HTTPBridgeImpl struct {
+	client SystemSettingsServiceClient
+}
+
+func NewSystemSettingsServiceGRPC2HTTP(client grpc.ClientConnInterface) SystemSettingsServiceHTTPServer {
+	return &SystemSettingsServiceGRPC2HTTPBridgeImpl{client: NewSystemSettingsServiceClient(client)}
+}
+
+func (c *SystemSettingsServiceGRPC2HTTPBridgeImpl) GetSystemSettings(ctx context.Context, in *GetSystemSettingsRequest) (*GetSystemSettingsResponse, error) {
+	return c.client.GetSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceGRPC2HTTPBridgeImpl) UpdateSystemSettings(ctx context.Context, in *UpdateSystemSettingsRequest) (*UpdateSystemSettingsResponse, error) {
+	return c.client.UpdateSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceGRPC2HTTPBridgeImpl) GetSystemSettingByKey(ctx context.Context, in *GetSystemSettingByKeyRequest) (*GetSystemSettingByKeyResponse, error) {
+	return c.client.GetSystemSettingByKey(ctx, in)
+}
+
+func (c *SystemSettingsServiceGRPC2HTTPBridgeImpl) ResetSystemSetting(ctx context.Context, in *ResetSystemSettingRequest) (*ResetSystemSettingResponse, error) {
+	return c.client.ResetSystemSetting(ctx, in)
+}
+
+func (c *SystemSettingsServiceGRPC2HTTPBridgeImpl) GetStorageCapabilities(ctx context.Context, in *GetStorageCapabilitiesRequest) (*GetStorageCapabilitiesResponse, error) {
+	return c.client.GetStorageCapabilities(ctx, in)
+}
+
+func (c *SystemSettingsServiceGRPC2HTTPBridgeImpl) GetPublicConfig(ctx context.Context, in *GetPublicConfigRequest) (*GetPublicConfigResponse, error) {
+	return c.client.GetPublicConfig(ctx, in)
+}
+
+type SystemSettingsServiceHTTP2GRPCBridgeImpl struct {
+	client SystemSettingsServiceHTTPClient
+}
+
+func NewSystemSettingsServiceHTTP2GRPC(client *http.Client) SystemSettingsServiceServer {
+	return &SystemSettingsServiceHTTP2GRPCBridgeImpl{client: NewSystemSettingsServiceHTTPClient(client)}
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) GetSystemSettings(ctx context.Context, in *GetSystemSettingsRequest) (*GetSystemSettingsResponse, error) {
+	return c.client.GetSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) UpdateSystemSettings(ctx context.Context, in *UpdateSystemSettingsRequest) (*UpdateSystemSettingsResponse, error) {
+	return c.client.UpdateSystemSettings(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) GetSystemSettingByKey(ctx context.Context, in *GetSystemSettingByKeyRequest) (*GetSystemSettingByKeyResponse, error) {
+	return c.client.GetSystemSettingByKey(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) ResetSystemSetting(ctx context.Context, in *ResetSystemSettingRequest) (*ResetSystemSettingResponse, error) {
+	return c.client.ResetSystemSetting(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) GetStorageCapabilities(ctx context.Context, in *GetStorageCapabilitiesRequest) (*GetStorageCapabilitiesResponse, error) {
+	return c.client.GetStorageCapabilities(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) GetPublicConfig(ctx context.Context, in *GetPublicConfigRequest) (*GetPublicConfigResponse, error) {
+	return c.client.GetPublicConfig(ctx, in)
+}
+
+func (c *SystemSettingsServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedSystemSettingsServiceServer() {
+}
+
+const InteractionServiceGetLikeStatusBatchBridgeOperation = "/api.v1.services.media.InteractionService/GetLikeStatusBatch"
+const InteractionServiceGetInteractionsLikesBridgeOperation = "/api.v1.services.media.InteractionService/GetInteractionsLikes"
+const InteractionServiceToggleInteractionLikeBridgeOperation = "/api.v1.services.media.InteractionService/ToggleInteractionLike"
+const InteractionServiceCheckFavoriteBridgeOperation = "/api.v1.services.media.InteractionService/CheckFavorite"
+const InteractionServiceGetInteractionsFavoritesBridgeOperation = "/api.v1.services.media.InteractionService/GetInteractionsFavorites"
+const InteractionServiceToggleInteractionFavoriteBridgeOperation = "/api.v1.services.media.InteractionService/ToggleInteractionFavorite"
+const InteractionServiceGetSubscriptionCountBridgeOperation = "/api.v1.services.media.InteractionService/GetSubscriptionCount"
+const InteractionServiceGetInteractionsSubscriptionsBridgeOperation = "/api.v1.services.media.InteractionService/GetInteractionsSubscriptions"
+const InteractionServiceGetFollowerCountBridgeOperation = "/api.v1.services.media.InteractionService/GetFollowerCount"
+const InteractionServiceGetInteractionsFollowersBridgeOperation = "/api.v1.services.media.InteractionService/GetInteractionsFollowers"
+const InteractionServiceCreateInteractionShareBridgeOperation = "/api.v1.services.media.InteractionService/CreateInteractionShare"
+
+type InteractionServiceBridgeServer interface {
+	// Likes
+	GetLikeStatusBatch(context.Context, *GetLikeStatusBatchRequest) (*GetLikeStatusBatchResponse, error)
+	GetInteractionsLikes(context.Context, *GetInteractionsLikesRequest) (*GetInteractionsLikesResponse, error)
+	ToggleInteractionLike(context.Context, *ToggleInteractionLikeRequest) (*ToggleInteractionLikeResponse, error)
+	// Favorites
+	CheckFavorite(context.Context, *CheckFavoriteRequest) (*CheckFavoriteResponse, error)
+	GetInteractionsFavorites(context.Context, *GetInteractionsFavoritesRequest) (*GetInteractionsFavoritesResponse, error)
+	ToggleInteractionFavorite(context.Context, *ToggleInteractionFavoriteRequest) (*ToggleInteractionFavoriteResponse, error)
+	// Subscriptions
+	GetSubscriptionCount(context.Context, *GetSubscriptionCountRequest) (*GetSubscriptionCountResponse, error)
+	GetInteractionsSubscriptions(context.Context, *GetInteractionsSubscriptionsRequest) (*GetInteractionsSubscriptionsResponse, error)
+	// Followers
+	GetFollowerCount(context.Context, *GetFollowerCountRequest) (*GetFollowerCountResponse, error)
+	GetInteractionsFollowers(context.Context, *GetInteractionsFollowersRequest) (*GetInteractionsFollowersResponse, error)
+	// Shares
+	CreateInteractionShare(context.Context, *CreateInteractionShareRequest) (*CreateInteractionShareResponse, error)
+}
+
+type InteractionServiceHooker interface {
+	InteractionServiceGetLikeStatusBatchHooker
+	InteractionServiceGetInteractionsLikesHooker
+	InteractionServiceToggleInteractionLikeHooker
+	InteractionServiceCheckFavoriteHooker
+	InteractionServiceGetInteractionsFavoritesHooker
+	InteractionServiceToggleInteractionFavoriteHooker
+	InteractionServiceGetSubscriptionCountHooker
+	InteractionServiceGetInteractionsSubscriptionsHooker
+	InteractionServiceGetFollowerCountHooker
+	InteractionServiceGetInteractionsFollowersHooker
+	InteractionServiceCreateInteractionShareHooker
+}
+
+type InteractionServiceHookedBridger interface {
+	InteractionServiceHooker
+	InteractionServiceBridgeServer
+}
+type InteractionServiceGetLikeStatusBatchHooker interface {
+	PrepareGetLikeStatusBatch(http.Context, *GetLikeStatusBatchRequest) (context.Context, error)
+	CompleteGetLikeStatusBatch(http.Context, *GetLikeStatusBatchRequest, *GetLikeStatusBatchResponse) error
+}
+type InteractionServiceGetInteractionsLikesHooker interface {
+	PrepareGetInteractionsLikes(http.Context, *GetInteractionsLikesRequest) (context.Context, error)
+	CompleteGetInteractionsLikes(http.Context, *GetInteractionsLikesRequest, *GetInteractionsLikesResponse) error
+}
+type InteractionServiceToggleInteractionLikeHooker interface {
+	PrepareToggleInteractionLike(http.Context, *ToggleInteractionLikeRequest) (context.Context, error)
+	CompleteToggleInteractionLike(http.Context, *ToggleInteractionLikeRequest, *ToggleInteractionLikeResponse) error
+}
+type InteractionServiceCheckFavoriteHooker interface {
+	PrepareCheckFavorite(http.Context, *CheckFavoriteRequest) (context.Context, error)
+	CompleteCheckFavorite(http.Context, *CheckFavoriteRequest, *CheckFavoriteResponse) error
+}
+type InteractionServiceGetInteractionsFavoritesHooker interface {
+	PrepareGetInteractionsFavorites(http.Context, *GetInteractionsFavoritesRequest) (context.Context, error)
+	CompleteGetInteractionsFavorites(http.Context, *GetInteractionsFavoritesRequest, *GetInteractionsFavoritesResponse) error
+}
+type InteractionServiceToggleInteractionFavoriteHooker interface {
+	PrepareToggleInteractionFavorite(http.Context, *ToggleInteractionFavoriteRequest) (context.Context, error)
+	CompleteToggleInteractionFavorite(http.Context, *ToggleInteractionFavoriteRequest, *ToggleInteractionFavoriteResponse) error
+}
+type InteractionServiceGetSubscriptionCountHooker interface {
+	PrepareGetSubscriptionCount(http.Context, *GetSubscriptionCountRequest) (context.Context, error)
+	CompleteGetSubscriptionCount(http.Context, *GetSubscriptionCountRequest, *GetSubscriptionCountResponse) error
+}
+type InteractionServiceGetInteractionsSubscriptionsHooker interface {
+	PrepareGetInteractionsSubscriptions(http.Context, *GetInteractionsSubscriptionsRequest) (context.Context, error)
+	CompleteGetInteractionsSubscriptions(http.Context, *GetInteractionsSubscriptionsRequest, *GetInteractionsSubscriptionsResponse) error
+}
+type InteractionServiceGetFollowerCountHooker interface {
+	PrepareGetFollowerCount(http.Context, *GetFollowerCountRequest) (context.Context, error)
+	CompleteGetFollowerCount(http.Context, *GetFollowerCountRequest, *GetFollowerCountResponse) error
+}
+type InteractionServiceGetInteractionsFollowersHooker interface {
+	PrepareGetInteractionsFollowers(http.Context, *GetInteractionsFollowersRequest) (context.Context, error)
+	CompleteGetInteractionsFollowers(http.Context, *GetInteractionsFollowersRequest, *GetInteractionsFollowersResponse) error
+}
+type InteractionServiceCreateInteractionShareHooker interface {
+	PrepareCreateInteractionShare(http.Context, *CreateInteractionShareRequest) (context.Context, error)
+	CompleteCreateInteractionShare(http.Context, *CreateInteractionShareRequest, *CreateInteractionShareResponse) error
+}
+
+func RegisterInteractionServiceBridgeServer(s *http.Server, srv InteractionServiceHookedBridger) {
+	r := s.Route("/")
+	r.GET("/api/v1/interactions/likes/status", _InteractionService_GetLikeStatusBatch0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/likes", _InteractionService_GetInteractionsLikes0_Bridge_Handler(srv))
+	r.POST("/api/v1/interactions/likes", _InteractionService_ToggleInteractionLike0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/favorites/check", _InteractionService_CheckFavorite0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/favorites", _InteractionService_GetInteractionsFavorites0_Bridge_Handler(srv))
+	r.POST("/api/v1/interactions/favorites", _InteractionService_ToggleInteractionFavorite0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/subscriptions/count", _InteractionService_GetSubscriptionCount0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/subscriptions", _InteractionService_GetInteractionsSubscriptions0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/followers/count", _InteractionService_GetFollowerCount0_Bridge_Handler(srv))
+	r.GET("/api/v1/interactions/followers", _InteractionService_GetInteractionsFollowers0_Bridge_Handler(srv))
+	r.POST("/api/v1/interactions/shares", _InteractionService_CreateInteractionShare0_Bridge_Handler(srv))
+}
+
+func _InteractionService_GetLikeStatusBatch0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetLikeStatusBatchRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetLikeStatusBatch)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetLikeStatusBatch(ctx, req.(*GetLikeStatusBatchRequest))
+		})
+
+		newctx, err := srv.PrepareGetLikeStatusBatch(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetLikeStatusBatch(ctx, &in, out.(*GetLikeStatusBatchResponse))
+	}
+}
+
+func _InteractionService_GetInteractionsLikes0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsLikesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsLikes)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsLikes(ctx, req.(*GetInteractionsLikesRequest))
+		})
+
+		newctx, err := srv.PrepareGetInteractionsLikes(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetInteractionsLikes(ctx, &in, out.(*GetInteractionsLikesResponse))
+	}
+}
+
+func _InteractionService_ToggleInteractionLike0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleInteractionLikeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceToggleInteractionLike)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleInteractionLike(ctx, req.(*ToggleInteractionLikeRequest))
+		})
+
+		newctx, err := srv.PrepareToggleInteractionLike(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleInteractionLike(ctx, &in, out.(*ToggleInteractionLikeResponse))
+	}
+}
+
+func _InteractionService_CheckFavorite0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CheckFavoriteRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceCheckFavorite)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CheckFavorite(ctx, req.(*CheckFavoriteRequest))
+		})
+
+		newctx, err := srv.PrepareCheckFavorite(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCheckFavorite(ctx, &in, out.(*CheckFavoriteResponse))
+	}
+}
+
+func _InteractionService_GetInteractionsFavorites0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsFavoritesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsFavorites)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsFavorites(ctx, req.(*GetInteractionsFavoritesRequest))
+		})
+
+		newctx, err := srv.PrepareGetInteractionsFavorites(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetInteractionsFavorites(ctx, &in, out.(*GetInteractionsFavoritesResponse))
+	}
+}
+
+func _InteractionService_ToggleInteractionFavorite0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleInteractionFavoriteRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceToggleInteractionFavorite)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleInteractionFavorite(ctx, req.(*ToggleInteractionFavoriteRequest))
+		})
+
+		newctx, err := srv.PrepareToggleInteractionFavorite(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleInteractionFavorite(ctx, &in, out.(*ToggleInteractionFavoriteResponse))
+	}
+}
+
+func _InteractionService_GetSubscriptionCount0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSubscriptionCountRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetSubscriptionCount)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSubscriptionCount(ctx, req.(*GetSubscriptionCountRequest))
+		})
+
+		newctx, err := srv.PrepareGetSubscriptionCount(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetSubscriptionCount(ctx, &in, out.(*GetSubscriptionCountResponse))
+	}
+}
+
+func _InteractionService_GetInteractionsSubscriptions0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsSubscriptionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsSubscriptions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsSubscriptions(ctx, req.(*GetInteractionsSubscriptionsRequest))
+		})
+
+		newctx, err := srv.PrepareGetInteractionsSubscriptions(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetInteractionsSubscriptions(ctx, &in, out.(*GetInteractionsSubscriptionsResponse))
+	}
+}
+
+func _InteractionService_GetFollowerCount0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetFollowerCountRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetFollowerCount)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetFollowerCount(ctx, req.(*GetFollowerCountRequest))
+		})
+
+		newctx, err := srv.PrepareGetFollowerCount(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetFollowerCount(ctx, &in, out.(*GetFollowerCountResponse))
+	}
+}
+
+func _InteractionService_GetInteractionsFollowers0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsFollowersRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsFollowers)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsFollowers(ctx, req.(*GetInteractionsFollowersRequest))
+		})
+
+		newctx, err := srv.PrepareGetInteractionsFollowers(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetInteractionsFollowers(ctx, &in, out.(*GetInteractionsFollowersResponse))
+	}
+}
+
+func _InteractionService_CreateInteractionShare0_Bridge_Handler(srv InteractionServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateInteractionShareRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceCreateInteractionShare)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateInteractionShare(ctx, req.(*CreateInteractionShareRequest))
+		})
+
+		newctx, err := srv.PrepareCreateInteractionShare(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCreateInteractionShare(ctx, &in, out.(*CreateInteractionShareResponse))
+	}
+}
+
+// UnimplementedInteractionServiceHooked must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedInteractionServiceHooked struct{}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetLikeStatusBatch(ctx http.Context, in *GetLikeStatusBatchRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetLikeStatusBatch(ctx http.Context, in *GetLikeStatusBatchRequest, out *GetLikeStatusBatchResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetInteractionsLikes(ctx http.Context, in *GetInteractionsLikesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetInteractionsLikes(ctx http.Context, in *GetInteractionsLikesRequest, out *GetInteractionsLikesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareToggleInteractionLike(ctx http.Context, in *ToggleInteractionLikeRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteToggleInteractionLike(ctx http.Context, in *ToggleInteractionLikeRequest, out *ToggleInteractionLikeResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareCheckFavorite(ctx http.Context, in *CheckFavoriteRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteCheckFavorite(ctx http.Context, in *CheckFavoriteRequest, out *CheckFavoriteResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetInteractionsFavorites(ctx http.Context, in *GetInteractionsFavoritesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetInteractionsFavorites(ctx http.Context, in *GetInteractionsFavoritesRequest, out *GetInteractionsFavoritesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareToggleInteractionFavorite(ctx http.Context, in *ToggleInteractionFavoriteRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteToggleInteractionFavorite(ctx http.Context, in *ToggleInteractionFavoriteRequest, out *ToggleInteractionFavoriteResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetSubscriptionCount(ctx http.Context, in *GetSubscriptionCountRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetSubscriptionCount(ctx http.Context, in *GetSubscriptionCountRequest, out *GetSubscriptionCountResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetInteractionsSubscriptions(ctx http.Context, in *GetInteractionsSubscriptionsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetInteractionsSubscriptions(ctx http.Context, in *GetInteractionsSubscriptionsRequest, out *GetInteractionsSubscriptionsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetFollowerCount(ctx http.Context, in *GetFollowerCountRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetFollowerCount(ctx http.Context, in *GetFollowerCountRequest, out *GetFollowerCountResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareGetInteractionsFollowers(ctx http.Context, in *GetInteractionsFollowersRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteGetInteractionsFollowers(ctx http.Context, in *GetInteractionsFollowersRequest, out *GetInteractionsFollowersResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedInteractionServiceHooked) PrepareCreateInteractionShare(ctx http.Context, in *CreateInteractionShareRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedInteractionServiceHooked) CompleteCreateInteractionShare(ctx http.Context, in *CreateInteractionShareRequest, out *CreateInteractionShareResponse) error {
+	return ctx.Result(200, out)
+}
+
+func WithInteractionServiceHook(h InteractionServiceHooker) func(InteractionServiceBridgeServer) InteractionServiceHookedBridger {
+	return func(srv InteractionServiceBridgeServer) InteractionServiceHookedBridger {
+		return InteractionServiceHookedBridge{InteractionServiceBridgeServer: srv, InteractionServiceHooker: h}
+	}
+}
+
+// InteractionServiceHookedBridge is a bridge between the HTTP and gRPC implementations of InteractionService.
+// It implements the HTTP and gRPC implementations of InteractionService.
+// It forwards requests and responses between the two implementations.
+type InteractionServiceHookedBridge struct {
+	InteractionServiceBridgeServer
+	InteractionServiceHooker
+}
+
+type InteractionServiceHTTPBridgeImpl struct {
+	client InteractionServiceHTTPClient
+}
+
+func NewInteractionServiceHTTPBridge(client *http.Client) InteractionServiceHTTPServer {
+	return &InteractionServiceHTTPBridgeImpl{client: NewInteractionServiceHTTPClient(client)}
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetLikeStatusBatch(ctx context.Context, in *GetLikeStatusBatchRequest) (*GetLikeStatusBatchResponse, error) {
+	return c.client.GetLikeStatusBatch(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetInteractionsLikes(ctx context.Context, in *GetInteractionsLikesRequest) (*GetInteractionsLikesResponse, error) {
+	return c.client.GetInteractionsLikes(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) ToggleInteractionLike(ctx context.Context, in *ToggleInteractionLikeRequest) (*ToggleInteractionLikeResponse, error) {
+	return c.client.ToggleInteractionLike(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) CheckFavorite(ctx context.Context, in *CheckFavoriteRequest) (*CheckFavoriteResponse, error) {
+	return c.client.CheckFavorite(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetInteractionsFavorites(ctx context.Context, in *GetInteractionsFavoritesRequest) (*GetInteractionsFavoritesResponse, error) {
+	return c.client.GetInteractionsFavorites(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) ToggleInteractionFavorite(ctx context.Context, in *ToggleInteractionFavoriteRequest) (*ToggleInteractionFavoriteResponse, error) {
+	return c.client.ToggleInteractionFavorite(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetSubscriptionCount(ctx context.Context, in *GetSubscriptionCountRequest) (*GetSubscriptionCountResponse, error) {
+	return c.client.GetSubscriptionCount(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetInteractionsSubscriptions(ctx context.Context, in *GetInteractionsSubscriptionsRequest) (*GetInteractionsSubscriptionsResponse, error) {
+	return c.client.GetInteractionsSubscriptions(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetFollowerCount(ctx context.Context, in *GetFollowerCountRequest) (*GetFollowerCountResponse, error) {
+	return c.client.GetFollowerCount(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) GetInteractionsFollowers(ctx context.Context, in *GetInteractionsFollowersRequest) (*GetInteractionsFollowersResponse, error) {
+	return c.client.GetInteractionsFollowers(ctx, in)
+}
+
+func (c *InteractionServiceHTTPBridgeImpl) CreateInteractionShare(ctx context.Context, in *CreateInteractionShareRequest) (*CreateInteractionShareResponse, error) {
+	return c.client.CreateInteractionShare(ctx, in)
+}
+
+type InteractionServiceBridgeImpl struct {
+	client InteractionServiceClient
+}
+
+func NewInteractionServiceBridge(client grpc.ClientConnInterface) InteractionServiceServer {
+	return &InteractionServiceBridgeImpl{client: NewInteractionServiceClient(client)}
+}
+
+func (c *InteractionServiceBridgeImpl) GetLikeStatusBatch(ctx context.Context, in *GetLikeStatusBatchRequest) (*GetLikeStatusBatchResponse, error) {
+	return c.client.GetLikeStatusBatch(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) GetInteractionsLikes(ctx context.Context, in *GetInteractionsLikesRequest) (*GetInteractionsLikesResponse, error) {
+	return c.client.GetInteractionsLikes(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) ToggleInteractionLike(ctx context.Context, in *ToggleInteractionLikeRequest) (*ToggleInteractionLikeResponse, error) {
+	return c.client.ToggleInteractionLike(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) CheckFavorite(ctx context.Context, in *CheckFavoriteRequest) (*CheckFavoriteResponse, error) {
+	return c.client.CheckFavorite(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) GetInteractionsFavorites(ctx context.Context, in *GetInteractionsFavoritesRequest) (*GetInteractionsFavoritesResponse, error) {
+	return c.client.GetInteractionsFavorites(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) ToggleInteractionFavorite(ctx context.Context, in *ToggleInteractionFavoriteRequest) (*ToggleInteractionFavoriteResponse, error) {
+	return c.client.ToggleInteractionFavorite(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) GetSubscriptionCount(ctx context.Context, in *GetSubscriptionCountRequest) (*GetSubscriptionCountResponse, error) {
+	return c.client.GetSubscriptionCount(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) GetInteractionsSubscriptions(ctx context.Context, in *GetInteractionsSubscriptionsRequest) (*GetInteractionsSubscriptionsResponse, error) {
+	return c.client.GetInteractionsSubscriptions(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) GetFollowerCount(ctx context.Context, in *GetFollowerCountRequest) (*GetFollowerCountResponse, error) {
+	return c.client.GetFollowerCount(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) GetInteractionsFollowers(ctx context.Context, in *GetInteractionsFollowersRequest) (*GetInteractionsFollowersResponse, error) {
+	return c.client.GetInteractionsFollowers(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) CreateInteractionShare(ctx context.Context, in *CreateInteractionShareRequest) (*CreateInteractionShareResponse, error) {
+	return c.client.CreateInteractionShare(ctx, in)
+}
+
+func (c *InteractionServiceBridgeImpl) mustEmbedUnimplementedInteractionServiceServer() {}
+
+type InteractionServiceGRPC2HTTPBridgeImpl struct {
+	client InteractionServiceClient
+}
+
+func NewInteractionServiceGRPC2HTTP(client grpc.ClientConnInterface) InteractionServiceHTTPServer {
+	return &InteractionServiceGRPC2HTTPBridgeImpl{client: NewInteractionServiceClient(client)}
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetLikeStatusBatch(ctx context.Context, in *GetLikeStatusBatchRequest) (*GetLikeStatusBatchResponse, error) {
+	return c.client.GetLikeStatusBatch(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetInteractionsLikes(ctx context.Context, in *GetInteractionsLikesRequest) (*GetInteractionsLikesResponse, error) {
+	return c.client.GetInteractionsLikes(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) ToggleInteractionLike(ctx context.Context, in *ToggleInteractionLikeRequest) (*ToggleInteractionLikeResponse, error) {
+	return c.client.ToggleInteractionLike(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) CheckFavorite(ctx context.Context, in *CheckFavoriteRequest) (*CheckFavoriteResponse, error) {
+	return c.client.CheckFavorite(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetInteractionsFavorites(ctx context.Context, in *GetInteractionsFavoritesRequest) (*GetInteractionsFavoritesResponse, error) {
+	return c.client.GetInteractionsFavorites(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) ToggleInteractionFavorite(ctx context.Context, in *ToggleInteractionFavoriteRequest) (*ToggleInteractionFavoriteResponse, error) {
+	return c.client.ToggleInteractionFavorite(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetSubscriptionCount(ctx context.Context, in *GetSubscriptionCountRequest) (*GetSubscriptionCountResponse, error) {
+	return c.client.GetSubscriptionCount(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetInteractionsSubscriptions(ctx context.Context, in *GetInteractionsSubscriptionsRequest) (*GetInteractionsSubscriptionsResponse, error) {
+	return c.client.GetInteractionsSubscriptions(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetFollowerCount(ctx context.Context, in *GetFollowerCountRequest) (*GetFollowerCountResponse, error) {
+	return c.client.GetFollowerCount(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) GetInteractionsFollowers(ctx context.Context, in *GetInteractionsFollowersRequest) (*GetInteractionsFollowersResponse, error) {
+	return c.client.GetInteractionsFollowers(ctx, in)
+}
+
+func (c *InteractionServiceGRPC2HTTPBridgeImpl) CreateInteractionShare(ctx context.Context, in *CreateInteractionShareRequest) (*CreateInteractionShareResponse, error) {
+	return c.client.CreateInteractionShare(ctx, in)
+}
+
+type InteractionServiceHTTP2GRPCBridgeImpl struct {
+	client InteractionServiceHTTPClient
+}
+
+func NewInteractionServiceHTTP2GRPC(client *http.Client) InteractionServiceServer {
+	return &InteractionServiceHTTP2GRPCBridgeImpl{client: NewInteractionServiceHTTPClient(client)}
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetLikeStatusBatch(ctx context.Context, in *GetLikeStatusBatchRequest) (*GetLikeStatusBatchResponse, error) {
+	return c.client.GetLikeStatusBatch(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetInteractionsLikes(ctx context.Context, in *GetInteractionsLikesRequest) (*GetInteractionsLikesResponse, error) {
+	return c.client.GetInteractionsLikes(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) ToggleInteractionLike(ctx context.Context, in *ToggleInteractionLikeRequest) (*ToggleInteractionLikeResponse, error) {
+	return c.client.ToggleInteractionLike(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) CheckFavorite(ctx context.Context, in *CheckFavoriteRequest) (*CheckFavoriteResponse, error) {
+	return c.client.CheckFavorite(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetInteractionsFavorites(ctx context.Context, in *GetInteractionsFavoritesRequest) (*GetInteractionsFavoritesResponse, error) {
+	return c.client.GetInteractionsFavorites(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) ToggleInteractionFavorite(ctx context.Context, in *ToggleInteractionFavoriteRequest) (*ToggleInteractionFavoriteResponse, error) {
+	return c.client.ToggleInteractionFavorite(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetSubscriptionCount(ctx context.Context, in *GetSubscriptionCountRequest) (*GetSubscriptionCountResponse, error) {
+	return c.client.GetSubscriptionCount(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetInteractionsSubscriptions(ctx context.Context, in *GetInteractionsSubscriptionsRequest) (*GetInteractionsSubscriptionsResponse, error) {
+	return c.client.GetInteractionsSubscriptions(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetFollowerCount(ctx context.Context, in *GetFollowerCountRequest) (*GetFollowerCountResponse, error) {
+	return c.client.GetFollowerCount(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) GetInteractionsFollowers(ctx context.Context, in *GetInteractionsFollowersRequest) (*GetInteractionsFollowersResponse, error) {
+	return c.client.GetInteractionsFollowers(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) CreateInteractionShare(ctx context.Context, in *CreateInteractionShareRequest) (*CreateInteractionShareResponse, error) {
+	return c.client.CreateInteractionShare(ctx, in)
+}
+
+func (c *InteractionServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedInteractionServiceServer() {}
+
+const UploadServiceUploadFileBridgeOperation = "/api.v1.services.media.UploadService/UploadFile"
+const UploadServiceInitiateMultipartUploadBridgeOperation = "/api.v1.services.media.UploadService/InitiateMultipartUpload"
+const UploadServiceUploadPartBridgeOperation = "/api.v1.services.media.UploadService/UploadPart"
+const UploadServiceCompleteMultipartUploadBridgeOperation = "/api.v1.services.media.UploadService/CompleteMultipartUpload"
+const UploadServiceAbortMultipartUploadBridgeOperation = "/api.v1.services.media.UploadService/AbortMultipartUpload"
+const UploadServiceGetUploadSessionBridgeOperation = "/api.v1.services.media.UploadService/GetUploadSession"
+const UploadServiceListUploadSessionsBridgeOperation = "/api.v1.services.media.UploadService/ListUploadSessions"
+const UploadServiceListPartsBridgeOperation = "/api.v1.services.media.UploadService/ListParts"
+const UploadServiceSimpleUploadBridgeOperation = "/api.v1.services.media.UploadService/SimpleUpload"
+
+type UploadServiceBridgeServer interface {
+	// UploadFile uploads a file directly (single-request upload for small files).
+	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
+	// InitiateMultipartUpload starts a multipart upload session.
+	InitiateMultipartUpload(context.Context, *InitiateMultipartUploadRequest) (*InitiateMultipartUploadResponse, error)
+	// UploadPart uploads a part of a multipart upload.
+	UploadPart(context.Context, *UploadPartRequest) (*UploadPartResponse, error)
+	// CompleteMultipartUpload completes a multipart upload.
+	CompleteMultipartUpload(context.Context, *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error)
+	// AbortMultipartUpload aborts a multipart upload.
+	AbortMultipartUpload(context.Context, *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error)
+	// GetUploadSession gets upload session info.
+	GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error)
+	// ListUploadSessions lists upload sessions for a user.
+	ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error)
+	// ListParts lists uploaded parts for a multipart upload.
+	ListParts(context.Context, *ListPartsRequest) (*ListPartsResponse, error)
+	// SimpleUpload uploads a small file directly (alternative to UploadFile).
+	SimpleUpload(context.Context, *SimpleUploadRequest) (*SimpleUploadResponse, error)
+}
+
+type UploadServiceHooker interface {
+	UploadServiceUploadFileHooker
+	UploadServiceInitiateMultipartUploadHooker
+	UploadServiceUploadPartHooker
+	UploadServiceCompleteMultipartUploadHooker
+	UploadServiceAbortMultipartUploadHooker
+	UploadServiceGetUploadSessionHooker
+	UploadServiceListUploadSessionsHooker
+	UploadServiceListPartsHooker
+	UploadServiceSimpleUploadHooker
+}
+
+type UploadServiceHookedBridger interface {
+	UploadServiceHooker
+	UploadServiceBridgeServer
+}
+type UploadServiceUploadFileHooker interface {
+	PrepareUploadFile(http.Context, *UploadFileRequest) (context.Context, error)
+	CompleteUploadFile(http.Context, *UploadFileRequest, *UploadFileResponse) error
+}
+type UploadServiceInitiateMultipartUploadHooker interface {
+	PrepareInitiateMultipartUpload(http.Context, *InitiateMultipartUploadRequest) (context.Context, error)
+	CompleteInitiateMultipartUpload(http.Context, *InitiateMultipartUploadRequest, *InitiateMultipartUploadResponse) error
+}
+type UploadServiceUploadPartHooker interface {
+	PrepareUploadPart(http.Context, *UploadPartRequest) (context.Context, error)
+	CompleteUploadPart(http.Context, *UploadPartRequest, *UploadPartResponse) error
+}
+type UploadServiceCompleteMultipartUploadHooker interface {
+	PrepareCompleteMultipartUpload(http.Context, *CompleteMultipartUploadRequest) (context.Context, error)
+	CompleteCompleteMultipartUpload(http.Context, *CompleteMultipartUploadRequest, *CompleteMultipartUploadResponse) error
+}
+type UploadServiceAbortMultipartUploadHooker interface {
+	PrepareAbortMultipartUpload(http.Context, *AbortMultipartUploadRequest) (context.Context, error)
+	CompleteAbortMultipartUpload(http.Context, *AbortMultipartUploadRequest, *AbortMultipartUploadResponse) error
+}
+type UploadServiceGetUploadSessionHooker interface {
+	PrepareGetUploadSession(http.Context, *GetUploadSessionRequest) (context.Context, error)
+	CompleteGetUploadSession(http.Context, *GetUploadSessionRequest, *GetUploadSessionResponse) error
+}
+type UploadServiceListUploadSessionsHooker interface {
+	PrepareListUploadSessions(http.Context, *ListUploadSessionsRequest) (context.Context, error)
+	CompleteListUploadSessions(http.Context, *ListUploadSessionsRequest, *ListUploadSessionsResponse) error
+}
+type UploadServiceListPartsHooker interface {
+	PrepareListParts(http.Context, *ListPartsRequest) (context.Context, error)
+	CompleteListParts(http.Context, *ListPartsRequest, *ListPartsResponse) error
+}
+type UploadServiceSimpleUploadHooker interface {
+	PrepareSimpleUpload(http.Context, *SimpleUploadRequest) (context.Context, error)
+	CompleteSimpleUpload(http.Context, *SimpleUploadRequest, *SimpleUploadResponse) error
+}
+
+func RegisterUploadServiceBridgeServer(s *http.Server, srv UploadServiceHookedBridger) {
+	r := s.Route("/")
+	r.POST("/api/v1/upload/file", _UploadService_UploadFile0_Bridge_Handler(srv))
+	r.POST("/api/v1/upload/multipart/initiate", _UploadService_InitiateMultipartUpload0_Bridge_Handler(srv))
+	r.POST("/api/v1/upload/multipart/:upload_id/part", _UploadService_UploadPart0_Bridge_Handler(srv))
+	r.POST("/api/v1/upload/multipart/:upload_id/complete", _UploadService_CompleteMultipartUpload0_Bridge_Handler(srv))
+	r.POST("/api/v1/upload/multipart/:upload_id/abort", _UploadService_AbortMultipartUpload0_Bridge_Handler(srv))
+	r.GET("/api/v1/upload/multipart/:upload_id", _UploadService_GetUploadSession0_Bridge_Handler(srv))
+	r.GET("/api/v1/upload/sessions", _UploadService_ListUploadSessions0_Bridge_Handler(srv))
+	r.GET("/api/v1/upload/multipart/:upload_id/parts", _UploadService_ListParts0_Bridge_Handler(srv))
+	r.POST("/api/v1/upload/simple", _UploadService_SimpleUpload0_Bridge_Handler(srv))
+}
+
+func _UploadService_UploadFile0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UploadFileRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceUploadFile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UploadFile(ctx, req.(*UploadFileRequest))
+		})
+
+		newctx, err := srv.PrepareUploadFile(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUploadFile(ctx, &in, out.(*UploadFileResponse))
+	}
+}
+
+func _UploadService_InitiateMultipartUpload0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in InitiateMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceInitiateMultipartUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.InitiateMultipartUpload(ctx, req.(*InitiateMultipartUploadRequest))
+		})
+
+		newctx, err := srv.PrepareInitiateMultipartUpload(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteInitiateMultipartUpload(ctx, &in, out.(*InitiateMultipartUploadResponse))
+	}
+}
+
+func _UploadService_UploadPart0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UploadPartRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceUploadPart)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UploadPart(ctx, req.(*UploadPartRequest))
+		})
+
+		newctx, err := srv.PrepareUploadPart(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUploadPart(ctx, &in, out.(*UploadPartResponse))
+	}
+}
+
+func _UploadService_CompleteMultipartUpload0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CompleteMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceCompleteMultipartUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CompleteMultipartUpload(ctx, req.(*CompleteMultipartUploadRequest))
+		})
+
+		newctx, err := srv.PrepareCompleteMultipartUpload(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCompleteMultipartUpload(ctx, &in, out.(*CompleteMultipartUploadResponse))
+	}
+}
+
+func _UploadService_AbortMultipartUpload0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AbortMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceAbortMultipartUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AbortMultipartUpload(ctx, req.(*AbortMultipartUploadRequest))
+		})
+
+		newctx, err := srv.PrepareAbortMultipartUpload(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteAbortMultipartUpload(ctx, &in, out.(*AbortMultipartUploadResponse))
+	}
+}
+
+func _UploadService_GetUploadSession0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUploadSessionRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceGetUploadSession)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUploadSession(ctx, req.(*GetUploadSessionRequest))
+		})
+
+		newctx, err := srv.PrepareGetUploadSession(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetUploadSession(ctx, &in, out.(*GetUploadSessionResponse))
+	}
+}
+
+func _UploadService_ListUploadSessions0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListUploadSessionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceListUploadSessions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
+		})
+
+		newctx, err := srv.PrepareListUploadSessions(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListUploadSessions(ctx, &in, out.(*ListUploadSessionsResponse))
+	}
+}
+
+func _UploadService_ListParts0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListPartsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceListParts)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListParts(ctx, req.(*ListPartsRequest))
+		})
+
+		newctx, err := srv.PrepareListParts(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListParts(ctx, &in, out.(*ListPartsResponse))
+	}
+}
+
+func _UploadService_SimpleUpload0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SimpleUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceSimpleUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SimpleUpload(ctx, req.(*SimpleUploadRequest))
+		})
+
+		newctx, err := srv.PrepareSimpleUpload(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteSimpleUpload(ctx, &in, out.(*SimpleUploadResponse))
+	}
+}
+
+// UnimplementedUploadServiceHooked must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedUploadServiceHooked struct{}
+
+func (UnimplementedUploadServiceHooked) PrepareUploadFile(ctx http.Context, in *UploadFileRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteUploadFile(ctx http.Context, in *UploadFileRequest, out *UploadFileResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareInitiateMultipartUpload(ctx http.Context, in *InitiateMultipartUploadRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteInitiateMultipartUpload(ctx http.Context, in *InitiateMultipartUploadRequest, out *InitiateMultipartUploadResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareUploadPart(ctx http.Context, in *UploadPartRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteUploadPart(ctx http.Context, in *UploadPartRequest, out *UploadPartResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareCompleteMultipartUpload(ctx http.Context, in *CompleteMultipartUploadRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteCompleteMultipartUpload(ctx http.Context, in *CompleteMultipartUploadRequest, out *CompleteMultipartUploadResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareAbortMultipartUpload(ctx http.Context, in *AbortMultipartUploadRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteAbortMultipartUpload(ctx http.Context, in *AbortMultipartUploadRequest, out *AbortMultipartUploadResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareGetUploadSession(ctx http.Context, in *GetUploadSessionRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteGetUploadSession(ctx http.Context, in *GetUploadSessionRequest, out *GetUploadSessionResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareListUploadSessions(ctx http.Context, in *ListUploadSessionsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteListUploadSessions(ctx http.Context, in *ListUploadSessionsRequest, out *ListUploadSessionsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareListParts(ctx http.Context, in *ListPartsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteListParts(ctx http.Context, in *ListPartsRequest, out *ListPartsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareSimpleUpload(ctx http.Context, in *SimpleUploadRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteSimpleUpload(ctx http.Context, in *SimpleUploadRequest, out *SimpleUploadResponse) error {
+	return ctx.Result(200, out)
+}
+
+func WithUploadServiceHook(h UploadServiceHooker) func(UploadServiceBridgeServer) UploadServiceHookedBridger {
+	return func(srv UploadServiceBridgeServer) UploadServiceHookedBridger {
+		return UploadServiceHookedBridge{UploadServiceBridgeServer: srv, UploadServiceHooker: h}
+	}
+}
+
+// UploadServiceHookedBridge is a bridge between the HTTP and gRPC implementations of UploadService.
+// It implements the HTTP and gRPC implementations of UploadService.
+// It forwards requests and responses between the two implementations.
+type UploadServiceHookedBridge struct {
+	UploadServiceBridgeServer
+	UploadServiceHooker
+}
+
+type UploadServiceHTTPBridgeImpl struct {
+	client UploadServiceHTTPClient
+}
+
+func NewUploadServiceHTTPBridge(client *http.Client) UploadServiceHTTPServer {
+	return &UploadServiceHTTPBridgeImpl{client: NewUploadServiceHTTPClient(client)}
+}
+
+func (c *UploadServiceHTTPBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
+	return c.client.UploadFile(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadRequest) (*InitiateMultipartUploadResponse, error) {
+	return c.client.InitiateMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) UploadPart(ctx context.Context, in *UploadPartRequest) (*UploadPartResponse, error) {
+	return c.client.UploadPart(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error) {
+	return c.client.CompleteMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error) {
+	return c.client.AbortMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
+	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) ListParts(ctx context.Context, in *ListPartsRequest) (*ListPartsResponse, error) {
+	return c.client.ListParts(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
+	return c.client.SimpleUpload(ctx, in)
+}
+
+type UploadServiceBridgeImpl struct {
+	client UploadServiceClient
+}
+
+func NewUploadServiceBridge(client grpc.ClientConnInterface) UploadServiceServer {
+	return &UploadServiceBridgeImpl{client: NewUploadServiceClient(client)}
+}
+
+func (c *UploadServiceBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
+	return c.client.UploadFile(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadRequest) (*InitiateMultipartUploadResponse, error) {
+	return c.client.InitiateMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) UploadPart(ctx context.Context, in *UploadPartRequest) (*UploadPartResponse, error) {
+	return c.client.UploadPart(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error) {
+	return c.client.CompleteMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error) {
+	return c.client.AbortMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
+	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) ListParts(ctx context.Context, in *ListPartsRequest) (*ListPartsResponse, error) {
+	return c.client.ListParts(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
+	return c.client.SimpleUpload(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) mustEmbedUnimplementedUploadServiceServer() {}
+
+type UploadServiceGRPC2HTTPBridgeImpl struct {
+	client UploadServiceClient
+}
+
+func NewUploadServiceGRPC2HTTP(client grpc.ClientConnInterface) UploadServiceHTTPServer {
+	return &UploadServiceGRPC2HTTPBridgeImpl{client: NewUploadServiceClient(client)}
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
+	return c.client.UploadFile(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadRequest) (*InitiateMultipartUploadResponse, error) {
+	return c.client.InitiateMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) UploadPart(ctx context.Context, in *UploadPartRequest) (*UploadPartResponse, error) {
+	return c.client.UploadPart(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error) {
+	return c.client.CompleteMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error) {
+	return c.client.AbortMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
+	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) ListParts(ctx context.Context, in *ListPartsRequest) (*ListPartsResponse, error) {
+	return c.client.ListParts(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
+	return c.client.SimpleUpload(ctx, in)
+}
+
+type UploadServiceHTTP2GRPCBridgeImpl struct {
+	client UploadServiceHTTPClient
+}
+
+func NewUploadServiceHTTP2GRPC(client *http.Client) UploadServiceServer {
+	return &UploadServiceHTTP2GRPCBridgeImpl{client: NewUploadServiceHTTPClient(client)}
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
+	return c.client.UploadFile(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadRequest) (*InitiateMultipartUploadResponse, error) {
+	return c.client.InitiateMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) UploadPart(ctx context.Context, in *UploadPartRequest) (*UploadPartResponse, error) {
+	return c.client.UploadPart(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error) {
+	return c.client.CompleteMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error) {
+	return c.client.AbortMultipartUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
+	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) ListParts(ctx context.Context, in *ListPartsRequest) (*ListPartsResponse, error) {
+	return c.client.ListParts(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
+	return c.client.SimpleUpload(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedUploadServiceServer() {}

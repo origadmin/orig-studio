@@ -645,6 +645,134 @@ func (x *ListCommentsResponse) GetPageSize() int32 {
 	return 0
 }
 
+type ListMediaCommentsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMediaCommentsRequest) Reset() {
+	*x = ListMediaCommentsRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMediaCommentsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMediaCommentsRequest) ProtoMessage() {}
+
+func (x *ListMediaCommentsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMediaCommentsRequest.ProtoReflect.Descriptor instead.
+func (*ListMediaCommentsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListMediaCommentsRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ListMediaCommentsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListMediaCommentsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ListMediaCommentsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Comments      []*Comment             `protobuf:"bytes,2,rep,name=comments,proto3" json:"comments,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMediaCommentsResponse) Reset() {
+	*x = ListMediaCommentsResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMediaCommentsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMediaCommentsResponse) ProtoMessage() {}
+
+func (x *ListMediaCommentsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMediaCommentsResponse.ProtoReflect.Descriptor instead.
+func (*ListMediaCommentsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListMediaCommentsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListMediaCommentsResponse) GetComments() []*Comment {
+	if x != nil {
+		return x.Comments
+	}
+	return nil
+}
+
+func (x *ListMediaCommentsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListMediaCommentsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
 type ToggleLikeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MediaId       int64                  `protobuf:"varint,1,opt,name=media_id,proto3" json:"media_id,omitempty"`
@@ -654,7 +782,7 @@ type ToggleLikeRequest struct {
 
 func (x *ToggleLikeRequest) Reset() {
 	*x = ToggleLikeRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[11]
+	mi := &file_v1_content_content_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -666,7 +794,7 @@ func (x *ToggleLikeRequest) String() string {
 func (*ToggleLikeRequest) ProtoMessage() {}
 
 func (x *ToggleLikeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[11]
+	mi := &file_v1_content_content_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -679,7 +807,7 @@ func (x *ToggleLikeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleLikeRequest.ProtoReflect.Descriptor instead.
 func (*ToggleLikeRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{11}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ToggleLikeRequest) GetMediaId() int64 {
@@ -699,7 +827,7 @@ type ToggleLikeResponse struct {
 
 func (x *ToggleLikeResponse) Reset() {
 	*x = ToggleLikeResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[12]
+	mi := &file_v1_content_content_service_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -711,7 +839,7 @@ func (x *ToggleLikeResponse) String() string {
 func (*ToggleLikeResponse) ProtoMessage() {}
 
 func (x *ToggleLikeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[12]
+	mi := &file_v1_content_content_service_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -724,7 +852,7 @@ func (x *ToggleLikeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleLikeResponse.ProtoReflect.Descriptor instead.
 func (*ToggleLikeResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{12}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ToggleLikeResponse) GetLiked() bool {
@@ -752,7 +880,7 @@ type ListLikesRequest struct {
 
 func (x *ListLikesRequest) Reset() {
 	*x = ListLikesRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[13]
+	mi := &file_v1_content_content_service_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -764,7 +892,7 @@ func (x *ListLikesRequest) String() string {
 func (*ListLikesRequest) ProtoMessage() {}
 
 func (x *ListLikesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[13]
+	mi := &file_v1_content_content_service_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -777,7 +905,7 @@ func (x *ListLikesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLikesRequest.ProtoReflect.Descriptor instead.
 func (*ListLikesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{13}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ListLikesRequest) GetMediaId() int64 {
@@ -811,7 +939,7 @@ type ListLikesResponse struct {
 
 func (x *ListLikesResponse) Reset() {
 	*x = ListLikesResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[14]
+	mi := &file_v1_content_content_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -823,7 +951,7 @@ func (x *ListLikesResponse) String() string {
 func (*ListLikesResponse) ProtoMessage() {}
 
 func (x *ListLikesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[14]
+	mi := &file_v1_content_content_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -836,7 +964,7 @@ func (x *ListLikesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLikesResponse.ProtoReflect.Descriptor instead.
 func (*ListLikesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{14}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ListLikesResponse) GetTotal() int32 {
@@ -862,7 +990,7 @@ type ToggleFavoriteRequest struct {
 
 func (x *ToggleFavoriteRequest) Reset() {
 	*x = ToggleFavoriteRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[15]
+	mi := &file_v1_content_content_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -874,7 +1002,7 @@ func (x *ToggleFavoriteRequest) String() string {
 func (*ToggleFavoriteRequest) ProtoMessage() {}
 
 func (x *ToggleFavoriteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[15]
+	mi := &file_v1_content_content_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -887,7 +1015,7 @@ func (x *ToggleFavoriteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleFavoriteRequest.ProtoReflect.Descriptor instead.
 func (*ToggleFavoriteRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{15}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ToggleFavoriteRequest) GetMediaId() int64 {
@@ -907,7 +1035,7 @@ type ToggleFavoriteResponse struct {
 
 func (x *ToggleFavoriteResponse) Reset() {
 	*x = ToggleFavoriteResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[16]
+	mi := &file_v1_content_content_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -919,7 +1047,7 @@ func (x *ToggleFavoriteResponse) String() string {
 func (*ToggleFavoriteResponse) ProtoMessage() {}
 
 func (x *ToggleFavoriteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[16]
+	mi := &file_v1_content_content_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -932,7 +1060,7 @@ func (x *ToggleFavoriteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleFavoriteResponse.ProtoReflect.Descriptor instead.
 func (*ToggleFavoriteResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{16}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ToggleFavoriteResponse) GetFavorited() bool {
@@ -959,7 +1087,7 @@ type ListFavoritesRequest struct {
 
 func (x *ListFavoritesRequest) Reset() {
 	*x = ListFavoritesRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[17]
+	mi := &file_v1_content_content_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -971,7 +1099,7 @@ func (x *ListFavoritesRequest) String() string {
 func (*ListFavoritesRequest) ProtoMessage() {}
 
 func (x *ListFavoritesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[17]
+	mi := &file_v1_content_content_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -984,7 +1112,7 @@ func (x *ListFavoritesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFavoritesRequest.ProtoReflect.Descriptor instead.
 func (*ListFavoritesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{17}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListFavoritesRequest) GetPage() int32 {
@@ -1013,7 +1141,7 @@ type ListFavoritesResponse struct {
 
 func (x *ListFavoritesResponse) Reset() {
 	*x = ListFavoritesResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[18]
+	mi := &file_v1_content_content_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1025,7 +1153,7 @@ func (x *ListFavoritesResponse) String() string {
 func (*ListFavoritesResponse) ProtoMessage() {}
 
 func (x *ListFavoritesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[18]
+	mi := &file_v1_content_content_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1038,7 +1166,7 @@ func (x *ListFavoritesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFavoritesResponse.ProtoReflect.Descriptor instead.
 func (*ListFavoritesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{18}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListFavoritesResponse) GetTotal() int32 {
@@ -1086,7 +1214,7 @@ type Notification struct {
 
 func (x *Notification) Reset() {
 	*x = Notification{}
-	mi := &file_v1_content_content_service_proto_msgTypes[19]
+	mi := &file_v1_content_content_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1098,7 +1226,7 @@ func (x *Notification) String() string {
 func (*Notification) ProtoMessage() {}
 
 func (x *Notification) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[19]
+	mi := &file_v1_content_content_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1111,7 +1239,7 @@ func (x *Notification) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Notification.ProtoReflect.Descriptor instead.
 func (*Notification) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{19}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Notification) GetId() int64 {
@@ -1188,7 +1316,7 @@ type ListNotificationsRequest struct {
 
 func (x *ListNotificationsRequest) Reset() {
 	*x = ListNotificationsRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[20]
+	mi := &file_v1_content_content_service_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1200,7 +1328,7 @@ func (x *ListNotificationsRequest) String() string {
 func (*ListNotificationsRequest) ProtoMessage() {}
 
 func (x *ListNotificationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[20]
+	mi := &file_v1_content_content_service_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1213,7 +1341,7 @@ func (x *ListNotificationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListNotificationsRequest.ProtoReflect.Descriptor instead.
 func (*ListNotificationsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{20}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ListNotificationsRequest) GetPage() int32 {
@@ -1248,7 +1376,7 @@ type ListNotificationsResponse struct {
 
 func (x *ListNotificationsResponse) Reset() {
 	*x = ListNotificationsResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[21]
+	mi := &file_v1_content_content_service_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1260,7 +1388,7 @@ func (x *ListNotificationsResponse) String() string {
 func (*ListNotificationsResponse) ProtoMessage() {}
 
 func (x *ListNotificationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[21]
+	mi := &file_v1_content_content_service_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1273,7 +1401,7 @@ func (x *ListNotificationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListNotificationsResponse.ProtoReflect.Descriptor instead.
 func (*ListNotificationsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{21}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListNotificationsResponse) GetTotal() int32 {
@@ -1306,7 +1434,7 @@ type MarkNotificationReadRequest struct {
 
 func (x *MarkNotificationReadRequest) Reset() {
 	*x = MarkNotificationReadRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[22]
+	mi := &file_v1_content_content_service_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1318,7 +1446,7 @@ func (x *MarkNotificationReadRequest) String() string {
 func (*MarkNotificationReadRequest) ProtoMessage() {}
 
 func (x *MarkNotificationReadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[22]
+	mi := &file_v1_content_content_service_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1331,7 +1459,7 @@ func (x *MarkNotificationReadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkNotificationReadRequest.ProtoReflect.Descriptor instead.
 func (*MarkNotificationReadRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{22}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *MarkNotificationReadRequest) GetId() int64 {
@@ -1349,7 +1477,7 @@ type MarkNotificationReadResponse struct {
 
 func (x *MarkNotificationReadResponse) Reset() {
 	*x = MarkNotificationReadResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[23]
+	mi := &file_v1_content_content_service_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1361,7 +1489,7 @@ func (x *MarkNotificationReadResponse) String() string {
 func (*MarkNotificationReadResponse) ProtoMessage() {}
 
 func (x *MarkNotificationReadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[23]
+	mi := &file_v1_content_content_service_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1374,7 +1502,7 @@ func (x *MarkNotificationReadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkNotificationReadResponse.ProtoReflect.Descriptor instead.
 func (*MarkNotificationReadResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{23}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{25}
 }
 
 type MarkAllNotificationsReadRequest struct {
@@ -1385,7 +1513,7 @@ type MarkAllNotificationsReadRequest struct {
 
 func (x *MarkAllNotificationsReadRequest) Reset() {
 	*x = MarkAllNotificationsReadRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[24]
+	mi := &file_v1_content_content_service_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1397,7 +1525,7 @@ func (x *MarkAllNotificationsReadRequest) String() string {
 func (*MarkAllNotificationsReadRequest) ProtoMessage() {}
 
 func (x *MarkAllNotificationsReadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[24]
+	mi := &file_v1_content_content_service_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1410,7 +1538,7 @@ func (x *MarkAllNotificationsReadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkAllNotificationsReadRequest.ProtoReflect.Descriptor instead.
 func (*MarkAllNotificationsReadRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{24}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{26}
 }
 
 type MarkAllNotificationsReadResponse struct {
@@ -1421,7 +1549,7 @@ type MarkAllNotificationsReadResponse struct {
 
 func (x *MarkAllNotificationsReadResponse) Reset() {
 	*x = MarkAllNotificationsReadResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[25]
+	mi := &file_v1_content_content_service_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1433,7 +1561,7 @@ func (x *MarkAllNotificationsReadResponse) String() string {
 func (*MarkAllNotificationsReadResponse) ProtoMessage() {}
 
 func (x *MarkAllNotificationsReadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[25]
+	mi := &file_v1_content_content_service_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1446,7 +1574,7 @@ func (x *MarkAllNotificationsReadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkAllNotificationsReadResponse.ProtoReflect.Descriptor instead.
 func (*MarkAllNotificationsReadResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{25}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{27}
 }
 
 type GetFeedRequest struct {
@@ -1460,7 +1588,7 @@ type GetFeedRequest struct {
 
 func (x *GetFeedRequest) Reset() {
 	*x = GetFeedRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[26]
+	mi := &file_v1_content_content_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1472,7 +1600,7 @@ func (x *GetFeedRequest) String() string {
 func (*GetFeedRequest) ProtoMessage() {}
 
 func (x *GetFeedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[26]
+	mi := &file_v1_content_content_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1485,7 +1613,7 @@ func (x *GetFeedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{26}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetFeedRequest) GetPage() int32 {
@@ -1521,7 +1649,7 @@ type GetFeedResponse struct {
 
 func (x *GetFeedResponse) Reset() {
 	*x = GetFeedResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[27]
+	mi := &file_v1_content_content_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1533,7 +1661,7 @@ func (x *GetFeedResponse) String() string {
 func (*GetFeedResponse) ProtoMessage() {}
 
 func (x *GetFeedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[27]
+	mi := &file_v1_content_content_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1546,7 +1674,7 @@ func (x *GetFeedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedResponse.ProtoReflect.Descriptor instead.
 func (*GetFeedResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{27}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GetFeedResponse) GetTotal() int32 {
@@ -1586,7 +1714,7 @@ type GetPortalHomeRequest struct {
 
 func (x *GetPortalHomeRequest) Reset() {
 	*x = GetPortalHomeRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[28]
+	mi := &file_v1_content_content_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1598,7 +1726,7 @@ func (x *GetPortalHomeRequest) String() string {
 func (*GetPortalHomeRequest) ProtoMessage() {}
 
 func (x *GetPortalHomeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[28]
+	mi := &file_v1_content_content_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1611,7 +1739,7 @@ func (x *GetPortalHomeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPortalHomeRequest.ProtoReflect.Descriptor instead.
 func (*GetPortalHomeRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{28}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *GetPortalHomeRequest) GetLimit() int32 {
@@ -1632,7 +1760,7 @@ type GetPortalHomeResponse struct {
 
 func (x *GetPortalHomeResponse) Reset() {
 	*x = GetPortalHomeResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[29]
+	mi := &file_v1_content_content_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1644,7 +1772,7 @@ func (x *GetPortalHomeResponse) String() string {
 func (*GetPortalHomeResponse) ProtoMessage() {}
 
 func (x *GetPortalHomeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[29]
+	mi := &file_v1_content_content_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1657,7 +1785,7 @@ func (x *GetPortalHomeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPortalHomeResponse.ProtoReflect.Descriptor instead.
 func (*GetPortalHomeResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{29}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *GetPortalHomeResponse) GetFeatured() []*types.Media {
@@ -1691,7 +1819,7 @@ type GetPortalTrendingRequest struct {
 
 func (x *GetPortalTrendingRequest) Reset() {
 	*x = GetPortalTrendingRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[30]
+	mi := &file_v1_content_content_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1703,7 +1831,7 @@ func (x *GetPortalTrendingRequest) String() string {
 func (*GetPortalTrendingRequest) ProtoMessage() {}
 
 func (x *GetPortalTrendingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[30]
+	mi := &file_v1_content_content_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1716,7 +1844,7 @@ func (x *GetPortalTrendingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPortalTrendingRequest.ProtoReflect.Descriptor instead.
 func (*GetPortalTrendingRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{30}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GetPortalTrendingRequest) GetPeriod() string {
@@ -1742,7 +1870,7 @@ type GetPortalTrendingResponse struct {
 
 func (x *GetPortalTrendingResponse) Reset() {
 	*x = GetPortalTrendingResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[31]
+	mi := &file_v1_content_content_service_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1754,7 +1882,7 @@ func (x *GetPortalTrendingResponse) String() string {
 func (*GetPortalTrendingResponse) ProtoMessage() {}
 
 func (x *GetPortalTrendingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[31]
+	mi := &file_v1_content_content_service_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1767,7 +1895,7 @@ func (x *GetPortalTrendingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPortalTrendingResponse.ProtoReflect.Descriptor instead.
 func (*GetPortalTrendingResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{31}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *GetPortalTrendingResponse) GetItems() []*types.Media {
@@ -1787,7 +1915,7 @@ type GetPortalSubscriptionFeedRequest struct {
 
 func (x *GetPortalSubscriptionFeedRequest) Reset() {
 	*x = GetPortalSubscriptionFeedRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[32]
+	mi := &file_v1_content_content_service_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1799,7 +1927,7 @@ func (x *GetPortalSubscriptionFeedRequest) String() string {
 func (*GetPortalSubscriptionFeedRequest) ProtoMessage() {}
 
 func (x *GetPortalSubscriptionFeedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[32]
+	mi := &file_v1_content_content_service_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1812,7 +1940,7 @@ func (x *GetPortalSubscriptionFeedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPortalSubscriptionFeedRequest.ProtoReflect.Descriptor instead.
 func (*GetPortalSubscriptionFeedRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{32}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *GetPortalSubscriptionFeedRequest) GetPage() int32 {
@@ -1841,7 +1969,7 @@ type GetPortalSubscriptionFeedResponse struct {
 
 func (x *GetPortalSubscriptionFeedResponse) Reset() {
 	*x = GetPortalSubscriptionFeedResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[33]
+	mi := &file_v1_content_content_service_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1853,7 +1981,7 @@ func (x *GetPortalSubscriptionFeedResponse) String() string {
 func (*GetPortalSubscriptionFeedResponse) ProtoMessage() {}
 
 func (x *GetPortalSubscriptionFeedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[33]
+	mi := &file_v1_content_content_service_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1866,7 +1994,7 @@ func (x *GetPortalSubscriptionFeedResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetPortalSubscriptionFeedResponse.ProtoReflect.Descriptor instead.
 func (*GetPortalSubscriptionFeedResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{33}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetPortalSubscriptionFeedResponse) GetTotal() int32 {
@@ -1910,7 +2038,7 @@ type Category struct {
 
 func (x *Category) Reset() {
 	*x = Category{}
-	mi := &file_v1_content_content_service_proto_msgTypes[34]
+	mi := &file_v1_content_content_service_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1922,7 +2050,7 @@ func (x *Category) String() string {
 func (*Category) ProtoMessage() {}
 
 func (x *Category) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[34]
+	mi := &file_v1_content_content_service_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1935,7 +2063,7 @@ func (x *Category) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Category.ProtoReflect.Descriptor instead.
 func (*Category) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{34}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *Category) GetId() int64 {
@@ -1985,7 +2113,7 @@ type Tag struct {
 
 func (x *Tag) Reset() {
 	*x = Tag{}
-	mi := &file_v1_content_content_service_proto_msgTypes[35]
+	mi := &file_v1_content_content_service_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1997,7 +2125,7 @@ func (x *Tag) String() string {
 func (*Tag) ProtoMessage() {}
 
 func (x *Tag) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[35]
+	mi := &file_v1_content_content_service_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2010,7 +2138,7 @@ func (x *Tag) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tag.ProtoReflect.Descriptor instead.
 func (*Tag) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{35}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *Tag) GetId() int64 {
@@ -2051,7 +2179,7 @@ type ListCategoriesRequest struct {
 
 func (x *ListCategoriesRequest) Reset() {
 	*x = ListCategoriesRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[36]
+	mi := &file_v1_content_content_service_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2063,7 +2191,7 @@ func (x *ListCategoriesRequest) String() string {
 func (*ListCategoriesRequest) ProtoMessage() {}
 
 func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[36]
+	mi := &file_v1_content_content_service_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2076,7 +2204,7 @@ func (x *ListCategoriesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCategoriesRequest.ProtoReflect.Descriptor instead.
 func (*ListCategoriesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{36}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ListCategoriesRequest) GetPage() int32 {
@@ -2103,7 +2231,7 @@ type ListCategoriesResponse struct {
 
 func (x *ListCategoriesResponse) Reset() {
 	*x = ListCategoriesResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[37]
+	mi := &file_v1_content_content_service_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2115,7 +2243,7 @@ func (x *ListCategoriesResponse) String() string {
 func (*ListCategoriesResponse) ProtoMessage() {}
 
 func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[37]
+	mi := &file_v1_content_content_service_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2128,7 +2256,7 @@ func (x *ListCategoriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCategoriesResponse.ProtoReflect.Descriptor instead.
 func (*ListCategoriesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{37}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ListCategoriesResponse) GetTotal() int32 {
@@ -2155,7 +2283,7 @@ type ListTagsRequest struct {
 
 func (x *ListTagsRequest) Reset() {
 	*x = ListTagsRequest{}
-	mi := &file_v1_content_content_service_proto_msgTypes[38]
+	mi := &file_v1_content_content_service_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2167,7 +2295,7 @@ func (x *ListTagsRequest) String() string {
 func (*ListTagsRequest) ProtoMessage() {}
 
 func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[38]
+	mi := &file_v1_content_content_service_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2180,7 +2308,7 @@ func (x *ListTagsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsRequest.ProtoReflect.Descriptor instead.
 func (*ListTagsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{38}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ListTagsRequest) GetPage() int32 {
@@ -2207,7 +2335,7 @@ type ListTagsResponse struct {
 
 func (x *ListTagsResponse) Reset() {
 	*x = ListTagsResponse{}
-	mi := &file_v1_content_content_service_proto_msgTypes[39]
+	mi := &file_v1_content_content_service_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2219,7 +2347,7 @@ func (x *ListTagsResponse) String() string {
 func (*ListTagsResponse) ProtoMessage() {}
 
 func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_content_content_service_proto_msgTypes[39]
+	mi := &file_v1_content_content_service_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2232,7 +2360,7 @@ func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsResponse.ProtoReflect.Descriptor instead.
 func (*ListTagsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_content_content_service_proto_rawDescGZIP(), []int{39}
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ListTagsResponse) GetTotal() int32 {
@@ -2247,6 +2375,862 @@ func (x *ListTagsResponse) GetTags() []*Tag {
 		return x.Tags
 	}
 	return nil
+}
+
+type ListAllNotificationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAllNotificationsRequest) Reset() {
+	*x = ListAllNotificationsRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAllNotificationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAllNotificationsRequest) ProtoMessage() {}
+
+func (x *ListAllNotificationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAllNotificationsRequest.ProtoReflect.Descriptor instead.
+func (*ListAllNotificationsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *ListAllNotificationsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAllNotificationsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListAllNotificationsRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type ListAllNotificationsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Notifications []*Notification        `protobuf:"bytes,2,rep,name=notifications,proto3" json:"notifications,omitempty"`
+	UnreadCount   int32                  `protobuf:"varint,3,opt,name=unread_count,proto3" json:"unread_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAllNotificationsResponse) Reset() {
+	*x = ListAllNotificationsResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAllNotificationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAllNotificationsResponse) ProtoMessage() {}
+
+func (x *ListAllNotificationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAllNotificationsResponse.ProtoReflect.Descriptor instead.
+func (*ListAllNotificationsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *ListAllNotificationsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListAllNotificationsResponse) GetNotifications() []*Notification {
+	if x != nil {
+		return x.Notifications
+	}
+	return nil
+}
+
+func (x *ListAllNotificationsResponse) GetUnreadCount() int32 {
+	if x != nil {
+		return x.UnreadCount
+	}
+	return 0
+}
+
+type GetUnreadNotificationCountRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUnreadNotificationCountRequest) Reset() {
+	*x = GetUnreadNotificationCountRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUnreadNotificationCountRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUnreadNotificationCountRequest) ProtoMessage() {}
+
+func (x *GetUnreadNotificationCountRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUnreadNotificationCountRequest.ProtoReflect.Descriptor instead.
+func (*GetUnreadNotificationCountRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{44}
+}
+
+type GetUnreadNotificationCountResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Count         int32                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUnreadNotificationCountResponse) Reset() {
+	*x = GetUnreadNotificationCountResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUnreadNotificationCountResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUnreadNotificationCountResponse) ProtoMessage() {}
+
+func (x *GetUnreadNotificationCountResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUnreadNotificationCountResponse.ProtoReflect.Descriptor instead.
+func (*GetUnreadNotificationCountResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *GetUnreadNotificationCountResponse) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+type MarkNotificationReadPostRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkNotificationReadPostRequest) Reset() {
+	*x = MarkNotificationReadPostRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkNotificationReadPostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkNotificationReadPostRequest) ProtoMessage() {}
+
+func (x *MarkNotificationReadPostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkNotificationReadPostRequest.ProtoReflect.Descriptor instead.
+func (*MarkNotificationReadPostRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *MarkNotificationReadPostRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type MarkNotificationReadPostResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkNotificationReadPostResponse) Reset() {
+	*x = MarkNotificationReadPostResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkNotificationReadPostResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkNotificationReadPostResponse) ProtoMessage() {}
+
+func (x *MarkNotificationReadPostResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkNotificationReadPostResponse.ProtoReflect.Descriptor instead.
+func (*MarkNotificationReadPostResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *MarkNotificationReadPostResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type MarkAllNotificationsReadPostRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkAllNotificationsReadPostRequest) Reset() {
+	*x = MarkAllNotificationsReadPostRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkAllNotificationsReadPostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkAllNotificationsReadPostRequest) ProtoMessage() {}
+
+func (x *MarkAllNotificationsReadPostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkAllNotificationsReadPostRequest.ProtoReflect.Descriptor instead.
+func (*MarkAllNotificationsReadPostRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{48}
+}
+
+type MarkAllNotificationsReadPostResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MarkAllNotificationsReadPostResponse) Reset() {
+	*x = MarkAllNotificationsReadPostResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MarkAllNotificationsReadPostResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkAllNotificationsReadPostResponse) ProtoMessage() {}
+
+func (x *MarkAllNotificationsReadPostResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkAllNotificationsReadPostResponse.ProtoReflect.Descriptor instead.
+func (*MarkAllNotificationsReadPostResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *MarkAllNotificationsReadPostResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type DeleteNotificationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteNotificationRequest) Reset() {
+	*x = DeleteNotificationRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteNotificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteNotificationRequest) ProtoMessage() {}
+
+func (x *DeleteNotificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteNotificationRequest.ProtoReflect.Descriptor instead.
+func (*DeleteNotificationRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *DeleteNotificationRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteNotificationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteNotificationResponse) Reset() {
+	*x = DeleteNotificationResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteNotificationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteNotificationResponse) ProtoMessage() {}
+
+func (x *DeleteNotificationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteNotificationResponse.ProtoReflect.Descriptor instead.
+func (*DeleteNotificationResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *DeleteNotificationResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type GetExploreTrendingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Period        string                 `protobuf:"bytes,1,opt,name=period,proto3" json:"period,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExploreTrendingRequest) Reset() {
+	*x = GetExploreTrendingRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExploreTrendingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExploreTrendingRequest) ProtoMessage() {}
+
+func (x *GetExploreTrendingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExploreTrendingRequest.ProtoReflect.Descriptor instead.
+func (*GetExploreTrendingRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *GetExploreTrendingRequest) GetPeriod() string {
+	if x != nil {
+		return x.Period
+	}
+	return ""
+}
+
+func (x *GetExploreTrendingRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetExploreTrendingResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*types.Media         `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExploreTrendingResponse) Reset() {
+	*x = GetExploreTrendingResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExploreTrendingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExploreTrendingResponse) ProtoMessage() {}
+
+func (x *GetExploreTrendingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExploreTrendingResponse.ProtoReflect.Descriptor instead.
+func (*GetExploreTrendingResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{53}
+}
+
+func (x *GetExploreTrendingResponse) GetItems() []*types.Media {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type GetCommentLikesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCommentLikesRequest) Reset() {
+	*x = GetCommentLikesRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCommentLikesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCommentLikesRequest) ProtoMessage() {}
+
+func (x *GetCommentLikesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCommentLikesRequest.ProtoReflect.Descriptor instead.
+func (*GetCommentLikesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{54}
+}
+
+func (x *GetCommentLikesRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetCommentLikesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LikeCount     int64                  `protobuf:"varint,1,opt,name=like_count,proto3" json:"like_count,omitempty"`
+	DislikeCount  int64                  `protobuf:"varint,2,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
+	IsLiked       bool                   `protobuf:"varint,3,opt,name=is_liked,proto3" json:"is_liked,omitempty"`
+	IsDisliked    bool                   `protobuf:"varint,4,opt,name=is_disliked,proto3" json:"is_disliked,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCommentLikesResponse) Reset() {
+	*x = GetCommentLikesResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCommentLikesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCommentLikesResponse) ProtoMessage() {}
+
+func (x *GetCommentLikesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCommentLikesResponse.ProtoReflect.Descriptor instead.
+func (*GetCommentLikesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *GetCommentLikesResponse) GetLikeCount() int64 {
+	if x != nil {
+		return x.LikeCount
+	}
+	return 0
+}
+
+func (x *GetCommentLikesResponse) GetDislikeCount() int64 {
+	if x != nil {
+		return x.DislikeCount
+	}
+	return 0
+}
+
+func (x *GetCommentLikesResponse) GetIsLiked() bool {
+	if x != nil {
+		return x.IsLiked
+	}
+	return false
+}
+
+func (x *GetCommentLikesResponse) GetIsDisliked() bool {
+	if x != nil {
+		return x.IsDisliked
+	}
+	return false
+}
+
+type ToggleCommentLikeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleCommentLikeRequest) Reset() {
+	*x = ToggleCommentLikeRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleCommentLikeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleCommentLikeRequest) ProtoMessage() {}
+
+func (x *ToggleCommentLikeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleCommentLikeRequest.ProtoReflect.Descriptor instead.
+func (*ToggleCommentLikeRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *ToggleCommentLikeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ToggleCommentLikeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Liked         bool                   `protobuf:"varint,1,opt,name=liked,proto3" json:"liked,omitempty"`
+	LikeCount     int64                  `protobuf:"varint,2,opt,name=like_count,proto3" json:"like_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleCommentLikeResponse) Reset() {
+	*x = ToggleCommentLikeResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleCommentLikeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleCommentLikeResponse) ProtoMessage() {}
+
+func (x *ToggleCommentLikeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleCommentLikeResponse.ProtoReflect.Descriptor instead.
+func (*ToggleCommentLikeResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *ToggleCommentLikeResponse) GetLiked() bool {
+	if x != nil {
+		return x.Liked
+	}
+	return false
+}
+
+func (x *ToggleCommentLikeResponse) GetLikeCount() int64 {
+	if x != nil {
+		return x.LikeCount
+	}
+	return 0
+}
+
+type ToggleCommentDislikeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleCommentDislikeRequest) Reset() {
+	*x = ToggleCommentDislikeRequest{}
+	mi := &file_v1_content_content_service_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleCommentDislikeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleCommentDislikeRequest) ProtoMessage() {}
+
+func (x *ToggleCommentDislikeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleCommentDislikeRequest.ProtoReflect.Descriptor instead.
+func (*ToggleCommentDislikeRequest) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{58}
+}
+
+func (x *ToggleCommentDislikeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ToggleCommentDislikeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Disliked      bool                   `protobuf:"varint,1,opt,name=disliked,proto3" json:"disliked,omitempty"`
+	DislikeCount  int64                  `protobuf:"varint,2,opt,name=dislike_count,proto3" json:"dislike_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToggleCommentDislikeResponse) Reset() {
+	*x = ToggleCommentDislikeResponse{}
+	mi := &file_v1_content_content_service_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToggleCommentDislikeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleCommentDislikeResponse) ProtoMessage() {}
+
+func (x *ToggleCommentDislikeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_content_content_service_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleCommentDislikeResponse.ProtoReflect.Descriptor instead.
+func (*ToggleCommentDislikeResponse) Descriptor() ([]byte, []int) {
+	return file_v1_content_content_service_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *ToggleCommentDislikeResponse) GetDisliked() bool {
+	if x != nil {
+		return x.Disliked
+	}
+	return false
+}
+
+func (x *ToggleCommentDislikeResponse) GetDislikeCount() int64 {
+	if x != nil {
+		return x.DislikeCount
+	}
+	return 0
 }
 
 var File_v1_content_content_service_proto protoreflect.FileDescriptor
@@ -2294,6 +3278,15 @@ const file_v1_content_content_service_proto_rawDesc = "" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
 	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x9c\x01\n" +
 	"\x14ListCommentsResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12<\n" +
+	"\bcomments\x18\x02 \x03(\v2 .api.v1.services.content.CommentR\bcomments\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"\\\n" +
+	"\x18ListMediaCommentsRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\xa1\x01\n" +
+	"\x19ListMediaCommentsResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x12<\n" +
 	"\bcomments\x18\x02 \x03(\v2 .api.v1.services.content.CommentR\bcomments\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
@@ -2400,14 +3393,66 @@ const file_v1_content_content_service_proto_rawDesc = "" +
 	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"Z\n" +
 	"\x10ListTagsResponse\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x05R\x05total\x120\n" +
-	"\x04tags\x18\x02 \x03(\v2\x1c.api.v1.services.content.TagR\x04tags2\xb1\x15\n" +
-	"\x0eContentService\x12\x9d\x01\n" +
-	"\rCreateComment\x12-.api.v1.services.content.CreateCommentRequest\x1a..api.v1.services.content.CreateCommentResponse\"-\x82\xd3\xe4\x93\x02':\x01*\"\"/api/v1/medias/{media_id}/comments\x12\x84\x01\n" +
+	"\x04tags\x18\x02 \x03(\v2\x1c.api.v1.services.content.TagR\x04tags\"c\n" +
+	"\x1bListAllNotificationsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\"\xa5\x01\n" +
+	"\x1cListAllNotificationsResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12K\n" +
+	"\rnotifications\x18\x02 \x03(\v2%.api.v1.services.content.NotificationR\rnotifications\x12\"\n" +
+	"\funread_count\x18\x03 \x01(\x05R\funread_count\"#\n" +
+	"!GetUnreadNotificationCountRequest\":\n" +
+	"\"GetUnreadNotificationCountResponse\x12\x14\n" +
+	"\x05count\x18\x01 \x01(\x05R\x05count\"1\n" +
+	"\x1fMarkNotificationReadPostRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"<\n" +
+	" MarkNotificationReadPostResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"%\n" +
+	"#MarkAllNotificationsReadPostRequest\"@\n" +
+	"$MarkAllNotificationsReadPostResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"+\n" +
+	"\x19DeleteNotificationRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"6\n" +
+	"\x1aDeleteNotificationResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"I\n" +
+	"\x19GetExploreTrendingRequest\x12\x16\n" +
+	"\x06period\x18\x01 \x01(\tR\x06period\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"P\n" +
+	"\x1aGetExploreTrendingResponse\x122\n" +
+	"\x05items\x18\x01 \x03(\v2\x1c.api.v1.services.types.MediaR\x05items\"(\n" +
+	"\x16GetCommentLikesRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\x9d\x01\n" +
+	"\x17GetCommentLikesResponse\x12\x1e\n" +
 	"\n" +
-	"GetComment\x12*.api.v1.services.content.GetCommentRequest\x1a+.api.v1.services.content.GetCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/comments/{id}\x12\x90\x01\n" +
+	"like_count\x18\x01 \x01(\x03R\n" +
+	"like_count\x12$\n" +
+	"\rdislike_count\x18\x02 \x01(\x03R\rdislike_count\x12\x1a\n" +
+	"\bis_liked\x18\x03 \x01(\bR\bis_liked\x12 \n" +
+	"\vis_disliked\x18\x04 \x01(\bR\vis_disliked\"*\n" +
+	"\x18ToggleCommentLikeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"Q\n" +
+	"\x19ToggleCommentLikeResponse\x12\x14\n" +
+	"\x05liked\x18\x01 \x01(\bR\x05liked\x12\x1e\n" +
+	"\n" +
+	"like_count\x18\x02 \x01(\x03R\n" +
+	"like_count\"-\n" +
+	"\x1bToggleCommentDislikeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"`\n" +
+	"\x1cToggleCommentDislikeResponse\x12\x1a\n" +
+	"\bdisliked\x18\x01 \x01(\bR\bdisliked\x12$\n" +
+	"\rdislike_count\x18\x02 \x01(\x03R\rdislike_count2\xd8\"\n" +
+	"\x0eContentService\x12\x85\x01\n" +
+	"\fListComments\x12,.api.v1.services.content.ListCommentsRequest\x1a-.api.v1.services.content.ListCommentsResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/api/v1/comments\x12\x84\x01\n" +
+	"\n" +
+	"GetComment\x12*.api.v1.services.content.GetCommentRequest\x1a+.api.v1.services.content.GetCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/comments/{id}\x12\x8b\x01\n" +
+	"\rCreateComment\x12-.api.v1.services.content.CreateCommentRequest\x1a..api.v1.services.content.CreateCommentResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/api/v1/comments\x12\x90\x01\n" +
 	"\rUpdateComment\x12-.api.v1.services.content.UpdateCommentRequest\x1a..api.v1.services.content.UpdateCommentResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/api/v1/comments/{id}\x12\x8d\x01\n" +
-	"\rDeleteComment\x12-.api.v1.services.content.DeleteCommentRequest\x1a..api.v1.services.content.DeleteCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/api/v1/comments/{id}\x12\x97\x01\n" +
-	"\fListComments\x12,.api.v1.services.content.ListCommentsRequest\x1a-.api.v1.services.content.ListCommentsResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/medias/{media_id}/comments\x12\x90\x01\n" +
+	"\rDeleteComment\x12-.api.v1.services.content.DeleteCommentRequest\x1a..api.v1.services.content.DeleteCommentResponse\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/api/v1/comments/{id}\x12\xa0\x01\n" +
+	"\x11ListMediaComments\x121.api.v1.services.content.ListMediaCommentsRequest\x1a2.api.v1.services.content.ListMediaCommentsResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/medias/{id}/comments\x12\x99\x01\n" +
+	"\x0fGetCommentLikes\x12/.api.v1.services.content.GetCommentLikesRequest\x1a0.api.v1.services.content.GetCommentLikesResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/comments/{id}/likes\x12\xa2\x01\n" +
+	"\x11ToggleCommentLike\x121.api.v1.services.content.ToggleCommentLikeRequest\x1a2.api.v1.services.content.ToggleCommentLikeResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/comments/{id}/likes\x12\xae\x01\n" +
+	"\x14ToggleCommentDislike\x124.api.v1.services.content.ToggleCommentDislikeRequest\x1a5.api.v1.services.content.ToggleCommentDislikeResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/api/v1/comments/{id}/dislikes\x12\x90\x01\n" +
 	"\n" +
 	"ToggleLike\x12*.api.v1.services.content.ToggleLikeRequest\x1a+.api.v1.services.content.ToggleLikeResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/api/v1/medias/{media_id}/like\x12\x8b\x01\n" +
 	"\tListLikes\x12).api.v1.services.content.ListLikesRequest\x1a*.api.v1.services.content.ListLikesResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/medias/{media_id}/likes\x12\xa0\x01\n" +
@@ -2415,7 +3460,13 @@ const file_v1_content_content_service_proto_rawDesc = "" +
 	"\rListFavorites\x12-.api.v1.services.content.ListFavoritesRequest\x1a..api.v1.services.content.ListFavoritesResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/me/favorites\x12\x9c\x01\n" +
 	"\x11ListNotifications\x121.api.v1.services.content.ListNotificationsRequest\x1a2.api.v1.services.content.ListNotificationsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/me/notifications\x12\xac\x01\n" +
 	"\x14MarkNotificationRead\x124.api.v1.services.content.MarkNotificationReadRequest\x1a5.api.v1.services.content.MarkNotificationReadResponse\"'\x82\xd3\xe4\x93\x02!2\x1f/api/v1/notifications/{id}/read\x12\xb7\x01\n" +
-	"\x18MarkAllNotificationsRead\x128.api.v1.services.content.MarkAllNotificationsReadRequest\x1a9.api.v1.services.content.MarkAllNotificationsReadResponse\"&\x82\xd3\xe4\x93\x02 2\x1e/api/v1/notifications/read-all\x12r\n" +
+	"\x18MarkAllNotificationsRead\x128.api.v1.services.content.MarkAllNotificationsReadRequest\x1a9.api.v1.services.content.MarkAllNotificationsReadResponse\"&\x82\xd3\xe4\x93\x02 2\x1e/api/v1/notifications/read-all\x12\xa2\x01\n" +
+	"\x14ListAllNotifications\x124.api.v1.services.content.ListAllNotificationsRequest\x1a5.api.v1.services.content.ListAllNotificationsResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/notifications\x12\xc1\x01\n" +
+	"\x1aGetUnreadNotificationCount\x12:.api.v1.services.content.GetUnreadNotificationCountRequest\x1a;.api.v1.services.content.GetUnreadNotificationCountResponse\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/notifications/unread-count\x12\xbb\x01\n" +
+	"\x18MarkNotificationReadPost\x128.api.v1.services.content.MarkNotificationReadPostRequest\x1a9.api.v1.services.content.MarkNotificationReadPostResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/api/v1/notifications/{id}/read\x12\xc6\x01\n" +
+	"\x1cMarkAllNotificationsReadPost\x12<.api.v1.services.content.MarkAllNotificationsReadPostRequest\x1a=.api.v1.services.content.MarkAllNotificationsReadPostResponse\")\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/api/v1/notifications/read-all\x12\xa1\x01\n" +
+	"\x12DeleteNotification\x122.api.v1.services.content.DeleteNotificationRequest\x1a3.api.v1.services.content.DeleteNotificationResponse\"\"\x82\xd3\xe4\x93\x02\x1c*\x1a/api/v1/notifications/{id}\x12\x9f\x01\n" +
+	"\x12GetExploreTrending\x122.api.v1.services.content.GetExploreTrendingRequest\x1a3.api.v1.services.content.GetExploreTrendingResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/explore/trending\x12r\n" +
 	"\aGetFeed\x12'.api.v1.services.content.GetFeedRequest\x1a(.api.v1.services.content.GetFeedResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/api/v1/feed\x12\x8b\x01\n" +
 	"\rGetPortalHome\x12-.api.v1.services.content.GetPortalHomeRequest\x1a..api.v1.services.content.GetPortalHomeResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/portal/home\x12\x9b\x01\n" +
 	"\x11GetPortalTrending\x121.api.v1.services.content.GetPortalTrendingRequest\x1a2.api.v1.services.content.GetPortalTrendingResponse\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/portal/trending\x12\xb8\x01\n" +
@@ -2436,118 +3487,161 @@ func file_v1_content_content_service_proto_rawDescGZIP() []byte {
 	return file_v1_content_content_service_proto_rawDescData
 }
 
-var file_v1_content_content_service_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
+var file_v1_content_content_service_proto_msgTypes = make([]protoimpl.MessageInfo, 60)
 var file_v1_content_content_service_proto_goTypes = []any{
-	(*Comment)(nil),                           // 0: api.v1.services.content.Comment
-	(*CreateCommentRequest)(nil),              // 1: api.v1.services.content.CreateCommentRequest
-	(*CreateCommentResponse)(nil),             // 2: api.v1.services.content.CreateCommentResponse
-	(*GetCommentRequest)(nil),                 // 3: api.v1.services.content.GetCommentRequest
-	(*GetCommentResponse)(nil),                // 4: api.v1.services.content.GetCommentResponse
-	(*UpdateCommentRequest)(nil),              // 5: api.v1.services.content.UpdateCommentRequest
-	(*UpdateCommentResponse)(nil),             // 6: api.v1.services.content.UpdateCommentResponse
-	(*DeleteCommentRequest)(nil),              // 7: api.v1.services.content.DeleteCommentRequest
-	(*DeleteCommentResponse)(nil),             // 8: api.v1.services.content.DeleteCommentResponse
-	(*ListCommentsRequest)(nil),               // 9: api.v1.services.content.ListCommentsRequest
-	(*ListCommentsResponse)(nil),              // 10: api.v1.services.content.ListCommentsResponse
-	(*ToggleLikeRequest)(nil),                 // 11: api.v1.services.content.ToggleLikeRequest
-	(*ToggleLikeResponse)(nil),                // 12: api.v1.services.content.ToggleLikeResponse
-	(*ListLikesRequest)(nil),                  // 13: api.v1.services.content.ListLikesRequest
-	(*ListLikesResponse)(nil),                 // 14: api.v1.services.content.ListLikesResponse
-	(*ToggleFavoriteRequest)(nil),             // 15: api.v1.services.content.ToggleFavoriteRequest
-	(*ToggleFavoriteResponse)(nil),            // 16: api.v1.services.content.ToggleFavoriteResponse
-	(*ListFavoritesRequest)(nil),              // 17: api.v1.services.content.ListFavoritesRequest
-	(*ListFavoritesResponse)(nil),             // 18: api.v1.services.content.ListFavoritesResponse
-	(*Notification)(nil),                      // 19: api.v1.services.content.Notification
-	(*ListNotificationsRequest)(nil),          // 20: api.v1.services.content.ListNotificationsRequest
-	(*ListNotificationsResponse)(nil),         // 21: api.v1.services.content.ListNotificationsResponse
-	(*MarkNotificationReadRequest)(nil),       // 22: api.v1.services.content.MarkNotificationReadRequest
-	(*MarkNotificationReadResponse)(nil),      // 23: api.v1.services.content.MarkNotificationReadResponse
-	(*MarkAllNotificationsReadRequest)(nil),   // 24: api.v1.services.content.MarkAllNotificationsReadRequest
-	(*MarkAllNotificationsReadResponse)(nil),  // 25: api.v1.services.content.MarkAllNotificationsReadResponse
-	(*GetFeedRequest)(nil),                    // 26: api.v1.services.content.GetFeedRequest
-	(*GetFeedResponse)(nil),                   // 27: api.v1.services.content.GetFeedResponse
-	(*GetPortalHomeRequest)(nil),              // 28: api.v1.services.content.GetPortalHomeRequest
-	(*GetPortalHomeResponse)(nil),             // 29: api.v1.services.content.GetPortalHomeResponse
-	(*GetPortalTrendingRequest)(nil),          // 30: api.v1.services.content.GetPortalTrendingRequest
-	(*GetPortalTrendingResponse)(nil),         // 31: api.v1.services.content.GetPortalTrendingResponse
-	(*GetPortalSubscriptionFeedRequest)(nil),  // 32: api.v1.services.content.GetPortalSubscriptionFeedRequest
-	(*GetPortalSubscriptionFeedResponse)(nil), // 33: api.v1.services.content.GetPortalSubscriptionFeedResponse
-	(*Category)(nil),                          // 34: api.v1.services.content.Category
-	(*Tag)(nil),                               // 35: api.v1.services.content.Tag
-	(*ListCategoriesRequest)(nil),             // 36: api.v1.services.content.ListCategoriesRequest
-	(*ListCategoriesResponse)(nil),            // 37: api.v1.services.content.ListCategoriesResponse
-	(*ListTagsRequest)(nil),                   // 38: api.v1.services.content.ListTagsRequest
-	(*ListTagsResponse)(nil),                  // 39: api.v1.services.content.ListTagsResponse
-	(*timestamppb.Timestamp)(nil),             // 40: google.protobuf.Timestamp
-	(*types.User)(nil),                        // 41: api.v1.services.types.User
-	(*emptypb.Empty)(nil),                     // 42: google.protobuf.Empty
-	(*types.Media)(nil),                       // 43: api.v1.services.types.Media
-	(*types.Channel)(nil),                     // 44: api.v1.services.types.Channel
+	(*Comment)(nil),                              // 0: api.v1.services.content.Comment
+	(*CreateCommentRequest)(nil),                 // 1: api.v1.services.content.CreateCommentRequest
+	(*CreateCommentResponse)(nil),                // 2: api.v1.services.content.CreateCommentResponse
+	(*GetCommentRequest)(nil),                    // 3: api.v1.services.content.GetCommentRequest
+	(*GetCommentResponse)(nil),                   // 4: api.v1.services.content.GetCommentResponse
+	(*UpdateCommentRequest)(nil),                 // 5: api.v1.services.content.UpdateCommentRequest
+	(*UpdateCommentResponse)(nil),                // 6: api.v1.services.content.UpdateCommentResponse
+	(*DeleteCommentRequest)(nil),                 // 7: api.v1.services.content.DeleteCommentRequest
+	(*DeleteCommentResponse)(nil),                // 8: api.v1.services.content.DeleteCommentResponse
+	(*ListCommentsRequest)(nil),                  // 9: api.v1.services.content.ListCommentsRequest
+	(*ListCommentsResponse)(nil),                 // 10: api.v1.services.content.ListCommentsResponse
+	(*ListMediaCommentsRequest)(nil),             // 11: api.v1.services.content.ListMediaCommentsRequest
+	(*ListMediaCommentsResponse)(nil),            // 12: api.v1.services.content.ListMediaCommentsResponse
+	(*ToggleLikeRequest)(nil),                    // 13: api.v1.services.content.ToggleLikeRequest
+	(*ToggleLikeResponse)(nil),                   // 14: api.v1.services.content.ToggleLikeResponse
+	(*ListLikesRequest)(nil),                     // 15: api.v1.services.content.ListLikesRequest
+	(*ListLikesResponse)(nil),                    // 16: api.v1.services.content.ListLikesResponse
+	(*ToggleFavoriteRequest)(nil),                // 17: api.v1.services.content.ToggleFavoriteRequest
+	(*ToggleFavoriteResponse)(nil),               // 18: api.v1.services.content.ToggleFavoriteResponse
+	(*ListFavoritesRequest)(nil),                 // 19: api.v1.services.content.ListFavoritesRequest
+	(*ListFavoritesResponse)(nil),                // 20: api.v1.services.content.ListFavoritesResponse
+	(*Notification)(nil),                         // 21: api.v1.services.content.Notification
+	(*ListNotificationsRequest)(nil),             // 22: api.v1.services.content.ListNotificationsRequest
+	(*ListNotificationsResponse)(nil),            // 23: api.v1.services.content.ListNotificationsResponse
+	(*MarkNotificationReadRequest)(nil),          // 24: api.v1.services.content.MarkNotificationReadRequest
+	(*MarkNotificationReadResponse)(nil),         // 25: api.v1.services.content.MarkNotificationReadResponse
+	(*MarkAllNotificationsReadRequest)(nil),      // 26: api.v1.services.content.MarkAllNotificationsReadRequest
+	(*MarkAllNotificationsReadResponse)(nil),     // 27: api.v1.services.content.MarkAllNotificationsReadResponse
+	(*GetFeedRequest)(nil),                       // 28: api.v1.services.content.GetFeedRequest
+	(*GetFeedResponse)(nil),                      // 29: api.v1.services.content.GetFeedResponse
+	(*GetPortalHomeRequest)(nil),                 // 30: api.v1.services.content.GetPortalHomeRequest
+	(*GetPortalHomeResponse)(nil),                // 31: api.v1.services.content.GetPortalHomeResponse
+	(*GetPortalTrendingRequest)(nil),             // 32: api.v1.services.content.GetPortalTrendingRequest
+	(*GetPortalTrendingResponse)(nil),            // 33: api.v1.services.content.GetPortalTrendingResponse
+	(*GetPortalSubscriptionFeedRequest)(nil),     // 34: api.v1.services.content.GetPortalSubscriptionFeedRequest
+	(*GetPortalSubscriptionFeedResponse)(nil),    // 35: api.v1.services.content.GetPortalSubscriptionFeedResponse
+	(*Category)(nil),                             // 36: api.v1.services.content.Category
+	(*Tag)(nil),                                  // 37: api.v1.services.content.Tag
+	(*ListCategoriesRequest)(nil),                // 38: api.v1.services.content.ListCategoriesRequest
+	(*ListCategoriesResponse)(nil),               // 39: api.v1.services.content.ListCategoriesResponse
+	(*ListTagsRequest)(nil),                      // 40: api.v1.services.content.ListTagsRequest
+	(*ListTagsResponse)(nil),                     // 41: api.v1.services.content.ListTagsResponse
+	(*ListAllNotificationsRequest)(nil),          // 42: api.v1.services.content.ListAllNotificationsRequest
+	(*ListAllNotificationsResponse)(nil),         // 43: api.v1.services.content.ListAllNotificationsResponse
+	(*GetUnreadNotificationCountRequest)(nil),    // 44: api.v1.services.content.GetUnreadNotificationCountRequest
+	(*GetUnreadNotificationCountResponse)(nil),   // 45: api.v1.services.content.GetUnreadNotificationCountResponse
+	(*MarkNotificationReadPostRequest)(nil),      // 46: api.v1.services.content.MarkNotificationReadPostRequest
+	(*MarkNotificationReadPostResponse)(nil),     // 47: api.v1.services.content.MarkNotificationReadPostResponse
+	(*MarkAllNotificationsReadPostRequest)(nil),  // 48: api.v1.services.content.MarkAllNotificationsReadPostRequest
+	(*MarkAllNotificationsReadPostResponse)(nil), // 49: api.v1.services.content.MarkAllNotificationsReadPostResponse
+	(*DeleteNotificationRequest)(nil),            // 50: api.v1.services.content.DeleteNotificationRequest
+	(*DeleteNotificationResponse)(nil),           // 51: api.v1.services.content.DeleteNotificationResponse
+	(*GetExploreTrendingRequest)(nil),            // 52: api.v1.services.content.GetExploreTrendingRequest
+	(*GetExploreTrendingResponse)(nil),           // 53: api.v1.services.content.GetExploreTrendingResponse
+	(*GetCommentLikesRequest)(nil),               // 54: api.v1.services.content.GetCommentLikesRequest
+	(*GetCommentLikesResponse)(nil),              // 55: api.v1.services.content.GetCommentLikesResponse
+	(*ToggleCommentLikeRequest)(nil),             // 56: api.v1.services.content.ToggleCommentLikeRequest
+	(*ToggleCommentLikeResponse)(nil),            // 57: api.v1.services.content.ToggleCommentLikeResponse
+	(*ToggleCommentDislikeRequest)(nil),          // 58: api.v1.services.content.ToggleCommentDislikeRequest
+	(*ToggleCommentDislikeResponse)(nil),         // 59: api.v1.services.content.ToggleCommentDislikeResponse
+	(*timestamppb.Timestamp)(nil),                // 60: google.protobuf.Timestamp
+	(*types.User)(nil),                           // 61: api.v1.services.types.User
+	(*emptypb.Empty)(nil),                        // 62: google.protobuf.Empty
+	(*types.Media)(nil),                          // 63: api.v1.services.types.Media
+	(*types.Channel)(nil),                        // 64: api.v1.services.types.Channel
 }
 var file_v1_content_content_service_proto_depIdxs = []int32{
-	40, // 0: api.v1.services.content.Comment.created_at:type_name -> google.protobuf.Timestamp
-	40, // 1: api.v1.services.content.Comment.updated_at:type_name -> google.protobuf.Timestamp
-	41, // 2: api.v1.services.content.Comment.user:type_name -> api.v1.services.types.User
+	60, // 0: api.v1.services.content.Comment.created_at:type_name -> google.protobuf.Timestamp
+	60, // 1: api.v1.services.content.Comment.updated_at:type_name -> google.protobuf.Timestamp
+	61, // 2: api.v1.services.content.Comment.user:type_name -> api.v1.services.types.User
 	0,  // 3: api.v1.services.content.Comment.replies:type_name -> api.v1.services.content.Comment
 	0,  // 4: api.v1.services.content.CreateCommentResponse.comment:type_name -> api.v1.services.content.Comment
 	0,  // 5: api.v1.services.content.GetCommentResponse.comment:type_name -> api.v1.services.content.Comment
 	0,  // 6: api.v1.services.content.UpdateCommentResponse.comment:type_name -> api.v1.services.content.Comment
-	42, // 7: api.v1.services.content.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
+	62, // 7: api.v1.services.content.DeleteCommentResponse.empty:type_name -> google.protobuf.Empty
 	0,  // 8: api.v1.services.content.ListCommentsResponse.comments:type_name -> api.v1.services.content.Comment
-	41, // 9: api.v1.services.content.ListLikesResponse.users:type_name -> api.v1.services.types.User
-	43, // 10: api.v1.services.content.ListFavoritesResponse.medias:type_name -> api.v1.services.types.Media
-	40, // 11: api.v1.services.content.Notification.created_at:type_name -> google.protobuf.Timestamp
-	41, // 12: api.v1.services.content.Notification.actor:type_name -> api.v1.services.types.User
-	19, // 13: api.v1.services.content.ListNotificationsResponse.notifications:type_name -> api.v1.services.content.Notification
-	43, // 14: api.v1.services.content.GetFeedResponse.items:type_name -> api.v1.services.types.Media
-	43, // 15: api.v1.services.content.GetPortalHomeResponse.featured:type_name -> api.v1.services.types.Media
-	43, // 16: api.v1.services.content.GetPortalHomeResponse.recommended:type_name -> api.v1.services.types.Media
-	44, // 17: api.v1.services.content.GetPortalHomeResponse.popular_channels:type_name -> api.v1.services.types.Channel
-	43, // 18: api.v1.services.content.GetPortalTrendingResponse.items:type_name -> api.v1.services.types.Media
-	43, // 19: api.v1.services.content.GetPortalSubscriptionFeedResponse.items:type_name -> api.v1.services.types.Media
-	34, // 20: api.v1.services.content.ListCategoriesResponse.categories:type_name -> api.v1.services.content.Category
-	35, // 21: api.v1.services.content.ListTagsResponse.tags:type_name -> api.v1.services.content.Tag
-	1,  // 22: api.v1.services.content.ContentService.CreateComment:input_type -> api.v1.services.content.CreateCommentRequest
-	3,  // 23: api.v1.services.content.ContentService.GetComment:input_type -> api.v1.services.content.GetCommentRequest
-	5,  // 24: api.v1.services.content.ContentService.UpdateComment:input_type -> api.v1.services.content.UpdateCommentRequest
-	7,  // 25: api.v1.services.content.ContentService.DeleteComment:input_type -> api.v1.services.content.DeleteCommentRequest
-	9,  // 26: api.v1.services.content.ContentService.ListComments:input_type -> api.v1.services.content.ListCommentsRequest
-	11, // 27: api.v1.services.content.ContentService.ToggleLike:input_type -> api.v1.services.content.ToggleLikeRequest
-	13, // 28: api.v1.services.content.ContentService.ListLikes:input_type -> api.v1.services.content.ListLikesRequest
-	15, // 29: api.v1.services.content.ContentService.ToggleFavorite:input_type -> api.v1.services.content.ToggleFavoriteRequest
-	17, // 30: api.v1.services.content.ContentService.ListFavorites:input_type -> api.v1.services.content.ListFavoritesRequest
-	20, // 31: api.v1.services.content.ContentService.ListNotifications:input_type -> api.v1.services.content.ListNotificationsRequest
-	22, // 32: api.v1.services.content.ContentService.MarkNotificationRead:input_type -> api.v1.services.content.MarkNotificationReadRequest
-	24, // 33: api.v1.services.content.ContentService.MarkAllNotificationsRead:input_type -> api.v1.services.content.MarkAllNotificationsReadRequest
-	26, // 34: api.v1.services.content.ContentService.GetFeed:input_type -> api.v1.services.content.GetFeedRequest
-	28, // 35: api.v1.services.content.ContentService.GetPortalHome:input_type -> api.v1.services.content.GetPortalHomeRequest
-	30, // 36: api.v1.services.content.ContentService.GetPortalTrending:input_type -> api.v1.services.content.GetPortalTrendingRequest
-	32, // 37: api.v1.services.content.ContentService.GetPortalSubscriptionFeed:input_type -> api.v1.services.content.GetPortalSubscriptionFeedRequest
-	36, // 38: api.v1.services.content.ContentService.ListCategories:input_type -> api.v1.services.content.ListCategoriesRequest
-	38, // 39: api.v1.services.content.ContentService.ListTags:input_type -> api.v1.services.content.ListTagsRequest
-	2,  // 40: api.v1.services.content.ContentService.CreateComment:output_type -> api.v1.services.content.CreateCommentResponse
-	4,  // 41: api.v1.services.content.ContentService.GetComment:output_type -> api.v1.services.content.GetCommentResponse
-	6,  // 42: api.v1.services.content.ContentService.UpdateComment:output_type -> api.v1.services.content.UpdateCommentResponse
-	8,  // 43: api.v1.services.content.ContentService.DeleteComment:output_type -> api.v1.services.content.DeleteCommentResponse
-	10, // 44: api.v1.services.content.ContentService.ListComments:output_type -> api.v1.services.content.ListCommentsResponse
-	12, // 45: api.v1.services.content.ContentService.ToggleLike:output_type -> api.v1.services.content.ToggleLikeResponse
-	14, // 46: api.v1.services.content.ContentService.ListLikes:output_type -> api.v1.services.content.ListLikesResponse
-	16, // 47: api.v1.services.content.ContentService.ToggleFavorite:output_type -> api.v1.services.content.ToggleFavoriteResponse
-	18, // 48: api.v1.services.content.ContentService.ListFavorites:output_type -> api.v1.services.content.ListFavoritesResponse
-	21, // 49: api.v1.services.content.ContentService.ListNotifications:output_type -> api.v1.services.content.ListNotificationsResponse
-	23, // 50: api.v1.services.content.ContentService.MarkNotificationRead:output_type -> api.v1.services.content.MarkNotificationReadResponse
-	25, // 51: api.v1.services.content.ContentService.MarkAllNotificationsRead:output_type -> api.v1.services.content.MarkAllNotificationsReadResponse
-	27, // 52: api.v1.services.content.ContentService.GetFeed:output_type -> api.v1.services.content.GetFeedResponse
-	29, // 53: api.v1.services.content.ContentService.GetPortalHome:output_type -> api.v1.services.content.GetPortalHomeResponse
-	31, // 54: api.v1.services.content.ContentService.GetPortalTrending:output_type -> api.v1.services.content.GetPortalTrendingResponse
-	33, // 55: api.v1.services.content.ContentService.GetPortalSubscriptionFeed:output_type -> api.v1.services.content.GetPortalSubscriptionFeedResponse
-	37, // 56: api.v1.services.content.ContentService.ListCategories:output_type -> api.v1.services.content.ListCategoriesResponse
-	39, // 57: api.v1.services.content.ContentService.ListTags:output_type -> api.v1.services.content.ListTagsResponse
-	40, // [40:58] is the sub-list for method output_type
-	22, // [22:40] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	0,  // 9: api.v1.services.content.ListMediaCommentsResponse.comments:type_name -> api.v1.services.content.Comment
+	61, // 10: api.v1.services.content.ListLikesResponse.users:type_name -> api.v1.services.types.User
+	63, // 11: api.v1.services.content.ListFavoritesResponse.medias:type_name -> api.v1.services.types.Media
+	60, // 12: api.v1.services.content.Notification.created_at:type_name -> google.protobuf.Timestamp
+	61, // 13: api.v1.services.content.Notification.actor:type_name -> api.v1.services.types.User
+	21, // 14: api.v1.services.content.ListNotificationsResponse.notifications:type_name -> api.v1.services.content.Notification
+	63, // 15: api.v1.services.content.GetFeedResponse.items:type_name -> api.v1.services.types.Media
+	63, // 16: api.v1.services.content.GetPortalHomeResponse.featured:type_name -> api.v1.services.types.Media
+	63, // 17: api.v1.services.content.GetPortalHomeResponse.recommended:type_name -> api.v1.services.types.Media
+	64, // 18: api.v1.services.content.GetPortalHomeResponse.popular_channels:type_name -> api.v1.services.types.Channel
+	63, // 19: api.v1.services.content.GetPortalTrendingResponse.items:type_name -> api.v1.services.types.Media
+	63, // 20: api.v1.services.content.GetPortalSubscriptionFeedResponse.items:type_name -> api.v1.services.types.Media
+	36, // 21: api.v1.services.content.ListCategoriesResponse.categories:type_name -> api.v1.services.content.Category
+	37, // 22: api.v1.services.content.ListTagsResponse.tags:type_name -> api.v1.services.content.Tag
+	21, // 23: api.v1.services.content.ListAllNotificationsResponse.notifications:type_name -> api.v1.services.content.Notification
+	63, // 24: api.v1.services.content.GetExploreTrendingResponse.items:type_name -> api.v1.services.types.Media
+	9,  // 25: api.v1.services.content.ContentService.ListComments:input_type -> api.v1.services.content.ListCommentsRequest
+	3,  // 26: api.v1.services.content.ContentService.GetComment:input_type -> api.v1.services.content.GetCommentRequest
+	1,  // 27: api.v1.services.content.ContentService.CreateComment:input_type -> api.v1.services.content.CreateCommentRequest
+	5,  // 28: api.v1.services.content.ContentService.UpdateComment:input_type -> api.v1.services.content.UpdateCommentRequest
+	7,  // 29: api.v1.services.content.ContentService.DeleteComment:input_type -> api.v1.services.content.DeleteCommentRequest
+	11, // 30: api.v1.services.content.ContentService.ListMediaComments:input_type -> api.v1.services.content.ListMediaCommentsRequest
+	54, // 31: api.v1.services.content.ContentService.GetCommentLikes:input_type -> api.v1.services.content.GetCommentLikesRequest
+	56, // 32: api.v1.services.content.ContentService.ToggleCommentLike:input_type -> api.v1.services.content.ToggleCommentLikeRequest
+	58, // 33: api.v1.services.content.ContentService.ToggleCommentDislike:input_type -> api.v1.services.content.ToggleCommentDislikeRequest
+	13, // 34: api.v1.services.content.ContentService.ToggleLike:input_type -> api.v1.services.content.ToggleLikeRequest
+	15, // 35: api.v1.services.content.ContentService.ListLikes:input_type -> api.v1.services.content.ListLikesRequest
+	17, // 36: api.v1.services.content.ContentService.ToggleFavorite:input_type -> api.v1.services.content.ToggleFavoriteRequest
+	19, // 37: api.v1.services.content.ContentService.ListFavorites:input_type -> api.v1.services.content.ListFavoritesRequest
+	22, // 38: api.v1.services.content.ContentService.ListNotifications:input_type -> api.v1.services.content.ListNotificationsRequest
+	24, // 39: api.v1.services.content.ContentService.MarkNotificationRead:input_type -> api.v1.services.content.MarkNotificationReadRequest
+	26, // 40: api.v1.services.content.ContentService.MarkAllNotificationsRead:input_type -> api.v1.services.content.MarkAllNotificationsReadRequest
+	42, // 41: api.v1.services.content.ContentService.ListAllNotifications:input_type -> api.v1.services.content.ListAllNotificationsRequest
+	44, // 42: api.v1.services.content.ContentService.GetUnreadNotificationCount:input_type -> api.v1.services.content.GetUnreadNotificationCountRequest
+	46, // 43: api.v1.services.content.ContentService.MarkNotificationReadPost:input_type -> api.v1.services.content.MarkNotificationReadPostRequest
+	48, // 44: api.v1.services.content.ContentService.MarkAllNotificationsReadPost:input_type -> api.v1.services.content.MarkAllNotificationsReadPostRequest
+	50, // 45: api.v1.services.content.ContentService.DeleteNotification:input_type -> api.v1.services.content.DeleteNotificationRequest
+	52, // 46: api.v1.services.content.ContentService.GetExploreTrending:input_type -> api.v1.services.content.GetExploreTrendingRequest
+	28, // 47: api.v1.services.content.ContentService.GetFeed:input_type -> api.v1.services.content.GetFeedRequest
+	30, // 48: api.v1.services.content.ContentService.GetPortalHome:input_type -> api.v1.services.content.GetPortalHomeRequest
+	32, // 49: api.v1.services.content.ContentService.GetPortalTrending:input_type -> api.v1.services.content.GetPortalTrendingRequest
+	34, // 50: api.v1.services.content.ContentService.GetPortalSubscriptionFeed:input_type -> api.v1.services.content.GetPortalSubscriptionFeedRequest
+	38, // 51: api.v1.services.content.ContentService.ListCategories:input_type -> api.v1.services.content.ListCategoriesRequest
+	40, // 52: api.v1.services.content.ContentService.ListTags:input_type -> api.v1.services.content.ListTagsRequest
+	10, // 53: api.v1.services.content.ContentService.ListComments:output_type -> api.v1.services.content.ListCommentsResponse
+	4,  // 54: api.v1.services.content.ContentService.GetComment:output_type -> api.v1.services.content.GetCommentResponse
+	2,  // 55: api.v1.services.content.ContentService.CreateComment:output_type -> api.v1.services.content.CreateCommentResponse
+	6,  // 56: api.v1.services.content.ContentService.UpdateComment:output_type -> api.v1.services.content.UpdateCommentResponse
+	8,  // 57: api.v1.services.content.ContentService.DeleteComment:output_type -> api.v1.services.content.DeleteCommentResponse
+	12, // 58: api.v1.services.content.ContentService.ListMediaComments:output_type -> api.v1.services.content.ListMediaCommentsResponse
+	55, // 59: api.v1.services.content.ContentService.GetCommentLikes:output_type -> api.v1.services.content.GetCommentLikesResponse
+	57, // 60: api.v1.services.content.ContentService.ToggleCommentLike:output_type -> api.v1.services.content.ToggleCommentLikeResponse
+	59, // 61: api.v1.services.content.ContentService.ToggleCommentDislike:output_type -> api.v1.services.content.ToggleCommentDislikeResponse
+	14, // 62: api.v1.services.content.ContentService.ToggleLike:output_type -> api.v1.services.content.ToggleLikeResponse
+	16, // 63: api.v1.services.content.ContentService.ListLikes:output_type -> api.v1.services.content.ListLikesResponse
+	18, // 64: api.v1.services.content.ContentService.ToggleFavorite:output_type -> api.v1.services.content.ToggleFavoriteResponse
+	20, // 65: api.v1.services.content.ContentService.ListFavorites:output_type -> api.v1.services.content.ListFavoritesResponse
+	23, // 66: api.v1.services.content.ContentService.ListNotifications:output_type -> api.v1.services.content.ListNotificationsResponse
+	25, // 67: api.v1.services.content.ContentService.MarkNotificationRead:output_type -> api.v1.services.content.MarkNotificationReadResponse
+	27, // 68: api.v1.services.content.ContentService.MarkAllNotificationsRead:output_type -> api.v1.services.content.MarkAllNotificationsReadResponse
+	43, // 69: api.v1.services.content.ContentService.ListAllNotifications:output_type -> api.v1.services.content.ListAllNotificationsResponse
+	45, // 70: api.v1.services.content.ContentService.GetUnreadNotificationCount:output_type -> api.v1.services.content.GetUnreadNotificationCountResponse
+	47, // 71: api.v1.services.content.ContentService.MarkNotificationReadPost:output_type -> api.v1.services.content.MarkNotificationReadPostResponse
+	49, // 72: api.v1.services.content.ContentService.MarkAllNotificationsReadPost:output_type -> api.v1.services.content.MarkAllNotificationsReadPostResponse
+	51, // 73: api.v1.services.content.ContentService.DeleteNotification:output_type -> api.v1.services.content.DeleteNotificationResponse
+	53, // 74: api.v1.services.content.ContentService.GetExploreTrending:output_type -> api.v1.services.content.GetExploreTrendingResponse
+	29, // 75: api.v1.services.content.ContentService.GetFeed:output_type -> api.v1.services.content.GetFeedResponse
+	31, // 76: api.v1.services.content.ContentService.GetPortalHome:output_type -> api.v1.services.content.GetPortalHomeResponse
+	33, // 77: api.v1.services.content.ContentService.GetPortalTrending:output_type -> api.v1.services.content.GetPortalTrendingResponse
+	35, // 78: api.v1.services.content.ContentService.GetPortalSubscriptionFeed:output_type -> api.v1.services.content.GetPortalSubscriptionFeedResponse
+	39, // 79: api.v1.services.content.ContentService.ListCategories:output_type -> api.v1.services.content.ListCategoriesResponse
+	41, // 80: api.v1.services.content.ContentService.ListTags:output_type -> api.v1.services.content.ListTagsResponse
+	53, // [53:81] is the sub-list for method output_type
+	25, // [25:53] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_v1_content_content_service_proto_init() }
@@ -2561,7 +3655,7 @@ func file_v1_content_content_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_content_content_service_proto_rawDesc), len(file_v1_content_content_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   40,
+			NumMessages:   60,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -174,6 +174,10 @@ func (m *InitiateMultipartUploadRequest) validate(all bool) error {
 
 	// no validation rules for CategoryId
 
+	// no validation rules for ChannelId
+
+	// no validation rules for Thumbnail
+
 	if len(errors) > 0 {
 		return InitiateMultipartUploadRequestMultiError(errors)
 	}
@@ -1334,185 +1338,64 @@ var _ interface {
 	ErrorName() string
 } = AbortMultipartUploadResponseValidationError{}
 
-// Validate checks the field values on UploadFileRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *UploadFileRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on UploadFileRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// UploadFileRequestMultiError, or nil if none found.
-func (m *UploadFileRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *UploadFileRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Data
-
-	// no validation rules for Filename
-
-	// no validation rules for ContentType
-
-	// no validation rules for Title
-
-	// no validation rules for Description
-
-	// no validation rules for CategoryId
-
-	if len(errors) > 0 {
-		return UploadFileRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// UploadFileRequestMultiError is an error wrapping multiple validation errors
-// returned by UploadFileRequest.ValidateAll() if the designated constraints
-// aren't met.
-type UploadFileRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m UploadFileRequestMultiError) Error() string {
-	msgs := make([]string, 0, len(m))
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m UploadFileRequestMultiError) AllErrors() []error { return m }
-
-// UploadFileRequestValidationError is the validation error returned by
-// UploadFileRequest.Validate if the designated constraints aren't met.
-type UploadFileRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e UploadFileRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e UploadFileRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e UploadFileRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e UploadFileRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e UploadFileRequestValidationError) ErrorName() string {
-	return "UploadFileRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e UploadFileRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sUploadFileRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = UploadFileRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = UploadFileRequestValidationError{}
-
-// Validate checks the field values on UploadFileResponse with the rules
+// Validate checks the field values on UpdateMetadataRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UploadFileResponse) Validate() error {
+func (m *UpdateMetadataRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UploadFileResponse with the rules
+// ValidateAll checks the field values on UpdateMetadataRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// UploadFileResponseMultiError, or nil if none found.
-func (m *UploadFileResponse) ValidateAll() error {
+// UpdateMetadataRequestMultiError, or nil if none found.
+func (m *UpdateMetadataRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UploadFileResponse) validate(all bool) error {
+func (m *UpdateMetadataRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetMedia()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UploadFileResponseValidationError{
-					field:  "Media",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UploadFileResponseValidationError{
-					field:  "Media",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetMedia()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UploadFileResponseValidationError{
-				field:  "Media",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
+	// no validation rules for UploadId
+
+	if m.Title != nil {
+		// no validation rules for Title
+	}
+
+	if m.Description != nil {
+		// no validation rules for Description
+	}
+
+	if m.CategoryId != nil {
+		// no validation rules for CategoryId
+	}
+
+	if m.ChannelId != nil {
+		// no validation rules for ChannelId
+	}
+
+	if m.Thumbnail != nil {
+		// no validation rules for Thumbnail
 	}
 
 	if len(errors) > 0 {
-		return UploadFileResponseMultiError(errors)
+		return UpdateMetadataRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// UploadFileResponseMultiError is an error wrapping multiple validation errors
-// returned by UploadFileResponse.ValidateAll() if the designated constraints
-// aren't met.
-type UploadFileResponseMultiError []error
+// UpdateMetadataRequestMultiError is an error wrapping multiple validation
+// errors returned by UpdateMetadataRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateMetadataRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UploadFileResponseMultiError) Error() string {
+func (m UpdateMetadataRequestMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1521,11 +1404,11 @@ func (m UploadFileResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UploadFileResponseMultiError) AllErrors() []error { return m }
+func (m UpdateMetadataRequestMultiError) AllErrors() []error { return m }
 
-// UploadFileResponseValidationError is the validation error returned by
-// UploadFileResponse.Validate if the designated constraints aren't met.
-type UploadFileResponseValidationError struct {
+// UpdateMetadataRequestValidationError is the validation error returned by
+// UpdateMetadataRequest.Validate if the designated constraints aren't met.
+type UpdateMetadataRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1533,24 +1416,24 @@ type UploadFileResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e UploadFileResponseValidationError) Field() string { return e.field }
+func (e UpdateMetadataRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UploadFileResponseValidationError) Reason() string { return e.reason }
+func (e UpdateMetadataRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UploadFileResponseValidationError) Cause() error { return e.cause }
+func (e UpdateMetadataRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UploadFileResponseValidationError) Key() bool { return e.key }
+func (e UpdateMetadataRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UploadFileResponseValidationError) ErrorName() string {
-	return "UploadFileResponseValidationError"
+func (e UpdateMetadataRequestValidationError) ErrorName() string {
+	return "UpdateMetadataRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UploadFileResponseValidationError) Error() string {
+func (e UpdateMetadataRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1562,14 +1445,14 @@ func (e UploadFileResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUploadFileResponse.%s: %s%s",
+		"invalid %sUpdateMetadataRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UploadFileResponseValidationError{}
+var _ error = UpdateMetadataRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -1577,7 +1460,113 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UploadFileResponseValidationError{}
+} = UpdateMetadataRequestValidationError{}
+
+// Validate checks the field values on UpdateMetadataResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateMetadataResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateMetadataResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateMetadataResponseMultiError, or nil if none found.
+func (m *UpdateMetadataResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateMetadataResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UploadId
+
+	// no validation rules for Status
+
+	if len(errors) > 0 {
+		return UpdateMetadataResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateMetadataResponseMultiError is an error wrapping multiple validation
+// errors returned by UpdateMetadataResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateMetadataResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateMetadataResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateMetadataResponseMultiError) AllErrors() []error { return m }
+
+// UpdateMetadataResponseValidationError is the validation error returned by
+// UpdateMetadataResponse.Validate if the designated constraints aren't met.
+type UpdateMetadataResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateMetadataResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateMetadataResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateMetadataResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateMetadataResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateMetadataResponseValidationError) ErrorName() string {
+	return "UpdateMetadataResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateMetadataResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateMetadataResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateMetadataResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateMetadataResponseValidationError{}
 
 // Validate checks the field values on GetUploadSessionRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -2120,6 +2109,10 @@ func (m *SimpleUploadRequest) validate(all bool) error {
 	// no validation rules for Description
 
 	// no validation rules for CategoryId
+
+	// no validation rules for ChannelId
+
+	// no validation rules for Thumbnail
 
 	if len(errors) > 0 {
 		return SimpleUploadRequestMultiError(errors)

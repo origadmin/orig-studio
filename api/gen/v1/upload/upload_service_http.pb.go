@@ -26,12 +26,11 @@ const OperationUploadServiceInitiateMultipartUpload = "/api.v1.services.upload.U
 const OperationUploadServiceListParts = "/api.v1.services.upload.UploadService/ListParts"
 const OperationUploadServiceListUploadSessions = "/api.v1.services.upload.UploadService/ListUploadSessions"
 const OperationUploadServiceSimpleUpload = "/api.v1.services.upload.UploadService/SimpleUpload"
-const OperationUploadServiceUploadFile = "/api.v1.services.upload.UploadService/UploadFile"
+const OperationUploadServiceUpdateMetadata = "/api.v1.services.upload.UploadService/UpdateMetadata"
 const OperationUploadServiceUploadPart = "/api.v1.services.upload.UploadService/UploadPart"
 
 type UploadServiceHTTPServer interface {
 	// AbortMultipartUpload AbortMultipartUpload cancels an in-progress multipart upload.
-	// All uploaded parts will be deleted.
 	AbortMultipartUpload(context.Context, *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error)
 	// CompleteMultipartUpload CompleteMultipartUpload finalizes a multipart upload.
 	// All parts must be uploaded before calling this method.
@@ -47,11 +46,11 @@ type UploadServiceHTTPServer interface {
 	ListParts(context.Context, *ListPartsRequest) (*ListPartsResponse, error)
 	// ListUploadSessions ListUploadSessions returns all upload sessions for the current user.
 	ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error)
-	// SimpleUpload SimpleUpload uploads a file with a simple single-request approach.
+	// SimpleUpload NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
+	// SimpleUpload uploads a file with a simple single-request approach.
 	SimpleUpload(context.Context, *SimpleUploadRequest) (*SimpleUploadResponse, error)
-	// UploadFile UploadFile uploads a small file in a single request.
-	// For files larger than 2MB, use multipart upload instead.
-	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
+	// UpdateMetadata UpdateMetadata updates upload session metadata.
+	UpdateMetadata(context.Context, *UpdateMetadataRequest) (*UpdateMetadataResponse, error)
 	// UploadPart UploadPart uploads a single part of a multipart upload.
 	// Each part is identified by its part_number (1-indexed).
 	// Returns an etag that should be saved for the complete operation.
@@ -64,10 +63,10 @@ func RegisterUploadServiceHTTPServer(s *http.Server, srv UploadServiceHTTPServer
 	r.POST("/api/v1/uploads/{upload_id}/parts/{part_number}", _UploadService_UploadPart0_HTTP_Handler(srv))
 	r.GET("/api/v1/uploads/{upload_id}/parts", _UploadService_ListParts0_HTTP_Handler(srv))
 	r.POST("/api/v1/uploads/{upload_id}/complete", _UploadService_CompleteMultipartUpload0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/uploads/{upload_id}", _UploadService_AbortMultipartUpload0_HTTP_Handler(srv))
-	r.POST("/api/v1/uploads", _UploadService_UploadFile0_HTTP_Handler(srv))
-	r.GET("/api/v1/uploads/{upload_id}", _UploadService_GetUploadSession0_HTTP_Handler(srv))
-	r.GET("/api/v1/uploads", _UploadService_ListUploadSessions0_HTTP_Handler(srv))
+	r.POST("/api/v1/uploads/{upload_id}/abort", _UploadService_AbortMultipartUpload0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/uploads/{upload_id}/metadata", _UploadService_UpdateMetadata0_HTTP_Handler(srv))
+	r.GET("/api/v1/uploads/sessions", _UploadService_ListUploadSessions0_HTTP_Handler(srv))
+	r.GET("/api/v1/uploads/sessions/{upload_id}", _UploadService_GetUploadSession0_HTTP_Handler(srv))
 	r.POST("/api/v1/uploads/simple", _UploadService_SimpleUpload0_HTTP_Handler(srv))
 }
 
@@ -168,6 +167,9 @@ func _UploadService_CompleteMultipartUpload0_HTTP_Handler(srv UploadServiceHTTPS
 func _UploadService_AbortMultipartUpload0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in AbortMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -187,24 +189,46 @@ func _UploadService_AbortMultipartUpload0_HTTP_Handler(srv UploadServiceHTTPServ
 	}
 }
 
-func _UploadService_UploadFile0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+func _UploadService_UpdateMetadata0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in UploadFileRequest
+		var in UpdateMetadataRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationUploadServiceUploadFile)
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceUpdateMetadata)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UploadFile(ctx, req.(*UploadFileRequest))
+			return srv.UpdateMetadata(ctx, req.(*UpdateMetadataRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*UploadFileResponse)
+		reply := out.(*UpdateMetadataResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_ListUploadSessions0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListUploadSessionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceListUploadSessions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListUploadSessionsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -227,25 +251,6 @@ func _UploadService_GetUploadSession0_HTTP_Handler(srv UploadServiceHTTPServer) 
 			return err
 		}
 		reply := out.(*GetUploadSessionResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _UploadService_ListUploadSessions0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListUploadSessionsRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUploadServiceListUploadSessions)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ListUploadSessionsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -274,7 +279,6 @@ func _UploadService_SimpleUpload0_HTTP_Handler(srv UploadServiceHTTPServer) func
 
 type UploadServiceHTTPClient interface {
 	// AbortMultipartUpload AbortMultipartUpload cancels an in-progress multipart upload.
-	// All uploaded parts will be deleted.
 	AbortMultipartUpload(ctx context.Context, req *AbortMultipartUploadRequest, opts ...http.CallOption) (rsp *AbortMultipartUploadResponse, err error)
 	// CompleteMultipartUpload CompleteMultipartUpload finalizes a multipart upload.
 	// All parts must be uploaded before calling this method.
@@ -290,11 +294,11 @@ type UploadServiceHTTPClient interface {
 	ListParts(ctx context.Context, req *ListPartsRequest, opts ...http.CallOption) (rsp *ListPartsResponse, err error)
 	// ListUploadSessions ListUploadSessions returns all upload sessions for the current user.
 	ListUploadSessions(ctx context.Context, req *ListUploadSessionsRequest, opts ...http.CallOption) (rsp *ListUploadSessionsResponse, err error)
-	// SimpleUpload SimpleUpload uploads a file with a simple single-request approach.
+	// SimpleUpload NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
+	// SimpleUpload uploads a file with a simple single-request approach.
 	SimpleUpload(ctx context.Context, req *SimpleUploadRequest, opts ...http.CallOption) (rsp *SimpleUploadResponse, err error)
-	// UploadFile UploadFile uploads a small file in a single request.
-	// For files larger than 2MB, use multipart upload instead.
-	UploadFile(ctx context.Context, req *UploadFileRequest, opts ...http.CallOption) (rsp *UploadFileResponse, err error)
+	// UpdateMetadata UpdateMetadata updates upload session metadata.
+	UpdateMetadata(ctx context.Context, req *UpdateMetadataRequest, opts ...http.CallOption) (rsp *UpdateMetadataResponse, err error)
 	// UploadPart UploadPart uploads a single part of a multipart upload.
 	// Each part is identified by its part_number (1-indexed).
 	// Returns an etag that should be saved for the complete operation.
@@ -310,14 +314,13 @@ func NewUploadServiceHTTPClient(client *http.Client) UploadServiceHTTPClient {
 }
 
 // AbortMultipartUpload AbortMultipartUpload cancels an in-progress multipart upload.
-// All uploaded parts will be deleted.
 func (c *UploadServiceHTTPClientImpl) AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest, opts ...http.CallOption) (*AbortMultipartUploadResponse, error) {
 	var out AbortMultipartUploadResponse
-	pattern := "/api/v1/uploads/{upload_id}"
-	path := binding.EncodeURL(pattern, in, true)
+	pattern := "/api/v1/uploads/{upload_id}/abort"
+	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUploadServiceAbortMultipartUpload))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +346,7 @@ func (c *UploadServiceHTTPClientImpl) CompleteMultipartUpload(ctx context.Contex
 // GetUploadSession GetUploadSession returns the current state of an upload session.
 func (c *UploadServiceHTTPClientImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest, opts ...http.CallOption) (*GetUploadSessionResponse, error) {
 	var out GetUploadSessionResponse
-	pattern := "/api/v1/uploads/{upload_id}"
+	pattern := "/api/v1/uploads/sessions/{upload_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUploadServiceGetUploadSession))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -387,7 +390,7 @@ func (c *UploadServiceHTTPClientImpl) ListParts(ctx context.Context, in *ListPar
 // ListUploadSessions ListUploadSessions returns all upload sessions for the current user.
 func (c *UploadServiceHTTPClientImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest, opts ...http.CallOption) (*ListUploadSessionsResponse, error) {
 	var out ListUploadSessionsResponse
-	pattern := "/api/v1/uploads"
+	pattern := "/api/v1/uploads/sessions"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUploadServiceListUploadSessions))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -398,7 +401,8 @@ func (c *UploadServiceHTTPClientImpl) ListUploadSessions(ctx context.Context, in
 	return &out, nil
 }
 
-// SimpleUpload SimpleUpload uploads a file with a simple single-request approach.
+// SimpleUpload NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
+// SimpleUpload uploads a file with a simple single-request approach.
 func (c *UploadServiceHTTPClientImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest, opts ...http.CallOption) (*SimpleUploadResponse, error) {
 	var out SimpleUploadResponse
 	pattern := "/api/v1/uploads/simple"
@@ -412,15 +416,14 @@ func (c *UploadServiceHTTPClientImpl) SimpleUpload(ctx context.Context, in *Simp
 	return &out, nil
 }
 
-// UploadFile UploadFile uploads a small file in a single request.
-// For files larger than 2MB, use multipart upload instead.
-func (c *UploadServiceHTTPClientImpl) UploadFile(ctx context.Context, in *UploadFileRequest, opts ...http.CallOption) (*UploadFileResponse, error) {
-	var out UploadFileResponse
-	pattern := "/api/v1/uploads"
+// UpdateMetadata UpdateMetadata updates upload session metadata.
+func (c *UploadServiceHTTPClientImpl) UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest, opts ...http.CallOption) (*UpdateMetadataResponse, error) {
+	var out UpdateMetadataResponse
+	pattern := "/api/v1/uploads/{upload_id}/metadata"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationUploadServiceUploadFile))
+	opts = append(opts, http.Operation(OperationUploadServiceUpdateMetadata))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

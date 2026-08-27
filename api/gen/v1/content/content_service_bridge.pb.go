@@ -28,11 +28,15 @@ var (
 	_ = codes.Unimplemented
 )
 
-const ContentServiceCreateCommentBridgeOperation = "/api.v1.services.content.ContentService/CreateComment"
+const ContentServiceListCommentsBridgeOperation = "/api.v1.services.content.ContentService/ListComments"
 const ContentServiceGetCommentBridgeOperation = "/api.v1.services.content.ContentService/GetComment"
+const ContentServiceCreateCommentBridgeOperation = "/api.v1.services.content.ContentService/CreateComment"
 const ContentServiceUpdateCommentBridgeOperation = "/api.v1.services.content.ContentService/UpdateComment"
 const ContentServiceDeleteCommentBridgeOperation = "/api.v1.services.content.ContentService/DeleteComment"
-const ContentServiceListCommentsBridgeOperation = "/api.v1.services.content.ContentService/ListComments"
+const ContentServiceListMediaCommentsBridgeOperation = "/api.v1.services.content.ContentService/ListMediaComments"
+const ContentServiceGetCommentLikesBridgeOperation = "/api.v1.services.content.ContentService/GetCommentLikes"
+const ContentServiceToggleCommentLikeBridgeOperation = "/api.v1.services.content.ContentService/ToggleCommentLike"
+const ContentServiceToggleCommentDislikeBridgeOperation = "/api.v1.services.content.ContentService/ToggleCommentDislike"
 const ContentServiceToggleLikeBridgeOperation = "/api.v1.services.content.ContentService/ToggleLike"
 const ContentServiceListLikesBridgeOperation = "/api.v1.services.content.ContentService/ListLikes"
 const ContentServiceToggleFavoriteBridgeOperation = "/api.v1.services.content.ContentService/ToggleFavorite"
@@ -54,12 +58,16 @@ const ContentServiceListCategoriesBridgeOperation = "/api.v1.services.content.Co
 const ContentServiceListTagsBridgeOperation = "/api.v1.services.content.ContentService/ListTags"
 
 type ContentServiceBridgeServer interface {
-	// ========== Comments ==========
-	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
+	// ========== Comments (independent /comments routes) ==========
+	ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error)
 	GetComment(context.Context, *GetCommentRequest) (*GetCommentResponse, error)
+	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error)
-	ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error)
+	ListMediaComments(context.Context, *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error)
+	GetCommentLikes(context.Context, *GetCommentLikesRequest) (*GetCommentLikesResponse, error)
+	ToggleCommentLike(context.Context, *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error)
+	ToggleCommentDislike(context.Context, *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error)
 	// ========== Likes ==========
 	ToggleLike(context.Context, *ToggleLikeRequest) (*ToggleLikeResponse, error)
 	ListLikes(context.Context, *ListLikesRequest) (*ListLikesResponse, error)
@@ -90,11 +98,15 @@ type ContentServiceBridgeServer interface {
 }
 
 type ContentServiceHooker interface {
-	ContentServiceCreateCommentHooker
+	ContentServiceListCommentsHooker
 	ContentServiceGetCommentHooker
+	ContentServiceCreateCommentHooker
 	ContentServiceUpdateCommentHooker
 	ContentServiceDeleteCommentHooker
-	ContentServiceListCommentsHooker
+	ContentServiceListMediaCommentsHooker
+	ContentServiceGetCommentLikesHooker
+	ContentServiceToggleCommentLikeHooker
+	ContentServiceToggleCommentDislikeHooker
 	ContentServiceToggleLikeHooker
 	ContentServiceListLikesHooker
 	ContentServiceToggleFavoriteHooker
@@ -120,13 +132,17 @@ type ContentServiceHookedBridger interface {
 	ContentServiceHooker
 	ContentServiceBridgeServer
 }
-type ContentServiceCreateCommentHooker interface {
-	PrepareCreateComment(http.Context, *CreateCommentRequest) (context.Context, error)
-	CompleteCreateComment(http.Context, *CreateCommentRequest, *CreateCommentResponse) error
+type ContentServiceListCommentsHooker interface {
+	PrepareListComments(http.Context, *ListCommentsRequest) (context.Context, error)
+	CompleteListComments(http.Context, *ListCommentsRequest, *ListCommentsResponse) error
 }
 type ContentServiceGetCommentHooker interface {
 	PrepareGetComment(http.Context, *GetCommentRequest) (context.Context, error)
 	CompleteGetComment(http.Context, *GetCommentRequest, *GetCommentResponse) error
+}
+type ContentServiceCreateCommentHooker interface {
+	PrepareCreateComment(http.Context, *CreateCommentRequest) (context.Context, error)
+	CompleteCreateComment(http.Context, *CreateCommentRequest, *CreateCommentResponse) error
 }
 type ContentServiceUpdateCommentHooker interface {
 	PrepareUpdateComment(http.Context, *UpdateCommentRequest) (context.Context, error)
@@ -136,9 +152,21 @@ type ContentServiceDeleteCommentHooker interface {
 	PrepareDeleteComment(http.Context, *DeleteCommentRequest) (context.Context, error)
 	CompleteDeleteComment(http.Context, *DeleteCommentRequest, *DeleteCommentResponse) error
 }
-type ContentServiceListCommentsHooker interface {
-	PrepareListComments(http.Context, *ListCommentsRequest) (context.Context, error)
-	CompleteListComments(http.Context, *ListCommentsRequest, *ListCommentsResponse) error
+type ContentServiceListMediaCommentsHooker interface {
+	PrepareListMediaComments(http.Context, *ListMediaCommentsRequest) (context.Context, error)
+	CompleteListMediaComments(http.Context, *ListMediaCommentsRequest, *ListMediaCommentsResponse) error
+}
+type ContentServiceGetCommentLikesHooker interface {
+	PrepareGetCommentLikes(http.Context, *GetCommentLikesRequest) (context.Context, error)
+	CompleteGetCommentLikes(http.Context, *GetCommentLikesRequest, *GetCommentLikesResponse) error
+}
+type ContentServiceToggleCommentLikeHooker interface {
+	PrepareToggleCommentLike(http.Context, *ToggleCommentLikeRequest) (context.Context, error)
+	CompleteToggleCommentLike(http.Context, *ToggleCommentLikeRequest, *ToggleCommentLikeResponse) error
+}
+type ContentServiceToggleCommentDislikeHooker interface {
+	PrepareToggleCommentDislike(http.Context, *ToggleCommentDislikeRequest) (context.Context, error)
+	CompleteToggleCommentDislike(http.Context, *ToggleCommentDislikeRequest, *ToggleCommentDislikeResponse) error
 }
 type ContentServiceToggleLikeHooker interface {
 	PrepareToggleLike(http.Context, *ToggleLikeRequest) (context.Context, error)
@@ -219,11 +247,15 @@ type ContentServiceListTagsHooker interface {
 
 func RegisterContentServiceBridgeServer(s *http.Server, srv ContentServiceHookedBridger) {
 	r := s.Route("/")
-	r.POST("/api/v1/medias/:media_id/comments", _ContentService_CreateComment0_Bridge_Handler(srv))
+	r.GET("/api/v1/comments", _ContentService_ListComments0_Bridge_Handler(srv))
 	r.GET("/api/v1/comments/:id", _ContentService_GetComment0_Bridge_Handler(srv))
+	r.POST("/api/v1/comments", _ContentService_CreateComment0_Bridge_Handler(srv))
 	r.PUT("/api/v1/comments/:id", _ContentService_UpdateComment0_Bridge_Handler(srv))
 	r.DELETE("/api/v1/comments/:id", _ContentService_DeleteComment0_Bridge_Handler(srv))
-	r.GET("/api/v1/medias/:media_id/comments", _ContentService_ListComments0_Bridge_Handler(srv))
+	r.GET("/api/v1/medias/:id/comments", _ContentService_ListMediaComments0_Bridge_Handler(srv))
+	r.GET("/api/v1/comments/:id/likes", _ContentService_GetCommentLikes0_Bridge_Handler(srv))
+	r.POST("/api/v1/comments/:id/likes", _ContentService_ToggleCommentLike0_Bridge_Handler(srv))
+	r.POST("/api/v1/comments/:id/dislikes", _ContentService_ToggleCommentDislike0_Bridge_Handler(srv))
 	r.POST("/api/v1/medias/:media_id/like", _ContentService_ToggleLike0_Bridge_Handler(srv))
 	r.GET("/api/v1/medias/:media_id/likes", _ContentService_ListLikes0_Bridge_Handler(srv))
 	r.POST("/api/v1/medias/:media_id/favorite", _ContentService_ToggleFavorite0_Bridge_Handler(srv))
@@ -245,24 +277,18 @@ func RegisterContentServiceBridgeServer(s *http.Server, srv ContentServiceHooked
 	r.GET("/api/v1/tags", _ContentService_ListTags0_Bridge_Handler(srv))
 }
 
-func _ContentService_CreateComment0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
+func _ContentService_ListComments0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateCommentRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
+		var in ListCommentsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationContentServiceCreateComment)
+		http.SetOperation(ctx, OperationContentServiceListComments)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateComment(ctx, req.(*CreateCommentRequest))
+			return srv.ListComments(ctx, req.(*ListCommentsRequest))
 		})
 
-		newctx, err := srv.PrepareCreateComment(ctx, &in)
+		newctx, err := srv.PrepareListComments(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -270,7 +296,7 @@ func _ContentService_CreateComment0_Bridge_Handler(srv ContentServiceHookedBridg
 		if err != nil {
 			return err
 		}
-		return srv.CompleteCreateComment(ctx, &in, out.(*CreateCommentResponse))
+		return srv.CompleteListComments(ctx, &in, out.(*ListCommentsResponse))
 	}
 }
 
@@ -297,6 +323,32 @@ func _ContentService_GetComment0_Bridge_Handler(srv ContentServiceHookedBridger)
 			return err
 		}
 		return srv.CompleteGetComment(ctx, &in, out.(*GetCommentResponse))
+	}
+}
+
+func _ContentService_CreateComment0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateCommentRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationContentServiceCreateComment)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateComment(ctx, req.(*CreateCommentRequest))
+		})
+
+		newctx, err := srv.PrepareCreateComment(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteCreateComment(ctx, &in, out.(*CreateCommentResponse))
 	}
 }
 
@@ -355,21 +407,21 @@ func _ContentService_DeleteComment0_Bridge_Handler(srv ContentServiceHookedBridg
 	}
 }
 
-func _ContentService_ListComments0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
+func _ContentService_ListMediaComments0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ListCommentsRequest
+		var in ListMediaCommentsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationContentServiceListComments)
+		http.SetOperation(ctx, OperationContentServiceListMediaComments)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListComments(ctx, req.(*ListCommentsRequest))
+			return srv.ListMediaComments(ctx, req.(*ListMediaCommentsRequest))
 		})
 
-		newctx, err := srv.PrepareListComments(ctx, &in)
+		newctx, err := srv.PrepareListMediaComments(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -377,7 +429,91 @@ func _ContentService_ListComments0_Bridge_Handler(srv ContentServiceHookedBridge
 		if err != nil {
 			return err
 		}
-		return srv.CompleteListComments(ctx, &in, out.(*ListCommentsResponse))
+		return srv.CompleteListMediaComments(ctx, &in, out.(*ListMediaCommentsResponse))
+	}
+}
+
+func _ContentService_GetCommentLikes0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetCommentLikesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationContentServiceGetCommentLikes)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetCommentLikes(ctx, req.(*GetCommentLikesRequest))
+		})
+
+		newctx, err := srv.PrepareGetCommentLikes(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetCommentLikes(ctx, &in, out.(*GetCommentLikesResponse))
+	}
+}
+
+func _ContentService_ToggleCommentLike0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleCommentLikeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationContentServiceToggleCommentLike)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleCommentLike(ctx, req.(*ToggleCommentLikeRequest))
+		})
+
+		newctx, err := srv.PrepareToggleCommentLike(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleCommentLike(ctx, &in, out.(*ToggleCommentLikeResponse))
+	}
+}
+
+func _ContentService_ToggleCommentDislike0_Bridge_Handler(srv ContentServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleCommentDislikeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationContentServiceToggleCommentDislike)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleCommentDislike(ctx, req.(*ToggleCommentDislikeRequest))
+		})
+
+		newctx, err := srv.PrepareToggleCommentDislike(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteToggleCommentDislike(ctx, &in, out.(*ToggleCommentDislikeResponse))
 	}
 }
 
@@ -855,11 +991,11 @@ func _ContentService_ListTags0_Bridge_Handler(srv ContentServiceHookedBridger) f
 // pointer dereference when methods are called.
 type UnimplementedContentServiceHooked struct{}
 
-func (UnimplementedContentServiceHooked) PrepareCreateComment(ctx http.Context, in *CreateCommentRequest) (context.Context, error) {
+func (UnimplementedContentServiceHooked) PrepareListComments(ctx http.Context, in *ListCommentsRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedContentServiceHooked) CompleteCreateComment(ctx http.Context, in *CreateCommentRequest, out *CreateCommentResponse) error {
+func (UnimplementedContentServiceHooked) CompleteListComments(ctx http.Context, in *ListCommentsRequest, out *ListCommentsResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -868,6 +1004,14 @@ func (UnimplementedContentServiceHooked) PrepareGetComment(ctx http.Context, in 
 }
 
 func (UnimplementedContentServiceHooked) CompleteGetComment(ctx http.Context, in *GetCommentRequest, out *GetCommentResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedContentServiceHooked) PrepareCreateComment(ctx http.Context, in *CreateCommentRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedContentServiceHooked) CompleteCreateComment(ctx http.Context, in *CreateCommentRequest, out *CreateCommentResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -887,11 +1031,35 @@ func (UnimplementedContentServiceHooked) CompleteDeleteComment(ctx http.Context,
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedContentServiceHooked) PrepareListComments(ctx http.Context, in *ListCommentsRequest) (context.Context, error) {
+func (UnimplementedContentServiceHooked) PrepareListMediaComments(ctx http.Context, in *ListMediaCommentsRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedContentServiceHooked) CompleteListComments(ctx http.Context, in *ListCommentsRequest, out *ListCommentsResponse) error {
+func (UnimplementedContentServiceHooked) CompleteListMediaComments(ctx http.Context, in *ListMediaCommentsRequest, out *ListMediaCommentsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedContentServiceHooked) PrepareGetCommentLikes(ctx http.Context, in *GetCommentLikesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedContentServiceHooked) CompleteGetCommentLikes(ctx http.Context, in *GetCommentLikesRequest, out *GetCommentLikesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedContentServiceHooked) PrepareToggleCommentLike(ctx http.Context, in *ToggleCommentLikeRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedContentServiceHooked) CompleteToggleCommentLike(ctx http.Context, in *ToggleCommentLikeRequest, out *ToggleCommentLikeResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedContentServiceHooked) PrepareToggleCommentDislike(ctx http.Context, in *ToggleCommentDislikeRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedContentServiceHooked) CompleteToggleCommentDislike(ctx http.Context, in *ToggleCommentDislikeRequest, out *ToggleCommentDislikeResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1069,12 +1237,16 @@ func NewContentServiceHTTPBridge(client *http.Client) ContentServiceHTTPServer {
 	return &ContentServiceHTTPBridgeImpl{client: NewContentServiceHTTPClient(client)}
 }
 
-func (c *ContentServiceHTTPBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
-	return c.client.CreateComment(ctx, in)
+func (c *ContentServiceHTTPBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
+	return c.client.ListComments(ctx, in)
 }
 
 func (c *ContentServiceHTTPBridgeImpl) GetComment(ctx context.Context, in *GetCommentRequest) (*GetCommentResponse, error) {
 	return c.client.GetComment(ctx, in)
+}
+
+func (c *ContentServiceHTTPBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
+	return c.client.CreateComment(ctx, in)
 }
 
 func (c *ContentServiceHTTPBridgeImpl) UpdateComment(ctx context.Context, in *UpdateCommentRequest) (*UpdateCommentResponse, error) {
@@ -1085,8 +1257,20 @@ func (c *ContentServiceHTTPBridgeImpl) DeleteComment(ctx context.Context, in *De
 	return c.client.DeleteComment(ctx, in)
 }
 
-func (c *ContentServiceHTTPBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
-	return c.client.ListComments(ctx, in)
+func (c *ContentServiceHTTPBridgeImpl) ListMediaComments(ctx context.Context, in *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error) {
+	return c.client.ListMediaComments(ctx, in)
+}
+
+func (c *ContentServiceHTTPBridgeImpl) GetCommentLikes(ctx context.Context, in *GetCommentLikesRequest) (*GetCommentLikesResponse, error) {
+	return c.client.GetCommentLikes(ctx, in)
+}
+
+func (c *ContentServiceHTTPBridgeImpl) ToggleCommentLike(ctx context.Context, in *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error) {
+	return c.client.ToggleCommentLike(ctx, in)
+}
+
+func (c *ContentServiceHTTPBridgeImpl) ToggleCommentDislike(ctx context.Context, in *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error) {
+	return c.client.ToggleCommentDislike(ctx, in)
 }
 
 func (c *ContentServiceHTTPBridgeImpl) ToggleLike(ctx context.Context, in *ToggleLikeRequest) (*ToggleLikeResponse, error) {
@@ -1173,12 +1357,16 @@ func NewContentServiceBridge(client grpc.ClientConnInterface) ContentServiceServ
 	return &ContentServiceBridgeImpl{client: NewContentServiceClient(client)}
 }
 
-func (c *ContentServiceBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
-	return c.client.CreateComment(ctx, in)
+func (c *ContentServiceBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
+	return c.client.ListComments(ctx, in)
 }
 
 func (c *ContentServiceBridgeImpl) GetComment(ctx context.Context, in *GetCommentRequest) (*GetCommentResponse, error) {
 	return c.client.GetComment(ctx, in)
+}
+
+func (c *ContentServiceBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
+	return c.client.CreateComment(ctx, in)
 }
 
 func (c *ContentServiceBridgeImpl) UpdateComment(ctx context.Context, in *UpdateCommentRequest) (*UpdateCommentResponse, error) {
@@ -1189,8 +1377,20 @@ func (c *ContentServiceBridgeImpl) DeleteComment(ctx context.Context, in *Delete
 	return c.client.DeleteComment(ctx, in)
 }
 
-func (c *ContentServiceBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
-	return c.client.ListComments(ctx, in)
+func (c *ContentServiceBridgeImpl) ListMediaComments(ctx context.Context, in *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error) {
+	return c.client.ListMediaComments(ctx, in)
+}
+
+func (c *ContentServiceBridgeImpl) GetCommentLikes(ctx context.Context, in *GetCommentLikesRequest) (*GetCommentLikesResponse, error) {
+	return c.client.GetCommentLikes(ctx, in)
+}
+
+func (c *ContentServiceBridgeImpl) ToggleCommentLike(ctx context.Context, in *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error) {
+	return c.client.ToggleCommentLike(ctx, in)
+}
+
+func (c *ContentServiceBridgeImpl) ToggleCommentDislike(ctx context.Context, in *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error) {
+	return c.client.ToggleCommentDislike(ctx, in)
 }
 
 func (c *ContentServiceBridgeImpl) ToggleLike(ctx context.Context, in *ToggleLikeRequest) (*ToggleLikeResponse, error) {
@@ -1279,12 +1479,16 @@ func NewContentServiceGRPC2HTTP(client grpc.ClientConnInterface) ContentServiceH
 	return &ContentServiceGRPC2HTTPBridgeImpl{client: NewContentServiceClient(client)}
 }
 
-func (c *ContentServiceGRPC2HTTPBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
-	return c.client.CreateComment(ctx, in)
+func (c *ContentServiceGRPC2HTTPBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
+	return c.client.ListComments(ctx, in)
 }
 
 func (c *ContentServiceGRPC2HTTPBridgeImpl) GetComment(ctx context.Context, in *GetCommentRequest) (*GetCommentResponse, error) {
 	return c.client.GetComment(ctx, in)
+}
+
+func (c *ContentServiceGRPC2HTTPBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
+	return c.client.CreateComment(ctx, in)
 }
 
 func (c *ContentServiceGRPC2HTTPBridgeImpl) UpdateComment(ctx context.Context, in *UpdateCommentRequest) (*UpdateCommentResponse, error) {
@@ -1295,8 +1499,20 @@ func (c *ContentServiceGRPC2HTTPBridgeImpl) DeleteComment(ctx context.Context, i
 	return c.client.DeleteComment(ctx, in)
 }
 
-func (c *ContentServiceGRPC2HTTPBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
-	return c.client.ListComments(ctx, in)
+func (c *ContentServiceGRPC2HTTPBridgeImpl) ListMediaComments(ctx context.Context, in *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error) {
+	return c.client.ListMediaComments(ctx, in)
+}
+
+func (c *ContentServiceGRPC2HTTPBridgeImpl) GetCommentLikes(ctx context.Context, in *GetCommentLikesRequest) (*GetCommentLikesResponse, error) {
+	return c.client.GetCommentLikes(ctx, in)
+}
+
+func (c *ContentServiceGRPC2HTTPBridgeImpl) ToggleCommentLike(ctx context.Context, in *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error) {
+	return c.client.ToggleCommentLike(ctx, in)
+}
+
+func (c *ContentServiceGRPC2HTTPBridgeImpl) ToggleCommentDislike(ctx context.Context, in *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error) {
+	return c.client.ToggleCommentDislike(ctx, in)
 }
 
 func (c *ContentServiceGRPC2HTTPBridgeImpl) ToggleLike(ctx context.Context, in *ToggleLikeRequest) (*ToggleLikeResponse, error) {
@@ -1383,12 +1599,16 @@ func NewContentServiceHTTP2GRPC(client *http.Client) ContentServiceServer {
 	return &ContentServiceHTTP2GRPCBridgeImpl{client: NewContentServiceHTTPClient(client)}
 }
 
-func (c *ContentServiceHTTP2GRPCBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
-	return c.client.CreateComment(ctx, in)
+func (c *ContentServiceHTTP2GRPCBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
+	return c.client.ListComments(ctx, in)
 }
 
 func (c *ContentServiceHTTP2GRPCBridgeImpl) GetComment(ctx context.Context, in *GetCommentRequest) (*GetCommentResponse, error) {
 	return c.client.GetComment(ctx, in)
+}
+
+func (c *ContentServiceHTTP2GRPCBridgeImpl) CreateComment(ctx context.Context, in *CreateCommentRequest) (*CreateCommentResponse, error) {
+	return c.client.CreateComment(ctx, in)
 }
 
 func (c *ContentServiceHTTP2GRPCBridgeImpl) UpdateComment(ctx context.Context, in *UpdateCommentRequest) (*UpdateCommentResponse, error) {
@@ -1399,8 +1619,20 @@ func (c *ContentServiceHTTP2GRPCBridgeImpl) DeleteComment(ctx context.Context, i
 	return c.client.DeleteComment(ctx, in)
 }
 
-func (c *ContentServiceHTTP2GRPCBridgeImpl) ListComments(ctx context.Context, in *ListCommentsRequest) (*ListCommentsResponse, error) {
-	return c.client.ListComments(ctx, in)
+func (c *ContentServiceHTTP2GRPCBridgeImpl) ListMediaComments(ctx context.Context, in *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error) {
+	return c.client.ListMediaComments(ctx, in)
+}
+
+func (c *ContentServiceHTTP2GRPCBridgeImpl) GetCommentLikes(ctx context.Context, in *GetCommentLikesRequest) (*GetCommentLikesResponse, error) {
+	return c.client.GetCommentLikes(ctx, in)
+}
+
+func (c *ContentServiceHTTP2GRPCBridgeImpl) ToggleCommentLike(ctx context.Context, in *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error) {
+	return c.client.ToggleCommentLike(ctx, in)
+}
+
+func (c *ContentServiceHTTP2GRPCBridgeImpl) ToggleCommentDislike(ctx context.Context, in *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error) {
+	return c.client.ToggleCommentDislike(ctx, in)
 }
 
 func (c *ContentServiceHTTP2GRPCBridgeImpl) ToggleLike(ctx context.Context, in *ToggleLikeRequest) (*ToggleLikeResponse, error) {

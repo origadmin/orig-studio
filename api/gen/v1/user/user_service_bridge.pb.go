@@ -32,8 +32,6 @@ const UserServiceLoginBridgeOperation = "/api.v1.services.user.UserService/Login
 const UserServiceLogoutBridgeOperation = "/api.v1.services.user.UserService/Logout"
 const UserServiceRefreshTokenBridgeOperation = "/api.v1.services.user.UserService/RefreshToken"
 const UserServiceRegisterBridgeOperation = "/api.v1.services.user.UserService/Register"
-const UserServiceForgotPasswordBridgeOperation = "/api.v1.services.user.UserService/ForgotPassword"
-const UserServiceResetPasswordBridgeOperation = "/api.v1.services.user.UserService/ResetPassword"
 const UserServiceGetCurrentUserBridgeOperation = "/api.v1.services.user.UserService/GetCurrentUser"
 const UserServiceGetMeBridgeOperation = "/api.v1.services.user.UserService/GetMe"
 const UserServiceUpdateMeBridgeOperation = "/api.v1.services.user.UserService/UpdateMe"
@@ -68,6 +66,10 @@ const UserServiceGetUserSubscriptionBridgeOperation = "/api.v1.services.user.Use
 const UserServiceGetMyFollowersBridgeOperation = "/api.v1.services.user.UserService/GetMyFollowers"
 const UserServiceGetMyChannelsBridgeOperation = "/api.v1.services.user.UserService/GetMyChannels"
 const UserServiceRemoveFavoriteBridgeOperation = "/api.v1.services.user.UserService/RemoveFavorite"
+const UserServiceUpdateMySlugBridgeOperation = "/api.v1.services.user.UserService/UpdateMySlug"
+const UserServiceGetUserLikesBridgeOperation = "/api.v1.services.user.UserService/GetUserLikes"
+const UserServiceGetUserSubscriptionsBridgeOperation = "/api.v1.services.user.UserService/GetUserSubscriptions"
+const UserServiceChangePasswordBridgeOperation = "/api.v1.services.user.UserService/ChangePassword"
 
 type UserServiceBridgeServer interface {
 	// Login authenticates a user and returns JWT tokens.
@@ -78,12 +80,7 @@ type UserServiceBridgeServer interface {
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	// Register creates a new user account.
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
-	// ForgotPassword initiates password reset process.
-	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
-	// ResetPassword resets user password with token.
-	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
-	// GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
-	// This is kept for backward compatibility, use MeService for new code.
+	// GetCurrentUser returns the current authenticated user.
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
 	// GetMe returns the current user's information.
 	GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error)
@@ -113,7 +110,7 @@ type UserServiceBridgeServer interface {
 	GetMyStats(context.Context, *GetMyStatsRequest) (*GetMyStatsResponse, error)
 	// ListUsers returns a list of users.
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
-	// GetUser returns a user by ID.
+	// GetUser returns a user by slug (portal) or ID (admin).
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// CreateUser creates a new user.
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
@@ -151,6 +148,14 @@ type UserServiceBridgeServer interface {
 	GetMyChannels(context.Context, *GetMyChannelsRequest) (*GetMyChannelsResponse, error)
 	// RemoveFavorite removes a favorite for the current user.
 	RemoveFavorite(context.Context, *RemoveFavoriteRequest) (*RemoveFavoriteResponse, error)
+	// UpdateMySlug updates the current user's slug.
+	UpdateMySlug(context.Context, *UpdateMySlugRequest) (*UpdateMySlugResponse, error)
+	// GetUserLikes returns likes for a user.
+	GetUserLikes(context.Context, *GetUserLikesRequest) (*GetUserLikesResponse, error)
+	// GetUserSubscriptions returns subscriptions for a user.
+	GetUserSubscriptions(context.Context, *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error)
+	// ChangePassword changes the current user's password (auth endpoint).
+	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 }
 
 type UserServiceHooker interface {
@@ -158,8 +163,6 @@ type UserServiceHooker interface {
 	UserServiceLogoutHooker
 	UserServiceRefreshTokenHooker
 	UserServiceRegisterHooker
-	UserServiceForgotPasswordHooker
-	UserServiceResetPasswordHooker
 	UserServiceGetCurrentUserHooker
 	UserServiceGetMeHooker
 	UserServiceUpdateMeHooker
@@ -194,6 +197,10 @@ type UserServiceHooker interface {
 	UserServiceGetMyFollowersHooker
 	UserServiceGetMyChannelsHooker
 	UserServiceRemoveFavoriteHooker
+	UserServiceUpdateMySlugHooker
+	UserServiceGetUserLikesHooker
+	UserServiceGetUserSubscriptionsHooker
+	UserServiceChangePasswordHooker
 }
 
 type UserServiceHookedBridger interface {
@@ -215,14 +222,6 @@ type UserServiceRefreshTokenHooker interface {
 type UserServiceRegisterHooker interface {
 	PrepareRegister(http.Context, *RegisterRequest) (context.Context, error)
 	CompleteRegister(http.Context, *RegisterRequest, *RegisterResponse) error
-}
-type UserServiceForgotPasswordHooker interface {
-	PrepareForgotPassword(http.Context, *ForgotPasswordRequest) (context.Context, error)
-	CompleteForgotPassword(http.Context, *ForgotPasswordRequest, *ForgotPasswordResponse) error
-}
-type UserServiceResetPasswordHooker interface {
-	PrepareResetPassword(http.Context, *ResetPasswordRequest) (context.Context, error)
-	CompleteResetPassword(http.Context, *ResetPasswordRequest, *ResetPasswordResponse) error
 }
 type UserServiceGetCurrentUserHooker interface {
 	PrepareGetCurrentUser(http.Context, *GetCurrentUserRequest) (context.Context, error)
@@ -360,6 +359,22 @@ type UserServiceRemoveFavoriteHooker interface {
 	PrepareRemoveFavorite(http.Context, *RemoveFavoriteRequest) (context.Context, error)
 	CompleteRemoveFavorite(http.Context, *RemoveFavoriteRequest, *RemoveFavoriteResponse) error
 }
+type UserServiceUpdateMySlugHooker interface {
+	PrepareUpdateMySlug(http.Context, *UpdateMySlugRequest) (context.Context, error)
+	CompleteUpdateMySlug(http.Context, *UpdateMySlugRequest, *UpdateMySlugResponse) error
+}
+type UserServiceGetUserLikesHooker interface {
+	PrepareGetUserLikes(http.Context, *GetUserLikesRequest) (context.Context, error)
+	CompleteGetUserLikes(http.Context, *GetUserLikesRequest, *GetUserLikesResponse) error
+}
+type UserServiceGetUserSubscriptionsHooker interface {
+	PrepareGetUserSubscriptions(http.Context, *GetUserSubscriptionsRequest) (context.Context, error)
+	CompleteGetUserSubscriptions(http.Context, *GetUserSubscriptionsRequest, *GetUserSubscriptionsResponse) error
+}
+type UserServiceChangePasswordHooker interface {
+	PrepareChangePassword(http.Context, *ChangePasswordRequest) (context.Context, error)
+	CompleteChangePassword(http.Context, *ChangePasswordRequest, *ChangePasswordResponse) error
+}
 
 func RegisterUserServiceBridgeServer(s *http.Server, srv UserServiceHookedBridger) {
 	r := s.Route("/")
@@ -367,8 +382,6 @@ func RegisterUserServiceBridgeServer(s *http.Server, srv UserServiceHookedBridge
 	r.POST("/api/v1/auth/signout", _UserService_Logout0_Bridge_Handler(srv))
 	r.POST("/api/v1/auth/refresh", _UserService_RefreshToken0_Bridge_Handler(srv))
 	r.POST("/api/v1/auth/signup", _UserService_Register0_Bridge_Handler(srv))
-	r.POST("/api/v1/auth/forgot-password", _UserService_ForgotPassword0_Bridge_Handler(srv))
-	r.POST("/api/v1/auth/reset-password", _UserService_ResetPassword0_Bridge_Handler(srv))
 	r.GET("/api/v1/auth/me", _UserService_GetCurrentUser0_Bridge_Handler(srv))
 	r.GET("/api/v1/me", _UserService_GetMe0_Bridge_Handler(srv))
 	r.PUT("/api/v1/me", _UserService_UpdateMe0_Bridge_Handler(srv))
@@ -396,13 +409,17 @@ func RegisterUserServiceBridgeServer(s *http.Server, srv UserServiceHookedBridge
 	r.GET("/api/v1/users/:id/stats", _UserService_GetUserStats0_Bridge_Handler(srv))
 	r.GET("/api/v1/users/:id/playlists", _UserService_GetUserPlaylists0_Bridge_Handler(srv))
 	r.GET("/api/v1/users/:id/followers", _UserService_GetUserFollowers0_Bridge_Handler(srv))
-	r.GET("/api/v1/users/username/:username", _UserService_GetUserByUsername0_Bridge_Handler(srv))
+	r.GET("/api/v1/usernames/:username", _UserService_GetUserByUsername0_Bridge_Handler(srv))
 	r.POST("/api/v1/users/:id/subscribe", _UserService_SubscribeUser0_Bridge_Handler(srv))
 	r.DELETE("/api/v1/users/:id/subscribe", _UserService_UnsubscribeUser0_Bridge_Handler(srv))
 	r.GET("/api/v1/users/:id/subscription", _UserService_GetUserSubscription0_Bridge_Handler(srv))
 	r.GET("/api/v1/me/followers", _UserService_GetMyFollowers0_Bridge_Handler(srv))
 	r.GET("/api/v1/me/channels", _UserService_GetMyChannels0_Bridge_Handler(srv))
 	r.DELETE("/api/v1/me/favorites/:id", _UserService_RemoveFavorite0_Bridge_Handler(srv))
+	r.PUT("/api/v1/me/slug", _UserService_UpdateMySlug0_Bridge_Handler(srv))
+	r.GET("/api/v1/users/:id/likes", _UserService_GetUserLikes0_Bridge_Handler(srv))
+	r.GET("/api/v1/users/:id/subscriptions", _UserService_GetUserSubscriptions0_Bridge_Handler(srv))
+	r.PUT("/api/v1/auth/password", _UserService_ChangePassword0_Bridge_Handler(srv))
 }
 
 func _UserService_Login0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
@@ -506,58 +523,6 @@ func _UserService_Register0_Bridge_Handler(srv UserServiceHookedBridger) func(ct
 			return err
 		}
 		return srv.CompleteRegister(ctx, &in, out.(*RegisterResponse))
-	}
-}
-
-func _UserService_ForgotPassword0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ForgotPasswordRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserServiceForgotPassword)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ForgotPassword(ctx, req.(*ForgotPasswordRequest))
-		})
-
-		newctx, err := srv.PrepareForgotPassword(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteForgotPassword(ctx, &in, out.(*ForgotPasswordResponse))
-	}
-}
-
-func _UserService_ResetPassword0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ResetPasswordRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserServiceResetPassword)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ResetPassword(ctx, req.(*ResetPasswordRequest))
-		})
-
-		newctx, err := srv.PrepareResetPassword(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteResetPassword(ctx, &in, out.(*ResetPasswordResponse))
 	}
 }
 
@@ -1424,6 +1389,110 @@ func _UserService_RemoveFavorite0_Bridge_Handler(srv UserServiceHookedBridger) f
 	}
 }
 
+func _UserService_UpdateMySlug0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateMySlugRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceUpdateMySlug)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateMySlug(ctx, req.(*UpdateMySlugRequest))
+		})
+
+		newctx, err := srv.PrepareUpdateMySlug(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteUpdateMySlug(ctx, &in, out.(*UpdateMySlugResponse))
+	}
+}
+
+func _UserService_GetUserLikes0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserLikesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceGetUserLikes)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserLikes(ctx, req.(*GetUserLikesRequest))
+		})
+
+		newctx, err := srv.PrepareGetUserLikes(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetUserLikes(ctx, &in, out.(*GetUserLikesResponse))
+	}
+}
+
+func _UserService_GetUserSubscriptions0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserSubscriptionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceGetUserSubscriptions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserSubscriptions(ctx, req.(*GetUserSubscriptionsRequest))
+		})
+
+		newctx, err := srv.PrepareGetUserSubscriptions(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteGetUserSubscriptions(ctx, &in, out.(*GetUserSubscriptionsResponse))
+	}
+}
+
+func _UserService_ChangePassword0_Bridge_Handler(srv UserServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ChangePasswordRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceChangePassword)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ChangePassword(ctx, req.(*ChangePasswordRequest))
+		})
+
+		newctx, err := srv.PrepareChangePassword(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteChangePassword(ctx, &in, out.(*ChangePasswordResponse))
+	}
+}
+
 // UnimplementedUserServiceHooked must be embedded to have
 // forward compatible implementations.
 //
@@ -1460,22 +1529,6 @@ func (UnimplementedUserServiceHooked) PrepareRegister(ctx http.Context, in *Regi
 }
 
 func (UnimplementedUserServiceHooked) CompleteRegister(ctx http.Context, in *RegisterRequest, out *RegisterResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedUserServiceHooked) PrepareForgotPassword(ctx http.Context, in *ForgotPasswordRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedUserServiceHooked) CompleteForgotPassword(ctx http.Context, in *ForgotPasswordRequest, out *ForgotPasswordResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedUserServiceHooked) PrepareResetPassword(ctx http.Context, in *ResetPasswordRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedUserServiceHooked) CompleteResetPassword(ctx http.Context, in *ResetPasswordRequest, out *ResetPasswordResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -1751,6 +1804,38 @@ func (UnimplementedUserServiceHooked) CompleteRemoveFavorite(ctx http.Context, i
 	return ctx.Result(200, out)
 }
 
+func (UnimplementedUserServiceHooked) PrepareUpdateMySlug(ctx http.Context, in *UpdateMySlugRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUserServiceHooked) CompleteUpdateMySlug(ctx http.Context, in *UpdateMySlugRequest, out *UpdateMySlugResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUserServiceHooked) PrepareGetUserLikes(ctx http.Context, in *GetUserLikesRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUserServiceHooked) CompleteGetUserLikes(ctx http.Context, in *GetUserLikesRequest, out *GetUserLikesResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUserServiceHooked) PrepareGetUserSubscriptions(ctx http.Context, in *GetUserSubscriptionsRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUserServiceHooked) CompleteGetUserSubscriptions(ctx http.Context, in *GetUserSubscriptionsRequest, out *GetUserSubscriptionsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUserServiceHooked) PrepareChangePassword(ctx http.Context, in *ChangePasswordRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUserServiceHooked) CompleteChangePassword(ctx http.Context, in *ChangePasswordRequest, out *ChangePasswordResponse) error {
+	return ctx.Result(200, out)
+}
+
 func WithUserServiceHook(h UserServiceHooker) func(UserServiceBridgeServer) UserServiceHookedBridger {
 	return func(srv UserServiceBridgeServer) UserServiceHookedBridger {
 		return UserServiceHookedBridge{UserServiceBridgeServer: srv, UserServiceHooker: h}
@@ -1787,14 +1872,6 @@ func (c *UserServiceHTTPBridgeImpl) RefreshToken(ctx context.Context, in *Refres
 
 func (c *UserServiceHTTPBridgeImpl) Register(ctx context.Context, in *RegisterRequest) (*RegisterResponse, error) {
 	return c.client.Register(ctx, in)
-}
-
-func (c *UserServiceHTTPBridgeImpl) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
-	return c.client.ForgotPassword(ctx, in)
-}
-
-func (c *UserServiceHTTPBridgeImpl) ResetPassword(ctx context.Context, in *ResetPasswordRequest) (*ResetPasswordResponse, error) {
-	return c.client.ResetPassword(ctx, in)
 }
 
 func (c *UserServiceHTTPBridgeImpl) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
@@ -1933,6 +2010,22 @@ func (c *UserServiceHTTPBridgeImpl) RemoveFavorite(ctx context.Context, in *Remo
 	return c.client.RemoveFavorite(ctx, in)
 }
 
+func (c *UserServiceHTTPBridgeImpl) UpdateMySlug(ctx context.Context, in *UpdateMySlugRequest) (*UpdateMySlugResponse, error) {
+	return c.client.UpdateMySlug(ctx, in)
+}
+
+func (c *UserServiceHTTPBridgeImpl) GetUserLikes(ctx context.Context, in *GetUserLikesRequest) (*GetUserLikesResponse, error) {
+	return c.client.GetUserLikes(ctx, in)
+}
+
+func (c *UserServiceHTTPBridgeImpl) GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error) {
+	return c.client.GetUserSubscriptions(ctx, in)
+}
+
+func (c *UserServiceHTTPBridgeImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest) (*ChangePasswordResponse, error) {
+	return c.client.ChangePassword(ctx, in)
+}
+
 type UserServiceBridgeImpl struct {
 	client UserServiceClient
 }
@@ -1955,14 +2048,6 @@ func (c *UserServiceBridgeImpl) RefreshToken(ctx context.Context, in *RefreshTok
 
 func (c *UserServiceBridgeImpl) Register(ctx context.Context, in *RegisterRequest) (*RegisterResponse, error) {
 	return c.client.Register(ctx, in)
-}
-
-func (c *UserServiceBridgeImpl) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
-	return c.client.ForgotPassword(ctx, in)
-}
-
-func (c *UserServiceBridgeImpl) ResetPassword(ctx context.Context, in *ResetPasswordRequest) (*ResetPasswordResponse, error) {
-	return c.client.ResetPassword(ctx, in)
 }
 
 func (c *UserServiceBridgeImpl) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
@@ -2101,6 +2186,22 @@ func (c *UserServiceBridgeImpl) RemoveFavorite(ctx context.Context, in *RemoveFa
 	return c.client.RemoveFavorite(ctx, in)
 }
 
+func (c *UserServiceBridgeImpl) UpdateMySlug(ctx context.Context, in *UpdateMySlugRequest) (*UpdateMySlugResponse, error) {
+	return c.client.UpdateMySlug(ctx, in)
+}
+
+func (c *UserServiceBridgeImpl) GetUserLikes(ctx context.Context, in *GetUserLikesRequest) (*GetUserLikesResponse, error) {
+	return c.client.GetUserLikes(ctx, in)
+}
+
+func (c *UserServiceBridgeImpl) GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error) {
+	return c.client.GetUserSubscriptions(ctx, in)
+}
+
+func (c *UserServiceBridgeImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest) (*ChangePasswordResponse, error) {
+	return c.client.ChangePassword(ctx, in)
+}
+
 func (c *UserServiceBridgeImpl) mustEmbedUnimplementedUserServiceServer() {}
 
 type UserServiceGRPC2HTTPBridgeImpl struct {
@@ -2125,14 +2226,6 @@ func (c *UserServiceGRPC2HTTPBridgeImpl) RefreshToken(ctx context.Context, in *R
 
 func (c *UserServiceGRPC2HTTPBridgeImpl) Register(ctx context.Context, in *RegisterRequest) (*RegisterResponse, error) {
 	return c.client.Register(ctx, in)
-}
-
-func (c *UserServiceGRPC2HTTPBridgeImpl) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
-	return c.client.ForgotPassword(ctx, in)
-}
-
-func (c *UserServiceGRPC2HTTPBridgeImpl) ResetPassword(ctx context.Context, in *ResetPasswordRequest) (*ResetPasswordResponse, error) {
-	return c.client.ResetPassword(ctx, in)
 }
 
 func (c *UserServiceGRPC2HTTPBridgeImpl) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
@@ -2271,6 +2364,22 @@ func (c *UserServiceGRPC2HTTPBridgeImpl) RemoveFavorite(ctx context.Context, in 
 	return c.client.RemoveFavorite(ctx, in)
 }
 
+func (c *UserServiceGRPC2HTTPBridgeImpl) UpdateMySlug(ctx context.Context, in *UpdateMySlugRequest) (*UpdateMySlugResponse, error) {
+	return c.client.UpdateMySlug(ctx, in)
+}
+
+func (c *UserServiceGRPC2HTTPBridgeImpl) GetUserLikes(ctx context.Context, in *GetUserLikesRequest) (*GetUserLikesResponse, error) {
+	return c.client.GetUserLikes(ctx, in)
+}
+
+func (c *UserServiceGRPC2HTTPBridgeImpl) GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error) {
+	return c.client.GetUserSubscriptions(ctx, in)
+}
+
+func (c *UserServiceGRPC2HTTPBridgeImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest) (*ChangePasswordResponse, error) {
+	return c.client.ChangePassword(ctx, in)
+}
+
 type UserServiceHTTP2GRPCBridgeImpl struct {
 	client UserServiceHTTPClient
 }
@@ -2293,14 +2402,6 @@ func (c *UserServiceHTTP2GRPCBridgeImpl) RefreshToken(ctx context.Context, in *R
 
 func (c *UserServiceHTTP2GRPCBridgeImpl) Register(ctx context.Context, in *RegisterRequest) (*RegisterResponse, error) {
 	return c.client.Register(ctx, in)
-}
-
-func (c *UserServiceHTTP2GRPCBridgeImpl) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest) (*ForgotPasswordResponse, error) {
-	return c.client.ForgotPassword(ctx, in)
-}
-
-func (c *UserServiceHTTP2GRPCBridgeImpl) ResetPassword(ctx context.Context, in *ResetPasswordRequest) (*ResetPasswordResponse, error) {
-	return c.client.ResetPassword(ctx, in)
 }
 
 func (c *UserServiceHTTP2GRPCBridgeImpl) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
@@ -2437,6 +2538,22 @@ func (c *UserServiceHTTP2GRPCBridgeImpl) GetMyChannels(ctx context.Context, in *
 
 func (c *UserServiceHTTP2GRPCBridgeImpl) RemoveFavorite(ctx context.Context, in *RemoveFavoriteRequest) (*RemoveFavoriteResponse, error) {
 	return c.client.RemoveFavorite(ctx, in)
+}
+
+func (c *UserServiceHTTP2GRPCBridgeImpl) UpdateMySlug(ctx context.Context, in *UpdateMySlugRequest) (*UpdateMySlugResponse, error) {
+	return c.client.UpdateMySlug(ctx, in)
+}
+
+func (c *UserServiceHTTP2GRPCBridgeImpl) GetUserLikes(ctx context.Context, in *GetUserLikesRequest) (*GetUserLikesResponse, error) {
+	return c.client.GetUserLikes(ctx, in)
+}
+
+func (c *UserServiceHTTP2GRPCBridgeImpl) GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error) {
+	return c.client.GetUserSubscriptions(ctx, in)
+}
+
+func (c *UserServiceHTTP2GRPCBridgeImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest) (*ChangePasswordResponse, error) {
+	return c.client.ChangePassword(ctx, in)
 }
 
 func (c *UserServiceHTTP2GRPCBridgeImpl) mustEmbedUnimplementedUserServiceServer() {}

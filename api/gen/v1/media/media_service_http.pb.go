@@ -19,136 +19,189 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationMediaServiceCreateMedia = "/api.v1.services.media.MediaService/CreateMedia"
 const OperationMediaServiceCreateMediaShare = "/api.v1.services.media.MediaService/CreateMediaShare"
 const OperationMediaServiceCreateMediaSubtitle = "/api.v1.services.media.MediaService/CreateMediaSubtitle"
 const OperationMediaServiceDeleteMedia = "/api.v1.services.media.MediaService/DeleteMedia"
 const OperationMediaServiceDeleteMediaFavorite = "/api.v1.services.media.MediaService/DeleteMediaFavorite"
+const OperationMediaServiceDeleteMediaFavoriteCompat = "/api.v1.services.media.MediaService/DeleteMediaFavoriteCompat"
 const OperationMediaServiceDeleteMediaLike = "/api.v1.services.media.MediaService/DeleteMediaLike"
-const OperationMediaServiceGetEncodingStatus = "/api.v1.services.media.MediaService/GetEncodingStatus"
+const OperationMediaServiceDeleteMediaLikeCompat = "/api.v1.services.media.MediaService/DeleteMediaLikeCompat"
+const OperationMediaServiceDeleteSubtitle = "/api.v1.services.media.MediaService/DeleteSubtitle"
+const OperationMediaServiceEncodingTasks = "/api.v1.services.media.MediaService/EncodingTasks"
 const OperationMediaServiceGetMedia = "/api.v1.services.media.MediaService/GetMedia"
-const OperationMediaServiceGetMediaComments = "/api.v1.services.media.MediaService/GetMediaComments"
+const OperationMediaServiceGetMediaAudioWaveform = "/api.v1.services.media.MediaService/GetMediaAudioWaveform"
 const OperationMediaServiceGetMediaDownload = "/api.v1.services.media.MediaService/GetMediaDownload"
 const OperationMediaServiceGetMediaFavorites = "/api.v1.services.media.MediaService/GetMediaFavorites"
+const OperationMediaServiceGetMediaKeyFrames = "/api.v1.services.media.MediaService/GetMediaKeyFrames"
 const OperationMediaServiceGetMediaLikes = "/api.v1.services.media.MediaService/GetMediaLikes"
 const OperationMediaServiceGetMediaMetadata = "/api.v1.services.media.MediaService/GetMediaMetadata"
+const OperationMediaServiceGetMediaSceneChanges = "/api.v1.services.media.MediaService/GetMediaSceneChanges"
 const OperationMediaServiceGetMediaShares = "/api.v1.services.media.MediaService/GetMediaShares"
 const OperationMediaServiceGetMediaSpriteJPG = "/api.v1.services.media.MediaService/GetMediaSpriteJPG"
 const OperationMediaServiceGetMediaSpriteVTT = "/api.v1.services.media.MediaService/GetMediaSpriteVTT"
 const OperationMediaServiceGetMediaStream = "/api.v1.services.media.MediaService/GetMediaStream"
 const OperationMediaServiceGetMediaSubtitles = "/api.v1.services.media.MediaService/GetMediaSubtitles"
+const OperationMediaServiceGetMediaTextContent = "/api.v1.services.media.MediaService/GetMediaTextContent"
 const OperationMediaServiceGetMediaThumbnail = "/api.v1.services.media.MediaService/GetMediaThumbnail"
 const OperationMediaServiceGetMediaVariants = "/api.v1.services.media.MediaService/GetMediaVariants"
+const OperationMediaServiceGetMetadataMiningStatus = "/api.v1.services.media.MediaService/GetMetadataMiningStatus"
 const OperationMediaServiceIncrementViewCount = "/api.v1.services.media.MediaService/IncrementViewCount"
-const OperationMediaServiceListAllEncodingTasks = "/api.v1.services.media.MediaService/ListAllEncodingTasks"
-const OperationMediaServiceListEncodingTasks = "/api.v1.services.media.MediaService/ListEncodingTasks"
+const OperationMediaServiceListFeaturedMedias = "/api.v1.services.media.MediaService/ListFeaturedMedias"
+const OperationMediaServiceListLatestMedias = "/api.v1.services.media.MediaService/ListLatestMedias"
 const OperationMediaServiceListMedias = "/api.v1.services.media.MediaService/ListMedias"
+const OperationMediaServiceListSubtitleLanguages = "/api.v1.services.media.MediaService/ListSubtitleLanguages"
+const OperationMediaServiceOwnerRegenerateThumbnail = "/api.v1.services.media.MediaService/OwnerRegenerateThumbnail"
+const OperationMediaServiceOwnerSetThumbnail = "/api.v1.services.media.MediaService/OwnerSetThumbnail"
 const OperationMediaServiceReportMedia = "/api.v1.services.media.MediaService/ReportMedia"
 const OperationMediaServiceRetryAllFailedTasks = "/api.v1.services.media.MediaService/RetryAllFailedTasks"
 const OperationMediaServiceRetryEncodingTask = "/api.v1.services.media.MediaService/RetryEncodingTask"
+const OperationMediaServiceStartMetadataMining = "/api.v1.services.media.MediaService/StartMetadataMining"
 const OperationMediaServiceToggleMediaFavorite = "/api.v1.services.media.MediaService/ToggleMediaFavorite"
+const OperationMediaServiceToggleMediaFavoriteCompat = "/api.v1.services.media.MediaService/ToggleMediaFavoriteCompat"
 const OperationMediaServiceToggleMediaLike = "/api.v1.services.media.MediaService/ToggleMediaLike"
+const OperationMediaServiceToggleMediaLikeCompat = "/api.v1.services.media.MediaService/ToggleMediaLikeCompat"
+const OperationMediaServiceTranscodingStatus = "/api.v1.services.media.MediaService/TranscodingStatus"
 const OperationMediaServiceUpdateMedia = "/api.v1.services.media.MediaService/UpdateMedia"
-const OperationMediaServiceUploadMedia = "/api.v1.services.media.MediaService/UploadMedia"
 
 type MediaServiceHTTPServer interface {
-	// CreateMedia CreateMedia creates a new media.
-	CreateMedia(context.Context, *CreateMediaRequest) (*CreateMediaResponse, error)
-	// CreateMediaShare CreateMediaShare creates a share record for a media.
+	// CreateMediaShare CreateMediaShare records a media share event.
 	CreateMediaShare(context.Context, *CreateMediaShareRequest) (*CreateMediaShareResponse, error)
-	// CreateMediaSubtitle CreateMediaSubtitle uploads a subtitle for a media.
+	// CreateMediaSubtitle STUB: Not yet implemented. Do not remove - reserved for future development.
 	CreateMediaSubtitle(context.Context, *CreateMediaSubtitleRequest) (*CreateMediaSubtitleResponse, error)
-	// DeleteMedia DeleteMedia deletes a media.
+	// DeleteMedia STUB: Not yet implemented. Do not remove - reserved for future development.
 	DeleteMedia(context.Context, *DeleteMediaRequest) (*DeleteMediaResponse, error)
-	// DeleteMediaFavorite DeleteMediaFavorite removes favorite from a media.
+	// DeleteMediaFavorite DeleteMediaFavorite removes favorite (canonical).
 	DeleteMediaFavorite(context.Context, *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error)
-	// DeleteMediaLike DeleteMediaLike removes like from a media.
+	// DeleteMediaFavoriteCompat DeleteMediaFavoriteCompat removes via plural (compat).
+	DeleteMediaFavoriteCompat(context.Context, *DeleteMediaFavoriteRequest) (*DeleteMediaFavoriteResponse, error)
+	// DeleteMediaLike DeleteMediaLike removes like from a media (canonical).
 	DeleteMediaLike(context.Context, *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error)
-	// GetEncodingStatus GetEncodingStatus returns the overall encoding status of the system.
-	GetEncodingStatus(context.Context, *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error)
+	// DeleteMediaLikeCompat DeleteMediaLikeCompat removes like via plural endpoint (compat).
+	DeleteMediaLikeCompat(context.Context, *DeleteMediaLikeRequest) (*DeleteMediaLikeResponse, error)
+	// DeleteSubtitle STUB: Not yet implemented. Do not remove - reserved for future development.
+	DeleteSubtitle(context.Context, *DeleteSubtitleRequest) (*DeleteSubtitleResponse, error)
+	// EncodingTasks EncodingTasks returns all encoding tasks.
+	EncodingTasks(context.Context, *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error)
 	// GetMedia GetMedia returns a media by ID.
 	GetMedia(context.Context, *GetMediaRequest) (*GetMediaResponse, error)
-	// GetMediaComments GetMediaComments returns comments for a media.
-	GetMediaComments(context.Context, *GetMediaCommentsRequest) (*GetMediaCommentsResponse, error)
-	// GetMediaDownload GetMediaDownload returns the download URL for a media.
+	// GetMediaAudioWaveform STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaAudioWaveform(context.Context, *GetMediaAudioWaveformRequest) (*GetMediaAudioWaveformResponse, error)
+	// GetMediaDownload STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
 	GetMediaDownload(context.Context, *GetMediaDownloadRequest) (*GetMediaDownloadResponse, error)
-	// GetMediaFavorites GetMediaFavorites returns the favorite status for a media.
+	// GetMediaFavorites GetMediaFavorites returns favorites (plural compat).
 	GetMediaFavorites(context.Context, *GetMediaFavoritesRequest) (*GetMediaFavoritesResponse, error)
-	// GetMediaLikes GetMediaLikes returns the like status for a media.
+	// GetMediaKeyFrames STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaKeyFrames(context.Context, *GetMediaKeyFramesRequest) (*GetMediaKeyFramesResponse, error)
+	// GetMediaLikes GetMediaLikes returns likes for a media (plural compat).
 	GetMediaLikes(context.Context, *GetMediaLikesRequest) (*GetMediaLikesResponse, error)
-	// GetMediaMetadata GetMediaMetadata returns metadata for a media.
+	// GetMediaMetadata STUB: Not yet implemented. Do not remove - reserved for future development.
 	GetMediaMetadata(context.Context, *GetMediaMetadataRequest) (*GetMediaMetadataResponse, error)
-	// GetMediaShares GetMediaShares returns share statistics for a media.
+	// GetMediaSceneChanges STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaSceneChanges(context.Context, *GetMediaSceneChangesRequest) (*GetMediaSceneChangesResponse, error)
+	// GetMediaShares GetMediaShares returns share links for a media.
 	GetMediaShares(context.Context, *GetMediaSharesRequest) (*GetMediaSharesResponse, error)
-	// GetMediaSpriteJPG GetMediaSpriteJPG returns the JPG sprite image for a media.
+	// GetMediaSpriteJPG NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
+	// GetMediaSpriteJPG returns the JPG sprite image for a media.
 	GetMediaSpriteJPG(context.Context, *GetMediaSpriteJPGRequest) (*GetMediaSpriteJPGResponse, error)
-	// GetMediaSpriteVTT GetMediaSpriteVTT returns the VTT sprite file for a media.
+	// GetMediaSpriteVTT NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
+	// GetMediaSpriteVTT returns the VTT sprite file for a media.
 	GetMediaSpriteVTT(context.Context, *GetMediaSpriteVTTRequest) (*GetMediaSpriteVTTResponse, error)
-	// GetMediaStream GetMediaStream returns the streaming URL for a media.
+	// GetMediaStream STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
 	GetMediaStream(context.Context, *GetMediaStreamRequest) (*GetMediaStreamResponse, error)
-	// GetMediaSubtitles GetMediaSubtitles returns subtitles for a media.
+	// GetMediaSubtitles STUB: Not yet implemented. Do not remove - reserved for future development.
 	GetMediaSubtitles(context.Context, *GetMediaSubtitlesRequest) (*GetMediaSubtitlesResponse, error)
-	// GetMediaThumbnail GetMediaThumbnail returns the thumbnail URL for a media.
+	// GetMediaTextContent STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaTextContent(context.Context, *GetMediaTextContentRequest) (*GetMediaTextContentResponse, error)
+	// GetMediaThumbnail STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns non-JSON content (image). Requires adapter-level content-type handling.
 	GetMediaThumbnail(context.Context, *GetMediaThumbnailRequest) (*GetMediaThumbnailResponse, error)
 	// GetMediaVariants GetMediaVariants returns the available variants for a media.
 	GetMediaVariants(context.Context, *GetMediaVariantsRequest) (*GetMediaVariantsResponse, error)
+	// GetMetadataMiningStatus STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMetadataMiningStatus(context.Context, *GetMetadataMiningStatusRequest) (*GetMetadataMiningStatusResponse, error)
 	// IncrementViewCount IncrementViewCount increments the view count of a media.
 	IncrementViewCount(context.Context, *IncrementViewCountRequest) (*IncrementViewCountResponse, error)
-	// ListAllEncodingTasks ListAllEncodingTasks returns a flat list of all encoding tasks (admin view).
-	ListAllEncodingTasks(context.Context, *ListAllEncodingTasksRequest) (*ListAllEncodingTasksResponse, error)
-	// ListEncodingTasks ListEncodingTasks returns a list of encoding tasks for a media.
-	ListEncodingTasks(context.Context, *ListEncodingTasksRequest) (*ListEncodingTasksResponse, error)
+	// ListFeaturedMedias ListFeaturedMedias returns a list of featured medias.
+	ListFeaturedMedias(context.Context, *ListFeaturedMediasRequest) (*ListFeaturedMediasResponse, error)
+	// ListLatestMedias ListLatestMedias returns a list of latest medias.
+	ListLatestMedias(context.Context, *ListLatestMediasRequest) (*ListLatestMediasResponse, error)
 	// ListMedias ListMedias returns a list of medias.
 	ListMedias(context.Context, *ListMediasRequest) (*ListMediasResponse, error)
+	// ListSubtitleLanguages STUB: Not yet implemented. Do not remove - reserved for future development.
+	ListSubtitleLanguages(context.Context, *ListSubtitleLanguagesRequest) (*ListSubtitleLanguagesResponse, error)
+	// OwnerRegenerateThumbnail Owner/portal cover regeneration (short_token; uuid never exposed to client).
+	OwnerRegenerateThumbnail(context.Context, *OwnerRegenerateThumbnailRequest) (*OwnerRegenerateThumbnailResponse, error)
+	// OwnerSetThumbnail Owner/portal cover selection from sprite sheet (short_token).
+	OwnerSetThumbnail(context.Context, *OwnerSetThumbnailRequest) (*OwnerSetThumbnailResponse, error)
 	// ReportMedia ReportMedia reports a media for review.
 	ReportMedia(context.Context, *ReportMediaRequest) (*ReportMediaResponse, error)
-	// RetryAllFailedTasks RetryAllFailedTasks retries all failed encoding tasks.
+	// RetryAllFailedTasks RetryAllFailedTasks retries all failed tasks.
 	RetryAllFailedTasks(context.Context, *RetryAllFailedTasksRequest) (*RetryAllFailedTasksResponse, error)
-	// RetryEncodingTask RetryEncodingTask retries a specific encoding task.
+	// RetryEncodingTask RetryEncodingTask retries a specific task.
 	RetryEncodingTask(context.Context, *RetryEncodingTaskRequest) (*RetryEncodingTaskResponse, error)
-	// ToggleMediaFavorite ToggleMediaFavorite toggles favorite status for a media.
+	// StartMetadataMining STUB: Not yet implemented. Do not remove - reserved for future development.
+	StartMetadataMining(context.Context, *StartMetadataMiningRequest) (*StartMetadataMiningResponse, error)
+	// ToggleMediaFavorite ToggleMediaFavorite toggles favorite status (canonical).
 	ToggleMediaFavorite(context.Context, *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error)
-	// ToggleMediaLike ToggleMediaLike toggles like status for a media.
+	// ToggleMediaFavoriteCompat ToggleMediaFavoriteCompat toggles via plural (compat).
+	ToggleMediaFavoriteCompat(context.Context, *ToggleMediaFavoriteRequest) (*ToggleMediaFavoriteResponse, error)
+	// ToggleMediaLike ToggleMediaLike toggles like status for a media (canonical).
 	ToggleMediaLike(context.Context, *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error)
-	// UpdateMedia UpdateMedia updates an existing media.
+	// ToggleMediaLikeCompat ToggleMediaLikeCompat toggles like via plural endpoint (compat).
+	ToggleMediaLikeCompat(context.Context, *ToggleMediaLikeRequest) (*ToggleMediaLikeResponse, error)
+	// TranscodingStatus TranscodingStatus returns current transcoding status.
+	TranscodingStatus(context.Context, *GetEncodingStatusRequest) (*GetEncodingStatusResponse, error)
+	// UpdateMedia STUB: Not yet implemented. Do not remove - reserved for future development.
 	UpdateMedia(context.Context, *UpdateMediaRequest) (*UpdateMediaResponse, error)
-	// UploadMedia UploadMedia uploads a media file.
-	UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error)
 }
 
 func RegisterMediaServiceHTTPServer(s *http.Server, srv MediaServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/api/v1/medias", _MediaService_ListMedias0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/featured", _MediaService_ListFeaturedMedias0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/latest", _MediaService_ListLatestMedias0_HTTP_Handler(srv))
 	r.GET("/api/v1/medias/{id}", _MediaService_GetMedia0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias", _MediaService_CreateMedia0_HTTP_Handler(srv))
-	r.PUT("/api/v1/medias/{media.id}", _MediaService_UpdateMedia0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/medias/{id}", _MediaService_DeleteMedia0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{id}/view", _MediaService_IncrementViewCount0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/upload", _MediaService_UploadMedia0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{id}/stream", _MediaService_GetMediaStream0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{id}/download", _MediaService_GetMediaDownload0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{id}/thumbnail", _MediaService_GetMediaThumbnail0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/tasks", _MediaService_ListEncodingTasks0_HTTP_Handler(srv))
 	r.GET("/api/v1/medias/{id}/variants", _MediaService_GetMediaVariants0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{media_id}/tasks/{task_id}/retry", _MediaService_RetryEncodingTask0_HTTP_Handler(srv))
-	r.GET("/api/v1/admin/encoding/status", _MediaService_GetEncodingStatus0_HTTP_Handler(srv))
-	r.GET("/api/v1/admin/encoding/tasks", _MediaService_ListAllEncodingTasks0_HTTP_Handler(srv))
-	r.POST("/api/v1/admin/encoding/retry-failed", _MediaService_RetryAllFailedTasks0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/likes", _MediaService_GetMediaLikes0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{media_id}/likes", _MediaService_ToggleMediaLike0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/medias/{media_id}/likes", _MediaService_DeleteMediaLike0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/favorites", _MediaService_GetMediaFavorites0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{media_id}/favorites", _MediaService_ToggleMediaFavorite0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/medias/{media_id}/favorites", _MediaService_DeleteMediaFavorite0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/shares", _MediaService_GetMediaShares0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{media_id}/shares", _MediaService_CreateMediaShare0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/comments", _MediaService_GetMediaComments0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/subtitles", _MediaService_GetMediaSubtitles0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{media_id}/subtitles", _MediaService_CreateMediaSubtitle0_HTTP_Handler(srv))
-	r.GET("/api/v1/medias/{media_id}/metadata", _MediaService_GetMediaMetadata0_HTTP_Handler(srv))
-	r.POST("/api/v1/medias/{id}/report", _MediaService_ReportMedia0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/view", _MediaService_IncrementViewCount0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/like", _MediaService_ToggleMediaLike0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/medias/{id}/like", _MediaService_DeleteMediaLike0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/likes", _MediaService_GetMediaLikes0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/likes", _MediaService_ToggleMediaLikeCompat0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/medias/{id}/likes", _MediaService_DeleteMediaLikeCompat0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/favorite", _MediaService_ToggleMediaFavorite0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/medias/{id}/favorite", _MediaService_DeleteMediaFavorite0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/favorites", _MediaService_GetMediaFavorites0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/favorites", _MediaService_ToggleMediaFavoriteCompat0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/medias/{id}/favorites", _MediaService_DeleteMediaFavoriteCompat0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/transcoding/status", _MediaService_TranscodingStatus0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/encoding/tasks", _MediaService_EncodingTasks0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/encoding/retry", _MediaService_RetryEncodingTask0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/encoding/retry-all-failed", _MediaService_RetryAllFailedTasks0_HTTP_Handler(srv))
 	r.GET("/api/v1/medias/{id}/sprite.vtt", _MediaService_GetMediaSpriteVTT0_HTTP_Handler(srv))
 	r.GET("/api/v1/medias/{id}/sprite.jpg", _MediaService_GetMediaSpriteJPG0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/download", _MediaService_GetMediaDownload0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/stream", _MediaService_GetMediaStream0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/thumbnail", _MediaService_GetMediaThumbnail0_HTTP_Handler(srv))
+	r.POST("/api/v1/me/medias/{token}/regen-thumbnail", _MediaService_OwnerRegenerateThumbnail0_HTTP_Handler(srv))
+	r.POST("/api/v1/me/medias/{token}/set-thumbnail", _MediaService_OwnerSetThumbnail0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/subtitles", _MediaService_GetMediaSubtitles0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/subtitles", _MediaService_CreateMediaSubtitle0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/metadata", _MediaService_GetMediaMetadata0_HTTP_Handler(srv))
+	r.PUT("/api/v1/medias/{id}", _MediaService_UpdateMedia0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/medias/{id}", _MediaService_DeleteMedia0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/metadata/mining", _MediaService_StartMetadataMining0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/metadata/status", _MediaService_GetMetadataMiningStatus0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/metadata/key-frames", _MediaService_GetMediaKeyFrames0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/metadata/audio-waveform", _MediaService_GetMediaAudioWaveform0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/metadata/text-content", _MediaService_GetMediaTextContent0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/metadata/scene-changes", _MediaService_GetMediaSceneChanges0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/subtitles/{id}", _MediaService_DeleteSubtitle0_HTTP_Handler(srv))
+	r.GET("/api/v1/subtitles/languages", _MediaService_ListSubtitleLanguages0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/report", _MediaService_ReportMedia0_HTTP_Handler(srv))
+	r.GET("/api/v1/medias/{id}/shares", _MediaService_GetMediaShares0_HTTP_Handler(srv))
+	r.POST("/api/v1/medias/{id}/shares", _MediaService_CreateMediaShare0_HTTP_Handler(srv))
 }
 
 func _MediaService_ListMedias0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
@@ -166,6 +219,44 @@ func _MediaService_ListMedias0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx
 			return err
 		}
 		reply := out.(*ListMediasResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_ListFeaturedMedias0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListFeaturedMediasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceListFeaturedMedias)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListFeaturedMedias(ctx, req.(*ListFeaturedMediasRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListFeaturedMediasResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_ListLatestMedias0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListLatestMediasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceListLatestMedias)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListLatestMedias(ctx, req.(*ListLatestMediasRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListLatestMediasResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -192,71 +283,24 @@ func _MediaService_GetMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx h
 	}
 }
 
-func _MediaService_CreateMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_GetMediaVariants0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceCreateMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateMedia(ctx, req.(*CreateMediaRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*CreateMediaResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_UpdateMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UpdateMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
+		var in GetMediaVariantsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceUpdateMedia)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaVariants)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateMedia(ctx, req.(*UpdateMediaRequest))
+			return srv.GetMediaVariants(ctx, req.(*GetMediaVariantsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*UpdateMediaResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_DeleteMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in DeleteMediaRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceDeleteMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteMedia(ctx, req.(*DeleteMediaRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*DeleteMediaResponse)
+		reply := out.(*GetMediaVariantsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -282,245 +326,6 @@ func _MediaService_IncrementViewCount0_HTTP_Handler(srv MediaServiceHTTPServer) 
 			return err
 		}
 		reply := out.(*IncrementViewCountResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_UploadMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UploadMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceUploadMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UploadMedia(ctx, req.(*UploadMediaRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*UploadMediaResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_GetMediaStream0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaStreamRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaStream)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaStream(ctx, req.(*GetMediaStreamRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetMediaStreamResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_GetMediaDownload0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaDownloadRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaDownload)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaDownload(ctx, req.(*GetMediaDownloadRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetMediaDownloadResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_GetMediaThumbnail0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaThumbnailRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaThumbnail)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaThumbnail(ctx, req.(*GetMediaThumbnailRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetMediaThumbnailResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_ListEncodingTasks0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListEncodingTasksRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceListEncodingTasks)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListEncodingTasks(ctx, req.(*ListEncodingTasksRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ListEncodingTasksResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_GetMediaVariants0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaVariantsRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaVariants)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaVariants(ctx, req.(*GetMediaVariantsRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetMediaVariantsResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_RetryEncodingTask0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RetryEncodingTaskRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceRetryEncodingTask)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RetryEncodingTask(ctx, req.(*RetryEncodingTaskRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*RetryEncodingTaskResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_GetEncodingStatus0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetEncodingStatusRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetEncodingStatus)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetEncodingStatus(ctx, req.(*GetEncodingStatusRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetEncodingStatusResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_ListAllEncodingTasks0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListAllEncodingTasksRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceListAllEncodingTasks)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListAllEncodingTasks(ctx, req.(*ListAllEncodingTasksRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ListAllEncodingTasksResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_RetryAllFailedTasks0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RetryAllFailedTasksRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceRetryAllFailedTasks)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RetryAllFailedTasks(ctx, req.(*RetryAllFailedTasksRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*RetryAllFailedTasksResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _MediaService_GetMediaLikes0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetMediaLikesRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaLikes)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaLikes(ctx, req.(*GetMediaLikesRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetMediaLikesResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -572,24 +377,71 @@ func _MediaService_DeleteMediaLike0_HTTP_Handler(srv MediaServiceHTTPServer) fun
 	}
 }
 
-func _MediaService_GetMediaFavorites0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_GetMediaLikes0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaFavoritesRequest
+		var in GetMediaLikesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaFavorites)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaLikes)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaFavorites(ctx, req.(*GetMediaFavoritesRequest))
+			return srv.GetMediaLikes(ctx, req.(*GetMediaLikesRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetMediaFavoritesResponse)
+		reply := out.(*GetMediaLikesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_ToggleMediaLikeCompat0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleMediaLikeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceToggleMediaLikeCompat)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleMediaLikeCompat(ctx, req.(*ToggleMediaLikeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ToggleMediaLikeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_DeleteMediaLikeCompat0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteMediaLikeRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceDeleteMediaLikeCompat)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteMediaLikeCompat(ctx, req.(*DeleteMediaLikeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteMediaLikeResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -641,31 +493,31 @@ func _MediaService_DeleteMediaFavorite0_HTTP_Handler(srv MediaServiceHTTPServer)
 	}
 }
 
-func _MediaService_GetMediaShares0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_GetMediaFavorites0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaSharesRequest
+		var in GetMediaFavoritesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaShares)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaFavorites)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaShares(ctx, req.(*GetMediaSharesRequest))
+			return srv.GetMediaFavorites(ctx, req.(*GetMediaFavoritesRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetMediaSharesResponse)
+		reply := out.(*GetMediaFavoritesResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _MediaService_CreateMediaShare0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_ToggleMediaFavoriteCompat0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateMediaShareRequest
+		var in ToggleMediaFavoriteRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -675,37 +527,279 @@ func _MediaService_CreateMediaShare0_HTTP_Handler(srv MediaServiceHTTPServer) fu
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceCreateMediaShare)
+		http.SetOperation(ctx, OperationMediaServiceToggleMediaFavoriteCompat)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateMediaShare(ctx, req.(*CreateMediaShareRequest))
+			return srv.ToggleMediaFavoriteCompat(ctx, req.(*ToggleMediaFavoriteRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*CreateMediaShareResponse)
+		reply := out.(*ToggleMediaFavoriteResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _MediaService_GetMediaComments0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_DeleteMediaFavoriteCompat0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaCommentsRequest
+		var in DeleteMediaFavoriteRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaComments)
+		http.SetOperation(ctx, OperationMediaServiceDeleteMediaFavoriteCompat)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaComments(ctx, req.(*GetMediaCommentsRequest))
+			return srv.DeleteMediaFavoriteCompat(ctx, req.(*DeleteMediaFavoriteRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetMediaCommentsResponse)
+		reply := out.(*DeleteMediaFavoriteResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_TranscodingStatus0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetEncodingStatusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceTranscodingStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.TranscodingStatus(ctx, req.(*GetEncodingStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetEncodingStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_EncodingTasks0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAllEncodingTasksRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceEncodingTasks)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.EncodingTasks(ctx, req.(*ListAllEncodingTasksRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAllEncodingTasksResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_RetryEncodingTask0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RetryEncodingTaskRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceRetryEncodingTask)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RetryEncodingTask(ctx, req.(*RetryEncodingTaskRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RetryEncodingTaskResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_RetryAllFailedTasks0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RetryAllFailedTasksRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceRetryAllFailedTasks)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RetryAllFailedTasks(ctx, req.(*RetryAllFailedTasksRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RetryAllFailedTasksResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaSpriteVTT0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaSpriteVTTRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteVTT)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaSpriteVTT(ctx, req.(*GetMediaSpriteVTTRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaSpriteVTTResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaSpriteJPG0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaSpriteJPGRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteJPG)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaSpriteJPG(ctx, req.(*GetMediaSpriteJPGRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaSpriteJPGResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaDownload0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaDownloadRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaDownload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaDownload(ctx, req.(*GetMediaDownloadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaDownloadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaStream0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaStreamRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaStream)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaStream(ctx, req.(*GetMediaStreamRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaStreamResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaThumbnail0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaThumbnailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaThumbnail(ctx, req.(*GetMediaThumbnailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaThumbnailResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_OwnerRegenerateThumbnail0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in OwnerRegenerateThumbnailRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceOwnerRegenerateThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.OwnerRegenerateThumbnail(ctx, req.(*OwnerRegenerateThumbnailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*OwnerRegenerateThumbnailResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_OwnerSetThumbnail0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in OwnerSetThumbnailRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceOwnerSetThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.OwnerSetThumbnail(ctx, req.(*OwnerSetThumbnailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*OwnerSetThumbnailResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -779,6 +873,229 @@ func _MediaService_GetMediaMetadata0_HTTP_Handler(srv MediaServiceHTTPServer) fu
 	}
 }
 
+func _MediaService_UpdateMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateMediaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceUpdateMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateMedia(ctx, req.(*UpdateMediaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateMediaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_DeleteMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteMediaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceDeleteMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteMedia(ctx, req.(*DeleteMediaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteMediaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_StartMetadataMining0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in StartMetadataMiningRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceStartMetadataMining)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.StartMetadataMining(ctx, req.(*StartMetadataMiningRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*StartMetadataMiningResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMetadataMiningStatus0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMetadataMiningStatusRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMetadataMiningStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMetadataMiningStatus(ctx, req.(*GetMetadataMiningStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMetadataMiningStatusResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaKeyFrames0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaKeyFramesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaKeyFrames)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaKeyFrames(ctx, req.(*GetMediaKeyFramesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaKeyFramesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaAudioWaveform0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaAudioWaveformRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaAudioWaveform)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaAudioWaveform(ctx, req.(*GetMediaAudioWaveformRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaAudioWaveformResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaTextContent0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaTextContentRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaTextContent)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaTextContent(ctx, req.(*GetMediaTextContentRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaTextContentResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_GetMediaSceneChanges0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMediaSceneChangesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceGetMediaSceneChanges)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMediaSceneChanges(ctx, req.(*GetMediaSceneChangesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMediaSceneChangesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_DeleteSubtitle0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteSubtitleRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceDeleteSubtitle)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteSubtitle(ctx, req.(*DeleteSubtitleRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteSubtitleResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _MediaService_ListSubtitleLanguages0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListSubtitleLanguagesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationMediaServiceListSubtitleLanguages)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListSubtitleLanguages(ctx, req.(*ListSubtitleLanguagesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListSubtitleLanguagesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _MediaService_ReportMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ReportMediaRequest
@@ -804,113 +1121,145 @@ func _MediaService_ReportMedia0_HTTP_Handler(srv MediaServiceHTTPServer) func(ct
 	}
 }
 
-func _MediaService_GetMediaSpriteVTT0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_GetMediaShares0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaSpriteVTTRequest
+		var in GetMediaSharesRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteVTT)
+		http.SetOperation(ctx, OperationMediaServiceGetMediaShares)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaSpriteVTT(ctx, req.(*GetMediaSpriteVTTRequest))
+			return srv.GetMediaShares(ctx, req.(*GetMediaSharesRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetMediaSpriteVTTResponse)
+		reply := out.(*GetMediaSharesResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _MediaService_GetMediaSpriteJPG0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
+func _MediaService_CreateMediaShare0_HTTP_Handler(srv MediaServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMediaSpriteJPGRequest
+		var in CreateMediaShareRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationMediaServiceGetMediaSpriteJPG)
+		http.SetOperation(ctx, OperationMediaServiceCreateMediaShare)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMediaSpriteJPG(ctx, req.(*GetMediaSpriteJPGRequest))
+			return srv.CreateMediaShare(ctx, req.(*CreateMediaShareRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetMediaSpriteJPGResponse)
+		reply := out.(*CreateMediaShareResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
 type MediaServiceHTTPClient interface {
-	// CreateMedia CreateMedia creates a new media.
-	CreateMedia(ctx context.Context, req *CreateMediaRequest, opts ...http.CallOption) (rsp *CreateMediaResponse, err error)
-	// CreateMediaShare CreateMediaShare creates a share record for a media.
+	// CreateMediaShare CreateMediaShare records a media share event.
 	CreateMediaShare(ctx context.Context, req *CreateMediaShareRequest, opts ...http.CallOption) (rsp *CreateMediaShareResponse, err error)
-	// CreateMediaSubtitle CreateMediaSubtitle uploads a subtitle for a media.
+	// CreateMediaSubtitle STUB: Not yet implemented. Do not remove - reserved for future development.
 	CreateMediaSubtitle(ctx context.Context, req *CreateMediaSubtitleRequest, opts ...http.CallOption) (rsp *CreateMediaSubtitleResponse, err error)
-	// DeleteMedia DeleteMedia deletes a media.
+	// DeleteMedia STUB: Not yet implemented. Do not remove - reserved for future development.
 	DeleteMedia(ctx context.Context, req *DeleteMediaRequest, opts ...http.CallOption) (rsp *DeleteMediaResponse, err error)
-	// DeleteMediaFavorite DeleteMediaFavorite removes favorite from a media.
+	// DeleteMediaFavorite DeleteMediaFavorite removes favorite (canonical).
 	DeleteMediaFavorite(ctx context.Context, req *DeleteMediaFavoriteRequest, opts ...http.CallOption) (rsp *DeleteMediaFavoriteResponse, err error)
-	// DeleteMediaLike DeleteMediaLike removes like from a media.
+	// DeleteMediaFavoriteCompat DeleteMediaFavoriteCompat removes via plural (compat).
+	DeleteMediaFavoriteCompat(ctx context.Context, req *DeleteMediaFavoriteRequest, opts ...http.CallOption) (rsp *DeleteMediaFavoriteResponse, err error)
+	// DeleteMediaLike DeleteMediaLike removes like from a media (canonical).
 	DeleteMediaLike(ctx context.Context, req *DeleteMediaLikeRequest, opts ...http.CallOption) (rsp *DeleteMediaLikeResponse, err error)
-	// GetEncodingStatus GetEncodingStatus returns the overall encoding status of the system.
-	GetEncodingStatus(ctx context.Context, req *GetEncodingStatusRequest, opts ...http.CallOption) (rsp *GetEncodingStatusResponse, err error)
+	// DeleteMediaLikeCompat DeleteMediaLikeCompat removes like via plural endpoint (compat).
+	DeleteMediaLikeCompat(ctx context.Context, req *DeleteMediaLikeRequest, opts ...http.CallOption) (rsp *DeleteMediaLikeResponse, err error)
+	// DeleteSubtitle STUB: Not yet implemented. Do not remove - reserved for future development.
+	DeleteSubtitle(ctx context.Context, req *DeleteSubtitleRequest, opts ...http.CallOption) (rsp *DeleteSubtitleResponse, err error)
+	// EncodingTasks EncodingTasks returns all encoding tasks.
+	EncodingTasks(ctx context.Context, req *ListAllEncodingTasksRequest, opts ...http.CallOption) (rsp *ListAllEncodingTasksResponse, err error)
 	// GetMedia GetMedia returns a media by ID.
 	GetMedia(ctx context.Context, req *GetMediaRequest, opts ...http.CallOption) (rsp *GetMediaResponse, err error)
-	// GetMediaComments GetMediaComments returns comments for a media.
-	GetMediaComments(ctx context.Context, req *GetMediaCommentsRequest, opts ...http.CallOption) (rsp *GetMediaCommentsResponse, err error)
-	// GetMediaDownload GetMediaDownload returns the download URL for a media.
+	// GetMediaAudioWaveform STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaAudioWaveform(ctx context.Context, req *GetMediaAudioWaveformRequest, opts ...http.CallOption) (rsp *GetMediaAudioWaveformResponse, err error)
+	// GetMediaDownload STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
 	GetMediaDownload(ctx context.Context, req *GetMediaDownloadRequest, opts ...http.CallOption) (rsp *GetMediaDownloadResponse, err error)
-	// GetMediaFavorites GetMediaFavorites returns the favorite status for a media.
+	// GetMediaFavorites GetMediaFavorites returns favorites (plural compat).
 	GetMediaFavorites(ctx context.Context, req *GetMediaFavoritesRequest, opts ...http.CallOption) (rsp *GetMediaFavoritesResponse, err error)
-	// GetMediaLikes GetMediaLikes returns the like status for a media.
+	// GetMediaKeyFrames STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaKeyFrames(ctx context.Context, req *GetMediaKeyFramesRequest, opts ...http.CallOption) (rsp *GetMediaKeyFramesResponse, err error)
+	// GetMediaLikes GetMediaLikes returns likes for a media (plural compat).
 	GetMediaLikes(ctx context.Context, req *GetMediaLikesRequest, opts ...http.CallOption) (rsp *GetMediaLikesResponse, err error)
-	// GetMediaMetadata GetMediaMetadata returns metadata for a media.
+	// GetMediaMetadata STUB: Not yet implemented. Do not remove - reserved for future development.
 	GetMediaMetadata(ctx context.Context, req *GetMediaMetadataRequest, opts ...http.CallOption) (rsp *GetMediaMetadataResponse, err error)
-	// GetMediaShares GetMediaShares returns share statistics for a media.
+	// GetMediaSceneChanges STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaSceneChanges(ctx context.Context, req *GetMediaSceneChangesRequest, opts ...http.CallOption) (rsp *GetMediaSceneChangesResponse, err error)
+	// GetMediaShares GetMediaShares returns share links for a media.
 	GetMediaShares(ctx context.Context, req *GetMediaSharesRequest, opts ...http.CallOption) (rsp *GetMediaSharesResponse, err error)
-	// GetMediaSpriteJPG GetMediaSpriteJPG returns the JPG sprite image for a media.
+	// GetMediaSpriteJPG NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
+	// GetMediaSpriteJPG returns the JPG sprite image for a media.
 	GetMediaSpriteJPG(ctx context.Context, req *GetMediaSpriteJPGRequest, opts ...http.CallOption) (rsp *GetMediaSpriteJPGResponse, err error)
-	// GetMediaSpriteVTT GetMediaSpriteVTT returns the VTT sprite file for a media.
+	// GetMediaSpriteVTT NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
+	// GetMediaSpriteVTT returns the VTT sprite file for a media.
 	GetMediaSpriteVTT(ctx context.Context, req *GetMediaSpriteVTTRequest, opts ...http.CallOption) (rsp *GetMediaSpriteVTTResponse, err error)
-	// GetMediaStream GetMediaStream returns the streaming URL for a media.
+	// GetMediaStream STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
 	GetMediaStream(ctx context.Context, req *GetMediaStreamRequest, opts ...http.CallOption) (rsp *GetMediaStreamResponse, err error)
-	// GetMediaSubtitles GetMediaSubtitles returns subtitles for a media.
+	// GetMediaSubtitles STUB: Not yet implemented. Do not remove - reserved for future development.
 	GetMediaSubtitles(ctx context.Context, req *GetMediaSubtitlesRequest, opts ...http.CallOption) (rsp *GetMediaSubtitlesResponse, err error)
-	// GetMediaThumbnail GetMediaThumbnail returns the thumbnail URL for a media.
+	// GetMediaTextContent STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMediaTextContent(ctx context.Context, req *GetMediaTextContentRequest, opts ...http.CallOption) (rsp *GetMediaTextContentResponse, err error)
+	// GetMediaThumbnail STUB: Not yet implemented. Do not remove - reserved for future development.
+	// NON-PROTO-SPECIAL: Returns non-JSON content (image). Requires adapter-level content-type handling.
 	GetMediaThumbnail(ctx context.Context, req *GetMediaThumbnailRequest, opts ...http.CallOption) (rsp *GetMediaThumbnailResponse, err error)
 	// GetMediaVariants GetMediaVariants returns the available variants for a media.
 	GetMediaVariants(ctx context.Context, req *GetMediaVariantsRequest, opts ...http.CallOption) (rsp *GetMediaVariantsResponse, err error)
+	// GetMetadataMiningStatus STUB: Not yet implemented. Do not remove - reserved for future development.
+	GetMetadataMiningStatus(ctx context.Context, req *GetMetadataMiningStatusRequest, opts ...http.CallOption) (rsp *GetMetadataMiningStatusResponse, err error)
 	// IncrementViewCount IncrementViewCount increments the view count of a media.
 	IncrementViewCount(ctx context.Context, req *IncrementViewCountRequest, opts ...http.CallOption) (rsp *IncrementViewCountResponse, err error)
-	// ListAllEncodingTasks ListAllEncodingTasks returns a flat list of all encoding tasks (admin view).
-	ListAllEncodingTasks(ctx context.Context, req *ListAllEncodingTasksRequest, opts ...http.CallOption) (rsp *ListAllEncodingTasksResponse, err error)
-	// ListEncodingTasks ListEncodingTasks returns a list of encoding tasks for a media.
-	ListEncodingTasks(ctx context.Context, req *ListEncodingTasksRequest, opts ...http.CallOption) (rsp *ListEncodingTasksResponse, err error)
+	// ListFeaturedMedias ListFeaturedMedias returns a list of featured medias.
+	ListFeaturedMedias(ctx context.Context, req *ListFeaturedMediasRequest, opts ...http.CallOption) (rsp *ListFeaturedMediasResponse, err error)
+	// ListLatestMedias ListLatestMedias returns a list of latest medias.
+	ListLatestMedias(ctx context.Context, req *ListLatestMediasRequest, opts ...http.CallOption) (rsp *ListLatestMediasResponse, err error)
 	// ListMedias ListMedias returns a list of medias.
 	ListMedias(ctx context.Context, req *ListMediasRequest, opts ...http.CallOption) (rsp *ListMediasResponse, err error)
+	// ListSubtitleLanguages STUB: Not yet implemented. Do not remove - reserved for future development.
+	ListSubtitleLanguages(ctx context.Context, req *ListSubtitleLanguagesRequest, opts ...http.CallOption) (rsp *ListSubtitleLanguagesResponse, err error)
+	// OwnerRegenerateThumbnail Owner/portal cover regeneration (short_token; uuid never exposed to client).
+	OwnerRegenerateThumbnail(ctx context.Context, req *OwnerRegenerateThumbnailRequest, opts ...http.CallOption) (rsp *OwnerRegenerateThumbnailResponse, err error)
+	// OwnerSetThumbnail Owner/portal cover selection from sprite sheet (short_token).
+	OwnerSetThumbnail(ctx context.Context, req *OwnerSetThumbnailRequest, opts ...http.CallOption) (rsp *OwnerSetThumbnailResponse, err error)
 	// ReportMedia ReportMedia reports a media for review.
 	ReportMedia(ctx context.Context, req *ReportMediaRequest, opts ...http.CallOption) (rsp *ReportMediaResponse, err error)
-	// RetryAllFailedTasks RetryAllFailedTasks retries all failed encoding tasks.
+	// RetryAllFailedTasks RetryAllFailedTasks retries all failed tasks.
 	RetryAllFailedTasks(ctx context.Context, req *RetryAllFailedTasksRequest, opts ...http.CallOption) (rsp *RetryAllFailedTasksResponse, err error)
-	// RetryEncodingTask RetryEncodingTask retries a specific encoding task.
+	// RetryEncodingTask RetryEncodingTask retries a specific task.
 	RetryEncodingTask(ctx context.Context, req *RetryEncodingTaskRequest, opts ...http.CallOption) (rsp *RetryEncodingTaskResponse, err error)
-	// ToggleMediaFavorite ToggleMediaFavorite toggles favorite status for a media.
+	// StartMetadataMining STUB: Not yet implemented. Do not remove - reserved for future development.
+	StartMetadataMining(ctx context.Context, req *StartMetadataMiningRequest, opts ...http.CallOption) (rsp *StartMetadataMiningResponse, err error)
+	// ToggleMediaFavorite ToggleMediaFavorite toggles favorite status (canonical).
 	ToggleMediaFavorite(ctx context.Context, req *ToggleMediaFavoriteRequest, opts ...http.CallOption) (rsp *ToggleMediaFavoriteResponse, err error)
-	// ToggleMediaLike ToggleMediaLike toggles like status for a media.
+	// ToggleMediaFavoriteCompat ToggleMediaFavoriteCompat toggles via plural (compat).
+	ToggleMediaFavoriteCompat(ctx context.Context, req *ToggleMediaFavoriteRequest, opts ...http.CallOption) (rsp *ToggleMediaFavoriteResponse, err error)
+	// ToggleMediaLike ToggleMediaLike toggles like status for a media (canonical).
 	ToggleMediaLike(ctx context.Context, req *ToggleMediaLikeRequest, opts ...http.CallOption) (rsp *ToggleMediaLikeResponse, err error)
-	// UpdateMedia UpdateMedia updates an existing media.
+	// ToggleMediaLikeCompat ToggleMediaLikeCompat toggles like via plural endpoint (compat).
+	ToggleMediaLikeCompat(ctx context.Context, req *ToggleMediaLikeRequest, opts ...http.CallOption) (rsp *ToggleMediaLikeResponse, err error)
+	// TranscodingStatus TranscodingStatus returns current transcoding status.
+	TranscodingStatus(ctx context.Context, req *GetEncodingStatusRequest, opts ...http.CallOption) (rsp *GetEncodingStatusResponse, err error)
+	// UpdateMedia STUB: Not yet implemented. Do not remove - reserved for future development.
 	UpdateMedia(ctx context.Context, req *UpdateMediaRequest, opts ...http.CallOption) (rsp *UpdateMediaResponse, err error)
-	// UploadMedia UploadMedia uploads a media file.
-	UploadMedia(ctx context.Context, req *UploadMediaRequest, opts ...http.CallOption) (rsp *UploadMediaResponse, err error)
 }
 
 type MediaServiceHTTPClientImpl struct {
@@ -921,24 +1270,10 @@ func NewMediaServiceHTTPClient(client *http.Client) MediaServiceHTTPClient {
 	return &MediaServiceHTTPClientImpl{client}
 }
 
-// CreateMedia CreateMedia creates a new media.
-func (c *MediaServiceHTTPClientImpl) CreateMedia(ctx context.Context, in *CreateMediaRequest, opts ...http.CallOption) (*CreateMediaResponse, error) {
-	var out CreateMediaResponse
-	pattern := "/api/v1/medias"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationMediaServiceCreateMedia))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// CreateMediaShare CreateMediaShare creates a share record for a media.
+// CreateMediaShare CreateMediaShare records a media share event.
 func (c *MediaServiceHTTPClientImpl) CreateMediaShare(ctx context.Context, in *CreateMediaShareRequest, opts ...http.CallOption) (*CreateMediaShareResponse, error) {
 	var out CreateMediaShareResponse
-	pattern := "/api/v1/medias/{media_id}/shares"
+	pattern := "/api/v1/medias/{id}/shares"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceCreateMediaShare))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -949,10 +1284,10 @@ func (c *MediaServiceHTTPClientImpl) CreateMediaShare(ctx context.Context, in *C
 	return &out, nil
 }
 
-// CreateMediaSubtitle CreateMediaSubtitle uploads a subtitle for a media.
+// CreateMediaSubtitle STUB: Not yet implemented. Do not remove - reserved for future development.
 func (c *MediaServiceHTTPClientImpl) CreateMediaSubtitle(ctx context.Context, in *CreateMediaSubtitleRequest, opts ...http.CallOption) (*CreateMediaSubtitleResponse, error) {
 	var out CreateMediaSubtitleResponse
-	pattern := "/api/v1/medias/{media_id}/subtitles"
+	pattern := "/api/v1/medias/{id}/subtitles"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceCreateMediaSubtitle))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -963,7 +1298,7 @@ func (c *MediaServiceHTTPClientImpl) CreateMediaSubtitle(ctx context.Context, in
 	return &out, nil
 }
 
-// DeleteMedia DeleteMedia deletes a media.
+// DeleteMedia STUB: Not yet implemented. Do not remove - reserved for future development.
 func (c *MediaServiceHTTPClientImpl) DeleteMedia(ctx context.Context, in *DeleteMediaRequest, opts ...http.CallOption) (*DeleteMediaResponse, error) {
 	var out DeleteMediaResponse
 	pattern := "/api/v1/medias/{id}"
@@ -977,10 +1312,10 @@ func (c *MediaServiceHTTPClientImpl) DeleteMedia(ctx context.Context, in *Delete
 	return &out, nil
 }
 
-// DeleteMediaFavorite DeleteMediaFavorite removes favorite from a media.
+// DeleteMediaFavorite DeleteMediaFavorite removes favorite (canonical).
 func (c *MediaServiceHTTPClientImpl) DeleteMediaFavorite(ctx context.Context, in *DeleteMediaFavoriteRequest, opts ...http.CallOption) (*DeleteMediaFavoriteResponse, error) {
 	var out DeleteMediaFavoriteResponse
-	pattern := "/api/v1/medias/{media_id}/favorites"
+	pattern := "/api/v1/medias/{id}/favorite"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceDeleteMediaFavorite))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -991,10 +1326,24 @@ func (c *MediaServiceHTTPClientImpl) DeleteMediaFavorite(ctx context.Context, in
 	return &out, nil
 }
 
-// DeleteMediaLike DeleteMediaLike removes like from a media.
+// DeleteMediaFavoriteCompat DeleteMediaFavoriteCompat removes via plural (compat).
+func (c *MediaServiceHTTPClientImpl) DeleteMediaFavoriteCompat(ctx context.Context, in *DeleteMediaFavoriteRequest, opts ...http.CallOption) (*DeleteMediaFavoriteResponse, error) {
+	var out DeleteMediaFavoriteResponse
+	pattern := "/api/v1/medias/{id}/favorites"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceDeleteMediaFavoriteCompat))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteMediaLike DeleteMediaLike removes like from a media (canonical).
 func (c *MediaServiceHTTPClientImpl) DeleteMediaLike(ctx context.Context, in *DeleteMediaLikeRequest, opts ...http.CallOption) (*DeleteMediaLikeResponse, error) {
 	var out DeleteMediaLikeResponse
-	pattern := "/api/v1/medias/{media_id}/likes"
+	pattern := "/api/v1/medias/{id}/like"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceDeleteMediaLike))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1005,12 +1354,40 @@ func (c *MediaServiceHTTPClientImpl) DeleteMediaLike(ctx context.Context, in *De
 	return &out, nil
 }
 
-// GetEncodingStatus GetEncodingStatus returns the overall encoding status of the system.
-func (c *MediaServiceHTTPClientImpl) GetEncodingStatus(ctx context.Context, in *GetEncodingStatusRequest, opts ...http.CallOption) (*GetEncodingStatusResponse, error) {
-	var out GetEncodingStatusResponse
-	pattern := "/api/v1/admin/encoding/status"
+// DeleteMediaLikeCompat DeleteMediaLikeCompat removes like via plural endpoint (compat).
+func (c *MediaServiceHTTPClientImpl) DeleteMediaLikeCompat(ctx context.Context, in *DeleteMediaLikeRequest, opts ...http.CallOption) (*DeleteMediaLikeResponse, error) {
+	var out DeleteMediaLikeResponse
+	pattern := "/api/v1/medias/{id}/likes"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMediaServiceGetEncodingStatus))
+	opts = append(opts, http.Operation(OperationMediaServiceDeleteMediaLikeCompat))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// DeleteSubtitle STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) DeleteSubtitle(ctx context.Context, in *DeleteSubtitleRequest, opts ...http.CallOption) (*DeleteSubtitleResponse, error) {
+	var out DeleteSubtitleResponse
+	pattern := "/api/v1/subtitles/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceDeleteSubtitle))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// EncodingTasks EncodingTasks returns all encoding tasks.
+func (c *MediaServiceHTTPClientImpl) EncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest, opts ...http.CallOption) (*ListAllEncodingTasksResponse, error) {
+	var out ListAllEncodingTasksResponse
+	pattern := "/api/v1/medias/encoding/tasks"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceEncodingTasks))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1033,12 +1410,12 @@ func (c *MediaServiceHTTPClientImpl) GetMedia(ctx context.Context, in *GetMediaR
 	return &out, nil
 }
 
-// GetMediaComments GetMediaComments returns comments for a media.
-func (c *MediaServiceHTTPClientImpl) GetMediaComments(ctx context.Context, in *GetMediaCommentsRequest, opts ...http.CallOption) (*GetMediaCommentsResponse, error) {
-	var out GetMediaCommentsResponse
-	pattern := "/api/v1/medias/{media_id}/comments"
+// GetMediaAudioWaveform STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) GetMediaAudioWaveform(ctx context.Context, in *GetMediaAudioWaveformRequest, opts ...http.CallOption) (*GetMediaAudioWaveformResponse, error) {
+	var out GetMediaAudioWaveformResponse
+	pattern := "/api/v1/medias/{id}/metadata/audio-waveform"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMediaServiceGetMediaComments))
+	opts = append(opts, http.Operation(OperationMediaServiceGetMediaAudioWaveform))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1047,7 +1424,8 @@ func (c *MediaServiceHTTPClientImpl) GetMediaComments(ctx context.Context, in *G
 	return &out, nil
 }
 
-// GetMediaDownload GetMediaDownload returns the download URL for a media.
+// GetMediaDownload STUB: Not yet implemented. Do not remove - reserved for future development.
+// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
 func (c *MediaServiceHTTPClientImpl) GetMediaDownload(ctx context.Context, in *GetMediaDownloadRequest, opts ...http.CallOption) (*GetMediaDownloadResponse, error) {
 	var out GetMediaDownloadResponse
 	pattern := "/api/v1/medias/{id}/download"
@@ -1061,10 +1439,10 @@ func (c *MediaServiceHTTPClientImpl) GetMediaDownload(ctx context.Context, in *G
 	return &out, nil
 }
 
-// GetMediaFavorites GetMediaFavorites returns the favorite status for a media.
+// GetMediaFavorites GetMediaFavorites returns favorites (plural compat).
 func (c *MediaServiceHTTPClientImpl) GetMediaFavorites(ctx context.Context, in *GetMediaFavoritesRequest, opts ...http.CallOption) (*GetMediaFavoritesResponse, error) {
 	var out GetMediaFavoritesResponse
-	pattern := "/api/v1/medias/{media_id}/favorites"
+	pattern := "/api/v1/medias/{id}/favorites"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceGetMediaFavorites))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1075,10 +1453,24 @@ func (c *MediaServiceHTTPClientImpl) GetMediaFavorites(ctx context.Context, in *
 	return &out, nil
 }
 
-// GetMediaLikes GetMediaLikes returns the like status for a media.
+// GetMediaKeyFrames STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) GetMediaKeyFrames(ctx context.Context, in *GetMediaKeyFramesRequest, opts ...http.CallOption) (*GetMediaKeyFramesResponse, error) {
+	var out GetMediaKeyFramesResponse
+	pattern := "/api/v1/medias/{id}/metadata/key-frames"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceGetMediaKeyFrames))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetMediaLikes GetMediaLikes returns likes for a media (plural compat).
 func (c *MediaServiceHTTPClientImpl) GetMediaLikes(ctx context.Context, in *GetMediaLikesRequest, opts ...http.CallOption) (*GetMediaLikesResponse, error) {
 	var out GetMediaLikesResponse
-	pattern := "/api/v1/medias/{media_id}/likes"
+	pattern := "/api/v1/medias/{id}/likes"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceGetMediaLikes))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1089,10 +1481,10 @@ func (c *MediaServiceHTTPClientImpl) GetMediaLikes(ctx context.Context, in *GetM
 	return &out, nil
 }
 
-// GetMediaMetadata GetMediaMetadata returns metadata for a media.
+// GetMediaMetadata STUB: Not yet implemented. Do not remove - reserved for future development.
 func (c *MediaServiceHTTPClientImpl) GetMediaMetadata(ctx context.Context, in *GetMediaMetadataRequest, opts ...http.CallOption) (*GetMediaMetadataResponse, error) {
 	var out GetMediaMetadataResponse
-	pattern := "/api/v1/medias/{media_id}/metadata"
+	pattern := "/api/v1/medias/{id}/metadata"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceGetMediaMetadata))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1103,10 +1495,24 @@ func (c *MediaServiceHTTPClientImpl) GetMediaMetadata(ctx context.Context, in *G
 	return &out, nil
 }
 
-// GetMediaShares GetMediaShares returns share statistics for a media.
+// GetMediaSceneChanges STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) GetMediaSceneChanges(ctx context.Context, in *GetMediaSceneChangesRequest, opts ...http.CallOption) (*GetMediaSceneChangesResponse, error) {
+	var out GetMediaSceneChangesResponse
+	pattern := "/api/v1/medias/{id}/metadata/scene-changes"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceGetMediaSceneChanges))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetMediaShares GetMediaShares returns share links for a media.
 func (c *MediaServiceHTTPClientImpl) GetMediaShares(ctx context.Context, in *GetMediaSharesRequest, opts ...http.CallOption) (*GetMediaSharesResponse, error) {
 	var out GetMediaSharesResponse
-	pattern := "/api/v1/medias/{media_id}/shares"
+	pattern := "/api/v1/medias/{id}/shares"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceGetMediaShares))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1117,7 +1523,8 @@ func (c *MediaServiceHTTPClientImpl) GetMediaShares(ctx context.Context, in *Get
 	return &out, nil
 }
 
-// GetMediaSpriteJPG GetMediaSpriteJPG returns the JPG sprite image for a media.
+// GetMediaSpriteJPG NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
+// GetMediaSpriteJPG returns the JPG sprite image for a media.
 func (c *MediaServiceHTTPClientImpl) GetMediaSpriteJPG(ctx context.Context, in *GetMediaSpriteJPGRequest, opts ...http.CallOption) (*GetMediaSpriteJPGResponse, error) {
 	var out GetMediaSpriteJPGResponse
 	pattern := "/api/v1/medias/{id}/sprite.jpg"
@@ -1131,7 +1538,8 @@ func (c *MediaServiceHTTPClientImpl) GetMediaSpriteJPG(ctx context.Context, in *
 	return &out, nil
 }
 
-// GetMediaSpriteVTT GetMediaSpriteVTT returns the VTT sprite file for a media.
+// GetMediaSpriteVTT NON-PROTO-SPECIAL: Returns non-JSON content (VTT/JPEG). Requires adapter-level content-type handling.
+// GetMediaSpriteVTT returns the VTT sprite file for a media.
 func (c *MediaServiceHTTPClientImpl) GetMediaSpriteVTT(ctx context.Context, in *GetMediaSpriteVTTRequest, opts ...http.CallOption) (*GetMediaSpriteVTTResponse, error) {
 	var out GetMediaSpriteVTTResponse
 	pattern := "/api/v1/medias/{id}/sprite.vtt"
@@ -1145,7 +1553,8 @@ func (c *MediaServiceHTTPClientImpl) GetMediaSpriteVTT(ctx context.Context, in *
 	return &out, nil
 }
 
-// GetMediaStream GetMediaStream returns the streaming URL for a media.
+// GetMediaStream STUB: Not yet implemented. Do not remove - reserved for future development.
+// NON-PROTO-SPECIAL: Returns binary stream. Requires adapter-level handling for file download/streaming.
 func (c *MediaServiceHTTPClientImpl) GetMediaStream(ctx context.Context, in *GetMediaStreamRequest, opts ...http.CallOption) (*GetMediaStreamResponse, error) {
 	var out GetMediaStreamResponse
 	pattern := "/api/v1/medias/{id}/stream"
@@ -1159,10 +1568,10 @@ func (c *MediaServiceHTTPClientImpl) GetMediaStream(ctx context.Context, in *Get
 	return &out, nil
 }
 
-// GetMediaSubtitles GetMediaSubtitles returns subtitles for a media.
+// GetMediaSubtitles STUB: Not yet implemented. Do not remove - reserved for future development.
 func (c *MediaServiceHTTPClientImpl) GetMediaSubtitles(ctx context.Context, in *GetMediaSubtitlesRequest, opts ...http.CallOption) (*GetMediaSubtitlesResponse, error) {
 	var out GetMediaSubtitlesResponse
-	pattern := "/api/v1/medias/{media_id}/subtitles"
+	pattern := "/api/v1/medias/{id}/subtitles"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMediaServiceGetMediaSubtitles))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1173,7 +1582,22 @@ func (c *MediaServiceHTTPClientImpl) GetMediaSubtitles(ctx context.Context, in *
 	return &out, nil
 }
 
-// GetMediaThumbnail GetMediaThumbnail returns the thumbnail URL for a media.
+// GetMediaTextContent STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) GetMediaTextContent(ctx context.Context, in *GetMediaTextContentRequest, opts ...http.CallOption) (*GetMediaTextContentResponse, error) {
+	var out GetMediaTextContentResponse
+	pattern := "/api/v1/medias/{id}/metadata/text-content"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceGetMediaTextContent))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetMediaThumbnail STUB: Not yet implemented. Do not remove - reserved for future development.
+// NON-PROTO-SPECIAL: Returns non-JSON content (image). Requires adapter-level content-type handling.
 func (c *MediaServiceHTTPClientImpl) GetMediaThumbnail(ctx context.Context, in *GetMediaThumbnailRequest, opts ...http.CallOption) (*GetMediaThumbnailResponse, error) {
 	var out GetMediaThumbnailResponse
 	pattern := "/api/v1/medias/{id}/thumbnail"
@@ -1201,6 +1625,20 @@ func (c *MediaServiceHTTPClientImpl) GetMediaVariants(ctx context.Context, in *G
 	return &out, nil
 }
 
+// GetMetadataMiningStatus STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) GetMetadataMiningStatus(ctx context.Context, in *GetMetadataMiningStatusRequest, opts ...http.CallOption) (*GetMetadataMiningStatusResponse, error) {
+	var out GetMetadataMiningStatusResponse
+	pattern := "/api/v1/medias/{id}/metadata/status"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceGetMetadataMiningStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // IncrementViewCount IncrementViewCount increments the view count of a media.
 func (c *MediaServiceHTTPClientImpl) IncrementViewCount(ctx context.Context, in *IncrementViewCountRequest, opts ...http.CallOption) (*IncrementViewCountResponse, error) {
 	var out IncrementViewCountResponse
@@ -1215,12 +1653,12 @@ func (c *MediaServiceHTTPClientImpl) IncrementViewCount(ctx context.Context, in 
 	return &out, nil
 }
 
-// ListAllEncodingTasks ListAllEncodingTasks returns a flat list of all encoding tasks (admin view).
-func (c *MediaServiceHTTPClientImpl) ListAllEncodingTasks(ctx context.Context, in *ListAllEncodingTasksRequest, opts ...http.CallOption) (*ListAllEncodingTasksResponse, error) {
-	var out ListAllEncodingTasksResponse
-	pattern := "/api/v1/admin/encoding/tasks"
+// ListFeaturedMedias ListFeaturedMedias returns a list of featured medias.
+func (c *MediaServiceHTTPClientImpl) ListFeaturedMedias(ctx context.Context, in *ListFeaturedMediasRequest, opts ...http.CallOption) (*ListFeaturedMediasResponse, error) {
+	var out ListFeaturedMediasResponse
+	pattern := "/api/v1/medias/featured"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMediaServiceListAllEncodingTasks))
+	opts = append(opts, http.Operation(OperationMediaServiceListFeaturedMedias))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1229,12 +1667,12 @@ func (c *MediaServiceHTTPClientImpl) ListAllEncodingTasks(ctx context.Context, i
 	return &out, nil
 }
 
-// ListEncodingTasks ListEncodingTasks returns a list of encoding tasks for a media.
-func (c *MediaServiceHTTPClientImpl) ListEncodingTasks(ctx context.Context, in *ListEncodingTasksRequest, opts ...http.CallOption) (*ListEncodingTasksResponse, error) {
-	var out ListEncodingTasksResponse
-	pattern := "/api/v1/medias/{media_id}/tasks"
+// ListLatestMedias ListLatestMedias returns a list of latest medias.
+func (c *MediaServiceHTTPClientImpl) ListLatestMedias(ctx context.Context, in *ListLatestMediasRequest, opts ...http.CallOption) (*ListLatestMediasResponse, error) {
+	var out ListLatestMediasResponse
+	pattern := "/api/v1/medias/latest"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationMediaServiceListEncodingTasks))
+	opts = append(opts, http.Operation(OperationMediaServiceListLatestMedias))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1257,6 +1695,48 @@ func (c *MediaServiceHTTPClientImpl) ListMedias(ctx context.Context, in *ListMed
 	return &out, nil
 }
 
+// ListSubtitleLanguages STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) ListSubtitleLanguages(ctx context.Context, in *ListSubtitleLanguagesRequest, opts ...http.CallOption) (*ListSubtitleLanguagesResponse, error) {
+	var out ListSubtitleLanguagesResponse
+	pattern := "/api/v1/subtitles/languages"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceListSubtitleLanguages))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OwnerRegenerateThumbnail Owner/portal cover regeneration (short_token; uuid never exposed to client).
+func (c *MediaServiceHTTPClientImpl) OwnerRegenerateThumbnail(ctx context.Context, in *OwnerRegenerateThumbnailRequest, opts ...http.CallOption) (*OwnerRegenerateThumbnailResponse, error) {
+	var out OwnerRegenerateThumbnailResponse
+	pattern := "/api/v1/me/medias/{token}/regen-thumbnail"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMediaServiceOwnerRegenerateThumbnail))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OwnerSetThumbnail Owner/portal cover selection from sprite sheet (short_token).
+func (c *MediaServiceHTTPClientImpl) OwnerSetThumbnail(ctx context.Context, in *OwnerSetThumbnailRequest, opts ...http.CallOption) (*OwnerSetThumbnailResponse, error) {
+	var out OwnerSetThumbnailResponse
+	pattern := "/api/v1/me/medias/{token}/set-thumbnail"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMediaServiceOwnerSetThumbnail))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ReportMedia ReportMedia reports a media for review.
 func (c *MediaServiceHTTPClientImpl) ReportMedia(ctx context.Context, in *ReportMediaRequest, opts ...http.CallOption) (*ReportMediaResponse, error) {
 	var out ReportMediaResponse
@@ -1271,10 +1751,10 @@ func (c *MediaServiceHTTPClientImpl) ReportMedia(ctx context.Context, in *Report
 	return &out, nil
 }
 
-// RetryAllFailedTasks RetryAllFailedTasks retries all failed encoding tasks.
+// RetryAllFailedTasks RetryAllFailedTasks retries all failed tasks.
 func (c *MediaServiceHTTPClientImpl) RetryAllFailedTasks(ctx context.Context, in *RetryAllFailedTasksRequest, opts ...http.CallOption) (*RetryAllFailedTasksResponse, error) {
 	var out RetryAllFailedTasksResponse
-	pattern := "/api/v1/admin/encoding/retry-failed"
+	pattern := "/api/v1/medias/encoding/retry-all-failed"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceRetryAllFailedTasks))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1285,10 +1765,10 @@ func (c *MediaServiceHTTPClientImpl) RetryAllFailedTasks(ctx context.Context, in
 	return &out, nil
 }
 
-// RetryEncodingTask RetryEncodingTask retries a specific encoding task.
+// RetryEncodingTask RetryEncodingTask retries a specific task.
 func (c *MediaServiceHTTPClientImpl) RetryEncodingTask(ctx context.Context, in *RetryEncodingTaskRequest, opts ...http.CallOption) (*RetryEncodingTaskResponse, error) {
 	var out RetryEncodingTaskResponse
-	pattern := "/api/v1/medias/{media_id}/tasks/{task_id}/retry"
+	pattern := "/api/v1/medias/encoding/retry"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceRetryEncodingTask))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1299,10 +1779,24 @@ func (c *MediaServiceHTTPClientImpl) RetryEncodingTask(ctx context.Context, in *
 	return &out, nil
 }
 
-// ToggleMediaFavorite ToggleMediaFavorite toggles favorite status for a media.
+// StartMetadataMining STUB: Not yet implemented. Do not remove - reserved for future development.
+func (c *MediaServiceHTTPClientImpl) StartMetadataMining(ctx context.Context, in *StartMetadataMiningRequest, opts ...http.CallOption) (*StartMetadataMiningResponse, error) {
+	var out StartMetadataMiningResponse
+	pattern := "/api/v1/medias/{id}/metadata/mining"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMediaServiceStartMetadataMining))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ToggleMediaFavorite ToggleMediaFavorite toggles favorite status (canonical).
 func (c *MediaServiceHTTPClientImpl) ToggleMediaFavorite(ctx context.Context, in *ToggleMediaFavoriteRequest, opts ...http.CallOption) (*ToggleMediaFavoriteResponse, error) {
 	var out ToggleMediaFavoriteResponse
-	pattern := "/api/v1/medias/{media_id}/favorites"
+	pattern := "/api/v1/medias/{id}/favorite"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceToggleMediaFavorite))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1313,10 +1807,24 @@ func (c *MediaServiceHTTPClientImpl) ToggleMediaFavorite(ctx context.Context, in
 	return &out, nil
 }
 
-// ToggleMediaLike ToggleMediaLike toggles like status for a media.
+// ToggleMediaFavoriteCompat ToggleMediaFavoriteCompat toggles via plural (compat).
+func (c *MediaServiceHTTPClientImpl) ToggleMediaFavoriteCompat(ctx context.Context, in *ToggleMediaFavoriteRequest, opts ...http.CallOption) (*ToggleMediaFavoriteResponse, error) {
+	var out ToggleMediaFavoriteResponse
+	pattern := "/api/v1/medias/{id}/favorites"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMediaServiceToggleMediaFavoriteCompat))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ToggleMediaLike ToggleMediaLike toggles like status for a media (canonical).
 func (c *MediaServiceHTTPClientImpl) ToggleMediaLike(ctx context.Context, in *ToggleMediaLikeRequest, opts ...http.CallOption) (*ToggleMediaLikeResponse, error) {
 	var out ToggleMediaLikeResponse
-	pattern := "/api/v1/medias/{media_id}/likes"
+	pattern := "/api/v1/medias/{id}/like"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceToggleMediaLike))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1327,10 +1835,38 @@ func (c *MediaServiceHTTPClientImpl) ToggleMediaLike(ctx context.Context, in *To
 	return &out, nil
 }
 
-// UpdateMedia UpdateMedia updates an existing media.
+// ToggleMediaLikeCompat ToggleMediaLikeCompat toggles like via plural endpoint (compat).
+func (c *MediaServiceHTTPClientImpl) ToggleMediaLikeCompat(ctx context.Context, in *ToggleMediaLikeRequest, opts ...http.CallOption) (*ToggleMediaLikeResponse, error) {
+	var out ToggleMediaLikeResponse
+	pattern := "/api/v1/medias/{id}/likes"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationMediaServiceToggleMediaLikeCompat))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// TranscodingStatus TranscodingStatus returns current transcoding status.
+func (c *MediaServiceHTTPClientImpl) TranscodingStatus(ctx context.Context, in *GetEncodingStatusRequest, opts ...http.CallOption) (*GetEncodingStatusResponse, error) {
+	var out GetEncodingStatusResponse
+	pattern := "/api/v1/medias/transcoding/status"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationMediaServiceTranscodingStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateMedia STUB: Not yet implemented. Do not remove - reserved for future development.
 func (c *MediaServiceHTTPClientImpl) UpdateMedia(ctx context.Context, in *UpdateMediaRequest, opts ...http.CallOption) (*UpdateMediaResponse, error) {
 	var out UpdateMediaResponse
-	pattern := "/api/v1/medias/{media.id}"
+	pattern := "/api/v1/medias/{id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMediaServiceUpdateMedia))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1341,24 +1877,11 @@ func (c *MediaServiceHTTPClientImpl) UpdateMedia(ctx context.Context, in *Update
 	return &out, nil
 }
 
-// UploadMedia UploadMedia uploads a media file.
-func (c *MediaServiceHTTPClientImpl) UploadMedia(ctx context.Context, in *UploadMediaRequest, opts ...http.CallOption) (*UploadMediaResponse, error) {
-	var out UploadMediaResponse
-	pattern := "/api/v1/medias/upload"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationMediaServiceUploadMedia))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 const OperationEncodingProfileServiceCreateEncodeProfile = "/api.v1.services.media.EncodingProfileService/CreateEncodeProfile"
 const OperationEncodingProfileServiceDeleteEncodeProfile = "/api.v1.services.media.EncodingProfileService/DeleteEncodeProfile"
 const OperationEncodingProfileServiceGetEncodeProfile = "/api.v1.services.media.EncodingProfileService/GetEncodeProfile"
 const OperationEncodingProfileServiceListEncodeProfiles = "/api.v1.services.media.EncodingProfileService/ListEncodeProfiles"
+const OperationEncodingProfileServicePreviewEncodeCommand = "/api.v1.services.media.EncodingProfileService/PreviewEncodeCommand"
 const OperationEncodingProfileServiceUpdateEncodeProfile = "/api.v1.services.media.EncodingProfileService/UpdateEncodeProfile"
 
 type EncodingProfileServiceHTTPServer interface {
@@ -1370,6 +1893,8 @@ type EncodingProfileServiceHTTPServer interface {
 	GetEncodeProfile(context.Context, *GetEncodeProfileRequest) (*GetEncodeProfileResponse, error)
 	// ListEncodeProfiles ListEncodeProfiles returns a list of encoding profiles.
 	ListEncodeProfiles(context.Context, *ListEncodeProfilesRequest) (*ListEncodeProfilesResponse, error)
+	// PreviewEncodeCommand PreviewEncodeCommand previews the encoding command.
+	PreviewEncodeCommand(context.Context, *PreviewEncodeCommandRequest) (*PreviewEncodeCommandResponse, error)
 	// UpdateEncodeProfile UpdateEncodeProfile updates an existing encoding profile.
 	UpdateEncodeProfile(context.Context, *UpdateEncodeProfileRequest) (*UpdateEncodeProfileResponse, error)
 }
@@ -1381,6 +1906,7 @@ func RegisterEncodingProfileServiceHTTPServer(s *http.Server, srv EncodingProfil
 	r.POST("/api/v1/admin/encoding/profiles", _EncodingProfileService_CreateEncodeProfile0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/encoding/profiles/{profile.id}", _EncodingProfileService_UpdateEncodeProfile0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/admin/encoding/profiles/{id}", _EncodingProfileService_DeleteEncodeProfile0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/encoding/profiles/preview", _EncodingProfileService_PreviewEncodeCommand0_HTTP_Handler(srv))
 }
 
 func _EncodingProfileService_ListEncodeProfiles0_HTTP_Handler(srv EncodingProfileServiceHTTPServer) func(ctx http.Context) error {
@@ -1493,6 +2019,28 @@ func _EncodingProfileService_DeleteEncodeProfile0_HTTP_Handler(srv EncodingProfi
 	}
 }
 
+func _EncodingProfileService_PreviewEncodeCommand0_HTTP_Handler(srv EncodingProfileServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PreviewEncodeCommandRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationEncodingProfileServicePreviewEncodeCommand)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PreviewEncodeCommand(ctx, req.(*PreviewEncodeCommandRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PreviewEncodeCommandResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type EncodingProfileServiceHTTPClient interface {
 	// CreateEncodeProfile CreateEncodeProfile creates a new encoding profile.
 	CreateEncodeProfile(ctx context.Context, req *CreateEncodeProfileRequest, opts ...http.CallOption) (rsp *CreateEncodeProfileResponse, err error)
@@ -1502,6 +2050,8 @@ type EncodingProfileServiceHTTPClient interface {
 	GetEncodeProfile(ctx context.Context, req *GetEncodeProfileRequest, opts ...http.CallOption) (rsp *GetEncodeProfileResponse, err error)
 	// ListEncodeProfiles ListEncodeProfiles returns a list of encoding profiles.
 	ListEncodeProfiles(ctx context.Context, req *ListEncodeProfilesRequest, opts ...http.CallOption) (rsp *ListEncodeProfilesResponse, err error)
+	// PreviewEncodeCommand PreviewEncodeCommand previews the encoding command.
+	PreviewEncodeCommand(ctx context.Context, req *PreviewEncodeCommandRequest, opts ...http.CallOption) (rsp *PreviewEncodeCommandResponse, err error)
 	// UpdateEncodeProfile UpdateEncodeProfile updates an existing encoding profile.
 	UpdateEncodeProfile(ctx context.Context, req *UpdateEncodeProfileRequest, opts ...http.CallOption) (rsp *UpdateEncodeProfileResponse, err error)
 }
@@ -1570,6 +2120,20 @@ func (c *EncodingProfileServiceHTTPClientImpl) ListEncodeProfiles(ctx context.Co
 	return &out, nil
 }
 
+// PreviewEncodeCommand PreviewEncodeCommand previews the encoding command.
+func (c *EncodingProfileServiceHTTPClientImpl) PreviewEncodeCommand(ctx context.Context, in *PreviewEncodeCommandRequest, opts ...http.CallOption) (*PreviewEncodeCommandResponse, error) {
+	var out PreviewEncodeCommandResponse
+	pattern := "/api/v1/admin/encoding/profiles/preview"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationEncodingProfileServicePreviewEncodeCommand))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // UpdateEncodeProfile UpdateEncodeProfile updates an existing encoding profile.
 func (c *EncodingProfileServiceHTTPClientImpl) UpdateEncodeProfile(ctx context.Context, in *UpdateEncodeProfileRequest, opts ...http.CallOption) (*UpdateEncodeProfileResponse, error) {
 	var out UpdateEncodeProfileResponse
@@ -1601,10 +2165,10 @@ type CategoryServiceHTTPServer interface {
 func RegisterCategoryServiceHTTPServer(s *http.Server, srv CategoryServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/api/v1/categories", _CategoryService_ListCategories0_HTTP_Handler(srv))
-	r.GET("/api/v1/categories/{id}", _CategoryService_GetCategory0_HTTP_Handler(srv))
+	r.GET("/api/v1/categories/{slug}", _CategoryService_GetCategory0_HTTP_Handler(srv))
 	r.POST("/api/v1/categories", _CategoryService_CreateCategory0_HTTP_Handler(srv))
 	r.PUT("/api/v1/categories/{category.id}", _CategoryService_UpdateCategory0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/categories/{id}", _CategoryService_DeleteCategory0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/categories/{slug}", _CategoryService_DeleteCategory0_HTTP_Handler(srv))
 }
 
 func _CategoryService_ListCategories0_HTTP_Handler(srv CategoryServiceHTTPServer) func(ctx http.Context) error {
@@ -1748,7 +2312,7 @@ func (c *CategoryServiceHTTPClientImpl) CreateCategory(ctx context.Context, in *
 
 func (c *CategoryServiceHTTPClientImpl) DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...http.CallOption) (*DeleteCategoryResponse, error) {
 	var out DeleteCategoryResponse
-	pattern := "/api/v1/categories/{id}"
+	pattern := "/api/v1/categories/{slug}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationCategoryServiceDeleteCategory))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1761,7 +2325,7 @@ func (c *CategoryServiceHTTPClientImpl) DeleteCategory(ctx context.Context, in *
 
 func (c *CategoryServiceHTTPClientImpl) GetCategory(ctx context.Context, in *GetCategoryRequest, opts ...http.CallOption) (*GetCategoryResponse, error) {
 	var out GetCategoryResponse
-	pattern := "/api/v1/categories/{id}"
+	pattern := "/api/v1/categories/{slug}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationCategoryServiceGetCategory))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1801,6 +2365,7 @@ func (c *CategoryServiceHTTPClientImpl) UpdateCategory(ctx context.Context, in *
 const OperationTagServiceCreateTag = "/api.v1.services.media.TagService/CreateTag"
 const OperationTagServiceDeleteTag = "/api.v1.services.media.TagService/DeleteTag"
 const OperationTagServiceGetTag = "/api.v1.services.media.TagService/GetTag"
+const OperationTagServiceListTagMedias = "/api.v1.services.media.TagService/ListTagMedias"
 const OperationTagServiceListTags = "/api.v1.services.media.TagService/ListTags"
 const OperationTagServiceUpdateTag = "/api.v1.services.media.TagService/UpdateTag"
 
@@ -1808,6 +2373,9 @@ type TagServiceHTTPServer interface {
 	CreateTag(context.Context, *CreateTagRequest) (*CreateTagResponse, error)
 	DeleteTag(context.Context, *DeleteTagRequest) (*DeleteTagResponse, error)
 	GetTag(context.Context, *GetTagRequest) (*GetTagResponse, error)
+	// ListTagMedias ListTagMedias returns the medias linked to a tag through the
+	// content_media_tags M2M pivot (tag-first browsing, powers /tag/{slug}).
+	ListTagMedias(context.Context, *ListTagMediasRequest) (*ListTagMediasResponse, error)
 	ListTags(context.Context, *ListTagsRequest) (*ListTagsResponse, error)
 	UpdateTag(context.Context, *UpdateTagRequest) (*UpdateTagResponse, error)
 }
@@ -1815,10 +2383,11 @@ type TagServiceHTTPServer interface {
 func RegisterTagServiceHTTPServer(s *http.Server, srv TagServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/api/v1/tags", _TagService_ListTags0_HTTP_Handler(srv))
-	r.GET("/api/v1/tags/{id}", _TagService_GetTag0_HTTP_Handler(srv))
+	r.GET("/api/v1/tags/{slug}", _TagService_GetTag0_HTTP_Handler(srv))
 	r.POST("/api/v1/tags", _TagService_CreateTag0_HTTP_Handler(srv))
-	r.PUT("/api/v1/tags/{tag.id}", _TagService_UpdateTag0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/tags/{id}", _TagService_DeleteTag0_HTTP_Handler(srv))
+	r.PUT("/api/v1/tags/{tag.slug}", _TagService_UpdateTag0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/tags/{slug}", _TagService_DeleteTag0_HTTP_Handler(srv))
+	r.GET("/api/v1/tags/{slug}/medias", _TagService_ListTagMedias0_HTTP_Handler(srv))
 }
 
 func _TagService_ListTags0_HTTP_Handler(srv TagServiceHTTPServer) func(ctx http.Context) error {
@@ -1931,10 +2500,35 @@ func _TagService_DeleteTag0_HTTP_Handler(srv TagServiceHTTPServer) func(ctx http
 	}
 }
 
+func _TagService_ListTagMedias0_HTTP_Handler(srv TagServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListTagMediasRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTagServiceListTagMedias)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListTagMedias(ctx, req.(*ListTagMediasRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListTagMediasResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type TagServiceHTTPClient interface {
 	CreateTag(ctx context.Context, req *CreateTagRequest, opts ...http.CallOption) (rsp *CreateTagResponse, err error)
 	DeleteTag(ctx context.Context, req *DeleteTagRequest, opts ...http.CallOption) (rsp *DeleteTagResponse, err error)
 	GetTag(ctx context.Context, req *GetTagRequest, opts ...http.CallOption) (rsp *GetTagResponse, err error)
+	// ListTagMedias ListTagMedias returns the medias linked to a tag through the
+	// content_media_tags M2M pivot (tag-first browsing, powers /tag/{slug}).
+	ListTagMedias(ctx context.Context, req *ListTagMediasRequest, opts ...http.CallOption) (rsp *ListTagMediasResponse, err error)
 	ListTags(ctx context.Context, req *ListTagsRequest, opts ...http.CallOption) (rsp *ListTagsResponse, err error)
 	UpdateTag(ctx context.Context, req *UpdateTagRequest, opts ...http.CallOption) (rsp *UpdateTagResponse, err error)
 }
@@ -1962,7 +2556,7 @@ func (c *TagServiceHTTPClientImpl) CreateTag(ctx context.Context, in *CreateTagR
 
 func (c *TagServiceHTTPClientImpl) DeleteTag(ctx context.Context, in *DeleteTagRequest, opts ...http.CallOption) (*DeleteTagResponse, error) {
 	var out DeleteTagResponse
-	pattern := "/api/v1/tags/{id}"
+	pattern := "/api/v1/tags/{slug}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationTagServiceDeleteTag))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1975,9 +2569,24 @@ func (c *TagServiceHTTPClientImpl) DeleteTag(ctx context.Context, in *DeleteTagR
 
 func (c *TagServiceHTTPClientImpl) GetTag(ctx context.Context, in *GetTagRequest, opts ...http.CallOption) (*GetTagResponse, error) {
 	var out GetTagResponse
-	pattern := "/api/v1/tags/{id}"
+	pattern := "/api/v1/tags/{slug}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationTagServiceGetTag))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListTagMedias ListTagMedias returns the medias linked to a tag through the
+// content_media_tags M2M pivot (tag-first browsing, powers /tag/{slug}).
+func (c *TagServiceHTTPClientImpl) ListTagMedias(ctx context.Context, in *ListTagMediasRequest, opts ...http.CallOption) (*ListTagMediasResponse, error) {
+	var out ListTagMediasResponse
+	pattern := "/api/v1/tags/{slug}/medias"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTagServiceListTagMedias))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -2001,7 +2610,7 @@ func (c *TagServiceHTTPClientImpl) ListTags(ctx context.Context, in *ListTagsReq
 
 func (c *TagServiceHTTPClientImpl) UpdateTag(ctx context.Context, in *UpdateTagRequest, opts ...http.CallOption) (*UpdateTagResponse, error) {
 	var out UpdateTagResponse
-	pattern := "/api/v1/tags/{tag.id}"
+	pattern := "/api/v1/tags/{tag.slug}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationTagServiceUpdateTag))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3055,15 +3664,22 @@ func (c *PlaylistServiceHTTPClientImpl) UpdatePlaylist(ctx context.Context, in *
 	return &out, nil
 }
 
+const OperationChannelServiceAcceptChannelInvitation = "/api.v1.services.media.ChannelService/AcceptChannelInvitation"
 const OperationChannelServiceAddChannelMedia = "/api.v1.services.media.ChannelService/AddChannelMedia"
 const OperationChannelServiceCreateChannel = "/api.v1.services.media.ChannelService/CreateChannel"
 const OperationChannelServiceDeleteChannel = "/api.v1.services.media.ChannelService/DeleteChannel"
-const OperationChannelServiceGetChannel = "/api.v1.services.media.ChannelService/GetChannel"
-const OperationChannelServiceGetChannelMedias = "/api.v1.services.media.ChannelService/GetChannelMedias"
+const OperationChannelServiceGetChannelByToken = "/api.v1.services.media.ChannelService/GetChannelByToken"
+const OperationChannelServiceGetChannelInvitations = "/api.v1.services.media.ChannelService/GetChannelInvitations"
+const OperationChannelServiceGetChannelLimits = "/api.v1.services.media.ChannelService/GetChannelLimits"
+const OperationChannelServiceGetChannelPlaylists = "/api.v1.services.media.ChannelService/GetChannelPlaylists"
 const OperationChannelServiceGetChannelSubscribers = "/api.v1.services.media.ChannelService/GetChannelSubscribers"
 const OperationChannelServiceGetChannelSubscription = "/api.v1.services.media.ChannelService/GetChannelSubscription"
+const OperationChannelServiceGetChannelVideos = "/api.v1.services.media.ChannelService/GetChannelVideos"
 const OperationChannelServiceGetMyChannel = "/api.v1.services.media.ChannelService/GetMyChannel"
+const OperationChannelServiceGetSubscriptionVideos = "/api.v1.services.media.ChannelService/GetSubscriptionVideos"
+const OperationChannelServiceInviteUserToChannel = "/api.v1.services.media.ChannelService/InviteUserToChannel"
 const OperationChannelServiceListChannels = "/api.v1.services.media.ChannelService/ListChannels"
+const OperationChannelServiceRejectChannelInvitation = "/api.v1.services.media.ChannelService/RejectChannelInvitation"
 const OperationChannelServiceRemoveChannelMedia = "/api.v1.services.media.ChannelService/RemoveChannelMedia"
 const OperationChannelServiceResolveHandle = "/api.v1.services.media.ChannelService/ResolveHandle"
 const OperationChannelServiceSubscribeChannel = "/api.v1.services.media.ChannelService/SubscribeChannel"
@@ -3074,16 +3690,22 @@ const OperationChannelServiceUpdateMyChannelHandle = "/api.v1.services.media.Cha
 const OperationChannelServiceValidateChannelHandle = "/api.v1.services.media.ChannelService/ValidateChannelHandle"
 
 type ChannelServiceHTTPServer interface {
+	AcceptChannelInvitation(context.Context, *AcceptChannelInvitationRequest) (*AcceptChannelInvitationResponse, error)
 	AddChannelMedia(context.Context, *AddChannelMediaRequest) (*AddChannelMediaResponse, error)
 	CreateChannel(context.Context, *CreateChannelRequest) (*CreateChannelResponse, error)
 	DeleteChannel(context.Context, *DeleteChannelRequest) (*DeleteChannelResponse, error)
-	GetChannel(context.Context, *GetChannelRequest) (*GetChannelResponse, error)
-	GetChannelMedias(context.Context, *GetChannelMediasRequest) (*GetChannelMediasResponse, error)
+	GetChannelByToken(context.Context, *GetChannelByTokenRequest) (*GetChannelByTokenResponse, error)
+	GetChannelInvitations(context.Context, *GetChannelInvitationsRequest) (*GetChannelInvitationsResponse, error)
+	GetChannelLimits(context.Context, *GetChannelLimitsRequest) (*GetChannelLimitsResponse, error)
+	GetChannelPlaylists(context.Context, *GetChannelPlaylistsRequest) (*GetChannelPlaylistsResponse, error)
 	GetChannelSubscribers(context.Context, *GetChannelSubscribersRequest) (*GetChannelSubscribersResponse, error)
 	GetChannelSubscription(context.Context, *GetChannelSubscriptionRequest) (*GetChannelSubscriptionResponse, error)
-	// GetMyChannel Channel additional routes
+	GetChannelVideos(context.Context, *GetChannelVideosRequest) (*GetChannelVideosResponse, error)
 	GetMyChannel(context.Context, *GetMyChannelRequest) (*GetMyChannelResponse, error)
+	GetSubscriptionVideos(context.Context, *GetSubscriptionVideosRequest) (*GetSubscriptionVideosResponse, error)
+	InviteUserToChannel(context.Context, *InviteUserToChannelRequest) (*InviteUserToChannelResponse, error)
 	ListChannels(context.Context, *ListChannelsRequest) (*ListChannelsResponse, error)
+	RejectChannelInvitation(context.Context, *RejectChannelInvitationRequest) (*RejectChannelInvitationResponse, error)
 	RemoveChannelMedia(context.Context, *RemoveChannelMediaRequest) (*RemoveChannelMediaResponse, error)
 	ResolveHandle(context.Context, *ResolveHandleRequest) (*ResolveHandleResponse, error)
 	SubscribeChannel(context.Context, *SubscribeChannelRequest) (*SubscribeChannelResponse, error)
@@ -3097,22 +3719,29 @@ type ChannelServiceHTTPServer interface {
 func RegisterChannelServiceHTTPServer(s *http.Server, srv ChannelServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/api/v1/channels", _ChannelService_ListChannels0_HTTP_Handler(srv))
-	r.GET("/api/v1/channels/{id}", _ChannelService_GetChannel0_HTTP_Handler(srv))
-	r.POST("/api/v1/channels", _ChannelService_CreateChannel0_HTTP_Handler(srv))
-	r.PUT("/api/v1/channels/{channel.id}", _ChannelService_UpdateChannel0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/channels/{id}", _ChannelService_DeleteChannel0_HTTP_Handler(srv))
-	r.GET("/api/v1/channels/{id}/medias", _ChannelService_GetChannelMedias0_HTTP_Handler(srv))
-	r.POST("/api/v1/channels/{id}/medias", _ChannelService_AddChannelMedia0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/channels/{id}/medias/{media_id}", _ChannelService_RemoveChannelMedia0_HTTP_Handler(srv))
-	r.GET("/api/v1/channels/{id}/subscribers", _ChannelService_GetChannelSubscribers0_HTTP_Handler(srv))
-	r.GET("/api/v1/channels/{id}/subscription", _ChannelService_GetChannelSubscription0_HTTP_Handler(srv))
-	r.POST("/api/v1/channels/{id}/subscription", _ChannelService_SubscribeChannel0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/channels/{id}/subscription", _ChannelService_UnsubscribeChannel0_HTTP_Handler(srv))
 	r.GET("/api/v1/channels/me", _ChannelService_GetMyChannel0_HTTP_Handler(srv))
 	r.PUT("/api/v1/channels/me/handle", _ChannelService_UpdateMyChannelHandle0_HTTP_Handler(srv))
 	r.GET("/api/v1/channels/validate-handle", _ChannelService_ValidateChannelHandle0_HTTP_Handler(srv))
-	r.PATCH("/api/v1/channels/{id}/notification", _ChannelService_UpdateChannelNotification0_HTTP_Handler(srv))
-	r.GET("/api/v1/resolve/@{handle}", _ChannelService_ResolveHandle0_HTTP_Handler(srv))
+	r.GET("/api/v1/channels/{token}", _ChannelService_GetChannelByToken0_HTTP_Handler(srv))
+	r.GET("/api/v1/channels/{token}/videos", _ChannelService_GetChannelVideos0_HTTP_Handler(srv))
+	r.GET("/api/v1/channels/{token}/playlists", _ChannelService_GetChannelPlaylists0_HTTP_Handler(srv))
+	r.PUT("/api/v1/channels/{token}/notification", _ChannelService_UpdateChannelNotification0_HTTP_Handler(srv))
+	r.GET("/api/v1/channels/{token}/subscribers", _ChannelService_GetChannelSubscribers0_HTTP_Handler(srv))
+	r.GET("/api/v1/channels/{token}/subscription", _ChannelService_GetChannelSubscription0_HTTP_Handler(srv))
+	r.POST("/api/v1/channels/{token}/subscription", _ChannelService_SubscribeChannel0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/channels/{token}/subscription", _ChannelService_UnsubscribeChannel0_HTTP_Handler(srv))
+	r.POST("/api/v1/channels", _ChannelService_CreateChannel0_HTTP_Handler(srv))
+	r.POST("/api/v1/channels/{token}/medias", _ChannelService_AddChannelMedia0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/channels/{token}/medias/{media_id}", _ChannelService_RemoveChannelMedia0_HTTP_Handler(srv))
+	r.POST("/api/v1/channels/{token}/invitations", _ChannelService_InviteUserToChannel0_HTTP_Handler(srv))
+	r.POST("/api/v1/channels/invitations/{id}/accept", _ChannelService_AcceptChannelInvitation0_HTTP_Handler(srv))
+	r.POST("/api/v1/channels/invitations/{id}/reject", _ChannelService_RejectChannelInvitation0_HTTP_Handler(srv))
+	r.GET("/api/v1/channels/invitations", _ChannelService_GetChannelInvitations0_HTTP_Handler(srv))
+	r.PUT("/api/v1/channels/{token}", _ChannelService_UpdateChannel0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/channels/{token}", _ChannelService_DeleteChannel0_HTTP_Handler(srv))
+	r.GET("/api/v1/resolve", _ChannelService_ResolveHandle0_HTTP_Handler(srv))
+	r.GET("/api/v1/system/config/channel-limits", _ChannelService_GetChannelLimits0_HTTP_Handler(srv))
+	r.GET("/api/v1/subscriptions/videos", _ChannelService_GetSubscriptionVideos0_HTTP_Handler(srv))
 }
 
 func _ChannelService_ListChannels0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
@@ -3134,53 +3763,135 @@ func _ChannelService_ListChannels0_HTTP_Handler(srv ChannelServiceHTTPServer) fu
 	}
 }
 
-func _ChannelService_GetChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+func _ChannelService_GetMyChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetChannelRequest
+		var in GetMyChannelRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceGetChannel)
+		http.SetOperation(ctx, OperationChannelServiceGetMyChannel)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetChannel(ctx, req.(*GetChannelRequest))
+			return srv.GetMyChannel(ctx, req.(*GetMyChannelRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetChannelResponse)
+		reply := out.(*GetMyChannelResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _ChannelService_CreateChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+func _ChannelService_UpdateMyChannelHandle0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in CreateChannelRequest
+		var in UpdateMyChannelHandleRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceCreateChannel)
+		http.SetOperation(ctx, OperationChannelServiceUpdateMyChannelHandle)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.CreateChannel(ctx, req.(*CreateChannelRequest))
+			return srv.UpdateMyChannelHandle(ctx, req.(*UpdateMyChannelHandleRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*CreateChannelResponse)
+		reply := out.(*UpdateMyChannelHandleResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _ChannelService_UpdateChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+func _ChannelService_ValidateChannelHandle0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in UpdateChannelRequest
+		var in ValidateChannelHandleRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceValidateChannelHandle)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ValidateChannelHandle(ctx, req.(*ValidateChannelHandleRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ValidateChannelHandleResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_GetChannelByToken0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelByTokenRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelByToken)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelByToken(ctx, req.(*GetChannelByTokenRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetChannelByTokenResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_GetChannelVideos0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelVideosRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelVideos)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelVideos(ctx, req.(*GetChannelVideosRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetChannelVideosResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_GetChannelPlaylists0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelPlaylistsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelPlaylists)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelPlaylists(ctx, req.(*GetChannelPlaylistsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetChannelPlaylistsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_UpdateChannelNotification0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateChannelNotificationRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -3190,106 +3901,15 @@ func _ChannelService_UpdateChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) f
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceUpdateChannel)
+		http.SetOperation(ctx, OperationChannelServiceUpdateChannelNotification)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateChannel(ctx, req.(*UpdateChannelRequest))
+			return srv.UpdateChannelNotification(ctx, req.(*UpdateChannelNotificationRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*UpdateChannelResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ChannelService_DeleteChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in DeleteChannelRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceDeleteChannel)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.DeleteChannel(ctx, req.(*DeleteChannelRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*DeleteChannelResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ChannelService_GetChannelMedias0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetChannelMediasRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceGetChannelMedias)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetChannelMedias(ctx, req.(*GetChannelMediasRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetChannelMediasResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ChannelService_AddChannelMedia0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in AddChannelMediaRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceAddChannelMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.AddChannelMedia(ctx, req.(*AddChannelMediaRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*AddChannelMediaResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ChannelService_RemoveChannelMedia0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RemoveChannelMediaRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceRemoveChannelMedia)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RemoveChannelMedia(ctx, req.(*RemoveChannelMediaRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*RemoveChannelMediaResponse)
+		reply := out.(*UpdateChannelNotificationResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -3385,69 +4005,31 @@ func _ChannelService_UnsubscribeChannel0_HTTP_Handler(srv ChannelServiceHTTPServ
 	}
 }
 
-func _ChannelService_GetMyChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+func _ChannelService_CreateChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetMyChannelRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceGetMyChannel)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetMyChannel(ctx, req.(*GetMyChannelRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetMyChannelResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ChannelService_UpdateMyChannelHandle0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UpdateMyChannelHandleRequest
+		var in CreateChannelRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceUpdateMyChannelHandle)
+		http.SetOperation(ctx, OperationChannelServiceCreateChannel)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateMyChannelHandle(ctx, req.(*UpdateMyChannelHandleRequest))
+			return srv.CreateChannel(ctx, req.(*CreateChannelRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*UpdateMyChannelHandleResponse)
+		reply := out.(*CreateChannelResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _ChannelService_ValidateChannelHandle0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+func _ChannelService_AddChannelMedia0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ValidateChannelHandleRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationChannelServiceValidateChannelHandle)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ValidateChannelHandle(ctx, req.(*ValidateChannelHandleRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ValidateChannelHandleResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ChannelService_UpdateChannelNotification0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in UpdateChannelNotificationRequest
+		var in AddChannelMediaRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -3457,15 +4039,178 @@ func _ChannelService_UpdateChannelNotification0_HTTP_Handler(srv ChannelServiceH
 		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationChannelServiceUpdateChannelNotification)
+		http.SetOperation(ctx, OperationChannelServiceAddChannelMedia)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UpdateChannelNotification(ctx, req.(*UpdateChannelNotificationRequest))
+			return srv.AddChannelMedia(ctx, req.(*AddChannelMediaRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*UpdateChannelNotificationResponse)
+		reply := out.(*AddChannelMediaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_RemoveChannelMedia0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RemoveChannelMediaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceRemoveChannelMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RemoveChannelMedia(ctx, req.(*RemoveChannelMediaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RemoveChannelMediaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_InviteUserToChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in InviteUserToChannelRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceInviteUserToChannel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.InviteUserToChannel(ctx, req.(*InviteUserToChannelRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*InviteUserToChannelResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_AcceptChannelInvitation0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AcceptChannelInvitationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceAcceptChannelInvitation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AcceptChannelInvitation(ctx, req.(*AcceptChannelInvitationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AcceptChannelInvitationResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_RejectChannelInvitation0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RejectChannelInvitationRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceRejectChannelInvitation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RejectChannelInvitation(ctx, req.(*RejectChannelInvitationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RejectChannelInvitationResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_GetChannelInvitations0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelInvitationsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelInvitations)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelInvitations(ctx, req.(*GetChannelInvitationsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetChannelInvitationsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_UpdateChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateChannelRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceUpdateChannel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateChannel(ctx, req.(*UpdateChannelRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateChannelResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_DeleteChannel0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteChannelRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceDeleteChannel)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteChannel(ctx, req.(*DeleteChannelRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteChannelResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -3474,9 +4219,6 @@ func _ChannelService_ResolveHandle0_HTTP_Handler(srv ChannelServiceHTTPServer) f
 	return func(ctx http.Context) error {
 		var in ResolveHandleRequest
 		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationChannelServiceResolveHandle)
@@ -3492,17 +4234,61 @@ func _ChannelService_ResolveHandle0_HTTP_Handler(srv ChannelServiceHTTPServer) f
 	}
 }
 
+func _ChannelService_GetChannelLimits0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelLimitsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetChannelLimits)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelLimits(ctx, req.(*GetChannelLimitsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetChannelLimitsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _ChannelService_GetSubscriptionVideos0_HTTP_Handler(srv ChannelServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSubscriptionVideosRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationChannelServiceGetSubscriptionVideos)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSubscriptionVideos(ctx, req.(*GetSubscriptionVideosRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetSubscriptionVideosResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ChannelServiceHTTPClient interface {
+	AcceptChannelInvitation(ctx context.Context, req *AcceptChannelInvitationRequest, opts ...http.CallOption) (rsp *AcceptChannelInvitationResponse, err error)
 	AddChannelMedia(ctx context.Context, req *AddChannelMediaRequest, opts ...http.CallOption) (rsp *AddChannelMediaResponse, err error)
 	CreateChannel(ctx context.Context, req *CreateChannelRequest, opts ...http.CallOption) (rsp *CreateChannelResponse, err error)
 	DeleteChannel(ctx context.Context, req *DeleteChannelRequest, opts ...http.CallOption) (rsp *DeleteChannelResponse, err error)
-	GetChannel(ctx context.Context, req *GetChannelRequest, opts ...http.CallOption) (rsp *GetChannelResponse, err error)
-	GetChannelMedias(ctx context.Context, req *GetChannelMediasRequest, opts ...http.CallOption) (rsp *GetChannelMediasResponse, err error)
+	GetChannelByToken(ctx context.Context, req *GetChannelByTokenRequest, opts ...http.CallOption) (rsp *GetChannelByTokenResponse, err error)
+	GetChannelInvitations(ctx context.Context, req *GetChannelInvitationsRequest, opts ...http.CallOption) (rsp *GetChannelInvitationsResponse, err error)
+	GetChannelLimits(ctx context.Context, req *GetChannelLimitsRequest, opts ...http.CallOption) (rsp *GetChannelLimitsResponse, err error)
+	GetChannelPlaylists(ctx context.Context, req *GetChannelPlaylistsRequest, opts ...http.CallOption) (rsp *GetChannelPlaylistsResponse, err error)
 	GetChannelSubscribers(ctx context.Context, req *GetChannelSubscribersRequest, opts ...http.CallOption) (rsp *GetChannelSubscribersResponse, err error)
 	GetChannelSubscription(ctx context.Context, req *GetChannelSubscriptionRequest, opts ...http.CallOption) (rsp *GetChannelSubscriptionResponse, err error)
-	// GetMyChannel Channel additional routes
+	GetChannelVideos(ctx context.Context, req *GetChannelVideosRequest, opts ...http.CallOption) (rsp *GetChannelVideosResponse, err error)
 	GetMyChannel(ctx context.Context, req *GetMyChannelRequest, opts ...http.CallOption) (rsp *GetMyChannelResponse, err error)
+	GetSubscriptionVideos(ctx context.Context, req *GetSubscriptionVideosRequest, opts ...http.CallOption) (rsp *GetSubscriptionVideosResponse, err error)
+	InviteUserToChannel(ctx context.Context, req *InviteUserToChannelRequest, opts ...http.CallOption) (rsp *InviteUserToChannelResponse, err error)
 	ListChannels(ctx context.Context, req *ListChannelsRequest, opts ...http.CallOption) (rsp *ListChannelsResponse, err error)
+	RejectChannelInvitation(ctx context.Context, req *RejectChannelInvitationRequest, opts ...http.CallOption) (rsp *RejectChannelInvitationResponse, err error)
 	RemoveChannelMedia(ctx context.Context, req *RemoveChannelMediaRequest, opts ...http.CallOption) (rsp *RemoveChannelMediaResponse, err error)
 	ResolveHandle(ctx context.Context, req *ResolveHandleRequest, opts ...http.CallOption) (rsp *ResolveHandleResponse, err error)
 	SubscribeChannel(ctx context.Context, req *SubscribeChannelRequest, opts ...http.CallOption) (rsp *SubscribeChannelResponse, err error)
@@ -3521,9 +4307,22 @@ func NewChannelServiceHTTPClient(client *http.Client) ChannelServiceHTTPClient {
 	return &ChannelServiceHTTPClientImpl{client}
 }
 
+func (c *ChannelServiceHTTPClientImpl) AcceptChannelInvitation(ctx context.Context, in *AcceptChannelInvitationRequest, opts ...http.CallOption) (*AcceptChannelInvitationResponse, error) {
+	var out AcceptChannelInvitationResponse
+	pattern := "/api/v1/channels/invitations/{id}/accept"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationChannelServiceAcceptChannelInvitation))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *ChannelServiceHTTPClientImpl) AddChannelMedia(ctx context.Context, in *AddChannelMediaRequest, opts ...http.CallOption) (*AddChannelMediaResponse, error) {
 	var out AddChannelMediaResponse
-	pattern := "/api/v1/channels/{id}/medias"
+	pattern := "/api/v1/channels/{token}/medias"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChannelServiceAddChannelMedia))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3549,7 +4348,7 @@ func (c *ChannelServiceHTTPClientImpl) CreateChannel(ctx context.Context, in *Cr
 
 func (c *ChannelServiceHTTPClientImpl) DeleteChannel(ctx context.Context, in *DeleteChannelRequest, opts ...http.CallOption) (*DeleteChannelResponse, error) {
 	var out DeleteChannelResponse
-	pattern := "/api/v1/channels/{id}"
+	pattern := "/api/v1/channels/{token}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChannelServiceDeleteChannel))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3560,11 +4359,11 @@ func (c *ChannelServiceHTTPClientImpl) DeleteChannel(ctx context.Context, in *De
 	return &out, nil
 }
 
-func (c *ChannelServiceHTTPClientImpl) GetChannel(ctx context.Context, in *GetChannelRequest, opts ...http.CallOption) (*GetChannelResponse, error) {
-	var out GetChannelResponse
-	pattern := "/api/v1/channels/{id}"
+func (c *ChannelServiceHTTPClientImpl) GetChannelByToken(ctx context.Context, in *GetChannelByTokenRequest, opts ...http.CallOption) (*GetChannelByTokenResponse, error) {
+	var out GetChannelByTokenResponse
+	pattern := "/api/v1/channels/{token}"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationChannelServiceGetChannel))
+	opts = append(opts, http.Operation(OperationChannelServiceGetChannelByToken))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -3573,11 +4372,37 @@ func (c *ChannelServiceHTTPClientImpl) GetChannel(ctx context.Context, in *GetCh
 	return &out, nil
 }
 
-func (c *ChannelServiceHTTPClientImpl) GetChannelMedias(ctx context.Context, in *GetChannelMediasRequest, opts ...http.CallOption) (*GetChannelMediasResponse, error) {
-	var out GetChannelMediasResponse
-	pattern := "/api/v1/channels/{id}/medias"
+func (c *ChannelServiceHTTPClientImpl) GetChannelInvitations(ctx context.Context, in *GetChannelInvitationsRequest, opts ...http.CallOption) (*GetChannelInvitationsResponse, error) {
+	var out GetChannelInvitationsResponse
+	pattern := "/api/v1/channels/invitations"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationChannelServiceGetChannelMedias))
+	opts = append(opts, http.Operation(OperationChannelServiceGetChannelInvitations))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ChannelServiceHTTPClientImpl) GetChannelLimits(ctx context.Context, in *GetChannelLimitsRequest, opts ...http.CallOption) (*GetChannelLimitsResponse, error) {
+	var out GetChannelLimitsResponse
+	pattern := "/api/v1/system/config/channel-limits"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationChannelServiceGetChannelLimits))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ChannelServiceHTTPClientImpl) GetChannelPlaylists(ctx context.Context, in *GetChannelPlaylistsRequest, opts ...http.CallOption) (*GetChannelPlaylistsResponse, error) {
+	var out GetChannelPlaylistsResponse
+	pattern := "/api/v1/channels/{token}/playlists"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationChannelServiceGetChannelPlaylists))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -3588,7 +4413,7 @@ func (c *ChannelServiceHTTPClientImpl) GetChannelMedias(ctx context.Context, in 
 
 func (c *ChannelServiceHTTPClientImpl) GetChannelSubscribers(ctx context.Context, in *GetChannelSubscribersRequest, opts ...http.CallOption) (*GetChannelSubscribersResponse, error) {
 	var out GetChannelSubscribersResponse
-	pattern := "/api/v1/channels/{id}/subscribers"
+	pattern := "/api/v1/channels/{token}/subscribers"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChannelServiceGetChannelSubscribers))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3601,7 +4426,7 @@ func (c *ChannelServiceHTTPClientImpl) GetChannelSubscribers(ctx context.Context
 
 func (c *ChannelServiceHTTPClientImpl) GetChannelSubscription(ctx context.Context, in *GetChannelSubscriptionRequest, opts ...http.CallOption) (*GetChannelSubscriptionResponse, error) {
 	var out GetChannelSubscriptionResponse
-	pattern := "/api/v1/channels/{id}/subscription"
+	pattern := "/api/v1/channels/{token}/subscription"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChannelServiceGetChannelSubscription))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3612,7 +4437,19 @@ func (c *ChannelServiceHTTPClientImpl) GetChannelSubscription(ctx context.Contex
 	return &out, nil
 }
 
-// GetMyChannel Channel additional routes
+func (c *ChannelServiceHTTPClientImpl) GetChannelVideos(ctx context.Context, in *GetChannelVideosRequest, opts ...http.CallOption) (*GetChannelVideosResponse, error) {
+	var out GetChannelVideosResponse
+	pattern := "/api/v1/channels/{token}/videos"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationChannelServiceGetChannelVideos))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *ChannelServiceHTTPClientImpl) GetMyChannel(ctx context.Context, in *GetMyChannelRequest, opts ...http.CallOption) (*GetMyChannelResponse, error) {
 	var out GetMyChannelResponse
 	pattern := "/api/v1/channels/me"
@@ -3620,6 +4457,32 @@ func (c *ChannelServiceHTTPClientImpl) GetMyChannel(ctx context.Context, in *Get
 	opts = append(opts, http.Operation(OperationChannelServiceGetMyChannel))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ChannelServiceHTTPClientImpl) GetSubscriptionVideos(ctx context.Context, in *GetSubscriptionVideosRequest, opts ...http.CallOption) (*GetSubscriptionVideosResponse, error) {
+	var out GetSubscriptionVideosResponse
+	pattern := "/api/v1/subscriptions/videos"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationChannelServiceGetSubscriptionVideos))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ChannelServiceHTTPClientImpl) InviteUserToChannel(ctx context.Context, in *InviteUserToChannelRequest, opts ...http.CallOption) (*InviteUserToChannelResponse, error) {
+	var out InviteUserToChannelResponse
+	pattern := "/api/v1/channels/{token}/invitations"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationChannelServiceInviteUserToChannel))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -3639,9 +4502,22 @@ func (c *ChannelServiceHTTPClientImpl) ListChannels(ctx context.Context, in *Lis
 	return &out, nil
 }
 
+func (c *ChannelServiceHTTPClientImpl) RejectChannelInvitation(ctx context.Context, in *RejectChannelInvitationRequest, opts ...http.CallOption) (*RejectChannelInvitationResponse, error) {
+	var out RejectChannelInvitationResponse
+	pattern := "/api/v1/channels/invitations/{id}/reject"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationChannelServiceRejectChannelInvitation))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *ChannelServiceHTTPClientImpl) RemoveChannelMedia(ctx context.Context, in *RemoveChannelMediaRequest, opts ...http.CallOption) (*RemoveChannelMediaResponse, error) {
 	var out RemoveChannelMediaResponse
-	pattern := "/api/v1/channels/{id}/medias/{media_id}"
+	pattern := "/api/v1/channels/{token}/medias/{media_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChannelServiceRemoveChannelMedia))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3654,7 +4530,7 @@ func (c *ChannelServiceHTTPClientImpl) RemoveChannelMedia(ctx context.Context, i
 
 func (c *ChannelServiceHTTPClientImpl) ResolveHandle(ctx context.Context, in *ResolveHandleRequest, opts ...http.CallOption) (*ResolveHandleResponse, error) {
 	var out ResolveHandleResponse
-	pattern := "/api/v1/resolve/@{handle}"
+	pattern := "/api/v1/resolve"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChannelServiceResolveHandle))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3667,7 +4543,7 @@ func (c *ChannelServiceHTTPClientImpl) ResolveHandle(ctx context.Context, in *Re
 
 func (c *ChannelServiceHTTPClientImpl) SubscribeChannel(ctx context.Context, in *SubscribeChannelRequest, opts ...http.CallOption) (*SubscribeChannelResponse, error) {
 	var out SubscribeChannelResponse
-	pattern := "/api/v1/channels/{id}/subscription"
+	pattern := "/api/v1/channels/{token}/subscription"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChannelServiceSubscribeChannel))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3680,7 +4556,7 @@ func (c *ChannelServiceHTTPClientImpl) SubscribeChannel(ctx context.Context, in 
 
 func (c *ChannelServiceHTTPClientImpl) UnsubscribeChannel(ctx context.Context, in *UnsubscribeChannelRequest, opts ...http.CallOption) (*UnsubscribeChannelResponse, error) {
 	var out UnsubscribeChannelResponse
-	pattern := "/api/v1/channels/{id}/subscription"
+	pattern := "/api/v1/channels/{token}/subscription"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationChannelServiceUnsubscribeChannel))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3693,7 +4569,7 @@ func (c *ChannelServiceHTTPClientImpl) UnsubscribeChannel(ctx context.Context, i
 
 func (c *ChannelServiceHTTPClientImpl) UpdateChannel(ctx context.Context, in *UpdateChannelRequest, opts ...http.CallOption) (*UpdateChannelResponse, error) {
 	var out UpdateChannelResponse
-	pattern := "/api/v1/channels/{channel.id}"
+	pattern := "/api/v1/channels/{token}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChannelServiceUpdateChannel))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -3706,11 +4582,11 @@ func (c *ChannelServiceHTTPClientImpl) UpdateChannel(ctx context.Context, in *Up
 
 func (c *ChannelServiceHTTPClientImpl) UpdateChannelNotification(ctx context.Context, in *UpdateChannelNotificationRequest, opts ...http.CallOption) (*UpdateChannelNotificationResponse, error) {
 	var out UpdateChannelNotificationResponse
-	pattern := "/api/v1/channels/{id}/notification"
+	pattern := "/api/v1/channels/{token}/notification"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationChannelServiceUpdateChannelNotification))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -3835,13 +4711,18 @@ func (c *SearchServiceHTTPClientImpl) Search(ctx context.Context, in *SearchRequ
 }
 
 const OperationAdminServiceBatchUpdateReviews = "/api.v1.services.media.AdminService/BatchUpdateReviews"
+const OperationAdminServiceGetChannelStats = "/api.v1.services.media.AdminService/GetChannelStats"
 const OperationAdminServiceGetDashboardStats = "/api.v1.services.media.AdminService/GetDashboardStats"
 const OperationAdminServiceGetMediaStats = "/api.v1.services.media.AdminService/GetMediaStats"
 const OperationAdminServiceGetPendingReviews = "/api.v1.services.media.AdminService/GetPendingReviews"
+const OperationAdminServiceGetPlaylistStats = "/api.v1.services.media.AdminService/GetPlaylistStats"
+const OperationAdminServiceGetPromotionStats = "/api.v1.services.media.AdminService/GetPromotionStats"
 const OperationAdminServiceGetRevenueStats = "/api.v1.services.media.AdminService/GetRevenueStats"
 const OperationAdminServiceGetReview = "/api.v1.services.media.AdminService/GetReview"
 const OperationAdminServiceGetReviewHistory = "/api.v1.services.media.AdminService/GetReviewHistory"
 const OperationAdminServiceGetSettings = "/api.v1.services.media.AdminService/GetSettings"
+const OperationAdminServiceGetSystemInfo = "/api.v1.services.media.AdminService/GetSystemInfo"
+const OperationAdminServiceGetTagStats = "/api.v1.services.media.AdminService/GetTagStats"
 const OperationAdminServiceGetTrafficStats = "/api.v1.services.media.AdminService/GetTrafficStats"
 const OperationAdminServiceGetUserStats = "/api.v1.services.media.AdminService/GetUserStats"
 const OperationAdminServiceUpdateReview = "/api.v1.services.media.AdminService/UpdateReview"
@@ -3849,16 +4730,23 @@ const OperationAdminServiceUpdateSettings = "/api.v1.services.media.AdminService
 
 type AdminServiceHTTPServer interface {
 	BatchUpdateReviews(context.Context, *BatchUpdateReviewsRequest) (*BatchUpdateReviewsResponse, error)
+	// GetChannelStats BUG-211: page-level stats card endpoints (independent, not derived from list).
+	GetChannelStats(context.Context, *GetChannelStatsRequest) (*GetChannelStatsResponse, error)
 	// GetDashboardStats Stats
 	GetDashboardStats(context.Context, *GetDashboardStatsRequest) (*GetDashboardStatsResponse, error)
 	GetMediaStats(context.Context, *GetMediaStatsRequest) (*GetMediaStatsResponse, error)
 	// GetPendingReviews Review
 	GetPendingReviews(context.Context, *GetPendingReviewsRequest) (*GetPendingReviewsResponse, error)
+	GetPlaylistStats(context.Context, *GetPlaylistStatsRequest) (*GetPlaylistStatsResponse, error)
+	GetPromotionStats(context.Context, *GetPromotionStatsRequest) (*GetPromotionStatsResponse, error)
 	GetRevenueStats(context.Context, *GetRevenueStatsRequest) (*GetRevenueStatsResponse, error)
 	GetReview(context.Context, *GetReviewRequest) (*GetReviewResponse, error)
 	GetReviewHistory(context.Context, *GetReviewHistoryRequest) (*GetReviewHistoryResponse, error)
 	// GetSettings Settings
 	GetSettings(context.Context, *GetSettingsRequest) (*GetSettingsResponse, error)
+	// GetSystemInfo GetSystemInfo returns system information.
+	GetSystemInfo(context.Context, *GetSystemInfoRequest) (*GetSystemInfoResponse, error)
+	GetTagStats(context.Context, *GetTagStatsRequest) (*GetTagStatsResponse, error)
 	GetTrafficStats(context.Context, *GetTrafficStatsRequest) (*GetTrafficStatsResponse, error)
 	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
 	UpdateReview(context.Context, *UpdateReviewRequest) (*UpdateReviewResponse, error)
@@ -3872,6 +4760,10 @@ func RegisterAdminServiceHTTPServer(s *http.Server, srv AdminServiceHTTPServer) 
 	r.GET("/api/v1/admin/stats/users", _AdminService_GetUserStats0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/stats/traffic", _AdminService_GetTrafficStats0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/stats/revenue", _AdminService_GetRevenueStats0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/stats/promotion", _AdminService_GetPromotionStats0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/stats/channels", _AdminService_GetChannelStats0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/stats/tags", _AdminService_GetTagStats0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/stats/playlists", _AdminService_GetPlaylistStats0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/medias/review/pending", _AdminService_GetPendingReviews0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/medias/review/history", _AdminService_GetReviewHistory0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/medias/review/{id}", _AdminService_GetReview0_HTTP_Handler(srv))
@@ -3879,6 +4771,7 @@ func RegisterAdminServiceHTTPServer(s *http.Server, srv AdminServiceHTTPServer) 
 	r.POST("/api/v1/admin/medias/review/batch", _AdminService_BatchUpdateReviews0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/settings", _AdminService_GetSettings0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/settings", _AdminService_UpdateSettings0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/settings/info", _AdminService_GetSystemInfo0_HTTP_Handler(srv))
 }
 
 func _AdminService_GetDashboardStats0_HTTP_Handler(srv AdminServiceHTTPServer) func(ctx http.Context) error {
@@ -3972,6 +4865,82 @@ func _AdminService_GetRevenueStats0_HTTP_Handler(srv AdminServiceHTTPServer) fun
 			return err
 		}
 		reply := out.(*GetRevenueStatsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminService_GetPromotionStats0_HTTP_Handler(srv AdminServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPromotionStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetPromotionStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPromotionStats(ctx, req.(*GetPromotionStatsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetPromotionStatsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminService_GetChannelStats0_HTTP_Handler(srv AdminServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetChannelStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetChannelStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetChannelStats(ctx, req.(*GetChannelStatsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetChannelStatsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminService_GetTagStats0_HTTP_Handler(srv AdminServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTagStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetTagStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetTagStats(ctx, req.(*GetTagStatsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetTagStatsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminService_GetPlaylistStats0_HTTP_Handler(srv AdminServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPlaylistStatsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetPlaylistStats)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPlaylistStats(ctx, req.(*GetPlaylistStatsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetPlaylistStatsResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -4124,18 +5093,44 @@ func _AdminService_UpdateSettings0_HTTP_Handler(srv AdminServiceHTTPServer) func
 	}
 }
 
+func _AdminService_GetSystemInfo0_HTTP_Handler(srv AdminServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSystemInfoRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminServiceGetSystemInfo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSystemInfo(ctx, req.(*GetSystemInfoRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetSystemInfoResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminServiceHTTPClient interface {
 	BatchUpdateReviews(ctx context.Context, req *BatchUpdateReviewsRequest, opts ...http.CallOption) (rsp *BatchUpdateReviewsResponse, err error)
+	// GetChannelStats BUG-211: page-level stats card endpoints (independent, not derived from list).
+	GetChannelStats(ctx context.Context, req *GetChannelStatsRequest, opts ...http.CallOption) (rsp *GetChannelStatsResponse, err error)
 	// GetDashboardStats Stats
 	GetDashboardStats(ctx context.Context, req *GetDashboardStatsRequest, opts ...http.CallOption) (rsp *GetDashboardStatsResponse, err error)
 	GetMediaStats(ctx context.Context, req *GetMediaStatsRequest, opts ...http.CallOption) (rsp *GetMediaStatsResponse, err error)
 	// GetPendingReviews Review
 	GetPendingReviews(ctx context.Context, req *GetPendingReviewsRequest, opts ...http.CallOption) (rsp *GetPendingReviewsResponse, err error)
+	GetPlaylistStats(ctx context.Context, req *GetPlaylistStatsRequest, opts ...http.CallOption) (rsp *GetPlaylistStatsResponse, err error)
+	GetPromotionStats(ctx context.Context, req *GetPromotionStatsRequest, opts ...http.CallOption) (rsp *GetPromotionStatsResponse, err error)
 	GetRevenueStats(ctx context.Context, req *GetRevenueStatsRequest, opts ...http.CallOption) (rsp *GetRevenueStatsResponse, err error)
 	GetReview(ctx context.Context, req *GetReviewRequest, opts ...http.CallOption) (rsp *GetReviewResponse, err error)
 	GetReviewHistory(ctx context.Context, req *GetReviewHistoryRequest, opts ...http.CallOption) (rsp *GetReviewHistoryResponse, err error)
 	// GetSettings Settings
 	GetSettings(ctx context.Context, req *GetSettingsRequest, opts ...http.CallOption) (rsp *GetSettingsResponse, err error)
+	// GetSystemInfo GetSystemInfo returns system information.
+	GetSystemInfo(ctx context.Context, req *GetSystemInfoRequest, opts ...http.CallOption) (rsp *GetSystemInfoResponse, err error)
+	GetTagStats(ctx context.Context, req *GetTagStatsRequest, opts ...http.CallOption) (rsp *GetTagStatsResponse, err error)
 	GetTrafficStats(ctx context.Context, req *GetTrafficStatsRequest, opts ...http.CallOption) (rsp *GetTrafficStatsResponse, err error)
 	GetUserStats(ctx context.Context, req *GetUserStatsRequest, opts ...http.CallOption) (rsp *GetUserStatsResponse, err error)
 	UpdateReview(ctx context.Context, req *UpdateReviewRequest, opts ...http.CallOption) (rsp *UpdateReviewResponse, err error)
@@ -4157,6 +5152,20 @@ func (c *AdminServiceHTTPClientImpl) BatchUpdateReviews(ctx context.Context, in 
 	opts = append(opts, http.Operation(OperationAdminServiceBatchUpdateReviews))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetChannelStats BUG-211: page-level stats card endpoints (independent, not derived from list).
+func (c *AdminServiceHTTPClientImpl) GetChannelStats(ctx context.Context, in *GetChannelStatsRequest, opts ...http.CallOption) (*GetChannelStatsResponse, error) {
+	var out GetChannelStatsResponse
+	pattern := "/api/v1/admin/stats/channels"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminServiceGetChannelStats))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4196,6 +5205,32 @@ func (c *AdminServiceHTTPClientImpl) GetPendingReviews(ctx context.Context, in *
 	pattern := "/api/v1/admin/medias/review/pending"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAdminServiceGetPendingReviews))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdminServiceHTTPClientImpl) GetPlaylistStats(ctx context.Context, in *GetPlaylistStatsRequest, opts ...http.CallOption) (*GetPlaylistStatsResponse, error) {
+	var out GetPlaylistStatsResponse
+	pattern := "/api/v1/admin/stats/playlists"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminServiceGetPlaylistStats))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdminServiceHTTPClientImpl) GetPromotionStats(ctx context.Context, in *GetPromotionStatsRequest, opts ...http.CallOption) (*GetPromotionStatsResponse, error) {
+	var out GetPromotionStatsResponse
+	pattern := "/api/v1/admin/stats/promotion"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminServiceGetPromotionStats))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -4249,6 +5284,33 @@ func (c *AdminServiceHTTPClientImpl) GetSettings(ctx context.Context, in *GetSet
 	pattern := "/api/v1/admin/settings"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAdminServiceGetSettings))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetSystemInfo GetSystemInfo returns system information.
+func (c *AdminServiceHTTPClientImpl) GetSystemInfo(ctx context.Context, in *GetSystemInfoRequest, opts ...http.CallOption) (*GetSystemInfoResponse, error) {
+	var out GetSystemInfoResponse
+	pattern := "/api/v1/admin/settings/info"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminServiceGetSystemInfo))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdminServiceHTTPClientImpl) GetTagStats(ctx context.Context, in *GetTagStatsRequest, opts ...http.CallOption) (*GetTagStatsResponse, error) {
+	var out GetTagStatsResponse
+	pattern := "/api/v1/admin/stats/tags"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminServiceGetTagStats))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -4491,8 +5553,10 @@ func (c *ExploreServiceHTTPClientImpl) GetTrending(ctx context.Context, in *GetT
 	return &out, nil
 }
 
+const OperationAdminMediaServiceDeleteAdminMedia = "/api.v1.services.media.AdminMediaService/DeleteAdminMedia"
 const OperationAdminMediaServiceGetAdminMedia = "/api.v1.services.media.AdminMediaService/GetAdminMedia"
 const OperationAdminMediaServiceGetAdminMediaVariants = "/api.v1.services.media.AdminMediaService/GetAdminMediaVariants"
+const OperationAdminMediaServiceGetAdminThumbnail = "/api.v1.services.media.AdminMediaService/GetAdminThumbnail"
 const OperationAdminMediaServiceGetMediaAdminStats = "/api.v1.services.media.AdminMediaService/GetMediaAdminStats"
 const OperationAdminMediaServiceGetMediaReviewLogs = "/api.v1.services.media.AdminMediaService/GetMediaReviewLogs"
 const OperationAdminMediaServiceListAdminMediaTasks = "/api.v1.services.media.AdminMediaService/ListAdminMediaTasks"
@@ -4501,11 +5565,17 @@ const OperationAdminMediaServiceRegenerateSprite = "/api.v1.services.media.Admin
 const OperationAdminMediaServiceRegenerateThumbnail = "/api.v1.services.media.AdminMediaService/RegenerateThumbnail"
 const OperationAdminMediaServiceRetryAdminMediaTask = "/api.v1.services.media.AdminMediaService/RetryAdminMediaTask"
 const OperationAdminMediaServiceReviewMedia = "/api.v1.services.media.AdminMediaService/ReviewMedia"
+const OperationAdminMediaServiceSetThumbnail = "/api.v1.services.media.AdminMediaService/SetThumbnail"
+const OperationAdminMediaServiceUpdateAdminMedia = "/api.v1.services.media.AdminMediaService/UpdateAdminMedia"
 const OperationAdminMediaServiceUpdateMediaState = "/api.v1.services.media.AdminMediaService/UpdateMediaState"
 
 type AdminMediaServiceHTTPServer interface {
+	// DeleteAdminMedia DeleteAdminMedia deletes a media (admin).
+	DeleteAdminMedia(context.Context, *DeleteAdminMediaRequest) (*DeleteAdminMediaResponse, error)
 	GetAdminMedia(context.Context, *GetAdminMediaRequest) (*GetAdminMediaResponse, error)
 	GetAdminMediaVariants(context.Context, *GetAdminMediaVariantsRequest) (*GetAdminMediaVariantsResponse, error)
+	// GetAdminThumbnail Admin get thumbnail URL (uuid; admin scope).
+	GetAdminThumbnail(context.Context, *GetAdminThumbnailRequest) (*GetAdminThumbnailResponse, error)
 	GetMediaAdminStats(context.Context, *GetMediaAdminStatsRequest) (*GetMediaAdminStatsResponse, error)
 	GetMediaReviewLogs(context.Context, *GetMediaReviewLogsRequest) (*GetMediaReviewLogsResponse, error)
 	ListAdminMediaTasks(context.Context, *ListAdminMediaTasksRequest) (*ListAdminMediaTasksResponse, error)
@@ -4514,6 +5584,10 @@ type AdminMediaServiceHTTPServer interface {
 	RegenerateThumbnail(context.Context, *RegenerateThumbnailRequest) (*RegenerateThumbnailResponse, error)
 	RetryAdminMediaTask(context.Context, *RetryAdminMediaTaskRequest) (*RetryAdminMediaTaskResponse, error)
 	ReviewMedia(context.Context, *ReviewMediaRequest) (*ReviewMediaResponse, error)
+	// SetThumbnail Admin cover selection from sprite sheet (uuid; admin scope).
+	SetThumbnail(context.Context, *SetThumbnailRequest) (*SetThumbnailResponse, error)
+	// UpdateAdminMedia UpdateAdminMedia updates a media (admin).
+	UpdateAdminMedia(context.Context, *UpdateAdminMediaRequest) (*UpdateAdminMediaResponse, error)
 	UpdateMediaState(context.Context, *UpdateMediaStateRequest) (*UpdateMediaStateResponse, error)
 }
 
@@ -4529,7 +5603,11 @@ func RegisterAdminMediaServiceHTTPServer(s *http.Server, srv AdminMediaServiceHT
 	r.PUT("/api/v1/admin/medias/{id}/review", _AdminMediaService_ReviewMedia0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/medias/{id}/review-logs", _AdminMediaService_GetMediaReviewLogs0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/medias/{id}/regenerate-sprite", _AdminMediaService_RegenerateSprite0_HTTP_Handler(srv))
-	r.POST("/api/v1/admin/medias/{id}/regenerate-thumbnail", _AdminMediaService_RegenerateThumbnail0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/medias/{id}/regen-thumbnail", _AdminMediaService_RegenerateThumbnail0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/medias/{id}/set-thumbnail", _AdminMediaService_SetThumbnail0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/medias/{id}/thumbnail", _AdminMediaService_GetAdminThumbnail0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/medias/{id}", _AdminMediaService_UpdateAdminMedia0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/admin/medias/{id}", _AdminMediaService_DeleteAdminMedia0_HTTP_Handler(srv))
 }
 
 func _AdminMediaService_ListAdminMedias0_HTTP_Handler(srv AdminMediaServiceHTTPServer) func(ctx http.Context) error {
@@ -4786,9 +5864,107 @@ func _AdminMediaService_RegenerateThumbnail0_HTTP_Handler(srv AdminMediaServiceH
 	}
 }
 
+func _AdminMediaService_SetThumbnail0_HTTP_Handler(srv AdminMediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SetThumbnailRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceSetThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SetThumbnail(ctx, req.(*SetThumbnailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SetThumbnailResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminMediaService_GetAdminThumbnail0_HTTP_Handler(srv AdminMediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetAdminThumbnailRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceGetAdminThumbnail)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetAdminThumbnail(ctx, req.(*GetAdminThumbnailRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetAdminThumbnailResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminMediaService_UpdateAdminMedia0_HTTP_Handler(srv AdminMediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAdminMediaRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceUpdateAdminMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateAdminMedia(ctx, req.(*UpdateAdminMediaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateAdminMediaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdminMediaService_DeleteAdminMedia0_HTTP_Handler(srv AdminMediaServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteAdminMediaRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminMediaServiceDeleteAdminMedia)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteAdminMedia(ctx, req.(*DeleteAdminMediaRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteAdminMediaResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminMediaServiceHTTPClient interface {
+	// DeleteAdminMedia DeleteAdminMedia deletes a media (admin).
+	DeleteAdminMedia(ctx context.Context, req *DeleteAdminMediaRequest, opts ...http.CallOption) (rsp *DeleteAdminMediaResponse, err error)
 	GetAdminMedia(ctx context.Context, req *GetAdminMediaRequest, opts ...http.CallOption) (rsp *GetAdminMediaResponse, err error)
 	GetAdminMediaVariants(ctx context.Context, req *GetAdminMediaVariantsRequest, opts ...http.CallOption) (rsp *GetAdminMediaVariantsResponse, err error)
+	// GetAdminThumbnail Admin get thumbnail URL (uuid; admin scope).
+	GetAdminThumbnail(ctx context.Context, req *GetAdminThumbnailRequest, opts ...http.CallOption) (rsp *GetAdminThumbnailResponse, err error)
 	GetMediaAdminStats(ctx context.Context, req *GetMediaAdminStatsRequest, opts ...http.CallOption) (rsp *GetMediaAdminStatsResponse, err error)
 	GetMediaReviewLogs(ctx context.Context, req *GetMediaReviewLogsRequest, opts ...http.CallOption) (rsp *GetMediaReviewLogsResponse, err error)
 	ListAdminMediaTasks(ctx context.Context, req *ListAdminMediaTasksRequest, opts ...http.CallOption) (rsp *ListAdminMediaTasksResponse, err error)
@@ -4797,6 +5973,10 @@ type AdminMediaServiceHTTPClient interface {
 	RegenerateThumbnail(ctx context.Context, req *RegenerateThumbnailRequest, opts ...http.CallOption) (rsp *RegenerateThumbnailResponse, err error)
 	RetryAdminMediaTask(ctx context.Context, req *RetryAdminMediaTaskRequest, opts ...http.CallOption) (rsp *RetryAdminMediaTaskResponse, err error)
 	ReviewMedia(ctx context.Context, req *ReviewMediaRequest, opts ...http.CallOption) (rsp *ReviewMediaResponse, err error)
+	// SetThumbnail Admin cover selection from sprite sheet (uuid; admin scope).
+	SetThumbnail(ctx context.Context, req *SetThumbnailRequest, opts ...http.CallOption) (rsp *SetThumbnailResponse, err error)
+	// UpdateAdminMedia UpdateAdminMedia updates a media (admin).
+	UpdateAdminMedia(ctx context.Context, req *UpdateAdminMediaRequest, opts ...http.CallOption) (rsp *UpdateAdminMediaResponse, err error)
 	UpdateMediaState(ctx context.Context, req *UpdateMediaStateRequest, opts ...http.CallOption) (rsp *UpdateMediaStateResponse, err error)
 }
 
@@ -4806,6 +5986,20 @@ type AdminMediaServiceHTTPClientImpl struct {
 
 func NewAdminMediaServiceHTTPClient(client *http.Client) AdminMediaServiceHTTPClient {
 	return &AdminMediaServiceHTTPClientImpl{client}
+}
+
+// DeleteAdminMedia DeleteAdminMedia deletes a media (admin).
+func (c *AdminMediaServiceHTTPClientImpl) DeleteAdminMedia(ctx context.Context, in *DeleteAdminMediaRequest, opts ...http.CallOption) (*DeleteAdminMediaResponse, error) {
+	var out DeleteAdminMediaResponse
+	pattern := "/api/v1/admin/medias/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminMediaServiceDeleteAdminMedia))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *AdminMediaServiceHTTPClientImpl) GetAdminMedia(ctx context.Context, in *GetAdminMediaRequest, opts ...http.CallOption) (*GetAdminMediaResponse, error) {
@@ -4826,6 +6020,20 @@ func (c *AdminMediaServiceHTTPClientImpl) GetAdminMediaVariants(ctx context.Cont
 	pattern := "/api/v1/admin/medias/{id}/variants"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAdminMediaServiceGetAdminMediaVariants))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetAdminThumbnail Admin get thumbnail URL (uuid; admin scope).
+func (c *AdminMediaServiceHTTPClientImpl) GetAdminThumbnail(ctx context.Context, in *GetAdminThumbnailRequest, opts ...http.CallOption) (*GetAdminThumbnailResponse, error) {
+	var out GetAdminThumbnailResponse
+	pattern := "/api/v1/admin/medias/{id}/thumbnail"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminMediaServiceGetAdminThumbnail))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -4901,7 +6109,7 @@ func (c *AdminMediaServiceHTTPClientImpl) RegenerateSprite(ctx context.Context, 
 
 func (c *AdminMediaServiceHTTPClientImpl) RegenerateThumbnail(ctx context.Context, in *RegenerateThumbnailRequest, opts ...http.CallOption) (*RegenerateThumbnailResponse, error) {
 	var out RegenerateThumbnailResponse
-	pattern := "/api/v1/admin/medias/{id}/regenerate-thumbnail"
+	pattern := "/api/v1/admin/medias/{id}/regen-thumbnail"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAdminMediaServiceRegenerateThumbnail))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -4930,6 +6138,34 @@ func (c *AdminMediaServiceHTTPClientImpl) ReviewMedia(ctx context.Context, in *R
 	pattern := "/api/v1/admin/medias/{id}/review"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAdminMediaServiceReviewMedia))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SetThumbnail Admin cover selection from sprite sheet (uuid; admin scope).
+func (c *AdminMediaServiceHTTPClientImpl) SetThumbnail(ctx context.Context, in *SetThumbnailRequest, opts ...http.CallOption) (*SetThumbnailResponse, error) {
+	var out SetThumbnailResponse
+	pattern := "/api/v1/admin/medias/{id}/set-thumbnail"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminMediaServiceSetThumbnail))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateAdminMedia UpdateAdminMedia updates a media (admin).
+func (c *AdminMediaServiceHTTPClientImpl) UpdateAdminMedia(ctx context.Context, in *UpdateAdminMediaRequest, opts ...http.CallOption) (*UpdateAdminMediaResponse, error) {
+	var out UpdateAdminMediaResponse
+	pattern := "/api/v1/admin/medias/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminMediaServiceUpdateAdminMedia))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
@@ -5414,6 +6650,7 @@ const OperationAdminTagServiceDeleteAdminTag = "/api.v1.services.media.AdminTagS
 const OperationAdminTagServiceGetAdminTag = "/api.v1.services.media.AdminTagService/GetAdminTag"
 const OperationAdminTagServiceImportTags = "/api.v1.services.media.AdminTagService/ImportTags"
 const OperationAdminTagServiceListAdminTags = "/api.v1.services.media.AdminTagService/ListAdminTags"
+const OperationAdminTagServicePatchAdminTag = "/api.v1.services.media.AdminTagService/PatchAdminTag"
 const OperationAdminTagServiceUpdateAdminTag = "/api.v1.services.media.AdminTagService/UpdateAdminTag"
 
 type AdminTagServiceHTTPServer interface {
@@ -5423,6 +6660,8 @@ type AdminTagServiceHTTPServer interface {
 	GetAdminTag(context.Context, *GetAdminTagRequest) (*GetAdminTagResponse, error)
 	ImportTags(context.Context, *ImportTagsRequest) (*ImportTagsResponse, error)
 	ListAdminTags(context.Context, *ListAdminTagsRequest) (*ListAdminTagsResponse, error)
+	// PatchAdminTag PatchAdminTag partially updates a tag (admin).
+	PatchAdminTag(context.Context, *PatchAdminTagRequest) (*PatchAdminTagResponse, error)
 	UpdateAdminTag(context.Context, *UpdateAdminTagRequest) (*UpdateAdminTagResponse, error)
 }
 
@@ -5433,6 +6672,7 @@ func RegisterAdminTagServiceHTTPServer(s *http.Server, srv AdminTagServiceHTTPSe
 	r.POST("/api/v1/admin/tags", _AdminTagService_CreateAdminTag0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/tags/{id}", _AdminTagService_UpdateAdminTag0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/admin/tags/{id}", _AdminTagService_DeleteAdminTag0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/admin/tags/{id}", _AdminTagService_PatchAdminTag0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/tags/bulk", _AdminTagService_BulkUpdateTags0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/tags/import", _AdminTagService_ImportTags0_HTTP_Handler(srv))
 }
@@ -5547,6 +6787,31 @@ func _AdminTagService_DeleteAdminTag0_HTTP_Handler(srv AdminTagServiceHTTPServer
 	}
 }
 
+func _AdminTagService_PatchAdminTag0_HTTP_Handler(srv AdminTagServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PatchAdminTagRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminTagServicePatchAdminTag)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PatchAdminTag(ctx, req.(*PatchAdminTagRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PatchAdminTagResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _AdminTagService_BulkUpdateTags0_HTTP_Handler(srv AdminTagServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in BulkUpdateTagsRequest
@@ -5598,6 +6863,8 @@ type AdminTagServiceHTTPClient interface {
 	GetAdminTag(ctx context.Context, req *GetAdminTagRequest, opts ...http.CallOption) (rsp *GetAdminTagResponse, err error)
 	ImportTags(ctx context.Context, req *ImportTagsRequest, opts ...http.CallOption) (rsp *ImportTagsResponse, err error)
 	ListAdminTags(ctx context.Context, req *ListAdminTagsRequest, opts ...http.CallOption) (rsp *ListAdminTagsResponse, err error)
+	// PatchAdminTag PatchAdminTag partially updates a tag (admin).
+	PatchAdminTag(ctx context.Context, req *PatchAdminTagRequest, opts ...http.CallOption) (rsp *PatchAdminTagResponse, err error)
 	UpdateAdminTag(ctx context.Context, req *UpdateAdminTagRequest, opts ...http.CallOption) (rsp *UpdateAdminTagResponse, err error)
 }
 
@@ -5687,6 +6954,20 @@ func (c *AdminTagServiceHTTPClientImpl) ListAdminTags(ctx context.Context, in *L
 	return &out, nil
 }
 
+// PatchAdminTag PatchAdminTag partially updates a tag (admin).
+func (c *AdminTagServiceHTTPClientImpl) PatchAdminTag(ctx context.Context, in *PatchAdminTagRequest, opts ...http.CallOption) (*PatchAdminTagResponse, error) {
+	var out PatchAdminTagResponse
+	pattern := "/api/v1/admin/tags/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminTagServicePatchAdminTag))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *AdminTagServiceHTTPClientImpl) UpdateAdminTag(ctx context.Context, in *UpdateAdminTagRequest, opts ...http.CallOption) (*UpdateAdminTagResponse, error) {
 	var out UpdateAdminTagResponse
 	pattern := "/api/v1/admin/tags/{id}"
@@ -5704,6 +6985,7 @@ const OperationAdminCategoryServiceCreateAdminCategory = "/api.v1.services.media
 const OperationAdminCategoryServiceDeleteAdminCategory = "/api.v1.services.media.AdminCategoryService/DeleteAdminCategory"
 const OperationAdminCategoryServiceGetAdminCategory = "/api.v1.services.media.AdminCategoryService/GetAdminCategory"
 const OperationAdminCategoryServiceListAdminCategories = "/api.v1.services.media.AdminCategoryService/ListAdminCategories"
+const OperationAdminCategoryServicePatchAdminCategory = "/api.v1.services.media.AdminCategoryService/PatchAdminCategory"
 const OperationAdminCategoryServiceUpdateAdminCategory = "/api.v1.services.media.AdminCategoryService/UpdateAdminCategory"
 
 type AdminCategoryServiceHTTPServer interface {
@@ -5711,6 +6993,8 @@ type AdminCategoryServiceHTTPServer interface {
 	DeleteAdminCategory(context.Context, *DeleteAdminCategoryRequest) (*DeleteAdminCategoryResponse, error)
 	GetAdminCategory(context.Context, *GetAdminCategoryRequest) (*GetAdminCategoryResponse, error)
 	ListAdminCategories(context.Context, *ListAdminCategoriesRequest) (*ListAdminCategoriesResponse, error)
+	// PatchAdminCategory PatchAdminCategory partially updates a category (admin).
+	PatchAdminCategory(context.Context, *PatchAdminCategoryRequest) (*PatchAdminCategoryResponse, error)
 	UpdateAdminCategory(context.Context, *UpdateAdminCategoryRequest) (*UpdateAdminCategoryResponse, error)
 }
 
@@ -5721,6 +7005,7 @@ func RegisterAdminCategoryServiceHTTPServer(s *http.Server, srv AdminCategorySer
 	r.POST("/api/v1/admin/categories", _AdminCategoryService_CreateAdminCategory0_HTTP_Handler(srv))
 	r.PUT("/api/v1/admin/categories/{id}", _AdminCategoryService_UpdateAdminCategory0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/admin/categories/{id}", _AdminCategoryService_DeleteAdminCategory0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/admin/categories/{id}", _AdminCategoryService_PatchAdminCategory0_HTTP_Handler(srv))
 }
 
 func _AdminCategoryService_ListAdminCategories0_HTTP_Handler(srv AdminCategoryServiceHTTPServer) func(ctx http.Context) error {
@@ -5833,11 +7118,38 @@ func _AdminCategoryService_DeleteAdminCategory0_HTTP_Handler(srv AdminCategorySe
 	}
 }
 
+func _AdminCategoryService_PatchAdminCategory0_HTTP_Handler(srv AdminCategoryServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PatchAdminCategoryRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminCategoryServicePatchAdminCategory)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PatchAdminCategory(ctx, req.(*PatchAdminCategoryRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PatchAdminCategoryResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminCategoryServiceHTTPClient interface {
 	CreateAdminCategory(ctx context.Context, req *CreateAdminCategoryRequest, opts ...http.CallOption) (rsp *CreateAdminCategoryResponse, err error)
 	DeleteAdminCategory(ctx context.Context, req *DeleteAdminCategoryRequest, opts ...http.CallOption) (rsp *DeleteAdminCategoryResponse, err error)
 	GetAdminCategory(ctx context.Context, req *GetAdminCategoryRequest, opts ...http.CallOption) (rsp *GetAdminCategoryResponse, err error)
 	ListAdminCategories(ctx context.Context, req *ListAdminCategoriesRequest, opts ...http.CallOption) (rsp *ListAdminCategoriesResponse, err error)
+	// PatchAdminCategory PatchAdminCategory partially updates a category (admin).
+	PatchAdminCategory(ctx context.Context, req *PatchAdminCategoryRequest, opts ...http.CallOption) (rsp *PatchAdminCategoryResponse, err error)
 	UpdateAdminCategory(ctx context.Context, req *UpdateAdminCategoryRequest, opts ...http.CallOption) (rsp *UpdateAdminCategoryResponse, err error)
 }
 
@@ -5895,6 +7207,20 @@ func (c *AdminCategoryServiceHTTPClientImpl) ListAdminCategories(ctx context.Con
 	opts = append(opts, http.Operation(OperationAdminCategoryServiceListAdminCategories))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PatchAdminCategory PatchAdminCategory partially updates a category (admin).
+func (c *AdminCategoryServiceHTTPClientImpl) PatchAdminCategory(ctx context.Context, in *PatchAdminCategoryRequest, opts ...http.CallOption) (*PatchAdminCategoryResponse, error) {
+	var out PatchAdminCategoryResponse
+	pattern := "/api/v1/admin/categories/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminCategoryServicePatchAdminCategory))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PATCH", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -7740,7 +9066,6 @@ const OperationArticleServiceDeleteAdminArticle = "/api.v1.services.media.Articl
 const OperationArticleServiceDeleteArticle = "/api.v1.services.media.ArticleService/DeleteArticle"
 const OperationArticleServiceGetAdminArticle = "/api.v1.services.media.ArticleService/GetAdminArticle"
 const OperationArticleServiceGetArticle = "/api.v1.services.media.ArticleService/GetArticle"
-const OperationArticleServiceGetArticleBySlug = "/api.v1.services.media.ArticleService/GetArticleBySlug"
 const OperationArticleServiceGetFeaturedArticles = "/api.v1.services.media.ArticleService/GetFeaturedArticles"
 const OperationArticleServiceGetLatestArticles = "/api.v1.services.media.ArticleService/GetLatestArticles"
 const OperationArticleServiceGetMyArticles = "/api.v1.services.media.ArticleService/GetMyArticles"
@@ -7758,7 +9083,6 @@ type ArticleServiceHTTPServer interface {
 	DeleteArticle(context.Context, *DeleteArticleRequest) (*DeleteArticleResponse, error)
 	GetAdminArticle(context.Context, *GetAdminArticleRequest) (*GetAdminArticleResponse, error)
 	GetArticle(context.Context, *GetArticleRequest) (*GetArticleResponse, error)
-	GetArticleBySlug(context.Context, *GetArticleBySlugRequest) (*GetArticleBySlugResponse, error)
 	GetFeaturedArticles(context.Context, *GetFeaturedArticlesRequest) (*GetFeaturedArticlesResponse, error)
 	GetLatestArticles(context.Context, *GetLatestArticlesRequest) (*GetLatestArticlesResponse, error)
 	GetMyArticles(context.Context, *GetMyArticlesRequest) (*GetMyArticlesResponse, error)
@@ -7773,15 +9097,14 @@ type ArticleServiceHTTPServer interface {
 func RegisterArticleServiceHTTPServer(s *http.Server, srv ArticleServiceHTTPServer) {
 	r := s.Route("/")
 	r.GET("/api/v1/articles", _ArticleService_ListArticles0_HTTP_Handler(srv))
-	r.GET("/api/v1/articles/{id}", _ArticleService_GetArticle0_HTTP_Handler(srv))
-	r.GET("/api/v1/articles/slug/{slug}", _ArticleService_GetArticleBySlug0_HTTP_Handler(srv))
+	r.GET("/api/v1/articles/{slug}", _ArticleService_GetArticle0_HTTP_Handler(srv))
 	r.GET("/api/v1/articles/featured", _ArticleService_GetFeaturedArticles0_HTTP_Handler(srv))
 	r.GET("/api/v1/articles/latest", _ArticleService_GetLatestArticles0_HTTP_Handler(srv))
 	r.GET("/api/v1/articles/me", _ArticleService_GetMyArticles0_HTTP_Handler(srv))
 	r.POST("/api/v1/articles", _ArticleService_CreateArticle0_HTTP_Handler(srv))
-	r.PUT("/api/v1/articles/{id}", _ArticleService_UpdateArticle0_HTTP_Handler(srv))
-	r.DELETE("/api/v1/articles/{id}", _ArticleService_DeleteArticle0_HTTP_Handler(srv))
-	r.PATCH("/api/v1/articles/{id}/state", _ArticleService_UpdateArticleState0_HTTP_Handler(srv))
+	r.PUT("/api/v1/articles/{slug}", _ArticleService_UpdateArticle0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/articles/{slug}", _ArticleService_DeleteArticle0_HTTP_Handler(srv))
+	r.PATCH("/api/v1/articles/{slug}/state", _ArticleService_UpdateArticleState0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/articles", _ArticleService_ListAdminArticles0_HTTP_Handler(srv))
 	r.GET("/api/v1/admin/articles/{id}", _ArticleService_GetAdminArticle0_HTTP_Handler(srv))
 	r.POST("/api/v1/admin/articles", _ArticleService_CreateAdminArticle0_HTTP_Handler(srv))
@@ -7827,28 +9150,6 @@ func _ArticleService_GetArticle0_HTTP_Handler(srv ArticleServiceHTTPServer) func
 			return err
 		}
 		reply := out.(*GetArticleResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _ArticleService_GetArticleBySlug0_HTTP_Handler(srv ArticleServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetArticleBySlugRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationArticleServiceGetArticleBySlug)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetArticleBySlug(ctx, req.(*GetArticleBySlugRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetArticleBySlugResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -8146,7 +9447,6 @@ type ArticleServiceHTTPClient interface {
 	DeleteArticle(ctx context.Context, req *DeleteArticleRequest, opts ...http.CallOption) (rsp *DeleteArticleResponse, err error)
 	GetAdminArticle(ctx context.Context, req *GetAdminArticleRequest, opts ...http.CallOption) (rsp *GetAdminArticleResponse, err error)
 	GetArticle(ctx context.Context, req *GetArticleRequest, opts ...http.CallOption) (rsp *GetArticleResponse, err error)
-	GetArticleBySlug(ctx context.Context, req *GetArticleBySlugRequest, opts ...http.CallOption) (rsp *GetArticleBySlugResponse, err error)
 	GetFeaturedArticles(ctx context.Context, req *GetFeaturedArticlesRequest, opts ...http.CallOption) (rsp *GetFeaturedArticlesResponse, err error)
 	GetLatestArticles(ctx context.Context, req *GetLatestArticlesRequest, opts ...http.CallOption) (rsp *GetLatestArticlesResponse, err error)
 	GetMyArticles(ctx context.Context, req *GetMyArticlesRequest, opts ...http.CallOption) (rsp *GetMyArticlesResponse, err error)
@@ -8207,7 +9507,7 @@ func (c *ArticleServiceHTTPClientImpl) DeleteAdminArticle(ctx context.Context, i
 
 func (c *ArticleServiceHTTPClientImpl) DeleteArticle(ctx context.Context, in *DeleteArticleRequest, opts ...http.CallOption) (*DeleteArticleResponse, error) {
 	var out DeleteArticleResponse
-	pattern := "/api/v1/articles/{id}"
+	pattern := "/api/v1/articles/{slug}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationArticleServiceDeleteArticle))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -8233,22 +9533,9 @@ func (c *ArticleServiceHTTPClientImpl) GetAdminArticle(ctx context.Context, in *
 
 func (c *ArticleServiceHTTPClientImpl) GetArticle(ctx context.Context, in *GetArticleRequest, opts ...http.CallOption) (*GetArticleResponse, error) {
 	var out GetArticleResponse
-	pattern := "/api/v1/articles/{id}"
+	pattern := "/api/v1/articles/{slug}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationArticleServiceGetArticle))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-func (c *ArticleServiceHTTPClientImpl) GetArticleBySlug(ctx context.Context, in *GetArticleBySlugRequest, opts ...http.CallOption) (*GetArticleBySlugResponse, error) {
-	var out GetArticleBySlugResponse
-	pattern := "/api/v1/articles/slug/{slug}"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationArticleServiceGetArticleBySlug))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -8350,7 +9637,7 @@ func (c *ArticleServiceHTTPClientImpl) UpdateAdminArticleState(ctx context.Conte
 
 func (c *ArticleServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *UpdateArticleRequest, opts ...http.CallOption) (*UpdateArticleResponse, error) {
 	var out UpdateArticleResponse
-	pattern := "/api/v1/articles/{id}"
+	pattern := "/api/v1/articles/{slug}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationArticleServiceUpdateArticle))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -8363,7 +9650,7 @@ func (c *ArticleServiceHTTPClientImpl) UpdateArticle(ctx context.Context, in *Up
 
 func (c *ArticleServiceHTTPClientImpl) UpdateArticleState(ctx context.Context, in *UpdateArticleStateRequest, opts ...http.CallOption) (*UpdateArticleStateResponse, error) {
 	var out UpdateArticleStateResponse
-	pattern := "/api/v1/articles/{id}/state"
+	pattern := "/api/v1/articles/{slug}/state"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationArticleServiceUpdateArticleState))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -8406,7 +9693,7 @@ func RegisterSystemConfigServiceHTTPServer(s *http.Server, srv SystemConfigServi
 	r.POST("/api/v1/system/settings/{key}/reset", _SystemConfigService_ResetSystemSetting0_HTTP_Handler(srv))
 	r.GET("/api/v1/system/settings/email/status", _SystemConfigService_GetEmailStatus0_HTTP_Handler(srv))
 	r.POST("/api/v1/system/settings/email/test", _SystemConfigService_TestEmail0_HTTP_Handler(srv))
-	r.GET("/api/v1/system/config/channel-limits", _SystemConfigService_GetChannelLimits0_HTTP_Handler(srv))
+	r.GET("/api/v1/system/config/channel-limits", _SystemConfigService_GetChannelLimits1_HTTP_Handler(srv))
 }
 
 func _SystemConfigService_GetSettingsByCategory0_HTTP_Handler(srv SystemConfigServiceHTTPServer) func(ctx http.Context) error {
@@ -8588,7 +9875,7 @@ func _SystemConfigService_TestEmail0_HTTP_Handler(srv SystemConfigServiceHTTPSer
 	}
 }
 
-func _SystemConfigService_GetChannelLimits0_HTTP_Handler(srv SystemConfigServiceHTTPServer) func(ctx http.Context) error {
+func _SystemConfigService_GetChannelLimits1_HTTP_Handler(srv SystemConfigServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetChannelLimitsRequest
 		if err := ctx.BindQuery(&in); err != nil {
@@ -8738,6 +10025,2022 @@ func (c *SystemConfigServiceHTTPClientImpl) UpdateSettingByKey(ctx context.Conte
 	opts = append(opts, http.Operation(OperationSystemConfigServiceUpdateSettingByKey))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+const OperationAdServiceCreateAd = "/api.v1.services.media.AdService/CreateAd"
+const OperationAdServiceCreateAdPlacement = "/api.v1.services.media.AdService/CreateAdPlacement"
+const OperationAdServiceDeleteAd = "/api.v1.services.media.AdService/DeleteAd"
+const OperationAdServiceDeleteAdPlacement = "/api.v1.services.media.AdService/DeleteAdPlacement"
+const OperationAdServiceListActiveAdsByPlacement = "/api.v1.services.media.AdService/ListActiveAdsByPlacement"
+const OperationAdServiceListAdClickLogs = "/api.v1.services.media.AdService/ListAdClickLogs"
+const OperationAdServiceListAdPlacements = "/api.v1.services.media.AdService/ListAdPlacements"
+const OperationAdServiceListAds = "/api.v1.services.media.AdService/ListAds"
+const OperationAdServiceRecordAdClick = "/api.v1.services.media.AdService/RecordAdClick"
+const OperationAdServiceRecordAdImpression = "/api.v1.services.media.AdService/RecordAdImpression"
+const OperationAdServiceToggleAd = "/api.v1.services.media.AdService/ToggleAd"
+const OperationAdServiceToggleAdPlacement = "/api.v1.services.media.AdService/ToggleAdPlacement"
+const OperationAdServiceUpdateAd = "/api.v1.services.media.AdService/UpdateAd"
+const OperationAdServiceUpdateAdPlacement = "/api.v1.services.media.AdService/UpdateAdPlacement"
+
+type AdServiceHTTPServer interface {
+	CreateAd(context.Context, *CreateAdRequest) (*CreateAdResponse, error)
+	CreateAdPlacement(context.Context, *CreateAdPlacementRequest) (*CreateAdPlacementResponse, error)
+	DeleteAd(context.Context, *DeleteAdRequest) (*DeleteAdResponse, error)
+	DeleteAdPlacement(context.Context, *DeleteAdPlacementRequest) (*DeleteAdPlacementResponse, error)
+	// ListActiveAdsByPlacement Public ad endpoints
+	ListActiveAdsByPlacement(context.Context, *ListActiveAdsByPlacementRequest) (*ListActiveAdsByPlacementResponse, error)
+	ListAdClickLogs(context.Context, *ListAdClickLogsRequest) (*ListAdClickLogsResponse, error)
+	// ListAdPlacements Admin placement management
+	ListAdPlacements(context.Context, *ListAdPlacementsRequest) (*ListAdPlacementsResponse, error)
+	// ListAds Admin ad management
+	ListAds(context.Context, *ListAdsRequest) (*ListAdsResponse, error)
+	RecordAdClick(context.Context, *RecordAdClickRequest) (*RecordAdClickResponse, error)
+	RecordAdImpression(context.Context, *RecordAdImpressionRequest) (*RecordAdImpressionResponse, error)
+	ToggleAd(context.Context, *ToggleAdRequest) (*ToggleAdResponse, error)
+	ToggleAdPlacement(context.Context, *ToggleAdPlacementRequest) (*ToggleAdPlacementResponse, error)
+	UpdateAd(context.Context, *UpdateAdRequest) (*UpdateAdResponse, error)
+	UpdateAdPlacement(context.Context, *UpdateAdPlacementRequest) (*UpdateAdPlacementResponse, error)
+}
+
+func RegisterAdServiceHTTPServer(s *http.Server, srv AdServiceHTTPServer) {
+	r := s.Route("/")
+	r.GET("/api/v1/admin/ad-placements", _AdService_ListAdPlacements0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/ad-placements", _AdService_CreateAdPlacement0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/ad-placements/{id}", _AdService_UpdateAdPlacement0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/ad-placements/{id}/toggle", _AdService_ToggleAdPlacement0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/admin/ad-placements/{id}", _AdService_DeleteAdPlacement0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/ads", _AdService_ListAds0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/ads", _AdService_CreateAd0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/ads/{id}", _AdService_UpdateAd0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/ads/{id}/toggle", _AdService_ToggleAd0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/admin/ads/{id}", _AdService_DeleteAd0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/ads/{id}/click-logs", _AdService_ListAdClickLogs0_HTTP_Handler(srv))
+	r.GET("/api/v1/ads", _AdService_ListActiveAdsByPlacement0_HTTP_Handler(srv))
+	r.POST("/api/v1/ads/{id}/impression", _AdService_RecordAdImpression0_HTTP_Handler(srv))
+	r.POST("/api/v1/ads/{id}/click", _AdService_RecordAdClick0_HTTP_Handler(srv))
+}
+
+func _AdService_ListAdPlacements0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAdPlacementsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListAdPlacements)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAdPlacements(ctx, req.(*ListAdPlacementsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAdPlacementsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_CreateAdPlacement0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateAdPlacementRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceCreateAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateAdPlacement(ctx, req.(*CreateAdPlacementRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateAdPlacementResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_UpdateAdPlacement0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAdPlacementRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceUpdateAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateAdPlacement(ctx, req.(*UpdateAdPlacementRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateAdPlacementResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_ToggleAdPlacement0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleAdPlacementRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceToggleAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleAdPlacement(ctx, req.(*ToggleAdPlacementRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ToggleAdPlacementResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_DeleteAdPlacement0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteAdPlacementRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceDeleteAdPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteAdPlacement(ctx, req.(*DeleteAdPlacementRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteAdPlacementResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_ListAds0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAdsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListAds)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAds(ctx, req.(*ListAdsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAdsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_CreateAd0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateAdRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceCreateAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateAd(ctx, req.(*CreateAdRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateAdResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_UpdateAd0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateAdRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceUpdateAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateAd(ctx, req.(*UpdateAdRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateAdResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_ToggleAd0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleAdRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceToggleAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleAd(ctx, req.(*ToggleAdRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ToggleAdResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_DeleteAd0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteAdRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceDeleteAd)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteAd(ctx, req.(*DeleteAdRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteAdResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_ListAdClickLogs0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAdClickLogsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListAdClickLogs)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAdClickLogs(ctx, req.(*ListAdClickLogsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAdClickLogsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_ListActiveAdsByPlacement0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListActiveAdsByPlacementRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceListActiveAdsByPlacement)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListActiveAdsByPlacement(ctx, req.(*ListActiveAdsByPlacementRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListActiveAdsByPlacementResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_RecordAdImpression0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RecordAdImpressionRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceRecordAdImpression)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RecordAdImpression(ctx, req.(*RecordAdImpressionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RecordAdImpressionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _AdService_RecordAdClick0_HTTP_Handler(srv AdServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RecordAdClickRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdServiceRecordAdClick)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RecordAdClick(ctx, req.(*RecordAdClickRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*RecordAdClickResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+type AdServiceHTTPClient interface {
+	CreateAd(ctx context.Context, req *CreateAdRequest, opts ...http.CallOption) (rsp *CreateAdResponse, err error)
+	CreateAdPlacement(ctx context.Context, req *CreateAdPlacementRequest, opts ...http.CallOption) (rsp *CreateAdPlacementResponse, err error)
+	DeleteAd(ctx context.Context, req *DeleteAdRequest, opts ...http.CallOption) (rsp *DeleteAdResponse, err error)
+	DeleteAdPlacement(ctx context.Context, req *DeleteAdPlacementRequest, opts ...http.CallOption) (rsp *DeleteAdPlacementResponse, err error)
+	// ListActiveAdsByPlacement Public ad endpoints
+	ListActiveAdsByPlacement(ctx context.Context, req *ListActiveAdsByPlacementRequest, opts ...http.CallOption) (rsp *ListActiveAdsByPlacementResponse, err error)
+	ListAdClickLogs(ctx context.Context, req *ListAdClickLogsRequest, opts ...http.CallOption) (rsp *ListAdClickLogsResponse, err error)
+	// ListAdPlacements Admin placement management
+	ListAdPlacements(ctx context.Context, req *ListAdPlacementsRequest, opts ...http.CallOption) (rsp *ListAdPlacementsResponse, err error)
+	// ListAds Admin ad management
+	ListAds(ctx context.Context, req *ListAdsRequest, opts ...http.CallOption) (rsp *ListAdsResponse, err error)
+	RecordAdClick(ctx context.Context, req *RecordAdClickRequest, opts ...http.CallOption) (rsp *RecordAdClickResponse, err error)
+	RecordAdImpression(ctx context.Context, req *RecordAdImpressionRequest, opts ...http.CallOption) (rsp *RecordAdImpressionResponse, err error)
+	ToggleAd(ctx context.Context, req *ToggleAdRequest, opts ...http.CallOption) (rsp *ToggleAdResponse, err error)
+	ToggleAdPlacement(ctx context.Context, req *ToggleAdPlacementRequest, opts ...http.CallOption) (rsp *ToggleAdPlacementResponse, err error)
+	UpdateAd(ctx context.Context, req *UpdateAdRequest, opts ...http.CallOption) (rsp *UpdateAdResponse, err error)
+	UpdateAdPlacement(ctx context.Context, req *UpdateAdPlacementRequest, opts ...http.CallOption) (rsp *UpdateAdPlacementResponse, err error)
+}
+
+type AdServiceHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewAdServiceHTTPClient(client *http.Client) AdServiceHTTPClient {
+	return &AdServiceHTTPClientImpl{client}
+}
+
+func (c *AdServiceHTTPClientImpl) CreateAd(ctx context.Context, in *CreateAdRequest, opts ...http.CallOption) (*CreateAdResponse, error) {
+	var out CreateAdResponse
+	pattern := "/api/v1/admin/ads"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceCreateAd))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) CreateAdPlacement(ctx context.Context, in *CreateAdPlacementRequest, opts ...http.CallOption) (*CreateAdPlacementResponse, error) {
+	var out CreateAdPlacementResponse
+	pattern := "/api/v1/admin/ad-placements"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceCreateAdPlacement))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) DeleteAd(ctx context.Context, in *DeleteAdRequest, opts ...http.CallOption) (*DeleteAdResponse, error) {
+	var out DeleteAdResponse
+	pattern := "/api/v1/admin/ads/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdServiceDeleteAd))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) DeleteAdPlacement(ctx context.Context, in *DeleteAdPlacementRequest, opts ...http.CallOption) (*DeleteAdPlacementResponse, error) {
+	var out DeleteAdPlacementResponse
+	pattern := "/api/v1/admin/ad-placements/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdServiceDeleteAdPlacement))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListActiveAdsByPlacement Public ad endpoints
+func (c *AdServiceHTTPClientImpl) ListActiveAdsByPlacement(ctx context.Context, in *ListActiveAdsByPlacementRequest, opts ...http.CallOption) (*ListActiveAdsByPlacementResponse, error) {
+	var out ListActiveAdsByPlacementResponse
+	pattern := "/api/v1/ads"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdServiceListActiveAdsByPlacement))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) ListAdClickLogs(ctx context.Context, in *ListAdClickLogsRequest, opts ...http.CallOption) (*ListAdClickLogsResponse, error) {
+	var out ListAdClickLogsResponse
+	pattern := "/api/v1/admin/ads/{id}/click-logs"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdServiceListAdClickLogs))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListAdPlacements Admin placement management
+func (c *AdServiceHTTPClientImpl) ListAdPlacements(ctx context.Context, in *ListAdPlacementsRequest, opts ...http.CallOption) (*ListAdPlacementsResponse, error) {
+	var out ListAdPlacementsResponse
+	pattern := "/api/v1/admin/ad-placements"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdServiceListAdPlacements))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListAds Admin ad management
+func (c *AdServiceHTTPClientImpl) ListAds(ctx context.Context, in *ListAdsRequest, opts ...http.CallOption) (*ListAdsResponse, error) {
+	var out ListAdsResponse
+	pattern := "/api/v1/admin/ads"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdServiceListAds))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) RecordAdClick(ctx context.Context, in *RecordAdClickRequest, opts ...http.CallOption) (*RecordAdClickResponse, error) {
+	var out RecordAdClickResponse
+	pattern := "/api/v1/ads/{id}/click"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceRecordAdClick))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) RecordAdImpression(ctx context.Context, in *RecordAdImpressionRequest, opts ...http.CallOption) (*RecordAdImpressionResponse, error) {
+	var out RecordAdImpressionResponse
+	pattern := "/api/v1/ads/{id}/impression"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceRecordAdImpression))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) ToggleAd(ctx context.Context, in *ToggleAdRequest, opts ...http.CallOption) (*ToggleAdResponse, error) {
+	var out ToggleAdResponse
+	pattern := "/api/v1/admin/ads/{id}/toggle"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceToggleAd))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) ToggleAdPlacement(ctx context.Context, in *ToggleAdPlacementRequest, opts ...http.CallOption) (*ToggleAdPlacementResponse, error) {
+	var out ToggleAdPlacementResponse
+	pattern := "/api/v1/admin/ad-placements/{id}/toggle"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceToggleAdPlacement))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) UpdateAd(ctx context.Context, in *UpdateAdRequest, opts ...http.CallOption) (*UpdateAdResponse, error) {
+	var out UpdateAdResponse
+	pattern := "/api/v1/admin/ads/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceUpdateAd))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *AdServiceHTTPClientImpl) UpdateAdPlacement(ctx context.Context, in *UpdateAdPlacementRequest, opts ...http.CallOption) (*UpdateAdPlacementResponse, error) {
+	var out UpdateAdPlacementResponse
+	pattern := "/api/v1/admin/ad-placements/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdServiceUpdateAdPlacement))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+const OperationFeatureFlagServiceGetFeatureFlags = "/api.v1.services.media.FeatureFlagService/GetFeatureFlags"
+const OperationFeatureFlagServiceUpdateFeatureFlag = "/api.v1.services.media.FeatureFlagService/UpdateFeatureFlag"
+
+type FeatureFlagServiceHTTPServer interface {
+	GetFeatureFlags(context.Context, *GetFeatureFlagsRequest) (*GetFeatureFlagsResponse, error)
+	UpdateFeatureFlag(context.Context, *UpdateFeatureFlagRequest) (*UpdateFeatureFlagResponse, error)
+}
+
+func RegisterFeatureFlagServiceHTTPServer(s *http.Server, srv FeatureFlagServiceHTTPServer) {
+	r := s.Route("/")
+	r.GET("/api/v1/features", _FeatureFlagService_GetFeatureFlags0_HTTP_Handler(srv))
+	r.PUT("/api/v1/features", _FeatureFlagService_UpdateFeatureFlag0_HTTP_Handler(srv))
+}
+
+func _FeatureFlagService_GetFeatureFlags0_HTTP_Handler(srv FeatureFlagServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetFeatureFlagsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFeatureFlagServiceGetFeatureFlags)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetFeatureFlags(ctx, req.(*GetFeatureFlagsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetFeatureFlagsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _FeatureFlagService_UpdateFeatureFlag0_HTTP_Handler(srv FeatureFlagServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateFeatureFlagRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationFeatureFlagServiceUpdateFeatureFlag)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateFeatureFlag(ctx, req.(*UpdateFeatureFlagRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateFeatureFlagResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+type FeatureFlagServiceHTTPClient interface {
+	GetFeatureFlags(ctx context.Context, req *GetFeatureFlagsRequest, opts ...http.CallOption) (rsp *GetFeatureFlagsResponse, err error)
+	UpdateFeatureFlag(ctx context.Context, req *UpdateFeatureFlagRequest, opts ...http.CallOption) (rsp *UpdateFeatureFlagResponse, err error)
+}
+
+type FeatureFlagServiceHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewFeatureFlagServiceHTTPClient(client *http.Client) FeatureFlagServiceHTTPClient {
+	return &FeatureFlagServiceHTTPClientImpl{client}
+}
+
+func (c *FeatureFlagServiceHTTPClientImpl) GetFeatureFlags(ctx context.Context, in *GetFeatureFlagsRequest, opts ...http.CallOption) (*GetFeatureFlagsResponse, error) {
+	var out GetFeatureFlagsResponse
+	pattern := "/api/v1/features"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationFeatureFlagServiceGetFeatureFlags))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *FeatureFlagServiceHTTPClientImpl) UpdateFeatureFlag(ctx context.Context, in *UpdateFeatureFlagRequest, opts ...http.CallOption) (*UpdateFeatureFlagResponse, error) {
+	var out UpdateFeatureFlagResponse
+	pattern := "/api/v1/features"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationFeatureFlagServiceUpdateFeatureFlag))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+const OperationTenantServiceCreateTenant = "/api.v1.services.media.TenantService/CreateTenant"
+const OperationTenantServiceDeleteTenant = "/api.v1.services.media.TenantService/DeleteTenant"
+const OperationTenantServiceGetCurrentTenant = "/api.v1.services.media.TenantService/GetCurrentTenant"
+const OperationTenantServiceGetTenant = "/api.v1.services.media.TenantService/GetTenant"
+const OperationTenantServiceListTenants = "/api.v1.services.media.TenantService/ListTenants"
+const OperationTenantServiceUpdateTenant = "/api.v1.services.media.TenantService/UpdateTenant"
+
+type TenantServiceHTTPServer interface {
+	CreateTenant(context.Context, *CreateTenantRequest) (*CreateTenantResponse, error)
+	DeleteTenant(context.Context, *DeleteTenantRequest) (*DeleteTenantResponse, error)
+	GetCurrentTenant(context.Context, *GetCurrentTenantRequest) (*GetCurrentTenantResponse, error)
+	GetTenant(context.Context, *GetTenantRequest) (*GetTenantResponse, error)
+	ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsResponse, error)
+	UpdateTenant(context.Context, *UpdateTenantRequest) (*UpdateTenantResponse, error)
+}
+
+func RegisterTenantServiceHTTPServer(s *http.Server, srv TenantServiceHTTPServer) {
+	r := s.Route("/")
+	r.GET("/api/v1/admin/tenants", _TenantService_ListTenants0_HTTP_Handler(srv))
+	r.POST("/api/v1/admin/tenants", _TenantService_CreateTenant0_HTTP_Handler(srv))
+	r.GET("/api/v1/admin/tenants/{id}", _TenantService_GetTenant0_HTTP_Handler(srv))
+	r.PUT("/api/v1/admin/tenants/{id}", _TenantService_UpdateTenant0_HTTP_Handler(srv))
+	r.DELETE("/api/v1/admin/tenants/{id}", _TenantService_DeleteTenant0_HTTP_Handler(srv))
+	r.GET("/api/v1/tenant/current", _TenantService_GetCurrentTenant0_HTTP_Handler(srv))
+}
+
+func _TenantService_ListTenants0_HTTP_Handler(srv TenantServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListTenantsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceListTenants)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListTenants(ctx, req.(*ListTenantsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListTenantsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantService_CreateTenant0_HTTP_Handler(srv TenantServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateTenantRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceCreateTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateTenant(ctx, req.(*CreateTenantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateTenantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantService_GetTenant0_HTTP_Handler(srv TenantServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTenantRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceGetTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetTenant(ctx, req.(*GetTenantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetTenantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantService_UpdateTenant0_HTTP_Handler(srv TenantServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateTenantRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceUpdateTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateTenant(ctx, req.(*UpdateTenantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateTenantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantService_DeleteTenant0_HTTP_Handler(srv TenantServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteTenantRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceDeleteTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteTenant(ctx, req.(*DeleteTenantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteTenantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _TenantService_GetCurrentTenant0_HTTP_Handler(srv TenantServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetCurrentTenantRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTenantServiceGetCurrentTenant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetCurrentTenant(ctx, req.(*GetCurrentTenantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetCurrentTenantResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+type TenantServiceHTTPClient interface {
+	CreateTenant(ctx context.Context, req *CreateTenantRequest, opts ...http.CallOption) (rsp *CreateTenantResponse, err error)
+	DeleteTenant(ctx context.Context, req *DeleteTenantRequest, opts ...http.CallOption) (rsp *DeleteTenantResponse, err error)
+	GetCurrentTenant(ctx context.Context, req *GetCurrentTenantRequest, opts ...http.CallOption) (rsp *GetCurrentTenantResponse, err error)
+	GetTenant(ctx context.Context, req *GetTenantRequest, opts ...http.CallOption) (rsp *GetTenantResponse, err error)
+	ListTenants(ctx context.Context, req *ListTenantsRequest, opts ...http.CallOption) (rsp *ListTenantsResponse, err error)
+	UpdateTenant(ctx context.Context, req *UpdateTenantRequest, opts ...http.CallOption) (rsp *UpdateTenantResponse, err error)
+}
+
+type TenantServiceHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewTenantServiceHTTPClient(client *http.Client) TenantServiceHTTPClient {
+	return &TenantServiceHTTPClientImpl{client}
+}
+
+func (c *TenantServiceHTTPClientImpl) CreateTenant(ctx context.Context, in *CreateTenantRequest, opts ...http.CallOption) (*CreateTenantResponse, error) {
+	var out CreateTenantResponse
+	pattern := "/api/v1/admin/tenants"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTenantServiceCreateTenant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantServiceHTTPClientImpl) DeleteTenant(ctx context.Context, in *DeleteTenantRequest, opts ...http.CallOption) (*DeleteTenantResponse, error) {
+	var out DeleteTenantResponse
+	pattern := "/api/v1/admin/tenants/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantServiceDeleteTenant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantServiceHTTPClientImpl) GetCurrentTenant(ctx context.Context, in *GetCurrentTenantRequest, opts ...http.CallOption) (*GetCurrentTenantResponse, error) {
+	var out GetCurrentTenantResponse
+	pattern := "/api/v1/tenant/current"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantServiceGetCurrentTenant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantServiceHTTPClientImpl) GetTenant(ctx context.Context, in *GetTenantRequest, opts ...http.CallOption) (*GetTenantResponse, error) {
+	var out GetTenantResponse
+	pattern := "/api/v1/admin/tenants/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantServiceGetTenant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantServiceHTTPClientImpl) ListTenants(ctx context.Context, in *ListTenantsRequest, opts ...http.CallOption) (*ListTenantsResponse, error) {
+	var out ListTenantsResponse
+	pattern := "/api/v1/admin/tenants"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationTenantServiceListTenants))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TenantServiceHTTPClientImpl) UpdateTenant(ctx context.Context, in *UpdateTenantRequest, opts ...http.CallOption) (*UpdateTenantResponse, error) {
+	var out UpdateTenantResponse
+	pattern := "/api/v1/admin/tenants/{id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTenantServiceUpdateTenant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+const OperationSystemSettingsServiceGetPublicConfig = "/api.v1.services.media.SystemSettingsService/GetPublicConfig"
+const OperationSystemSettingsServiceGetStorageCapabilities = "/api.v1.services.media.SystemSettingsService/GetStorageCapabilities"
+const OperationSystemSettingsServiceGetSystemSettingByKey = "/api.v1.services.media.SystemSettingsService/GetSystemSettingByKey"
+const OperationSystemSettingsServiceGetSystemSettings = "/api.v1.services.media.SystemSettingsService/GetSystemSettings"
+const OperationSystemSettingsServiceResetSystemSetting = "/api.v1.services.media.SystemSettingsService/ResetSystemSetting"
+const OperationSystemSettingsServiceUpdateSystemSettings = "/api.v1.services.media.SystemSettingsService/UpdateSystemSettings"
+
+type SystemSettingsServiceHTTPServer interface {
+	GetPublicConfig(context.Context, *GetPublicConfigRequest) (*GetPublicConfigResponse, error)
+	GetStorageCapabilities(context.Context, *GetStorageCapabilitiesRequest) (*GetStorageCapabilitiesResponse, error)
+	GetSystemSettingByKey(context.Context, *GetSystemSettingByKeyRequest) (*GetSystemSettingByKeyResponse, error)
+	GetSystemSettings(context.Context, *GetSystemSettingsRequest) (*GetSystemSettingsResponse, error)
+	ResetSystemSetting(context.Context, *ResetSystemSettingRequest) (*ResetSystemSettingResponse, error)
+	UpdateSystemSettings(context.Context, *UpdateSystemSettingsRequest) (*UpdateSystemSettingsResponse, error)
+}
+
+func RegisterSystemSettingsServiceHTTPServer(s *http.Server, srv SystemSettingsServiceHTTPServer) {
+	r := s.Route("/")
+	r.GET("/api/v1/system/settings", _SystemSettingsService_GetSystemSettings0_HTTP_Handler(srv))
+	r.PUT("/api/v1/system/settings", _SystemSettingsService_UpdateSystemSettings0_HTTP_Handler(srv))
+	r.GET("/api/v1/system/settings/{key}", _SystemSettingsService_GetSystemSettingByKey0_HTTP_Handler(srv))
+	r.POST("/api/v1/system/settings/{key}/reset", _SystemSettingsService_ResetSystemSetting1_HTTP_Handler(srv))
+	r.GET("/api/v1/system/settings/storage/capabilities", _SystemSettingsService_GetStorageCapabilities0_HTTP_Handler(srv))
+	r.GET("/api/v1/config", _SystemSettingsService_GetPublicConfig0_HTTP_Handler(srv))
+}
+
+func _SystemSettingsService_GetSystemSettings0_HTTP_Handler(srv SystemSettingsServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSystemSettingsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetSystemSettings)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSystemSettings(ctx, req.(*GetSystemSettingsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetSystemSettingsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SystemSettingsService_UpdateSystemSettings0_HTTP_Handler(srv SystemSettingsServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateSystemSettingsRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceUpdateSystemSettings)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateSystemSettings(ctx, req.(*UpdateSystemSettingsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateSystemSettingsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SystemSettingsService_GetSystemSettingByKey0_HTTP_Handler(srv SystemSettingsServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSystemSettingByKeyRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetSystemSettingByKey)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSystemSettingByKey(ctx, req.(*GetSystemSettingByKeyRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetSystemSettingByKeyResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SystemSettingsService_ResetSystemSetting1_HTTP_Handler(srv SystemSettingsServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ResetSystemSettingRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceResetSystemSetting)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ResetSystemSetting(ctx, req.(*ResetSystemSettingRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ResetSystemSettingResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SystemSettingsService_GetStorageCapabilities0_HTTP_Handler(srv SystemSettingsServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetStorageCapabilitiesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetStorageCapabilities)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetStorageCapabilities(ctx, req.(*GetStorageCapabilitiesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetStorageCapabilitiesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _SystemSettingsService_GetPublicConfig0_HTTP_Handler(srv SystemSettingsServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPublicConfigRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationSystemSettingsServiceGetPublicConfig)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPublicConfig(ctx, req.(*GetPublicConfigRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetPublicConfigResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+type SystemSettingsServiceHTTPClient interface {
+	GetPublicConfig(ctx context.Context, req *GetPublicConfigRequest, opts ...http.CallOption) (rsp *GetPublicConfigResponse, err error)
+	GetStorageCapabilities(ctx context.Context, req *GetStorageCapabilitiesRequest, opts ...http.CallOption) (rsp *GetStorageCapabilitiesResponse, err error)
+	GetSystemSettingByKey(ctx context.Context, req *GetSystemSettingByKeyRequest, opts ...http.CallOption) (rsp *GetSystemSettingByKeyResponse, err error)
+	GetSystemSettings(ctx context.Context, req *GetSystemSettingsRequest, opts ...http.CallOption) (rsp *GetSystemSettingsResponse, err error)
+	ResetSystemSetting(ctx context.Context, req *ResetSystemSettingRequest, opts ...http.CallOption) (rsp *ResetSystemSettingResponse, err error)
+	UpdateSystemSettings(ctx context.Context, req *UpdateSystemSettingsRequest, opts ...http.CallOption) (rsp *UpdateSystemSettingsResponse, err error)
+}
+
+type SystemSettingsServiceHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewSystemSettingsServiceHTTPClient(client *http.Client) SystemSettingsServiceHTTPClient {
+	return &SystemSettingsServiceHTTPClientImpl{client}
+}
+
+func (c *SystemSettingsServiceHTTPClientImpl) GetPublicConfig(ctx context.Context, in *GetPublicConfigRequest, opts ...http.CallOption) (*GetPublicConfigResponse, error) {
+	var out GetPublicConfigResponse
+	pattern := "/api/v1/config"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSystemSettingsServiceGetPublicConfig))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *SystemSettingsServiceHTTPClientImpl) GetStorageCapabilities(ctx context.Context, in *GetStorageCapabilitiesRequest, opts ...http.CallOption) (*GetStorageCapabilitiesResponse, error) {
+	var out GetStorageCapabilitiesResponse
+	pattern := "/api/v1/system/settings/storage/capabilities"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSystemSettingsServiceGetStorageCapabilities))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *SystemSettingsServiceHTTPClientImpl) GetSystemSettingByKey(ctx context.Context, in *GetSystemSettingByKeyRequest, opts ...http.CallOption) (*GetSystemSettingByKeyResponse, error) {
+	var out GetSystemSettingByKeyResponse
+	pattern := "/api/v1/system/settings/{key}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSystemSettingsServiceGetSystemSettingByKey))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *SystemSettingsServiceHTTPClientImpl) GetSystemSettings(ctx context.Context, in *GetSystemSettingsRequest, opts ...http.CallOption) (*GetSystemSettingsResponse, error) {
+	var out GetSystemSettingsResponse
+	pattern := "/api/v1/system/settings"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationSystemSettingsServiceGetSystemSettings))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *SystemSettingsServiceHTTPClientImpl) ResetSystemSetting(ctx context.Context, in *ResetSystemSettingRequest, opts ...http.CallOption) (*ResetSystemSettingResponse, error) {
+	var out ResetSystemSettingResponse
+	pattern := "/api/v1/system/settings/{key}/reset"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationSystemSettingsServiceResetSystemSetting))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *SystemSettingsServiceHTTPClientImpl) UpdateSystemSettings(ctx context.Context, in *UpdateSystemSettingsRequest, opts ...http.CallOption) (*UpdateSystemSettingsResponse, error) {
+	var out UpdateSystemSettingsResponse
+	pattern := "/api/v1/system/settings"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationSystemSettingsServiceUpdateSystemSettings))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+const OperationInteractionServiceCheckFavorite = "/api.v1.services.media.InteractionService/CheckFavorite"
+const OperationInteractionServiceCreateInteractionShare = "/api.v1.services.media.InteractionService/CreateInteractionShare"
+const OperationInteractionServiceGetFollowerCount = "/api.v1.services.media.InteractionService/GetFollowerCount"
+const OperationInteractionServiceGetInteractionsFavorites = "/api.v1.services.media.InteractionService/GetInteractionsFavorites"
+const OperationInteractionServiceGetInteractionsFollowers = "/api.v1.services.media.InteractionService/GetInteractionsFollowers"
+const OperationInteractionServiceGetInteractionsLikes = "/api.v1.services.media.InteractionService/GetInteractionsLikes"
+const OperationInteractionServiceGetInteractionsSubscriptions = "/api.v1.services.media.InteractionService/GetInteractionsSubscriptions"
+const OperationInteractionServiceGetLikeStatusBatch = "/api.v1.services.media.InteractionService/GetLikeStatusBatch"
+const OperationInteractionServiceGetSubscriptionCount = "/api.v1.services.media.InteractionService/GetSubscriptionCount"
+const OperationInteractionServiceToggleInteractionFavorite = "/api.v1.services.media.InteractionService/ToggleInteractionFavorite"
+const OperationInteractionServiceToggleInteractionLike = "/api.v1.services.media.InteractionService/ToggleInteractionLike"
+
+type InteractionServiceHTTPServer interface {
+	// CheckFavorite Favorites
+	CheckFavorite(context.Context, *CheckFavoriteRequest) (*CheckFavoriteResponse, error)
+	// CreateInteractionShare Shares
+	CreateInteractionShare(context.Context, *CreateInteractionShareRequest) (*CreateInteractionShareResponse, error)
+	// GetFollowerCount Followers
+	GetFollowerCount(context.Context, *GetFollowerCountRequest) (*GetFollowerCountResponse, error)
+	GetInteractionsFavorites(context.Context, *GetInteractionsFavoritesRequest) (*GetInteractionsFavoritesResponse, error)
+	GetInteractionsFollowers(context.Context, *GetInteractionsFollowersRequest) (*GetInteractionsFollowersResponse, error)
+	GetInteractionsLikes(context.Context, *GetInteractionsLikesRequest) (*GetInteractionsLikesResponse, error)
+	GetInteractionsSubscriptions(context.Context, *GetInteractionsSubscriptionsRequest) (*GetInteractionsSubscriptionsResponse, error)
+	// GetLikeStatusBatch Likes
+	GetLikeStatusBatch(context.Context, *GetLikeStatusBatchRequest) (*GetLikeStatusBatchResponse, error)
+	// GetSubscriptionCount Subscriptions
+	GetSubscriptionCount(context.Context, *GetSubscriptionCountRequest) (*GetSubscriptionCountResponse, error)
+	ToggleInteractionFavorite(context.Context, *ToggleInteractionFavoriteRequest) (*ToggleInteractionFavoriteResponse, error)
+	ToggleInteractionLike(context.Context, *ToggleInteractionLikeRequest) (*ToggleInteractionLikeResponse, error)
+}
+
+func RegisterInteractionServiceHTTPServer(s *http.Server, srv InteractionServiceHTTPServer) {
+	r := s.Route("/")
+	r.GET("/api/v1/interactions/likes/status", _InteractionService_GetLikeStatusBatch0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/likes", _InteractionService_GetInteractionsLikes0_HTTP_Handler(srv))
+	r.POST("/api/v1/interactions/likes", _InteractionService_ToggleInteractionLike0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/favorites/check", _InteractionService_CheckFavorite0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/favorites", _InteractionService_GetInteractionsFavorites0_HTTP_Handler(srv))
+	r.POST("/api/v1/interactions/favorites", _InteractionService_ToggleInteractionFavorite0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/subscriptions/count", _InteractionService_GetSubscriptionCount0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/subscriptions", _InteractionService_GetInteractionsSubscriptions0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/followers/count", _InteractionService_GetFollowerCount0_HTTP_Handler(srv))
+	r.GET("/api/v1/interactions/followers", _InteractionService_GetInteractionsFollowers0_HTTP_Handler(srv))
+	r.POST("/api/v1/interactions/shares", _InteractionService_CreateInteractionShare0_HTTP_Handler(srv))
+}
+
+func _InteractionService_GetLikeStatusBatch0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetLikeStatusBatchRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetLikeStatusBatch)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetLikeStatusBatch(ctx, req.(*GetLikeStatusBatchRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetLikeStatusBatchResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_GetInteractionsLikes0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsLikesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsLikes)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsLikes(ctx, req.(*GetInteractionsLikesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetInteractionsLikesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_ToggleInteractionLike0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleInteractionLikeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceToggleInteractionLike)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleInteractionLike(ctx, req.(*ToggleInteractionLikeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ToggleInteractionLikeResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_CheckFavorite0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CheckFavoriteRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceCheckFavorite)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CheckFavorite(ctx, req.(*CheckFavoriteRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CheckFavoriteResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_GetInteractionsFavorites0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsFavoritesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsFavorites)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsFavorites(ctx, req.(*GetInteractionsFavoritesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetInteractionsFavoritesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_ToggleInteractionFavorite0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ToggleInteractionFavoriteRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceToggleInteractionFavorite)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ToggleInteractionFavorite(ctx, req.(*ToggleInteractionFavoriteRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ToggleInteractionFavoriteResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_GetSubscriptionCount0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetSubscriptionCountRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetSubscriptionCount)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetSubscriptionCount(ctx, req.(*GetSubscriptionCountRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetSubscriptionCountResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_GetInteractionsSubscriptions0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsSubscriptionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsSubscriptions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsSubscriptions(ctx, req.(*GetInteractionsSubscriptionsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetInteractionsSubscriptionsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_GetFollowerCount0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetFollowerCountRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetFollowerCount)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetFollowerCount(ctx, req.(*GetFollowerCountRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetFollowerCountResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_GetInteractionsFollowers0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInteractionsFollowersRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceGetInteractionsFollowers)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInteractionsFollowers(ctx, req.(*GetInteractionsFollowersRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetInteractionsFollowersResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _InteractionService_CreateInteractionShare0_HTTP_Handler(srv InteractionServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateInteractionShareRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInteractionServiceCreateInteractionShare)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateInteractionShare(ctx, req.(*CreateInteractionShareRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateInteractionShareResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+type InteractionServiceHTTPClient interface {
+	// CheckFavorite Favorites
+	CheckFavorite(ctx context.Context, req *CheckFavoriteRequest, opts ...http.CallOption) (rsp *CheckFavoriteResponse, err error)
+	// CreateInteractionShare Shares
+	CreateInteractionShare(ctx context.Context, req *CreateInteractionShareRequest, opts ...http.CallOption) (rsp *CreateInteractionShareResponse, err error)
+	// GetFollowerCount Followers
+	GetFollowerCount(ctx context.Context, req *GetFollowerCountRequest, opts ...http.CallOption) (rsp *GetFollowerCountResponse, err error)
+	GetInteractionsFavorites(ctx context.Context, req *GetInteractionsFavoritesRequest, opts ...http.CallOption) (rsp *GetInteractionsFavoritesResponse, err error)
+	GetInteractionsFollowers(ctx context.Context, req *GetInteractionsFollowersRequest, opts ...http.CallOption) (rsp *GetInteractionsFollowersResponse, err error)
+	GetInteractionsLikes(ctx context.Context, req *GetInteractionsLikesRequest, opts ...http.CallOption) (rsp *GetInteractionsLikesResponse, err error)
+	GetInteractionsSubscriptions(ctx context.Context, req *GetInteractionsSubscriptionsRequest, opts ...http.CallOption) (rsp *GetInteractionsSubscriptionsResponse, err error)
+	// GetLikeStatusBatch Likes
+	GetLikeStatusBatch(ctx context.Context, req *GetLikeStatusBatchRequest, opts ...http.CallOption) (rsp *GetLikeStatusBatchResponse, err error)
+	// GetSubscriptionCount Subscriptions
+	GetSubscriptionCount(ctx context.Context, req *GetSubscriptionCountRequest, opts ...http.CallOption) (rsp *GetSubscriptionCountResponse, err error)
+	ToggleInteractionFavorite(ctx context.Context, req *ToggleInteractionFavoriteRequest, opts ...http.CallOption) (rsp *ToggleInteractionFavoriteResponse, err error)
+	ToggleInteractionLike(ctx context.Context, req *ToggleInteractionLikeRequest, opts ...http.CallOption) (rsp *ToggleInteractionLikeResponse, err error)
+}
+
+type InteractionServiceHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewInteractionServiceHTTPClient(client *http.Client) InteractionServiceHTTPClient {
+	return &InteractionServiceHTTPClientImpl{client}
+}
+
+// CheckFavorite Favorites
+func (c *InteractionServiceHTTPClientImpl) CheckFavorite(ctx context.Context, in *CheckFavoriteRequest, opts ...http.CallOption) (*CheckFavoriteResponse, error) {
+	var out CheckFavoriteResponse
+	pattern := "/api/v1/interactions/favorites/check"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceCheckFavorite))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CreateInteractionShare Shares
+func (c *InteractionServiceHTTPClientImpl) CreateInteractionShare(ctx context.Context, in *CreateInteractionShareRequest, opts ...http.CallOption) (*CreateInteractionShareResponse, error) {
+	var out CreateInteractionShareResponse
+	pattern := "/api/v1/interactions/shares"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationInteractionServiceCreateInteractionShare))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetFollowerCount Followers
+func (c *InteractionServiceHTTPClientImpl) GetFollowerCount(ctx context.Context, in *GetFollowerCountRequest, opts ...http.CallOption) (*GetFollowerCountResponse, error) {
+	var out GetFollowerCountResponse
+	pattern := "/api/v1/interactions/followers/count"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetFollowerCount))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *InteractionServiceHTTPClientImpl) GetInteractionsFavorites(ctx context.Context, in *GetInteractionsFavoritesRequest, opts ...http.CallOption) (*GetInteractionsFavoritesResponse, error) {
+	var out GetInteractionsFavoritesResponse
+	pattern := "/api/v1/interactions/favorites"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetInteractionsFavorites))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *InteractionServiceHTTPClientImpl) GetInteractionsFollowers(ctx context.Context, in *GetInteractionsFollowersRequest, opts ...http.CallOption) (*GetInteractionsFollowersResponse, error) {
+	var out GetInteractionsFollowersResponse
+	pattern := "/api/v1/interactions/followers"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetInteractionsFollowers))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *InteractionServiceHTTPClientImpl) GetInteractionsLikes(ctx context.Context, in *GetInteractionsLikesRequest, opts ...http.CallOption) (*GetInteractionsLikesResponse, error) {
+	var out GetInteractionsLikesResponse
+	pattern := "/api/v1/interactions/likes"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetInteractionsLikes))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *InteractionServiceHTTPClientImpl) GetInteractionsSubscriptions(ctx context.Context, in *GetInteractionsSubscriptionsRequest, opts ...http.CallOption) (*GetInteractionsSubscriptionsResponse, error) {
+	var out GetInteractionsSubscriptionsResponse
+	pattern := "/api/v1/interactions/subscriptions"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetInteractionsSubscriptions))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetLikeStatusBatch Likes
+func (c *InteractionServiceHTTPClientImpl) GetLikeStatusBatch(ctx context.Context, in *GetLikeStatusBatchRequest, opts ...http.CallOption) (*GetLikeStatusBatchResponse, error) {
+	var out GetLikeStatusBatchResponse
+	pattern := "/api/v1/interactions/likes/status"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetLikeStatusBatch))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetSubscriptionCount Subscriptions
+func (c *InteractionServiceHTTPClientImpl) GetSubscriptionCount(ctx context.Context, in *GetSubscriptionCountRequest, opts ...http.CallOption) (*GetSubscriptionCountResponse, error) {
+	var out GetSubscriptionCountResponse
+	pattern := "/api/v1/interactions/subscriptions/count"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationInteractionServiceGetSubscriptionCount))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *InteractionServiceHTTPClientImpl) ToggleInteractionFavorite(ctx context.Context, in *ToggleInteractionFavoriteRequest, opts ...http.CallOption) (*ToggleInteractionFavoriteResponse, error) {
+	var out ToggleInteractionFavoriteResponse
+	pattern := "/api/v1/interactions/favorites"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationInteractionServiceToggleInteractionFavorite))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *InteractionServiceHTTPClientImpl) ToggleInteractionLike(ctx context.Context, in *ToggleInteractionLikeRequest, opts ...http.CallOption) (*ToggleInteractionLikeResponse, error) {
+	var out ToggleInteractionLikeResponse
+	pattern := "/api/v1/interactions/likes"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationInteractionServiceToggleInteractionLike))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+const OperationUploadServiceAbortMultipartUpload = "/api.v1.services.media.UploadService/AbortMultipartUpload"
+const OperationUploadServiceCompleteMultipartUpload = "/api.v1.services.media.UploadService/CompleteMultipartUpload"
+const OperationUploadServiceGetUploadSession = "/api.v1.services.media.UploadService/GetUploadSession"
+const OperationUploadServiceInitiateMultipartUpload = "/api.v1.services.media.UploadService/InitiateMultipartUpload"
+const OperationUploadServiceListParts = "/api.v1.services.media.UploadService/ListParts"
+const OperationUploadServiceListUploadSessions = "/api.v1.services.media.UploadService/ListUploadSessions"
+const OperationUploadServiceSimpleUpload = "/api.v1.services.media.UploadService/SimpleUpload"
+const OperationUploadServiceUploadFile = "/api.v1.services.media.UploadService/UploadFile"
+const OperationUploadServiceUploadPart = "/api.v1.services.media.UploadService/UploadPart"
+
+type UploadServiceHTTPServer interface {
+	// AbortMultipartUpload AbortMultipartUpload aborts a multipart upload.
+	AbortMultipartUpload(context.Context, *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error)
+	// CompleteMultipartUpload CompleteMultipartUpload completes a multipart upload.
+	CompleteMultipartUpload(context.Context, *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error)
+	// GetUploadSession GetUploadSession gets upload session info.
+	GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error)
+	// InitiateMultipartUpload InitiateMultipartUpload starts a multipart upload session.
+	InitiateMultipartUpload(context.Context, *InitiateMultipartUploadRequest) (*InitiateMultipartUploadResponse, error)
+	// ListParts ListParts lists uploaded parts for a multipart upload.
+	ListParts(context.Context, *ListPartsRequest) (*ListPartsResponse, error)
+	// ListUploadSessions ListUploadSessions lists upload sessions for a user.
+	ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error)
+	// SimpleUpload SimpleUpload uploads a small file directly (alternative to UploadFile).
+	SimpleUpload(context.Context, *SimpleUploadRequest) (*SimpleUploadResponse, error)
+	// UploadFile UploadFile uploads a file directly (single-request upload for small files).
+	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
+	// UploadPart UploadPart uploads a part of a multipart upload.
+	UploadPart(context.Context, *UploadPartRequest) (*UploadPartResponse, error)
+}
+
+func RegisterUploadServiceHTTPServer(s *http.Server, srv UploadServiceHTTPServer) {
+	r := s.Route("/")
+	r.POST("/api/v1/upload/file", _UploadService_UploadFile0_HTTP_Handler(srv))
+	r.POST("/api/v1/upload/multipart/initiate", _UploadService_InitiateMultipartUpload0_HTTP_Handler(srv))
+	r.POST("/api/v1/upload/multipart/{upload_id}/part", _UploadService_UploadPart0_HTTP_Handler(srv))
+	r.POST("/api/v1/upload/multipart/{upload_id}/complete", _UploadService_CompleteMultipartUpload0_HTTP_Handler(srv))
+	r.POST("/api/v1/upload/multipart/{upload_id}/abort", _UploadService_AbortMultipartUpload0_HTTP_Handler(srv))
+	r.GET("/api/v1/upload/multipart/{upload_id}", _UploadService_GetUploadSession0_HTTP_Handler(srv))
+	r.GET("/api/v1/upload/sessions", _UploadService_ListUploadSessions0_HTTP_Handler(srv))
+	r.GET("/api/v1/upload/multipart/{upload_id}/parts", _UploadService_ListParts0_HTTP_Handler(srv))
+	r.POST("/api/v1/upload/simple", _UploadService_SimpleUpload0_HTTP_Handler(srv))
+}
+
+func _UploadService_UploadFile0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UploadFileRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceUploadFile)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UploadFile(ctx, req.(*UploadFileRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UploadFileResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_InitiateMultipartUpload0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in InitiateMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceInitiateMultipartUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.InitiateMultipartUpload(ctx, req.(*InitiateMultipartUploadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*InitiateMultipartUploadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_UploadPart0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UploadPartRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceUploadPart)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UploadPart(ctx, req.(*UploadPartRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UploadPartResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_CompleteMultipartUpload0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CompleteMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceCompleteMultipartUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CompleteMultipartUpload(ctx, req.(*CompleteMultipartUploadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CompleteMultipartUploadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_AbortMultipartUpload0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AbortMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceAbortMultipartUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AbortMultipartUpload(ctx, req.(*AbortMultipartUploadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AbortMultipartUploadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_GetUploadSession0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUploadSessionRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceGetUploadSession)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUploadSession(ctx, req.(*GetUploadSessionRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUploadSessionResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_ListUploadSessions0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListUploadSessionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceListUploadSessions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListUploadSessionsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_ListParts0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListPartsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceListParts)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListParts(ctx, req.(*ListPartsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListPartsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UploadService_SimpleUpload0_HTTP_Handler(srv UploadServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SimpleUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceSimpleUpload)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SimpleUpload(ctx, req.(*SimpleUploadRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SimpleUploadResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+type UploadServiceHTTPClient interface {
+	// AbortMultipartUpload AbortMultipartUpload aborts a multipart upload.
+	AbortMultipartUpload(ctx context.Context, req *AbortMultipartUploadRequest, opts ...http.CallOption) (rsp *AbortMultipartUploadResponse, err error)
+	// CompleteMultipartUpload CompleteMultipartUpload completes a multipart upload.
+	CompleteMultipartUpload(ctx context.Context, req *CompleteMultipartUploadRequest, opts ...http.CallOption) (rsp *CompleteMultipartUploadResponse, err error)
+	// GetUploadSession GetUploadSession gets upload session info.
+	GetUploadSession(ctx context.Context, req *GetUploadSessionRequest, opts ...http.CallOption) (rsp *GetUploadSessionResponse, err error)
+	// InitiateMultipartUpload InitiateMultipartUpload starts a multipart upload session.
+	InitiateMultipartUpload(ctx context.Context, req *InitiateMultipartUploadRequest, opts ...http.CallOption) (rsp *InitiateMultipartUploadResponse, err error)
+	// ListParts ListParts lists uploaded parts for a multipart upload.
+	ListParts(ctx context.Context, req *ListPartsRequest, opts ...http.CallOption) (rsp *ListPartsResponse, err error)
+	// ListUploadSessions ListUploadSessions lists upload sessions for a user.
+	ListUploadSessions(ctx context.Context, req *ListUploadSessionsRequest, opts ...http.CallOption) (rsp *ListUploadSessionsResponse, err error)
+	// SimpleUpload SimpleUpload uploads a small file directly (alternative to UploadFile).
+	SimpleUpload(ctx context.Context, req *SimpleUploadRequest, opts ...http.CallOption) (rsp *SimpleUploadResponse, err error)
+	// UploadFile UploadFile uploads a file directly (single-request upload for small files).
+	UploadFile(ctx context.Context, req *UploadFileRequest, opts ...http.CallOption) (rsp *UploadFileResponse, err error)
+	// UploadPart UploadPart uploads a part of a multipart upload.
+	UploadPart(ctx context.Context, req *UploadPartRequest, opts ...http.CallOption) (rsp *UploadPartResponse, err error)
+}
+
+type UploadServiceHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewUploadServiceHTTPClient(client *http.Client) UploadServiceHTTPClient {
+	return &UploadServiceHTTPClientImpl{client}
+}
+
+// AbortMultipartUpload AbortMultipartUpload aborts a multipart upload.
+func (c *UploadServiceHTTPClientImpl) AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest, opts ...http.CallOption) (*AbortMultipartUploadResponse, error) {
+	var out AbortMultipartUploadResponse
+	pattern := "/api/v1/upload/multipart/{upload_id}/abort"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUploadServiceAbortMultipartUpload))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CompleteMultipartUpload CompleteMultipartUpload completes a multipart upload.
+func (c *UploadServiceHTTPClientImpl) CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadRequest, opts ...http.CallOption) (*CompleteMultipartUploadResponse, error) {
+	var out CompleteMultipartUploadResponse
+	pattern := "/api/v1/upload/multipart/{upload_id}/complete"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUploadServiceCompleteMultipartUpload))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetUploadSession GetUploadSession gets upload session info.
+func (c *UploadServiceHTTPClientImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest, opts ...http.CallOption) (*GetUploadSessionResponse, error) {
+	var out GetUploadSessionResponse
+	pattern := "/api/v1/upload/multipart/{upload_id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUploadServiceGetUploadSession))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// InitiateMultipartUpload InitiateMultipartUpload starts a multipart upload session.
+func (c *UploadServiceHTTPClientImpl) InitiateMultipartUpload(ctx context.Context, in *InitiateMultipartUploadRequest, opts ...http.CallOption) (*InitiateMultipartUploadResponse, error) {
+	var out InitiateMultipartUploadResponse
+	pattern := "/api/v1/upload/multipart/initiate"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUploadServiceInitiateMultipartUpload))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListParts ListParts lists uploaded parts for a multipart upload.
+func (c *UploadServiceHTTPClientImpl) ListParts(ctx context.Context, in *ListPartsRequest, opts ...http.CallOption) (*ListPartsResponse, error) {
+	var out ListPartsResponse
+	pattern := "/api/v1/upload/multipart/{upload_id}/parts"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUploadServiceListParts))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListUploadSessions ListUploadSessions lists upload sessions for a user.
+func (c *UploadServiceHTTPClientImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest, opts ...http.CallOption) (*ListUploadSessionsResponse, error) {
+	var out ListUploadSessionsResponse
+	pattern := "/api/v1/upload/sessions"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUploadServiceListUploadSessions))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SimpleUpload SimpleUpload uploads a small file directly (alternative to UploadFile).
+func (c *UploadServiceHTTPClientImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest, opts ...http.CallOption) (*SimpleUploadResponse, error) {
+	var out SimpleUploadResponse
+	pattern := "/api/v1/upload/simple"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUploadServiceSimpleUpload))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UploadFile UploadFile uploads a file directly (single-request upload for small files).
+func (c *UploadServiceHTTPClientImpl) UploadFile(ctx context.Context, in *UploadFileRequest, opts ...http.CallOption) (*UploadFileResponse, error) {
+	var out UploadFileResponse
+	pattern := "/api/v1/upload/file"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUploadServiceUploadFile))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UploadPart UploadPart uploads a part of a multipart upload.
+func (c *UploadServiceHTTPClientImpl) UploadPart(ctx context.Context, in *UploadPartRequest, opts ...http.CallOption) (*UploadPartResponse, error) {
+	var out UploadPartResponse
+	pattern := "/api/v1/upload/multipart/{upload_id}/part"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUploadServiceUploadPart))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

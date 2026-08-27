@@ -5,6 +5,7 @@ package api.v1.services.user;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
+import "validate/validate.proto";
 import "v1/types/user.proto";
 import "v1/types/media.proto";
 
@@ -141,9 +142,9 @@ service UserService {
     option (google.api.http) = {get: "/api/v1/users"};
   }
 
-  // GetUser returns a user by slug.
+  // GetUser returns a user by slug (portal) or ID (admin).
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}"};
+    option (google.api.http) = {get: "/api/v1/users/{id}"};
   }
 
   // CreateUser creates a new user.
@@ -164,13 +165,13 @@ service UserService {
 
   // DeleteUser deletes a user.
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
-    option (google.api.http) = {delete: "/api/v1/users/{slug}"};
+    option (google.api.http) = {delete: "/api/v1/users/{id}"};
   }
 
   // UpdateUserStatus updates a user's status.
   rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse) {
     option (google.api.http) = {
-      patch: "/api/v1/users/{slug}/status"
+      patch: "/api/v1/users/{id}/status"
       body: "*"
     };
   }
@@ -178,7 +179,7 @@ service UserService {
   // UpdateUserRoles updates a user's roles.
   rpc UpdateUserRoles(UpdateUserRolesRequest) returns (UpdateUserRolesResponse) {
     option (google.api.http) = {
-      put: "/api/v1/users/{slug}/roles"
+      put: "/api/v1/users/{id}/roles"
       body: "*"
     };
   }
@@ -186,7 +187,7 @@ service UserService {
   // ChangeUserPassword changes a user's password.
   rpc ChangeUserPassword(ChangeUserPasswordRequest) returns (ChangeUserPasswordResponse) {
     option (google.api.http) = {
-      post: "/api/v1/users/{slug}/password"
+      post: "/api/v1/users/{id}/password"
       body: "*"
     };
   }
@@ -201,45 +202,45 @@ service UserService {
 
   // ListUserRoles returns roles assigned to a user.
   rpc ListUserRoles(ListUserRolesRequest) returns (ListUserRolesResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/roles"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/roles"};
   }
 
   // GetUserStats returns statistics for a user.
   rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/stats"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/stats"};
   }
 
   // GetUserPlaylists returns public playlists for a user.
   rpc GetUserPlaylists(GetUserPlaylistsRequest) returns (GetUserPlaylistsResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/playlists"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/playlists"};
   }
 
   // GetUserFollowers returns followers for a user.
   rpc GetUserFollowers(GetUserFollowersRequest) returns (GetUserFollowersResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/followers"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/followers"};
   }
 
   // GetUserByUsername returns a user by username.
   rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserByUsernameResponse) {
-    option (google.api.http) = {get: "/api/v1/users/username/{username}"};
+    option (google.api.http) = {get: "/api/v1/usernames/{username}"};
   }
 
   // SubscribeUser subscribes to a user.
   rpc SubscribeUser(SubscribeUserRequest) returns (SubscribeUserResponse) {
     option (google.api.http) = {
-      post: "/api/v1/users/{slug}/subscribe"
+      post: "/api/v1/users/{id}/subscribe"
       body: "*"
     };
   }
 
   // UnsubscribeUser unsubscribes from a user.
   rpc UnsubscribeUser(UnsubscribeUserRequest) returns (UnsubscribeUserResponse) {
-    option (google.api.http) = {delete: "/api/v1/users/{slug}/subscribe"};
+    option (google.api.http) = {delete: "/api/v1/users/{id}/subscribe"};
   }
 
   // GetUserSubscription returns subscription status for a user.
   rpc GetUserSubscription(GetUserSubscriptionRequest) returns (GetUserSubscriptionResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/subscription"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/subscription"};
   }
 
   // GetMyFollowers returns the current user's followers.
@@ -267,17 +268,12 @@ service UserService {
 
   // GetUserLikes returns likes for a user.
   rpc GetUserLikes(GetUserLikesRequest) returns (GetUserLikesResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/likes"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/likes"};
   }
 
   // GetUserSubscriptions returns subscriptions for a user.
   rpc GetUserSubscriptions(GetUserSubscriptionsRequest) returns (GetUserSubscriptionsResponse) {
-    option (google.api.http) = {get: "/api/v1/users/{slug}/subscriptions"};
-  }
-
-  // GetUserBySlug returns a user by slug.
-  rpc GetUserBySlug(GetUserBySlugRequest) returns (GetUserBySlugResponse) {
-    option (google.api.http) = {get: "/api/v1/users/slug/{slug}"};
+    option (google.api.http) = {get: "/api/v1/users/{id}/subscriptions"};
   }
 
   // ChangePassword changes the current user's password (auth endpoint).
@@ -295,9 +291,15 @@ service UserService {
 // LoginRequest is the request message for user login.
 message LoginRequest {
   // The username or email.
-  string username = 1 [json_name = "username"];
+  string username = 1 [
+    json_name = "username",
+    (validate.rules).string = {min_len: 1, max_len: 128}
+  ];
   // The plain text password.
-  string password = 2 [json_name = "password"];
+  string password = 2 [
+    json_name = "password",
+    (validate.rules).string = {min_len: 6, max_len: 256}
+  ];
 }
 
 // LoginResponse is the response message for user login.
@@ -869,19 +871,31 @@ message GetUserSubscriptionsResponse {
   int32 page_size = 4 [json_name = "page_size"];
 }
 
-message GetUserBySlugRequest {
-  string slug = 1 [json_name = "slug"];
-}
-message GetUserBySlugResponse {
-  api.v1.services.types.User user = 1 [json_name = "user"];
-}
-
 message ChangePasswordRequest {
   string current_password = 1 [json_name = "current_password"];
   string new_password = 2 [json_name = "new_password"];
 }
 message ChangePasswordResponse {
   bool success = 1 [json_name = "success"];
+}
+
+message ForgotPasswordRequest {
+  string email = 1 [json_name = "email"];
+}
+
+message ForgotPasswordResponse {
+  bool success = 1 [json_name = "success"];
+  string message = 2 [json_name = "message"];
+}
+
+message ResetPasswordRequest {
+  string token = 1 [json_name = "token"];
+  string new_password = 2 [json_name = "new_password"];
+}
+
+message ResetPasswordResponse {
+  bool success = 1 [json_name = "success"];
+  string message = 2 [json_name = "message"];
 }
 
 // ========== User Subscription Stub Messages ==========

@@ -251,7 +251,6 @@ type User struct {
 	Avatar                 string                 `protobuf:"bytes,12,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	Status                 UserStatus             `protobuf:"varint,13,opt,name=status,proto3,enum=api.v1.services.types.UserStatus" json:"status,omitempty"`
 	IsSuperuser            bool                   `protobuf:"varint,14,opt,name=is_superuser,proto3" json:"is_superuser,omitempty"`
-	IsStaff                bool                   `protobuf:"varint,15,opt,name=is_staff,proto3" json:"is_staff,omitempty"`
 	LastLoginIp            string                 `protobuf:"bytes,16,opt,name=last_login_ip,proto3" json:"last_login_ip,omitempty"`
 	LoginIp                string                 `protobuf:"bytes,17,opt,name=login_ip,proto3" json:"login_ip,omitempty"`
 	LastLoginTime          *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=last_login_time,proto3" json:"last_login_time,omitempty"`
@@ -395,13 +394,6 @@ func (x *User) GetStatus() UserStatus {
 func (x *User) GetIsSuperuser() bool {
 	if x != nil {
 		return x.IsSuperuser
-	}
-	return false
-}
-
-func (x *User) GetIsStaff() bool {
-	if x != nil {
-		return x.IsStaff
 	}
 	return false
 }
@@ -898,7 +890,8 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\vpreferences\x18\x04 \x03(\v23.api.v1.services.types.UserSetting.PreferencesEntryR\vpreferences\x1a>\n" +
 	"\x10PreferencesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x86\v\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf0\n" +
+	"\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12$\n" +
 	"\rcreate_author\x18\x02 \x01(\tR\rcreate_author\x12$\n" +
@@ -913,8 +906,7 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"\x05email\x18\v \x01(\tR\x05email\x12\x16\n" +
 	"\x06avatar\x18\f \x01(\tR\x06avatar\x129\n" +
 	"\x06status\x18\r \x01(\x0e2!.api.v1.services.types.UserStatusR\x06status\x12\"\n" +
-	"\fis_superuser\x18\x0e \x01(\bR\fis_superuser\x12\x1a\n" +
-	"\bis_staff\x18\x0f \x01(\bR\bis_staff\x12$\n" +
+	"\fis_superuser\x18\x0e \x01(\bR\fis_superuser\x12$\n" +
 	"\rlast_login_ip\x18\x10 \x01(\tR\rlast_login_ip\x12\x1a\n" +
 	"\blogin_ip\x18\x11 \x01(\tR\blogin_ip\x12D\n" +
 	"\x0flast_login_time\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\x0flast_login_time\x12:\n" +
@@ -944,7 +936,7 @@ const file_v1_types_user_proto_rawDesc = "" +
 	"last_login\x12<\n" +
 	"\aprofile\x182 \x01(\v2\".api.v1.services.types.UserProfileR\aprofile\x12<\n" +
 	"\asetting\x183 \x01(\v2\".api.v1.services.types.UserSettingR\asetting\x121\n" +
-	"\x05roles\x18d \x03(\v2\x1b.api.v1.services.types.RoleR\x05rolesJ\x04\b\x06\x10\a\"\xa2\x03\n" +
+	"\x05roles\x18d \x03(\v2\x1b.api.v1.services.types.RoleR\x05rolesJ\x04\b\x06\x10\aJ\x04\b\x0f\x10\x10\"\xa2\x03\n" +
 	"\x04Role\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +

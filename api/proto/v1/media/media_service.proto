@@ -118,12 +118,12 @@ service MediaService {
   // ========== Media Encoding ==========
 
   // TranscodingStatus returns current transcoding status.
-  rpc TranscodingStatus(TranscodingStatusRequest) returns (TranscodingStatusResponse) {
+  rpc TranscodingStatus(GetEncodingStatusRequest) returns (GetEncodingStatusResponse) {
     option (google.api.http) = {get: "/api/v1/medias/transcoding/status"};
   }
 
   // EncodingTasks returns all encoding tasks.
-  rpc EncodingTasks(EncodingTasksRequest) returns (EncodingTasksResponse) {
+  rpc EncodingTasks(ListAllEncodingTasksRequest) returns (ListAllEncodingTasksResponse) {
     option (google.api.http) = {get: "/api/v1/medias/encoding/tasks"};
   }
 
@@ -171,6 +171,21 @@ service MediaService {
   // NON-PROTO-SPECIAL: Returns non-JSON content (image). Requires adapter-level content-type handling.
   rpc GetMediaThumbnail(GetMediaThumbnailRequest) returns (GetMediaThumbnailResponse) {
     option (google.api.http) = {get: "/api/v1/medias/{id}/thumbnail"};
+  }
+
+  // Owner/portal cover regeneration (short_token; uuid never exposed to client).
+  rpc OwnerRegenerateThumbnail(OwnerRegenerateThumbnailRequest) returns (OwnerRegenerateThumbnailResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/me/medias/{token}/regen-thumbnail"
+      body: "*"
+    };
+  }
+  // Owner/portal cover selection from sprite sheet (short_token).
+  rpc OwnerSetThumbnail(OwnerSetThumbnailRequest) returns (OwnerSetThumbnailResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/me/medias/{token}/set-thumbnail"
+      body: "*"
+    };
   }
 
   // STUB: Not yet implemented. Do not remove - reserved for future development.
@@ -312,7 +327,7 @@ service CategoryService {
     option (google.api.http) = {get: "/api/v1/categories"};
   }
   rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse) {
-    option (google.api.http) = {get: "/api/v1/categories/{id}"};
+    option (google.api.http) = {get: "/api/v1/categories/{slug}"};
   }
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {
     option (google.api.http) = {
@@ -327,7 +342,7 @@ service CategoryService {
     };
   }
   rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {
-    option (google.api.http) = {delete: "/api/v1/categories/{id}"};
+    option (google.api.http) = {delete: "/api/v1/categories/{slug}"};
   }
 }
 
@@ -338,7 +353,7 @@ service TagService {
     option (google.api.http) = {get: "/api/v1/tags"};
   }
   rpc GetTag(GetTagRequest) returns (GetTagResponse) {
-    option (google.api.http) = {get: "/api/v1/tags/{id}"};
+    option (google.api.http) = {get: "/api/v1/tags/{slug}"};
   }
   rpc CreateTag(CreateTagRequest) returns (CreateTagResponse) {
     option (google.api.http) = {
@@ -348,12 +363,17 @@ service TagService {
   }
   rpc UpdateTag(UpdateTagRequest) returns (UpdateTagResponse) {
     option (google.api.http) = {
-      put: "/api/v1/tags/{tag.id}"
+      put: "/api/v1/tags/{tag.slug}"
       body: "*"
     };
   }
   rpc DeleteTag(DeleteTagRequest) returns (DeleteTagResponse) {
-    option (google.api.http) = {delete: "/api/v1/tags/{id}"};
+    option (google.api.http) = {delete: "/api/v1/tags/{slug}"};
+  }
+  // ListTagMedias returns the medias linked to a tag through the
+  // content_media_tags M2M pivot (tag-first browsing, powers /tag/{slug}).
+  rpc ListTagMedias(ListTagMediasRequest) returns (ListTagMediasResponse) {
+    option (google.api.http) = {get: "/api/v1/tags/{slug}/medias"};
   }
 }
 
@@ -584,7 +604,7 @@ service ChannelService {
     option (google.api.http) = {delete: "/api/v1/channels/{token}"};
   }
   rpc ResolveHandle(ResolveHandleRequest) returns (ResolveHandleResponse) {
-    option (google.api.http) = {get: "/api/v1/resolve/@{handle}"};
+    option (google.api.http) = {get: "/api/v1/resolve"};
   }
   rpc GetChannelLimits(GetChannelLimitsRequest) returns (GetChannelLimitsResponse) {
     option (google.api.http) = {get: "/api/v1/system/config/channel-limits"};
@@ -623,6 +643,19 @@ service AdminService {
   }
   rpc GetRevenueStats(GetRevenueStatsRequest) returns (GetRevenueStatsResponse) {
     option (google.api.http) = {get: "/api/v1/admin/stats/revenue"};
+  }
+  rpc GetPromotionStats(GetPromotionStatsRequest) returns (GetPromotionStatsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/stats/promotion"};
+  }
+  // BUG-211: page-level stats card endpoints (independent, not derived from list).
+  rpc GetChannelStats(GetChannelStatsRequest) returns (GetChannelStatsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/stats/channels"};
+  }
+  rpc GetTagStats(GetTagStatsRequest) returns (GetTagStatsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/stats/tags"};
+  }
+  rpc GetPlaylistStats(GetPlaylistStatsRequest) returns (GetPlaylistStatsResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/stats/playlists"};
   }
 
   // Review
@@ -734,9 +767,20 @@ service AdminMediaService {
   }
   rpc RegenerateThumbnail(RegenerateThumbnailRequest) returns (RegenerateThumbnailResponse) {
     option (google.api.http) = {
-      post: "/api/v1/admin/medias/{id}/regenerate-thumbnail"
+      post: "/api/v1/admin/medias/{id}/regen-thumbnail"
       body: "*"
     };
+  }
+  // Admin cover selection from sprite sheet (uuid; admin scope).
+  rpc SetThumbnail(SetThumbnailRequest) returns (SetThumbnailResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/admin/medias/{id}/set-thumbnail"
+      body: "*"
+    };
+  }
+  // Admin get thumbnail URL (uuid; admin scope).
+  rpc GetAdminThumbnail(GetAdminThumbnailRequest) returns (GetAdminThumbnailResponse) {
+    option (google.api.http) = {get: "/api/v1/admin/medias/{id}/thumbnail"};
   }
   // NON-PROTO-SPECIAL: SSE (Server-Sent Events) streaming endpoint. Requires adapter-level handling; proto gateway cannot natively proxy SSE.
   rpc GetTranscodingEvents(GetTranscodingEventsRequest) returns (stream TranscodingEvent) {
@@ -839,6 +883,14 @@ service AdminTagService {
   }
   rpc DeleteAdminTag(DeleteAdminTagRequest) returns (DeleteAdminTagResponse) {
     option (google.api.http) = {delete: "/api/v1/admin/tags/{id}"};
+  }
+
+  // PatchAdminTag partially updates a tag (admin).
+  rpc PatchAdminTag(PatchAdminTagRequest) returns (PatchAdminTagResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/admin/tags/{id}"
+      body: "*"
+    };
   }
   rpc BulkUpdateTags(BulkUpdateTagsRequest) returns (BulkUpdateTagsResponse) {
     option (google.api.http) = {
@@ -1112,10 +1164,7 @@ service ArticleService {
     option (google.api.http) = {get: "/api/v1/articles"};
   }
   rpc GetArticle(GetArticleRequest) returns (GetArticleResponse) {
-    option (google.api.http) = {get: "/api/v1/articles/{id}"};
-  }
-  rpc GetArticleBySlug(GetArticleBySlugRequest) returns (GetArticleBySlugResponse) {
-    option (google.api.http) = {get: "/api/v1/articles/slug/{slug}"};
+    option (google.api.http) = {get: "/api/v1/articles/{slug}"};
   }
   rpc GetFeaturedArticles(GetFeaturedArticlesRequest) returns (GetFeaturedArticlesResponse) {
     option (google.api.http) = {get: "/api/v1/articles/featured"};
@@ -1134,16 +1183,16 @@ service ArticleService {
   }
   rpc UpdateArticle(UpdateArticleRequest) returns (UpdateArticleResponse) {
     option (google.api.http) = {
-      put: "/api/v1/articles/{id}"
+      put: "/api/v1/articles/{slug}"
       body: "*"
     };
   }
   rpc DeleteArticle(DeleteArticleRequest) returns (DeleteArticleResponse) {
-    option (google.api.http) = {delete: "/api/v1/articles/{id}"};
+    option (google.api.http) = {delete: "/api/v1/articles/{slug}"};
   }
   rpc UpdateArticleState(UpdateArticleStateRequest) returns (UpdateArticleStateResponse) {
     option (google.api.http) = {
-      patch: "/api/v1/articles/{id}/state"
+      patch: "/api/v1/articles/{slug}/state"
       body: "*"
     };
   }
@@ -1277,7 +1326,7 @@ service AdService {
 
   // Public ad endpoints
   rpc ListActiveAdsByPlacement(ListActiveAdsByPlacementRequest) returns (ListActiveAdsByPlacementResponse) {
-    option (google.api.http) = {get: "/api/v1/ads/placement/{slug}"};
+    option (google.api.http) = {get: "/api/v1/ads"};
   }
   rpc RecordAdImpression(RecordAdImpressionRequest) returns (RecordAdImpressionResponse) {
     option (google.api.http) = {
@@ -1337,18 +1386,6 @@ service TenantService {
 }
 
 // ========== System Stats Service ==========
-
-service SystemStatsService {
-  rpc GetPublicDashboardStats(GetPublicDashboardStatsRequest) returns (GetPublicDashboardStatsResponse) {
-    option (google.api.http) = {get: "/api/v1/stats/dashboard"};
-  }
-  rpc GetPublicMediaStats(GetPublicMediaStatsRequest) returns (GetPublicMediaStatsResponse) {
-    option (google.api.http) = {get: "/api/v1/stats/media"};
-  }
-  rpc GetPublicUserStats(GetPublicUserStatsRequest) returns (GetPublicUserStatsResponse) {
-    option (google.api.http) = {get: "/api/v1/stats/user"};
-  }
-}
 
 // ========== System Settings Service ==========
 
@@ -1450,6 +1487,29 @@ message ListMediasRequest {
   optional string user_id = 8 [json_name = "user_id"];
   string order_by = 9 [json_name = "order_by"];
   bool descending = 10 [json_name = "descending"];
+  // tags filters medias that carry ALL of the given tag slugs (AND semantics).
+  // Resolved through the content_media_tags M2M pivot, not the jsonb projection.
+  repeated string tags = 11 [json_name = "tags"];
+  // category_ids filters medias belonging to ANY of the given category ids (OR semantics).
+  // Mirrors the frontend filter (parent category expands to itself + its children).
+  // The live gRPC path previously only exposed singular `category_id`, so the
+  // frontend's `category_ids` query param was silently dropped — this field fixes that.
+  repeated int64 category_ids = 12 [json_name = "category_ids"];
+  // created_after filters medias created at or after this RFC3339 timestamp
+  // (time-range filter: today / this week / this month / this year).
+  string created_after = 13 [json_name = "created_after"];
+  // state filters by media lifecycle state (e.g. "active", "draft", "deleted").
+  // Was previously dropped by the proto layer (BUG-131); now exposed so the
+  // gateway transcoding forwards the `state` query param to the backend.
+  optional string state = 14 [json_name = "state"];
+  // featured filters medias flagged as featured (homepage hero / spotlight).
+  optional bool featured = 15 [json_name = "featured"];
+  // seed provides a deterministic shuffle seed for `order_by=random` (portal
+  // "为您推荐" 换一批). Required (positive uint32) when order_by=random; the
+  // backend rejects invalid/missing seed with HTTP 400. The seed is used ONLY
+  // as a bound parameter inside the ORDER BY expression and is never
+  // interpolated into WHERE / table / column names (BUG-226 SQL-injection guard).
+  optional uint32 seed = 16 [json_name = "seed"];
 }
 
 message ListMediasResponse {
@@ -1459,6 +1519,30 @@ message ListMediasResponse {
   int32 page_size = 4 [json_name = "page_size"];
   string next_page_token = 5 [json_name = "next_page_token"];
   int32 total_pages = 6 [json_name = "total_pages"];
+}
+
+message ListFeaturedMediasRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message ListFeaturedMediasResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message ListLatestMediasRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message ListLatestMediasResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
 }
 
 message GetMediaRequest {
@@ -1478,8 +1562,9 @@ message CreateMediaResponse {
 }
 
 message UpdateMediaRequest {
-  api.v1.services.types.Media media = 1 [json_name = "media"];
-  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+  string id = 1;
+  api.v1.services.types.Media media = 2 [json_name = "media"];
+  google.protobuf.FieldMask update_mask = 3 [json_name = "update_mask"];
 }
 
 message UpdateMediaResponse {
@@ -1539,6 +1624,13 @@ message GetMediaThumbnailRequest {
 }
 
 message GetMediaThumbnailResponse {
+  string thumbnail_url = 1 [json_name = "thumbnail_url"];
+}
+
+message GetAdminThumbnailRequest {
+  string id = 1;
+}
+message GetAdminThumbnailResponse {
   string thumbnail_url = 1 [json_name = "thumbnail_url"];
 }
 
@@ -1619,7 +1711,7 @@ message TranscodingMediaItem {
 // ========== Like Messages ==========
 
 message GetMediaLikesRequest {
-  string media_id = 1;
+  string id = 1;
 }
 
 message GetMediaLikesResponse {
@@ -1630,7 +1722,7 @@ message GetMediaLikesResponse {
 }
 
 message ToggleMediaLikeRequest {
-  string media_id = 1 [json_name = "media_id"];
+  string id = 1;
   string type = 2 [json_name = "type"]; // "like" or "dislike"
 }
 
@@ -1642,7 +1734,7 @@ message ToggleMediaLikeResponse {
 }
 
 message DeleteMediaLikeRequest {
-  string media_id = 1 [json_name = "media_id"];
+  string id = 1;
 }
 
 message DeleteMediaLikeResponse {
@@ -1652,7 +1744,7 @@ message DeleteMediaLikeResponse {
 // ========== Favorite Messages ==========
 
 message GetMediaFavoritesRequest {
-  string media_id = 1;
+  string id = 1;
 }
 
 message GetMediaFavoritesResponse {
@@ -1661,7 +1753,7 @@ message GetMediaFavoritesResponse {
 }
 
 message ToggleMediaFavoriteRequest {
-  string media_id = 1 [json_name = "media_id"];
+  string id = 1;
 }
 
 message ToggleMediaFavoriteResponse {
@@ -1670,7 +1762,7 @@ message ToggleMediaFavoriteResponse {
 }
 
 message DeleteMediaFavoriteRequest {
-  string media_id = 1 [json_name = "media_id"];
+  string id = 1;
 }
 
 message DeleteMediaFavoriteResponse {
@@ -1680,7 +1772,7 @@ message DeleteMediaFavoriteResponse {
 // ========== Share Messages ==========
 
 message GetMediaSharesRequest {
-  string media_id = 1;
+  string id = 1;
 }
 
 message GetMediaSharesResponse {
@@ -1689,7 +1781,7 @@ message GetMediaSharesResponse {
 }
 
 message CreateMediaShareRequest {
-  string media_id = 1 [json_name = "media_id"];
+  string id = 1;
   string platform = 2 [json_name = "platform"];
 }
 
@@ -1717,7 +1809,7 @@ message GetMediaCommentsResponse {
 // ========== Subtitle Messages ==========
 
 message GetMediaSubtitlesRequest {
-  string media_id = 1;
+  string id = 1;
 }
 
 message GetMediaSubtitlesResponse {
@@ -1725,7 +1817,7 @@ message GetMediaSubtitlesResponse {
 }
 
 message CreateMediaSubtitleRequest {
-  string media_id = 1 [json_name = "media_id"];
+  string id = 1;
   string language = 2 [json_name = "language"];
   string file_url = 3 [json_name = "file_url"];
 }
@@ -1737,7 +1829,7 @@ message CreateMediaSubtitleResponse {
 // ========== Metadata Messages ==========
 
 message GetMediaMetadataRequest {
-  string media_id = 1;
+  string id = 1;
 }
 
 message GetMediaMetadataResponse {
@@ -1836,7 +1928,7 @@ message ListCategoriesResponse {
 }
 
 message GetCategoryRequest {
-  string id = 1;
+  string slug = 1;
 }
 
 message GetCategoryResponse {
@@ -1861,7 +1953,7 @@ message UpdateCategoryResponse {
 }
 
 message DeleteCategoryRequest {
-  string id = 1;
+  string slug = 1;
 }
 
 message DeleteCategoryResponse {
@@ -1888,7 +1980,7 @@ message ListTagsResponse {
 }
 
 message GetTagRequest {
-  string id = 1;
+  string slug = 1;
 }
 
 message GetTagResponse {
@@ -1913,11 +2005,30 @@ message UpdateTagResponse {
 }
 
 message DeleteTagRequest {
-  string id = 1;
+  string slug = 1;
 }
 
 message DeleteTagResponse {
   google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+message ListTagMediasRequest {
+  string slug = 1 [json_name = "slug"];
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+  string order_by = 4 [json_name = "order_by"];
+  bool descending = 5 [json_name = "descending"];
+}
+
+message ListTagMediasResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+  int32 total_pages = 5 [json_name = "total_pages"];
+  // tag echoes the resolved tag so the page header can render without a
+  // second round-trip to GET /api/v1/tags/{slug}.
+  api.v1.services.types.Tag tag = 6 [json_name = "tag"];
 }
 
 // ========== Comment Service Messages ==========
@@ -2203,8 +2314,9 @@ message CreateChannelResponse {
 }
 
 message UpdateChannelRequest {
-  api.v1.services.types.Channel channel = 1 [json_name = "channel"];
-  google.protobuf.FieldMask update_mask = 2 [json_name = "update_mask"];
+  string token = 1;
+  api.v1.services.types.Channel channel = 2 [json_name = "channel"];
+  google.protobuf.FieldMask update_mask = 3 [json_name = "update_mask"];
 }
 
 message UpdateChannelResponse {
@@ -2212,7 +2324,7 @@ message UpdateChannelResponse {
 }
 
 message DeleteChannelRequest {
-  string id = 1;
+  string token = 1;
 }
 
 message DeleteChannelResponse {
@@ -2220,7 +2332,7 @@ message DeleteChannelResponse {
 }
 
 message GetChannelMediasRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
   int32 page = 2 [json_name = "page"];
   int32 page_size = 3 [json_name = "page_size"];
 }
@@ -2233,7 +2345,7 @@ message GetChannelMediasResponse {
 }
 
 message AddChannelMediaRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
   string media_id = 2 [json_name = "media_id"];
 }
 
@@ -2242,7 +2354,7 @@ message AddChannelMediaResponse {
 }
 
 message RemoveChannelMediaRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
   string media_id = 2 [json_name = "media_id"];
 }
 
@@ -2251,7 +2363,7 @@ message RemoveChannelMediaResponse {
 }
 
 message GetChannelSubscribersRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
   bool count_only = 2 [json_name = "count_only"];
   int32 page = 3 [json_name = "page"];
   int32 page_size = 4 [json_name = "page_size"];
@@ -2266,15 +2378,17 @@ message GetChannelSubscribersResponse {
 }
 
 message GetChannelSubscriptionRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
 }
 
 message GetChannelSubscriptionResponse {
   bool is_subscribed = 1 [json_name = "is_subscribed"];
+  // BUG-198: 订阅者通知偏好 all/personalized/none，由 UpdateChannelNotification 落库。
+  string notification_preference = 2 [json_name = "notification_preference"];
 }
 
 message SubscribeChannelRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
 }
 
 message SubscribeChannelResponse {
@@ -2283,7 +2397,7 @@ message SubscribeChannelResponse {
 }
 
 message UnsubscribeChannelRequest {
-  string id = 1 [json_name = "id"];
+  string token = 1;
 }
 
 message UnsubscribeChannelResponse {
@@ -2317,8 +2431,9 @@ message ValidateChannelHandleResponse {
 }
 
 message UpdateChannelNotificationRequest {
-  string id = 1;
-  bool enabled = 2 [json_name = "enabled"];
+  string token = 1;
+  // BUG-198: 订阅者通知偏好 all/personalized/none（替换原 bool enabled 假控件）。
+  string notification_preference = 2 [json_name = "notification_preference"];
 }
 
 message UpdateChannelNotificationResponse {
@@ -2331,6 +2446,88 @@ message ResolveHandleRequest {
 
 message ResolveHandleResponse {
   api.v1.services.types.HandleResolution resolution = 1 [json_name = "resolution"];
+}
+
+message GetChannelByTokenRequest {
+  string token = 1;
+}
+
+message GetChannelByTokenResponse {
+  api.v1.services.types.Channel channel = 1 [json_name = "channel"];
+}
+
+message GetChannelVideosRequest {
+  string token = 1;
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message GetChannelVideosResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message GetChannelPlaylistsRequest {
+  string token = 1;
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message GetChannelPlaylistsResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Playlist items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
+}
+
+message InviteUserToChannelRequest {
+  string token = 1;
+  string user_id = 2 [json_name = "user_id"];
+}
+
+message InviteUserToChannelResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+message AcceptChannelInvitationRequest {
+  string id = 1;
+}
+
+message AcceptChannelInvitationResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+message RejectChannelInvitationRequest {
+  string id = 1;
+}
+
+message RejectChannelInvitationResponse {
+  bool success = 1 [json_name = "success"];
+}
+
+message GetChannelInvitationsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message GetChannelInvitationsResponse {
+  int32 total = 1 [json_name = "total"];
+  int32 page = 2 [json_name = "page"];
+  int32 page_size = 3 [json_name = "page_size"];
+}
+
+message GetSubscriptionVideosRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+}
+
+message GetSubscriptionVideosResponse {
+  int32 total = 1 [json_name = "total"];
+  repeated api.v1.services.types.Media items = 2 [json_name = "items"];
+  int32 page = 3 [json_name = "page"];
+  int32 page_size = 4 [json_name = "page_size"];
 }
 
 // ========== Search Messages ==========
@@ -2371,6 +2568,14 @@ message GetDashboardStatsResponse {
   int32 total_views = 3 [json_name = "total_views"];
   int32 total_channels = 4 [json_name = "total_channels"];
   int32 pending_reviews = 5 [json_name = "pending_reviews"];
+  int32 total_comments = 6 [json_name = "total_comments"];
+  int32 total_subscribers = 7 [json_name = "total_subscribers"];
+  int32 new_users_today = 8 [json_name = "new_users_today"];
+  int32 new_media_today = 9 [json_name = "new_media_today"];
+  int32 new_comments_today = 10 [json_name = "new_comments_today"];
+  int32 new_subscribers_today = 11 [json_name = "new_subscribers_today"];
+  map<string, int32> media_by_type = 12 [json_name = "media_by_type"];
+  map<string, int32> users_by_role = 13 [json_name = "users_by_role"];
 }
 
 message GetMediaStatsRequest {
@@ -2381,6 +2586,7 @@ message GetMediaStatsResponse {
   int32 total_uploads = 1 [json_name = "total_uploads"];
   int32 total_views = 2 [json_name = "total_views"];
   repeated api.v1.services.types.StatPoint daily_stats = 3 [json_name = "daily_stats"];
+  int64 storage_used = 4 [json_name = "storage_used"]; // sum of media file sizes in bytes
 }
 
 message GetUserStatsRequest {
@@ -2392,6 +2598,40 @@ message GetUserStatsResponse {
   int32 new_users = 2 [json_name = "new_users"];
   int32 active_users = 3 [json_name = "active_users"];
   repeated api.v1.services.types.StatPoint daily_stats = 4 [json_name = "daily_stats"];
+  // BUG-211: page-level stats card fields (independent /admin/stats/users endpoint,
+  // not derived from list endpoint). active_users above = logged-in-today;
+  // active_total below = status=ACTIVE total count.
+  int32 active_total = 5 [json_name = "active_total"];
+  int32 admin_count = 6 [json_name = "admin_count"];
+  int32 editor_count = 7 [json_name = "editor_count"];
+}
+
+// BUG-211: Channel/Tag/Playlist stats endpoints (page-level cards, independent).
+message GetChannelStatsRequest {}
+
+message GetChannelStatsResponse {
+  int32 total = 1 [json_name = "total"];
+  int32 total_subscribers = 2 [json_name = "total_subscribers"];
+  int32 verified_count = 3 [json_name = "verified_count"];
+  int32 pending_count = 4 [json_name = "pending_count"];
+}
+
+message GetTagStatsRequest {}
+
+message GetTagStatsResponse {
+  int32 total = 1 [json_name = "total"];
+  int32 active_count = 2 [json_name = "active_count"];
+  int32 unused_count = 3 [json_name = "unused_count"];
+  int32 color_alerts = 4 [json_name = "color_alerts"];
+}
+
+message GetPlaylistStatsRequest {}
+
+message GetPlaylistStatsResponse {
+  int32 total = 1 [json_name = "total"];
+  int32 public_count = 2 [json_name = "public_count"];
+  int32 total_items = 3 [json_name = "total_items"];
+  int64 total_views = 4 [json_name = "total_views"];
 }
 
 message GetTrafficStatsRequest {
@@ -2413,6 +2653,19 @@ message GetRevenueStatsResponse {
   int64 subscription_revenue = 2 [json_name = "subscription_revenue"];
   int64 ad_revenue = 3 [json_name = "ad_revenue"];
   repeated api.v1.services.types.StatPoint daily_stats = 4 [json_name = "daily_stats"];
+}
+
+message GetPromotionStatsRequest {}
+
+message GetPromotionStatsResponse {
+  int32 total_channels = 1 [json_name = "total_channels"];
+  int32 active_channels = 2 [json_name = "active_channels"];
+  int32 total_subscriptions = 3 [json_name = "total_subscriptions"];
+  int32 active_subscriptions = 4 [json_name = "active_subscriptions"];
+  int32 sent_today = 5 [json_name = "sent_today"];
+  int32 total_logs = 6 [json_name = "total_logs"];
+  int32 total_tasks = 7 [json_name = "total_tasks"];
+  int32 total_templates = 8 [json_name = "total_templates"];
 }
 
 message GetPendingReviewsRequest {
@@ -2531,6 +2784,7 @@ message ListAdminMediasRequest {
   string keyword = 3 [json_name = "keyword"];
   string state = 4 [json_name = "state"];
   string review_status = 5 [json_name = "review_status"];
+  string type = 6 [json_name = "type"];
 }
 
 message ListAdminMediasResponse {
@@ -2628,6 +2882,30 @@ message RegenerateThumbnailRequest {
 }
 
 message RegenerateThumbnailResponse {
+  bool success = 1 [json_name = "success"];
+  string thumbnail_url = 2 [json_name = "thumbnail_url"];
+}
+
+message SetThumbnailRequest {
+  string id = 1;
+  bool use_sprite_sheet = 2 [json_name = "use_sprite_sheet"];
+}
+message SetThumbnailResponse {
+  bool success = 1 [json_name = "success"];
+}
+message OwnerRegenerateThumbnailRequest {
+  string token = 1;
+  double thumbnail_time = 2 [json_name = "thumbnail_time"];
+}
+message OwnerRegenerateThumbnailResponse {
+  bool success = 1 [json_name = "success"];
+  string thumbnail_url = 2 [json_name = "thumbnail_url"];
+}
+message OwnerSetThumbnailRequest {
+  string token = 1;
+  bool use_sprite_sheet = 2 [json_name = "use_sprite_sheet"];
+}
+message OwnerSetThumbnailResponse {
   bool success = 1 [json_name = "success"];
 }
 
@@ -2775,6 +3053,7 @@ message CreateAdminTagRequest {
   string slug = 2 [json_name = "slug"];
   string description = 3 [json_name = "description"];
   string color = 4 [json_name = "color"];
+  string status = 5 [json_name = "status"];
 }
 
 message CreateAdminTagResponse {
@@ -2800,6 +3079,19 @@ message DeleteAdminTagRequest {
 
 message DeleteAdminTagResponse {
   google.protobuf.Empty empty = 1 [json_name = "empty"];
+}
+
+message PatchAdminTagRequest {
+  string id = 1;
+  string name = 2 [json_name = "name"];
+  string slug = 3 [json_name = "slug"];
+  string description = 4 [json_name = "description"];
+  string color = 5 [json_name = "color"];
+  string status = 6 [json_name = "status"];
+}
+
+message PatchAdminTagResponse {
+  api.v1.services.types.Tag tag = 1 [json_name = "tag"];
 }
 
 message BulkUpdateTagsRequest {
@@ -2848,6 +3140,10 @@ message CreateAdminCategoryRequest {
   string slug = 2 [json_name = "slug"];
   string description = 3 [json_name = "description"];
   int64 parent_id = 4 [json_name = "parent_id"];
+  string thumbnail = 5 [json_name = "thumbnail"];
+  string icon = 6 [json_name = "icon"];
+  string color = 7 [json_name = "color"];
+  int32 order = 8 [json_name = "order"];
 }
 
 message CreateAdminCategoryResponse {
@@ -2861,6 +3157,10 @@ message UpdateAdminCategoryRequest {
   string description = 4 [json_name = "description"];
   int64 parent_id = 5 [json_name = "parent_id"];
   int32 status = 6 [json_name = "status"];
+  string thumbnail = 7 [json_name = "thumbnail"];
+  string icon = 8 [json_name = "icon"];
+  string color = 9 [json_name = "color"];
+  int32 order = 10 [json_name = "order"];
 }
 
 message UpdateAdminCategoryResponse {
@@ -3404,18 +3704,10 @@ message ListArticlesResponse {
 }
 
 message GetArticleRequest {
-  string id = 1;
+  string slug = 1;
 }
 
 message GetArticleResponse {
-  ArticleInfo article = 1 [json_name = "article"];
-}
-
-message GetArticleBySlugRequest {
-  string slug = 1 [json_name = "slug"];
-}
-
-message GetArticleBySlugResponse {
   ArticleInfo article = 1 [json_name = "article"];
 }
 
@@ -3477,7 +3769,7 @@ message UpdateArticleResponse {
 }
 
 message DeleteArticleRequest {
-  string id = 1;
+  string slug = 1;
 }
 
 message DeleteArticleResponse {
@@ -3485,7 +3777,7 @@ message DeleteArticleResponse {
 }
 
 message UpdateArticleStateRequest {
-  string id = 1;
+  string slug = 1;
   string state = 2 [json_name = "state"];
 }
 
@@ -3859,26 +4151,6 @@ message GetCurrentTenantResponse {
   TenantInfo tenant = 1 [json_name = "tenant"];
 }
 
-// ========== System Stats Messages ==========
-
-message GetPublicDashboardStatsRequest {}
-message GetPublicDashboardStatsResponse {
-  int32 total_users = 1 [json_name = "total_users"];
-  int32 total_media = 2 [json_name = "total_media"];
-  int32 total_views = 3 [json_name = "total_views"];
-  int32 total_comments = 4 [json_name = "total_comments"];
-}
-message GetPublicMediaStatsRequest {}
-message GetPublicMediaStatsResponse {
-  int32 total_uploads = 1 [json_name = "total_uploads"];
-  int32 total_views = 2 [json_name = "total_views"];
-}
-message GetPublicUserStatsRequest {}
-message GetPublicUserStatsResponse {
-  int32 total_users = 1 [json_name = "total_users"];
-  int32 active_users = 2 [json_name = "active_users"];
-}
-
 // ========== System Settings Messages ==========
 
 message GetSystemSettingsRequest {}
@@ -3895,13 +4167,6 @@ message GetSystemSettingByKeyRequest {
   string key = 1 [json_name = "key"];
 }
 message GetSystemSettingByKeyResponse {
-  string key = 1 [json_name = "key"];
-  string value = 2 [json_name = "value"];
-}
-message ResetSystemSettingRequest {
-  string key = 1 [json_name = "key"];
-}
-message ResetSystemSettingResponse {
   string key = 1 [json_name = "key"];
   string value = 2 [json_name = "value"];
 }
@@ -4016,6 +4281,18 @@ message UpdateAdminMediaRequest {
   string description = 3 [json_name = "description"];
   int64 category_id = 4 [json_name = "category_id"];
   repeated string tags = 5 [json_name = "tags"];
+  // Editable fields persisted by the admin edit page. Previously the request
+  // proto omitted these, so state/privacy/featured/comments/download/listable
+  // submitted from the UI were silently dropped on save (see UpdateAdminMedia).
+  string state = 6 [json_name = "state"];
+  api.v1.services.types.Privacy privacy = 7 [json_name = "privacy"];
+  bool featured = 8 [json_name = "featured"];
+  bool enable_comments = 9 [json_name = "enable_comments"];
+  bool allow_download = 10 [json_name = "allow_download"];
+  bool listable = 11 [json_name = "listable"];
+  // BUG-105: channel assignment for admin edits. "" clears the assignment
+  // (move to unassigned); non-empty sets it (assign / move A->B).
+  string channel_id = 12 [json_name = "channel_id"];
 }
 message UpdateAdminMediaResponse {
   api.v1.services.types.Media media = 1 [json_name = "media"];
@@ -4035,6 +4312,10 @@ message PatchAdminCategoryRequest {
   string description = 4 [json_name = "description"];
   int64 parent_id = 5 [json_name = "parent_id"];
   int32 status = 6 [json_name = "status"];
+  string thumbnail = 7 [json_name = "thumbnail"];
+  string icon = 8 [json_name = "icon"];
+  string color = 9 [json_name = "color"];
+  int32 order = 10 [json_name = "order"];
 }
 message PatchAdminCategoryResponse {
   api.v1.services.types.Category category = 1 [json_name = "category"];
@@ -4044,6 +4325,10 @@ message PreviewEncodeCommandRequest {
   string command_template = 1 [json_name = "command_template"];
   string input_path = 2 [json_name = "input_path"];
   string output_path = 3 [json_name = "output_path"];
+  string codec = 4 [json_name = "codec"];
+  string resolution = 5 [json_name = "resolution"];
+  string extension = 6 [json_name = "extension"];
+  string audio_codec = 7 [json_name = "audio_codec"];
 }
 message PreviewEncodeCommandResponse {
   string full_command = 1 [json_name = "full_command"];
@@ -4052,21 +4337,21 @@ message PreviewEncodeCommandResponse {
 // ========== Metadata Mining Stub Messages ==========
 
 message StartMetadataMiningRequest {
-  string id = 1 [json_name = "id"];
+  string id = 1;
 }
 message StartMetadataMiningResponse {
   bool success = 1 [json_name = "success"];
   string task_id = 2 [json_name = "task_id"];
 }
 message GetMetadataMiningStatusRequest {
-  string id = 1 [json_name = "id"];
+  string id = 1;
 }
 message GetMetadataMiningStatusResponse {
   string status = 1 [json_name = "status"];
   int32 progress = 2 [json_name = "progress"];
 }
 message GetMediaKeyFramesRequest {
-  string id = 1 [json_name = "id"];
+  string id = 1;
 }
 message GetMediaKeyFramesResponse {
   repeated KeyFrameInfo key_frames = 1 [json_name = "key_frames"];
@@ -4076,14 +4361,14 @@ message KeyFrameInfo {
   string url = 2 [json_name = "url"];
 }
 message GetMediaAudioWaveformRequest {
-  string id = 1 [json_name = "id"];
+  string id = 1;
 }
 message GetMediaAudioWaveformResponse {
   repeated float samples = 1 [json_name = "samples"];
   int32 sample_rate = 2 [json_name = "sample_rate"];
 }
 message GetMediaTextContentRequest {
-  string id = 1 [json_name = "id"];
+  string id = 1;
 }
 message GetMediaTextContentResponse {
   string text = 1 [json_name = "text"];
@@ -4095,7 +4380,7 @@ message TextSegment {
   string text = 3 [json_name = "text"];
 }
 message GetMediaSceneChangesRequest {
-  string id = 1 [json_name = "id"];
+  string id = 1;
 }
 message GetMediaSceneChangesResponse {
   repeated SceneChangeInfo scenes = 1 [json_name = "scenes"];
@@ -4114,4 +4399,207 @@ message DeleteSubtitleResponse {
 message ListSubtitleLanguagesRequest {}
 message ListSubtitleLanguagesResponse {
   repeated string languages = 1 [json_name = "languages"];
+}
+
+// ========== Upload Service ==========
+
+service UploadService {
+  // UploadFile uploads a file directly (single-request upload for small files).
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/upload/file"
+      body: "*"
+    };
+  }
+
+  // InitiateMultipartUpload starts a multipart upload session.
+  rpc InitiateMultipartUpload(InitiateMultipartUploadRequest) returns (InitiateMultipartUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/upload/multipart/initiate"
+      body: "*"
+    };
+  }
+
+  // UploadPart uploads a part of a multipart upload.
+  rpc UploadPart(UploadPartRequest) returns (UploadPartResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/upload/multipart/{upload_id}/part"
+      body: "*"
+    };
+  }
+
+  // CompleteMultipartUpload completes a multipart upload.
+  rpc CompleteMultipartUpload(CompleteMultipartUploadRequest) returns (CompleteMultipartUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/upload/multipart/{upload_id}/complete"
+      body: "*"
+    };
+  }
+
+  // AbortMultipartUpload aborts a multipart upload.
+  rpc AbortMultipartUpload(AbortMultipartUploadRequest) returns (AbortMultipartUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/upload/multipart/{upload_id}/abort"
+      body: "*"
+    };
+  }
+
+  // GetUploadSession gets upload session info.
+  rpc GetUploadSession(GetUploadSessionRequest) returns (GetUploadSessionResponse) {
+    option (google.api.http) = {get: "/api/v1/upload/multipart/{upload_id}"};
+  }
+
+  // ListUploadSessions lists upload sessions for a user.
+  rpc ListUploadSessions(ListUploadSessionsRequest) returns (ListUploadSessionsResponse) {
+    option (google.api.http) = {get: "/api/v1/upload/sessions"};
+  }
+
+  // ListParts lists uploaded parts for a multipart upload.
+  rpc ListParts(ListPartsRequest) returns (ListPartsResponse) {
+    option (google.api.http) = {get: "/api/v1/upload/multipart/{upload_id}/parts"};
+  }
+
+  // SimpleUpload uploads a small file directly (alternative to UploadFile).
+  rpc SimpleUpload(SimpleUploadRequest) returns (SimpleUploadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/upload/simple"
+      body: "*"
+    };
+  }
+}
+
+message UploadFileRequest {
+  string filename = 1 [json_name = "filename"];
+  bytes data = 2 [json_name = "data"];
+  string content_type = 3 [json_name = "content_type"];
+  string title = 4 [json_name = "title"];
+  string description = 5 [json_name = "description"];
+  int64 category_id = 6 [json_name = "category_id"];
+  repeated string tags = 7 [json_name = "tags"];
+}
+
+message UploadFileResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+message InitiateMultipartUploadRequest {
+  string filename = 1 [json_name = "filename"];
+  int64 file_size = 2 [json_name = "file_size"];
+  string content_type = 3 [json_name = "content_type"];
+  string title = 4 [json_name = "title"];
+  string description = 5 [json_name = "description"];
+  int64 category_id = 6 [json_name = "category_id"];
+  repeated string tags = 7 [json_name = "tags"];
+  string channel_id = 8 [json_name = "channel_id"];
+  string thumbnail = 9 [json_name = "thumbnail"];
+}
+
+message InitiateMultipartUploadResponse {
+  string upload_id = 1 [json_name = "upload_id"];
+  string key = 2 [json_name = "key"];
+  int32 total_parts = 3 [json_name = "total_parts"];
+  int32 chunk_size = 4 [json_name = "chunk_size"];
+}
+
+message UploadPartRequest {
+  string upload_id = 1 [json_name = "upload_id"];
+  int32 part_number = 2 [json_name = "part_number"];
+  bytes data = 3 [json_name = "data"];
+}
+
+message UploadPartResponse {
+  string etag = 1 [json_name = "etag"];
+  int32 part_number = 2 [json_name = "part_number"];
+  int64 size = 3 [json_name = "size"];
+}
+
+message CompleteMultipartUploadRequest {
+  string upload_id = 1 [json_name = "upload_id"];
+  string key = 2 [json_name = "key"];
+  repeated PartInfo parts = 3 [json_name = "parts"];
+  string title = 4 [json_name = "title"];
+  string description = 5 [json_name = "description"];
+  int64 category_id = 6 [json_name = "category_id"];
+  repeated string tags = 7 [json_name = "tags"];
+  string sha256 = 8 [json_name = "sha256"];
+  string channel_id = 9 [json_name = "channel_id"];
+  string thumbnail = 10 [json_name = "thumbnail"];
+}
+
+message PartInfo {
+  int32 part_number = 1 [json_name = "part_number"];
+  string etag = 2 [json_name = "etag"];
+  int64 size = 3 [json_name = "size"];
+}
+
+message CompleteMultipartUploadResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+}
+
+message AbortMultipartUploadRequest {
+  string upload_id = 1 [json_name = "upload_id"];
+  string key = 2 [json_name = "key"];
+}
+
+message AbortMultipartUploadResponse {}
+
+message GetUploadSessionRequest {
+  string upload_id = 1 [json_name = "upload_id"];
+}
+
+message GetUploadSessionResponse {
+  string upload_id = 1 [json_name = "upload_id"];
+  string key = 2 [json_name = "key"];
+  string filename = 3 [json_name = "filename"];
+  int64 file_size = 4 [json_name = "file_size"];
+  string content_type = 5 [json_name = "content_type"];
+  int32 total_parts = 6 [json_name = "total_parts"];
+  int32 uploaded_parts = 7 [json_name = "uploaded_parts"];
+  string status = 8 [json_name = "status"];
+  int32 chunk_size = 9 [json_name = "chunk_size"];
+  int64 uploaded_size = 10 [json_name = "uploaded_size"];
+  repeated PartInfo parts = 11 [json_name = "parts"];
+  string create_time = 12 [json_name = "create_time"];
+  string expires_at = 13 [json_name = "expires_at"];
+}
+
+message ListUploadSessionsRequest {
+  int32 page = 1 [json_name = "page"];
+  int32 page_size = 2 [json_name = "page_size"];
+  string status = 3 [json_name = "status"];
+}
+
+message ListUploadSessionsResponse {
+  repeated GetUploadSessionResponse sessions = 1 [json_name = "sessions"];
+  int32 total = 2 [json_name = "total"];
+}
+
+message ListPartsRequest {
+  string upload_id = 1 [json_name = "upload_id"];
+}
+
+message ListPartsResponse {
+  repeated PartInfo parts = 1 [json_name = "parts"];
+  int32 total_parts = 2 [json_name = "total_parts"];
+  int64 uploaded_size = 3 [json_name = "uploaded_size"];
+  int64 total_size = 4 [json_name = "total_size"];
+  string status = 5 [json_name = "status"];
+}
+
+message SimpleUploadRequest {
+  string filename = 1 [json_name = "filename"];
+  bytes data = 2 [json_name = "data"];
+  string content_type = 3 [json_name = "content_type"];
+  string title = 4 [json_name = "title"];
+  string description = 5 [json_name = "description"];
+  int64 category_id = 6 [json_name = "category_id"];
+  repeated string tags = 7 [json_name = "tags"];
+  string channel_id = 8 [json_name = "channel_id"];
+  string thumbnail = 9 [json_name = "thumbnail"];
+}
+
+message SimpleUploadResponse {
+  api.v1.services.types.Media media = 1 [json_name = "media"];
+  string url = 2 [json_name = "url"];
+  string upload_url = 3 [json_name = "upload_url"];
 }

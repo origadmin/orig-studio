@@ -7,6 +7,7 @@
 package user
 
 import (
+	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -501,208 +502,6 @@ func (x *RegisterResponse) GetExpiresAt() int64 {
 	return 0
 }
 
-// ForgotPasswordRequest is the request message for forgot password.
-type ForgotPasswordRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The email address.
-	Email         string `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ForgotPasswordRequest) Reset() {
-	*x = ForgotPasswordRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ForgotPasswordRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ForgotPasswordRequest) ProtoMessage() {}
-
-func (x *ForgotPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ForgotPasswordRequest.ProtoReflect.Descriptor instead.
-func (*ForgotPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *ForgotPasswordRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-// ForgotPasswordResponse is the response message for forgot password.
-type ForgotPasswordResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Whether the request was successful.
-	Success bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	// Message to display to user.
-	Message       string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ForgotPasswordResponse) Reset() {
-	*x = ForgotPasswordResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ForgotPasswordResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ForgotPasswordResponse) ProtoMessage() {}
-
-func (x *ForgotPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ForgotPasswordResponse.ProtoReflect.Descriptor instead.
-func (*ForgotPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *ForgotPasswordResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *ForgotPasswordResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-// ResetPasswordRequest is the request message for resetting password.
-type ResetPasswordRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The reset token.
-	Token string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// The new password.
-	Password      string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ResetPasswordRequest) Reset() {
-	*x = ResetPasswordRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ResetPasswordRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ResetPasswordRequest) ProtoMessage() {}
-
-func (x *ResetPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ResetPasswordRequest.ProtoReflect.Descriptor instead.
-func (*ResetPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *ResetPasswordRequest) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-func (x *ResetPasswordRequest) GetPassword() string {
-	if x != nil {
-		return x.Password
-	}
-	return ""
-}
-
-// ResetPasswordResponse is the response message for resetting password.
-type ResetPasswordResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Whether the reset was successful.
-	Success       bool `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ResetPasswordResponse) Reset() {
-	*x = ResetPasswordResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ResetPasswordResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ResetPasswordResponse) ProtoMessage() {}
-
-func (x *ResetPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ResetPasswordResponse.ProtoReflect.Descriptor instead.
-func (*ResetPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *ResetPasswordResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
 // GetCurrentUserRequest is the request message for getting current user.
 type GetCurrentUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -712,7 +511,7 @@ type GetCurrentUserRequest struct {
 
 func (x *GetCurrentUserRequest) Reset() {
 	*x = GetCurrentUserRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[12]
+	mi := &file_v1_user_user_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -724,7 +523,7 @@ func (x *GetCurrentUserRequest) String() string {
 func (*GetCurrentUserRequest) ProtoMessage() {}
 
 func (x *GetCurrentUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[12]
+	mi := &file_v1_user_user_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -737,7 +536,7 @@ func (x *GetCurrentUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrentUserRequest.ProtoReflect.Descriptor instead.
 func (*GetCurrentUserRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{12}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{8}
 }
 
 // GetCurrentUserResponse is the response message for getting current user.
@@ -751,7 +550,7 @@ type GetCurrentUserResponse struct {
 
 func (x *GetCurrentUserResponse) Reset() {
 	*x = GetCurrentUserResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[13]
+	mi := &file_v1_user_user_service_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -763,7 +562,7 @@ func (x *GetCurrentUserResponse) String() string {
 func (*GetCurrentUserResponse) ProtoMessage() {}
 
 func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[13]
+	mi := &file_v1_user_user_service_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -776,7 +575,7 @@ func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrentUserResponse.ProtoReflect.Descriptor instead.
 func (*GetCurrentUserResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{13}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetCurrentUserResponse) GetUser() *types.User {
@@ -795,7 +594,7 @@ type GetMeRequest struct {
 
 func (x *GetMeRequest) Reset() {
 	*x = GetMeRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[14]
+	mi := &file_v1_user_user_service_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -807,7 +606,7 @@ func (x *GetMeRequest) String() string {
 func (*GetMeRequest) ProtoMessage() {}
 
 func (x *GetMeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[14]
+	mi := &file_v1_user_user_service_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -820,7 +619,7 @@ func (x *GetMeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMeRequest.ProtoReflect.Descriptor instead.
 func (*GetMeRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{14}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{10}
 }
 
 // GetMeResponse is the response message for getting current user info.
@@ -834,7 +633,7 @@ type GetMeResponse struct {
 
 func (x *GetMeResponse) Reset() {
 	*x = GetMeResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[15]
+	mi := &file_v1_user_user_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -846,7 +645,7 @@ func (x *GetMeResponse) String() string {
 func (*GetMeResponse) ProtoMessage() {}
 
 func (x *GetMeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[15]
+	mi := &file_v1_user_user_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -859,7 +658,7 @@ func (x *GetMeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMeResponse.ProtoReflect.Descriptor instead.
 func (*GetMeResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{15}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetMeResponse) GetUser() *types.User {
@@ -884,7 +683,7 @@ type UpdateMeRequest struct {
 
 func (x *UpdateMeRequest) Reset() {
 	*x = UpdateMeRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[16]
+	mi := &file_v1_user_user_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -896,7 +695,7 @@ func (x *UpdateMeRequest) String() string {
 func (*UpdateMeRequest) ProtoMessage() {}
 
 func (x *UpdateMeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[16]
+	mi := &file_v1_user_user_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -909,7 +708,7 @@ func (x *UpdateMeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMeRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMeRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{16}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateMeRequest) GetNickname() string {
@@ -958,7 +757,7 @@ type UpdateMeResponse struct {
 
 func (x *UpdateMeResponse) Reset() {
 	*x = UpdateMeResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[17]
+	mi := &file_v1_user_user_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -970,7 +769,7 @@ func (x *UpdateMeResponse) String() string {
 func (*UpdateMeResponse) ProtoMessage() {}
 
 func (x *UpdateMeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[17]
+	mi := &file_v1_user_user_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -983,7 +782,7 @@ func (x *UpdateMeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMeResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMeResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{17}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *UpdateMeResponse) GetUser() *types.User {
@@ -1006,7 +805,7 @@ type UpdateMyPasswordRequest struct {
 
 func (x *UpdateMyPasswordRequest) Reset() {
 	*x = UpdateMyPasswordRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[18]
+	mi := &file_v1_user_user_service_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1018,7 +817,7 @@ func (x *UpdateMyPasswordRequest) String() string {
 func (*UpdateMyPasswordRequest) ProtoMessage() {}
 
 func (x *UpdateMyPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[18]
+	mi := &file_v1_user_user_service_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1031,7 +830,7 @@ func (x *UpdateMyPasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMyPasswordRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMyPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{18}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateMyPasswordRequest) GetCurrentPassword() string {
@@ -1059,7 +858,7 @@ type UpdateMyPasswordResponse struct {
 
 func (x *UpdateMyPasswordResponse) Reset() {
 	*x = UpdateMyPasswordResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[19]
+	mi := &file_v1_user_user_service_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1071,7 +870,7 @@ func (x *UpdateMyPasswordResponse) String() string {
 func (*UpdateMyPasswordResponse) ProtoMessage() {}
 
 func (x *UpdateMyPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[19]
+	mi := &file_v1_user_user_service_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1084,7 +883,7 @@ func (x *UpdateMyPasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMyPasswordResponse.ProtoReflect.Descriptor instead.
 func (*UpdateMyPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{19}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateMyPasswordResponse) GetSuccess() bool {
@@ -1105,7 +904,7 @@ type GetMyPlaylistsRequest struct {
 
 func (x *GetMyPlaylistsRequest) Reset() {
 	*x = GetMyPlaylistsRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[20]
+	mi := &file_v1_user_user_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1117,7 +916,7 @@ func (x *GetMyPlaylistsRequest) String() string {
 func (*GetMyPlaylistsRequest) ProtoMessage() {}
 
 func (x *GetMyPlaylistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[20]
+	mi := &file_v1_user_user_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1130,7 +929,7 @@ func (x *GetMyPlaylistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyPlaylistsRequest.ProtoReflect.Descriptor instead.
 func (*GetMyPlaylistsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{20}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetMyPlaylistsRequest) GetPage() int32 {
@@ -1160,7 +959,7 @@ type GetMyPlaylistsResponse struct {
 
 func (x *GetMyPlaylistsResponse) Reset() {
 	*x = GetMyPlaylistsResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[21]
+	mi := &file_v1_user_user_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +971,7 @@ func (x *GetMyPlaylistsResponse) String() string {
 func (*GetMyPlaylistsResponse) ProtoMessage() {}
 
 func (x *GetMyPlaylistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[21]
+	mi := &file_v1_user_user_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +984,7 @@ func (x *GetMyPlaylistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyPlaylistsResponse.ProtoReflect.Descriptor instead.
 func (*GetMyPlaylistsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{21}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetMyPlaylistsResponse) GetTotal() int32 {
@@ -1227,7 +1026,7 @@ type GetMyFavoritesRequest struct {
 
 func (x *GetMyFavoritesRequest) Reset() {
 	*x = GetMyFavoritesRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[22]
+	mi := &file_v1_user_user_service_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1239,7 +1038,7 @@ func (x *GetMyFavoritesRequest) String() string {
 func (*GetMyFavoritesRequest) ProtoMessage() {}
 
 func (x *GetMyFavoritesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[22]
+	mi := &file_v1_user_user_service_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1252,7 +1051,7 @@ func (x *GetMyFavoritesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyFavoritesRequest.ProtoReflect.Descriptor instead.
 func (*GetMyFavoritesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{22}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetMyFavoritesRequest) GetPage() int32 {
@@ -1282,7 +1081,7 @@ type GetMyFavoritesResponse struct {
 
 func (x *GetMyFavoritesResponse) Reset() {
 	*x = GetMyFavoritesResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[23]
+	mi := &file_v1_user_user_service_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1294,7 +1093,7 @@ func (x *GetMyFavoritesResponse) String() string {
 func (*GetMyFavoritesResponse) ProtoMessage() {}
 
 func (x *GetMyFavoritesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[23]
+	mi := &file_v1_user_user_service_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1307,7 +1106,7 @@ func (x *GetMyFavoritesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyFavoritesResponse.ProtoReflect.Descriptor instead.
 func (*GetMyFavoritesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{23}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GetMyFavoritesResponse) GetTotal() int32 {
@@ -1349,7 +1148,7 @@ type GetMyLikesRequest struct {
 
 func (x *GetMyLikesRequest) Reset() {
 	*x = GetMyLikesRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[24]
+	mi := &file_v1_user_user_service_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1361,7 +1160,7 @@ func (x *GetMyLikesRequest) String() string {
 func (*GetMyLikesRequest) ProtoMessage() {}
 
 func (x *GetMyLikesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[24]
+	mi := &file_v1_user_user_service_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1374,7 +1173,7 @@ func (x *GetMyLikesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyLikesRequest.ProtoReflect.Descriptor instead.
 func (*GetMyLikesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{24}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetMyLikesRequest) GetPage() int32 {
@@ -1404,7 +1203,7 @@ type GetMyLikesResponse struct {
 
 func (x *GetMyLikesResponse) Reset() {
 	*x = GetMyLikesResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[25]
+	mi := &file_v1_user_user_service_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1416,7 +1215,7 @@ func (x *GetMyLikesResponse) String() string {
 func (*GetMyLikesResponse) ProtoMessage() {}
 
 func (x *GetMyLikesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[25]
+	mi := &file_v1_user_user_service_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1429,7 +1228,7 @@ func (x *GetMyLikesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyLikesResponse.ProtoReflect.Descriptor instead.
 func (*GetMyLikesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{25}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetMyLikesResponse) GetTotal() int32 {
@@ -1471,7 +1270,7 @@ type GetMySubscriptionsRequest struct {
 
 func (x *GetMySubscriptionsRequest) Reset() {
 	*x = GetMySubscriptionsRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[26]
+	mi := &file_v1_user_user_service_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1483,7 +1282,7 @@ func (x *GetMySubscriptionsRequest) String() string {
 func (*GetMySubscriptionsRequest) ProtoMessage() {}
 
 func (x *GetMySubscriptionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[26]
+	mi := &file_v1_user_user_service_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1496,7 +1295,7 @@ func (x *GetMySubscriptionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMySubscriptionsRequest.ProtoReflect.Descriptor instead.
 func (*GetMySubscriptionsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{26}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetMySubscriptionsRequest) GetPage() int32 {
@@ -1526,7 +1325,7 @@ type GetMySubscriptionsResponse struct {
 
 func (x *GetMySubscriptionsResponse) Reset() {
 	*x = GetMySubscriptionsResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[27]
+	mi := &file_v1_user_user_service_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1538,7 +1337,7 @@ func (x *GetMySubscriptionsResponse) String() string {
 func (*GetMySubscriptionsResponse) ProtoMessage() {}
 
 func (x *GetMySubscriptionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[27]
+	mi := &file_v1_user_user_service_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1551,7 +1350,7 @@ func (x *GetMySubscriptionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMySubscriptionsResponse.ProtoReflect.Descriptor instead.
 func (*GetMySubscriptionsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{27}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetMySubscriptionsResponse) GetTotal() int32 {
@@ -1595,7 +1394,7 @@ type GetMyHistoryRequest struct {
 
 func (x *GetMyHistoryRequest) Reset() {
 	*x = GetMyHistoryRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[28]
+	mi := &file_v1_user_user_service_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1607,7 +1406,7 @@ func (x *GetMyHistoryRequest) String() string {
 func (*GetMyHistoryRequest) ProtoMessage() {}
 
 func (x *GetMyHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[28]
+	mi := &file_v1_user_user_service_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1620,7 +1419,7 @@ func (x *GetMyHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyHistoryRequest.ProtoReflect.Descriptor instead.
 func (*GetMyHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{28}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetMyHistoryRequest) GetPage() int32 {
@@ -1657,7 +1456,7 @@ type GetMyHistoryResponse struct {
 
 func (x *GetMyHistoryResponse) Reset() {
 	*x = GetMyHistoryResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[29]
+	mi := &file_v1_user_user_service_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1669,7 +1468,7 @@ func (x *GetMyHistoryResponse) String() string {
 func (*GetMyHistoryResponse) ProtoMessage() {}
 
 func (x *GetMyHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[29]
+	mi := &file_v1_user_user_service_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1682,7 +1481,7 @@ func (x *GetMyHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyHistoryResponse.ProtoReflect.Descriptor instead.
 func (*GetMyHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{29}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetMyHistoryResponse) GetTotal() int32 {
@@ -1722,7 +1521,7 @@ type GetMyStatsRequest struct {
 
 func (x *GetMyStatsRequest) Reset() {
 	*x = GetMyStatsRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[30]
+	mi := &file_v1_user_user_service_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1734,7 +1533,7 @@ func (x *GetMyStatsRequest) String() string {
 func (*GetMyStatsRequest) ProtoMessage() {}
 
 func (x *GetMyStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[30]
+	mi := &file_v1_user_user_service_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1747,7 +1546,7 @@ func (x *GetMyStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetMyStatsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{30}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{26}
 }
 
 // GetMyStatsResponse is the response message for getting my stats.
@@ -1764,7 +1563,7 @@ type GetMyStatsResponse struct {
 
 func (x *GetMyStatsResponse) Reset() {
 	*x = GetMyStatsResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[31]
+	mi := &file_v1_user_user_service_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1776,7 +1575,7 @@ func (x *GetMyStatsResponse) String() string {
 func (*GetMyStatsResponse) ProtoMessage() {}
 
 func (x *GetMyStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[31]
+	mi := &file_v1_user_user_service_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1789,7 +1588,7 @@ func (x *GetMyStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMyStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetMyStatsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{31}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GetMyStatsResponse) GetTotalViews() int32 {
@@ -1848,7 +1647,7 @@ type ListUsersRequest struct {
 
 func (x *ListUsersRequest) Reset() {
 	*x = ListUsersRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[32]
+	mi := &file_v1_user_user_service_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1860,7 +1659,7 @@ func (x *ListUsersRequest) String() string {
 func (*ListUsersRequest) ProtoMessage() {}
 
 func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[32]
+	mi := &file_v1_user_user_service_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1873,7 +1672,7 @@ func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
 func (*ListUsersRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{32}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ListUsersRequest) GetPage() int32 {
@@ -1938,7 +1737,7 @@ type ListUsersResponse struct {
 
 func (x *ListUsersResponse) Reset() {
 	*x = ListUsersResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[33]
+	mi := &file_v1_user_user_service_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1950,7 +1749,7 @@ func (x *ListUsersResponse) String() string {
 func (*ListUsersResponse) ProtoMessage() {}
 
 func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[33]
+	mi := &file_v1_user_user_service_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1963,7 +1762,7 @@ func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
 func (*ListUsersResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{33}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ListUsersResponse) GetTotal() int32 {
@@ -2018,7 +1817,7 @@ type GetUserRequest struct {
 
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[34]
+	mi := &file_v1_user_user_service_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2030,7 +1829,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[34]
+	mi := &file_v1_user_user_service_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2043,7 +1842,7 @@ func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserRequest.ProtoReflect.Descriptor instead.
 func (*GetUserRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{34}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *GetUserRequest) GetId() string {
@@ -2085,7 +1884,7 @@ type GetUserResponse struct {
 
 func (x *GetUserResponse) Reset() {
 	*x = GetUserResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[35]
+	mi := &file_v1_user_user_service_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2097,7 +1896,7 @@ func (x *GetUserResponse) String() string {
 func (*GetUserResponse) ProtoMessage() {}
 
 func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[35]
+	mi := &file_v1_user_user_service_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2110,7 +1909,7 @@ func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserResponse.ProtoReflect.Descriptor instead.
 func (*GetUserResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{35}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *GetUserResponse) GetUser() *types.User {
@@ -2136,7 +1935,7 @@ type CreateUserRequest struct {
 
 func (x *CreateUserRequest) Reset() {
 	*x = CreateUserRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[36]
+	mi := &file_v1_user_user_service_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2148,7 +1947,7 @@ func (x *CreateUserRequest) String() string {
 func (*CreateUserRequest) ProtoMessage() {}
 
 func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[36]
+	mi := &file_v1_user_user_service_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2161,7 +1960,7 @@ func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUserRequest.ProtoReflect.Descriptor instead.
 func (*CreateUserRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{36}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *CreateUserRequest) GetUser() *types.User {
@@ -2196,7 +1995,7 @@ type CreateUserResponse struct {
 
 func (x *CreateUserResponse) Reset() {
 	*x = CreateUserResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[37]
+	mi := &file_v1_user_user_service_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2208,7 +2007,7 @@ func (x *CreateUserResponse) String() string {
 func (*CreateUserResponse) ProtoMessage() {}
 
 func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[37]
+	mi := &file_v1_user_user_service_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2221,7 +2020,7 @@ func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUserResponse.ProtoReflect.Descriptor instead.
 func (*CreateUserResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{37}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *CreateUserResponse) GetUser() *types.User {
@@ -2246,7 +2045,7 @@ type UpdateUserRequest struct {
 
 func (x *UpdateUserRequest) Reset() {
 	*x = UpdateUserRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[38]
+	mi := &file_v1_user_user_service_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2258,7 +2057,7 @@ func (x *UpdateUserRequest) String() string {
 func (*UpdateUserRequest) ProtoMessage() {}
 
 func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[38]
+	mi := &file_v1_user_user_service_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2271,7 +2070,7 @@ func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{38}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *UpdateUserRequest) GetUser() *types.User {
@@ -2306,7 +2105,7 @@ type UpdateUserResponse struct {
 
 func (x *UpdateUserResponse) Reset() {
 	*x = UpdateUserResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[39]
+	mi := &file_v1_user_user_service_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2318,7 +2117,7 @@ func (x *UpdateUserResponse) String() string {
 func (*UpdateUserResponse) ProtoMessage() {}
 
 func (x *UpdateUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[39]
+	mi := &file_v1_user_user_service_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2331,7 +2130,7 @@ func (x *UpdateUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{39}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *UpdateUserResponse) GetUser() *types.User {
@@ -2352,7 +2151,7 @@ type DeleteUserRequest struct {
 
 func (x *DeleteUserRequest) Reset() {
 	*x = DeleteUserRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[40]
+	mi := &file_v1_user_user_service_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2364,7 +2163,7 @@ func (x *DeleteUserRequest) String() string {
 func (*DeleteUserRequest) ProtoMessage() {}
 
 func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[40]
+	mi := &file_v1_user_user_service_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2377,7 +2176,7 @@ func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteUserRequest.ProtoReflect.Descriptor instead.
 func (*DeleteUserRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{40}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *DeleteUserRequest) GetId() string {
@@ -2398,7 +2197,7 @@ type DeleteUserResponse struct {
 
 func (x *DeleteUserResponse) Reset() {
 	*x = DeleteUserResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[41]
+	mi := &file_v1_user_user_service_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2410,7 +2209,7 @@ func (x *DeleteUserResponse) String() string {
 func (*DeleteUserResponse) ProtoMessage() {}
 
 func (x *DeleteUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[41]
+	mi := &file_v1_user_user_service_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2423,7 +2222,7 @@ func (x *DeleteUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteUserResponse.ProtoReflect.Descriptor instead.
 func (*DeleteUserResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{41}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *DeleteUserResponse) GetEmpty() *emptypb.Empty {
@@ -2446,7 +2245,7 @@ type UpdateUserStatusRequest struct {
 
 func (x *UpdateUserStatusRequest) Reset() {
 	*x = UpdateUserStatusRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[42]
+	mi := &file_v1_user_user_service_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2458,7 +2257,7 @@ func (x *UpdateUserStatusRequest) String() string {
 func (*UpdateUserStatusRequest) ProtoMessage() {}
 
 func (x *UpdateUserStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[42]
+	mi := &file_v1_user_user_service_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2471,7 +2270,7 @@ func (x *UpdateUserStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserStatusRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{42}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *UpdateUserStatusRequest) GetId() string {
@@ -2497,7 +2296,7 @@ type UpdateUserStatusResponse struct {
 
 func (x *UpdateUserStatusResponse) Reset() {
 	*x = UpdateUserStatusResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[43]
+	mi := &file_v1_user_user_service_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2509,7 +2308,7 @@ func (x *UpdateUserStatusResponse) String() string {
 func (*UpdateUserStatusResponse) ProtoMessage() {}
 
 func (x *UpdateUserStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[43]
+	mi := &file_v1_user_user_service_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2522,7 +2321,7 @@ func (x *UpdateUserStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserStatusResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{43}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{39}
 }
 
 // UpdateUserRolesRequest is the request message for updating user roles.
@@ -2538,7 +2337,7 @@ type UpdateUserRolesRequest struct {
 
 func (x *UpdateUserRolesRequest) Reset() {
 	*x = UpdateUserRolesRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[44]
+	mi := &file_v1_user_user_service_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2550,7 +2349,7 @@ func (x *UpdateUserRolesRequest) String() string {
 func (*UpdateUserRolesRequest) ProtoMessage() {}
 
 func (x *UpdateUserRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[44]
+	mi := &file_v1_user_user_service_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2563,7 +2362,7 @@ func (x *UpdateUserRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRolesRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserRolesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{44}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *UpdateUserRolesRequest) GetId() string {
@@ -2590,7 +2389,7 @@ type UpdateUserRolesResponse struct {
 
 func (x *UpdateUserRolesResponse) Reset() {
 	*x = UpdateUserRolesResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[45]
+	mi := &file_v1_user_user_service_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2602,7 +2401,7 @@ func (x *UpdateUserRolesResponse) String() string {
 func (*UpdateUserRolesResponse) ProtoMessage() {}
 
 func (x *UpdateUserRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[45]
+	mi := &file_v1_user_user_service_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2615,7 +2414,7 @@ func (x *UpdateUserRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRolesResponse.ProtoReflect.Descriptor instead.
 func (*UpdateUserRolesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{45}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *UpdateUserRolesResponse) GetUser() *types.User {
@@ -2638,7 +2437,7 @@ type ChangeUserPasswordRequest struct {
 
 func (x *ChangeUserPasswordRequest) Reset() {
 	*x = ChangeUserPasswordRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[46]
+	mi := &file_v1_user_user_service_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2650,7 +2449,7 @@ func (x *ChangeUserPasswordRequest) String() string {
 func (*ChangeUserPasswordRequest) ProtoMessage() {}
 
 func (x *ChangeUserPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[46]
+	mi := &file_v1_user_user_service_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2663,7 +2462,7 @@ func (x *ChangeUserPasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeUserPasswordRequest.ProtoReflect.Descriptor instead.
 func (*ChangeUserPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{46}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ChangeUserPasswordRequest) GetId() string {
@@ -2689,7 +2488,7 @@ type ChangeUserPasswordResponse struct {
 
 func (x *ChangeUserPasswordResponse) Reset() {
 	*x = ChangeUserPasswordResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[47]
+	mi := &file_v1_user_user_service_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2701,7 +2500,7 @@ func (x *ChangeUserPasswordResponse) String() string {
 func (*ChangeUserPasswordResponse) ProtoMessage() {}
 
 func (x *ChangeUserPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[47]
+	mi := &file_v1_user_user_service_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2714,7 +2513,7 @@ func (x *ChangeUserPasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeUserPasswordResponse.ProtoReflect.Descriptor instead.
 func (*ChangeUserPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{47}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{43}
 }
 
 // VerifyPasswordRequest is the request message for verifying password.
@@ -2732,7 +2531,7 @@ type VerifyPasswordRequest struct {
 
 func (x *VerifyPasswordRequest) Reset() {
 	*x = VerifyPasswordRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[48]
+	mi := &file_v1_user_user_service_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2744,7 +2543,7 @@ func (x *VerifyPasswordRequest) String() string {
 func (*VerifyPasswordRequest) ProtoMessage() {}
 
 func (x *VerifyPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[48]
+	mi := &file_v1_user_user_service_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2757,7 +2556,7 @@ func (x *VerifyPasswordRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyPasswordRequest.ProtoReflect.Descriptor instead.
 func (*VerifyPasswordRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{48}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *VerifyPasswordRequest) GetUserId() string {
@@ -2792,7 +2591,7 @@ type VerifyPasswordResponse struct {
 
 func (x *VerifyPasswordResponse) Reset() {
 	*x = VerifyPasswordResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[49]
+	mi := &file_v1_user_user_service_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2804,7 +2603,7 @@ func (x *VerifyPasswordResponse) String() string {
 func (*VerifyPasswordResponse) ProtoMessage() {}
 
 func (x *VerifyPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[49]
+	mi := &file_v1_user_user_service_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2817,7 +2616,7 @@ func (x *VerifyPasswordResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyPasswordResponse.ProtoReflect.Descriptor instead.
 func (*VerifyPasswordResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{49}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *VerifyPasswordResponse) GetValid() bool {
@@ -2838,7 +2637,7 @@ type ListUserRolesRequest struct {
 
 func (x *ListUserRolesRequest) Reset() {
 	*x = ListUserRolesRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[50]
+	mi := &file_v1_user_user_service_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2850,7 +2649,7 @@ func (x *ListUserRolesRequest) String() string {
 func (*ListUserRolesRequest) ProtoMessage() {}
 
 func (x *ListUserRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[50]
+	mi := &file_v1_user_user_service_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2863,7 +2662,7 @@ func (x *ListUserRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserRolesRequest.ProtoReflect.Descriptor instead.
 func (*ListUserRolesRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{50}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *ListUserRolesRequest) GetId() string {
@@ -2886,7 +2685,7 @@ type ListUserRolesResponse struct {
 
 func (x *ListUserRolesResponse) Reset() {
 	*x = ListUserRolesResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[51]
+	mi := &file_v1_user_user_service_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2898,7 +2697,7 @@ func (x *ListUserRolesResponse) String() string {
 func (*ListUserRolesResponse) ProtoMessage() {}
 
 func (x *ListUserRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[51]
+	mi := &file_v1_user_user_service_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2911,7 +2710,7 @@ func (x *ListUserRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserRolesResponse.ProtoReflect.Descriptor instead.
 func (*ListUserRolesResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{51}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *ListUserRolesResponse) GetTotal() int32 {
@@ -2938,7 +2737,7 @@ type GetUserStatsRequest struct {
 
 func (x *GetUserStatsRequest) Reset() {
 	*x = GetUserStatsRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[52]
+	mi := &file_v1_user_user_service_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2950,7 +2749,7 @@ func (x *GetUserStatsRequest) String() string {
 func (*GetUserStatsRequest) ProtoMessage() {}
 
 func (x *GetUserStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[52]
+	mi := &file_v1_user_user_service_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2963,7 +2762,7 @@ func (x *GetUserStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserStatsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{52}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *GetUserStatsRequest) GetId() string {
@@ -2986,7 +2785,7 @@ type GetUserStatsResponse struct {
 
 func (x *GetUserStatsResponse) Reset() {
 	*x = GetUserStatsResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[53]
+	mi := &file_v1_user_user_service_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2998,7 +2797,7 @@ func (x *GetUserStatsResponse) String() string {
 func (*GetUserStatsResponse) ProtoMessage() {}
 
 func (x *GetUserStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[53]
+	mi := &file_v1_user_user_service_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3011,7 +2810,7 @@ func (x *GetUserStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserStatsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{53}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *GetUserStatsResponse) GetTotalViews() int32 {
@@ -3054,7 +2853,7 @@ type GetUserPlaylistsRequest struct {
 
 func (x *GetUserPlaylistsRequest) Reset() {
 	*x = GetUserPlaylistsRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[54]
+	mi := &file_v1_user_user_service_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3066,7 +2865,7 @@ func (x *GetUserPlaylistsRequest) String() string {
 func (*GetUserPlaylistsRequest) ProtoMessage() {}
 
 func (x *GetUserPlaylistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[54]
+	mi := &file_v1_user_user_service_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3079,7 +2878,7 @@ func (x *GetUserPlaylistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPlaylistsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserPlaylistsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{54}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *GetUserPlaylistsRequest) GetId() string {
@@ -3116,7 +2915,7 @@ type GetUserPlaylistsResponse struct {
 
 func (x *GetUserPlaylistsResponse) Reset() {
 	*x = GetUserPlaylistsResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[55]
+	mi := &file_v1_user_user_service_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3128,7 +2927,7 @@ func (x *GetUserPlaylistsResponse) String() string {
 func (*GetUserPlaylistsResponse) ProtoMessage() {}
 
 func (x *GetUserPlaylistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[55]
+	mi := &file_v1_user_user_service_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3141,7 +2940,7 @@ func (x *GetUserPlaylistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPlaylistsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserPlaylistsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{55}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *GetUserPlaylistsResponse) GetTotal() int32 {
@@ -3184,7 +2983,7 @@ type GetUserFollowersRequest struct {
 
 func (x *GetUserFollowersRequest) Reset() {
 	*x = GetUserFollowersRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[56]
+	mi := &file_v1_user_user_service_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3196,7 +2995,7 @@ func (x *GetUserFollowersRequest) String() string {
 func (*GetUserFollowersRequest) ProtoMessage() {}
 
 func (x *GetUserFollowersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[56]
+	mi := &file_v1_user_user_service_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3209,7 +3008,7 @@ func (x *GetUserFollowersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserFollowersRequest.ProtoReflect.Descriptor instead.
 func (*GetUserFollowersRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{56}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *GetUserFollowersRequest) GetId() string {
@@ -3246,7 +3045,7 @@ type GetUserFollowersResponse struct {
 
 func (x *GetUserFollowersResponse) Reset() {
 	*x = GetUserFollowersResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[57]
+	mi := &file_v1_user_user_service_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3258,7 +3057,7 @@ func (x *GetUserFollowersResponse) String() string {
 func (*GetUserFollowersResponse) ProtoMessage() {}
 
 func (x *GetUserFollowersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[57]
+	mi := &file_v1_user_user_service_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3271,7 +3070,7 @@ func (x *GetUserFollowersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserFollowersResponse.ProtoReflect.Descriptor instead.
 func (*GetUserFollowersResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{57}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *GetUserFollowersResponse) GetTotal() int32 {
@@ -3319,7 +3118,7 @@ type UpsertHistoryRequest struct {
 
 func (x *UpsertHistoryRequest) Reset() {
 	*x = UpsertHistoryRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[58]
+	mi := &file_v1_user_user_service_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3331,7 +3130,7 @@ func (x *UpsertHistoryRequest) String() string {
 func (*UpsertHistoryRequest) ProtoMessage() {}
 
 func (x *UpsertHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[58]
+	mi := &file_v1_user_user_service_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3344,7 +3143,7 @@ func (x *UpsertHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpsertHistoryRequest.ProtoReflect.Descriptor instead.
 func (*UpsertHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{58}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *UpsertHistoryRequest) GetContentId() string {
@@ -3386,7 +3185,7 @@ type UpsertHistoryResponse struct {
 
 func (x *UpsertHistoryResponse) Reset() {
 	*x = UpsertHistoryResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[59]
+	mi := &file_v1_user_user_service_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3398,7 +3197,7 @@ func (x *UpsertHistoryResponse) String() string {
 func (*UpsertHistoryResponse) ProtoMessage() {}
 
 func (x *UpsertHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[59]
+	mi := &file_v1_user_user_service_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3411,7 +3210,7 @@ func (x *UpsertHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpsertHistoryResponse.ProtoReflect.Descriptor instead.
 func (*UpsertHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{59}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *UpsertHistoryResponse) GetItem() *types.HistoryItem {
@@ -3432,7 +3231,7 @@ type SyncHistoryRequest struct {
 
 func (x *SyncHistoryRequest) Reset() {
 	*x = SyncHistoryRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[60]
+	mi := &file_v1_user_user_service_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3444,7 +3243,7 @@ func (x *SyncHistoryRequest) String() string {
 func (*SyncHistoryRequest) ProtoMessage() {}
 
 func (x *SyncHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[60]
+	mi := &file_v1_user_user_service_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3457,7 +3256,7 @@ func (x *SyncHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SyncHistoryRequest.ProtoReflect.Descriptor instead.
 func (*SyncHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{60}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *SyncHistoryRequest) GetItems() []*types.HistoryItem {
@@ -3480,7 +3279,7 @@ type SyncHistoryResponse struct {
 
 func (x *SyncHistoryResponse) Reset() {
 	*x = SyncHistoryResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[61]
+	mi := &file_v1_user_user_service_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3492,7 +3291,7 @@ func (x *SyncHistoryResponse) String() string {
 func (*SyncHistoryResponse) ProtoMessage() {}
 
 func (x *SyncHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[61]
+	mi := &file_v1_user_user_service_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3505,7 +3304,7 @@ func (x *SyncHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SyncHistoryResponse.ProtoReflect.Descriptor instead.
 func (*SyncHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{61}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *SyncHistoryResponse) GetItems() []*types.HistoryItem {
@@ -3531,7 +3330,7 @@ type ClearHistoryRequest struct {
 
 func (x *ClearHistoryRequest) Reset() {
 	*x = ClearHistoryRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[62]
+	mi := &file_v1_user_user_service_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3543,7 +3342,7 @@ func (x *ClearHistoryRequest) String() string {
 func (*ClearHistoryRequest) ProtoMessage() {}
 
 func (x *ClearHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[62]
+	mi := &file_v1_user_user_service_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3556,7 +3355,7 @@ func (x *ClearHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClearHistoryRequest.ProtoReflect.Descriptor instead.
 func (*ClearHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{62}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{58}
 }
 
 // ClearHistoryResponse is the response for clearing all history.
@@ -3570,7 +3369,7 @@ type ClearHistoryResponse struct {
 
 func (x *ClearHistoryResponse) Reset() {
 	*x = ClearHistoryResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[63]
+	mi := &file_v1_user_user_service_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3582,7 +3381,7 @@ func (x *ClearHistoryResponse) String() string {
 func (*ClearHistoryResponse) ProtoMessage() {}
 
 func (x *ClearHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[63]
+	mi := &file_v1_user_user_service_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3595,7 +3394,7 @@ func (x *ClearHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClearHistoryResponse.ProtoReflect.Descriptor instead.
 func (*ClearHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{63}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *ClearHistoryResponse) GetDeletedCount() int32 {
@@ -3616,7 +3415,7 @@ type RemoveHistoryItemRequest struct {
 
 func (x *RemoveHistoryItemRequest) Reset() {
 	*x = RemoveHistoryItemRequest{}
-	mi := &file_v1_user_user_service_proto_msgTypes[64]
+	mi := &file_v1_user_user_service_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3628,7 +3427,7 @@ func (x *RemoveHistoryItemRequest) String() string {
 func (*RemoveHistoryItemRequest) ProtoMessage() {}
 
 func (x *RemoveHistoryItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[64]
+	mi := &file_v1_user_user_service_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3641,7 +3440,7 @@ func (x *RemoveHistoryItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveHistoryItemRequest.ProtoReflect.Descriptor instead.
 func (*RemoveHistoryItemRequest) Descriptor() ([]byte, []int) {
-	return file_v1_user_user_service_proto_rawDescGZIP(), []int{64}
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *RemoveHistoryItemRequest) GetId() string {
@@ -3660,7 +3459,7 @@ type RemoveHistoryItemResponse struct {
 
 func (x *RemoveHistoryItemResponse) Reset() {
 	*x = RemoveHistoryItemResponse{}
-	mi := &file_v1_user_user_service_proto_msgTypes[65]
+	mi := &file_v1_user_user_service_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3672,7 +3471,7 @@ func (x *RemoveHistoryItemResponse) String() string {
 func (*RemoveHistoryItemResponse) ProtoMessage() {}
 
 func (x *RemoveHistoryItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_user_user_service_proto_msgTypes[65]
+	mi := &file_v1_user_user_service_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3685,17 +3484,1369 @@ func (x *RemoveHistoryItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveHistoryItemResponse.ProtoReflect.Descriptor instead.
 func (*RemoveHistoryItemResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{61}
+}
+
+// GetUserByUsernameRequest is the request for getting a user by username.
+type GetUserByUsernameRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Username      string                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByUsernameRequest) Reset() {
+	*x = GetUserByUsernameRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByUsernameRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByUsernameRequest) ProtoMessage() {}
+
+func (x *GetUserByUsernameRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByUsernameRequest.ProtoReflect.Descriptor instead.
+func (*GetUserByUsernameRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *GetUserByUsernameRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+// GetUserByUsernameResponse is the response for getting a user by username.
+type GetUserByUsernameResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *types.User            `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByUsernameResponse) Reset() {
+	*x = GetUserByUsernameResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByUsernameResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByUsernameResponse) ProtoMessage() {}
+
+func (x *GetUserByUsernameResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByUsernameResponse.ProtoReflect.Descriptor instead.
+func (*GetUserByUsernameResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *GetUserByUsernameResponse) GetUser() *types.User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+// SubscribeUserRequest is the request for subscribing to a user.
+type SubscribeUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeUserRequest) Reset() {
+	*x = SubscribeUserRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeUserRequest) ProtoMessage() {}
+
+func (x *SubscribeUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeUserRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeUserRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *SubscribeUserRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+// SubscribeUserResponse is the response for subscribing to a user.
+type SubscribeUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	IsSubscribed  bool                   `protobuf:"varint,2,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeUserResponse) Reset() {
+	*x = SubscribeUserResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeUserResponse) ProtoMessage() {}
+
+func (x *SubscribeUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeUserResponse.ProtoReflect.Descriptor instead.
+func (*SubscribeUserResponse) Descriptor() ([]byte, []int) {
 	return file_v1_user_user_service_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *SubscribeUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *SubscribeUserResponse) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+// UnsubscribeUserRequest is the request for unsubscribing from a user.
+type UnsubscribeUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnsubscribeUserRequest) Reset() {
+	*x = UnsubscribeUserRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnsubscribeUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnsubscribeUserRequest) ProtoMessage() {}
+
+func (x *UnsubscribeUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnsubscribeUserRequest.ProtoReflect.Descriptor instead.
+func (*UnsubscribeUserRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{66}
+}
+
+func (x *UnsubscribeUserRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+// UnsubscribeUserResponse is the response for unsubscribing from a user.
+type UnsubscribeUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	IsSubscribed  bool                   `protobuf:"varint,2,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnsubscribeUserResponse) Reset() {
+	*x = UnsubscribeUserResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnsubscribeUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnsubscribeUserResponse) ProtoMessage() {}
+
+func (x *UnsubscribeUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnsubscribeUserResponse.ProtoReflect.Descriptor instead.
+func (*UnsubscribeUserResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *UnsubscribeUserResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UnsubscribeUserResponse) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+// GetUserSubscriptionRequest is the request for getting subscription status.
+type GetUserSubscriptionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserSubscriptionRequest) Reset() {
+	*x = GetUserSubscriptionRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserSubscriptionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserSubscriptionRequest) ProtoMessage() {}
+
+func (x *GetUserSubscriptionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserSubscriptionRequest.ProtoReflect.Descriptor instead.
+func (*GetUserSubscriptionRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{68}
+}
+
+func (x *GetUserSubscriptionRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+// GetUserSubscriptionResponse is the response for getting subscription status.
+type GetUserSubscriptionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsSubscribed  bool                   `protobuf:"varint,1,opt,name=is_subscribed,proto3" json:"is_subscribed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserSubscriptionResponse) Reset() {
+	*x = GetUserSubscriptionResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[69]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserSubscriptionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserSubscriptionResponse) ProtoMessage() {}
+
+func (x *GetUserSubscriptionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[69]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserSubscriptionResponse.ProtoReflect.Descriptor instead.
+func (*GetUserSubscriptionResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{69}
+}
+
+func (x *GetUserSubscriptionResponse) GetIsSubscribed() bool {
+	if x != nil {
+		return x.IsSubscribed
+	}
+	return false
+}
+
+// GetMyFollowersRequest is the request for getting my followers.
+type GetMyFollowersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMyFollowersRequest) Reset() {
+	*x = GetMyFollowersRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMyFollowersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMyFollowersRequest) ProtoMessage() {}
+
+func (x *GetMyFollowersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMyFollowersRequest.ProtoReflect.Descriptor instead.
+func (*GetMyFollowersRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *GetMyFollowersRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMyFollowersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// GetMyFollowersResponse is the response for getting my followers.
+type GetMyFollowersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Followers     []*types.User          `protobuf:"bytes,2,rep,name=followers,proto3" json:"followers,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMyFollowersResponse) Reset() {
+	*x = GetMyFollowersResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMyFollowersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMyFollowersResponse) ProtoMessage() {}
+
+func (x *GetMyFollowersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMyFollowersResponse.ProtoReflect.Descriptor instead.
+func (*GetMyFollowersResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *GetMyFollowersResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetMyFollowersResponse) GetFollowers() []*types.User {
+	if x != nil {
+		return x.Followers
+	}
+	return nil
+}
+
+func (x *GetMyFollowersResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMyFollowersResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// GetMyChannelsRequest is the request for getting my channels.
+type GetMyChannelsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMyChannelsRequest) Reset() {
+	*x = GetMyChannelsRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[72]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMyChannelsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMyChannelsRequest) ProtoMessage() {}
+
+func (x *GetMyChannelsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[72]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMyChannelsRequest.ProtoReflect.Descriptor instead.
+func (*GetMyChannelsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{72}
+}
+
+func (x *GetMyChannelsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMyChannelsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// GetMyChannelsResponse is the response for getting my channels.
+type GetMyChannelsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Total         int32                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Channels      []*types.Channel       `protobuf:"bytes,2,rep,name=channels,proto3" json:"channels,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMyChannelsResponse) Reset() {
+	*x = GetMyChannelsResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMyChannelsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMyChannelsResponse) ProtoMessage() {}
+
+func (x *GetMyChannelsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMyChannelsResponse.ProtoReflect.Descriptor instead.
+func (*GetMyChannelsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{73}
+}
+
+func (x *GetMyChannelsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetMyChannelsResponse) GetChannels() []*types.Channel {
+	if x != nil {
+		return x.Channels
+	}
+	return nil
+}
+
+func (x *GetMyChannelsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetMyChannelsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// RemoveFavoriteRequest is the request for removing a favorite.
+type RemoveFavoriteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveFavoriteRequest) Reset() {
+	*x = RemoveFavoriteRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveFavoriteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveFavoriteRequest) ProtoMessage() {}
+
+func (x *RemoveFavoriteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveFavoriteRequest.ProtoReflect.Descriptor instead.
+func (*RemoveFavoriteRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *RemoveFavoriteRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+// RemoveFavoriteResponse is the response for removing a favorite.
+type RemoveFavoriteResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveFavoriteResponse) Reset() {
+	*x = RemoveFavoriteResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveFavoriteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveFavoriteResponse) ProtoMessage() {}
+
+func (x *RemoveFavoriteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveFavoriteResponse.ProtoReflect.Descriptor instead.
+func (*RemoveFavoriteResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{75}
+}
+
+func (x *RemoveFavoriteResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type UpdateMySlugRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateMySlugRequest) Reset() {
+	*x = UpdateMySlugRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMySlugRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMySlugRequest) ProtoMessage() {}
+
+func (x *UpdateMySlugRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMySlugRequest.ProtoReflect.Descriptor instead.
+func (*UpdateMySlugRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *UpdateMySlugRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+type UpdateMySlugResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *types.User            `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateMySlugResponse) Reset() {
+	*x = UpdateMySlugResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMySlugResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMySlugResponse) ProtoMessage() {}
+
+func (x *UpdateMySlugResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMySlugResponse.ProtoReflect.Descriptor instead.
+func (*UpdateMySlugResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *UpdateMySlugResponse) GetUser() *types.User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type GetUserLikesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserLikesRequest) Reset() {
+	*x = GetUserLikesRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[78]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserLikesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserLikesRequest) ProtoMessage() {}
+
+func (x *GetUserLikesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[78]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserLikesRequest.ProtoReflect.Descriptor instead.
+func (*GetUserLikesRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{78}
+}
+
+func (x *GetUserLikesRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *GetUserLikesRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUserLikesRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetUserLikesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*types.Like          `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserLikesResponse) Reset() {
+	*x = GetUserLikesResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[79]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserLikesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserLikesResponse) ProtoMessage() {}
+
+func (x *GetUserLikesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[79]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserLikesResponse.ProtoReflect.Descriptor instead.
+func (*GetUserLikesResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *GetUserLikesResponse) GetItems() []*types.Like {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *GetUserLikesResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetUserLikesResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUserLikesResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetUserSubscriptionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserSubscriptionsRequest) Reset() {
+	*x = GetUserSubscriptionsRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[80]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserSubscriptionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserSubscriptionsRequest) ProtoMessage() {}
+
+func (x *GetUserSubscriptionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[80]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserSubscriptionsRequest.ProtoReflect.Descriptor instead.
+func (*GetUserSubscriptionsRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{80}
+}
+
+func (x *GetUserSubscriptionsRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *GetUserSubscriptionsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUserSubscriptionsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type GetUserSubscriptionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*types.Channel       `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserSubscriptionsResponse) Reset() {
+	*x = GetUserSubscriptionsResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserSubscriptionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserSubscriptionsResponse) ProtoMessage() {}
+
+func (x *GetUserSubscriptionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserSubscriptionsResponse.ProtoReflect.Descriptor instead.
+func (*GetUserSubscriptionsResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{81}
+}
+
+func (x *GetUserSubscriptionsResponse) GetItems() []*types.Channel {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *GetUserSubscriptionsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetUserSubscriptionsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUserSubscriptionsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ChangePasswordRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	CurrentPassword string                 `protobuf:"bytes,1,opt,name=current_password,proto3" json:"current_password,omitempty"`
+	NewPassword     string                 `protobuf:"bytes,2,opt,name=new_password,proto3" json:"new_password,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ChangePasswordRequest) Reset() {
+	*x = ChangePasswordRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangePasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePasswordRequest) ProtoMessage() {}
+
+func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePasswordRequest.ProtoReflect.Descriptor instead.
+func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{82}
+}
+
+func (x *ChangePasswordRequest) GetCurrentPassword() string {
+	if x != nil {
+		return x.CurrentPassword
+	}
+	return ""
+}
+
+func (x *ChangePasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+type ChangePasswordResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangePasswordResponse) Reset() {
+	*x = ChangePasswordResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[83]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangePasswordResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePasswordResponse) ProtoMessage() {}
+
+func (x *ChangePasswordResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[83]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePasswordResponse.ProtoReflect.Descriptor instead.
+func (*ChangePasswordResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{83}
+}
+
+func (x *ChangePasswordResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type ForgotPasswordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ForgotPasswordRequest) Reset() {
+	*x = ForgotPasswordRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[84]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ForgotPasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ForgotPasswordRequest) ProtoMessage() {}
+
+func (x *ForgotPasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[84]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ForgotPasswordRequest.ProtoReflect.Descriptor instead.
+func (*ForgotPasswordRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{84}
+}
+
+func (x *ForgotPasswordRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type ForgotPasswordResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ForgotPasswordResponse) Reset() {
+	*x = ForgotPasswordResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[85]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ForgotPasswordResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ForgotPasswordResponse) ProtoMessage() {}
+
+func (x *ForgotPasswordResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[85]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ForgotPasswordResponse.ProtoReflect.Descriptor instead.
+func (*ForgotPasswordResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{85}
+}
+
+func (x *ForgotPasswordResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ForgotPasswordResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ResetPasswordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,proto3" json:"new_password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResetPasswordRequest) Reset() {
+	*x = ResetPasswordRequest{}
+	mi := &file_v1_user_user_service_proto_msgTypes[86]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResetPasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPasswordRequest) ProtoMessage() {}
+
+func (x *ResetPasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[86]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPasswordRequest.ProtoReflect.Descriptor instead.
+func (*ResetPasswordRequest) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{86}
+}
+
+func (x *ResetPasswordRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *ResetPasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+type ResetPasswordResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResetPasswordResponse) Reset() {
+	*x = ResetPasswordResponse{}
+	mi := &file_v1_user_user_service_proto_msgTypes[87]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResetPasswordResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPasswordResponse) ProtoMessage() {}
+
+func (x *ResetPasswordResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_user_user_service_proto_msgTypes[87]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPasswordResponse.ProtoReflect.Descriptor instead.
+func (*ResetPasswordResponse) Descriptor() ([]byte, []int) {
+	return file_v1_user_user_service_proto_rawDescGZIP(), []int{87}
+}
+
+func (x *ResetPasswordResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ResetPasswordResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
 }
 
 var File_v1_user_user_service_proto protoreflect.FileDescriptor
 
 const file_v1_user_user_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1av1/user/user_service.proto\x12\x14api.v1.services.user\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x13v1/types/user.proto\x1a\x14v1/types/media.proto\"F\n" +
-	"\fLoginRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xaa\x01\n" +
+	"\x1av1/user/user_service.proto\x12\x14api.v1.services.user\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto\x1a\x17validate/validate.proto\x1a\x13v1/types/user.proto\x1a\x14v1/types/media.proto\"^\n" +
+	"\fLoginRequest\x12&\n" +
+	"\busername\x18\x01 \x01(\tB\n" +
+	"\xfaB\ar\x05\x10\x01\x18\x80\x01R\busername\x12&\n" +
+	"\bpassword\x18\x02 \x01(\tB\n" +
+	"\xfaB\ar\x05\x10\x06\x18\x80\x02R\bpassword\"\xaa\x01\n" +
 	"\rLoginResponse\x12\"\n" +
 	"\faccess_token\x18\x01 \x01(\tR\faccess_token\x12$\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\rrefresh_token\x12\x1e\n" +
@@ -3726,17 +4877,7 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\rrefresh_token\x18\x03 \x01(\tR\rrefresh_token\x12\x1e\n" +
 	"\n" +
 	"expires_at\x18\x04 \x01(\x03R\n" +
-	"expires_at\"-\n" +
-	"\x15ForgotPasswordRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\"L\n" +
-	"\x16ForgotPasswordResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"H\n" +
-	"\x14ResetPasswordRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"1\n" +
-	"\x15ResetPasswordResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x17\n" +
+	"expires_at\"\x17\n" +
 	"\x15GetCurrentUserRequest\"I\n" +
 	"\x16GetCurrentUserResponse\x12/\n" +
 	"\x04user\x18\x01 \x01(\v2\x1b.api.v1.services.types.UserR\x04user\"\x0e\n" +
@@ -3915,14 +5056,88 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\rdeleted_count\x18\x01 \x01(\x05R\rdeleted_count\"*\n" +
 	"\x18RemoveHistoryItemRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x1b\n" +
-	"\x19RemoveHistoryItemResponse2\x8f#\n" +
-	"\vUserService\x12o\n" +
-	"\x05Login\x12\".api.v1.services.user.LoginRequest\x1a#.api.v1.services.user.LoginResponse\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\"\x12/api/v1/auth/login\x12s\n" +
-	"\x06Logout\x12#.api.v1.services.user.LogoutRequest\x1a$.api.v1.services.user.LogoutResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/logout\x12\x86\x01\n" +
-	"\fRefreshToken\x12).api.v1.services.user.RefreshTokenRequest\x1a*.api.v1.services.user.RefreshTokenResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12{\n" +
-	"\bRegister\x12%.api.v1.services.user.RegisterRequest\x1a&.api.v1.services.user.RegisterResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/auth/register\x12\x94\x01\n" +
-	"\x0eForgotPassword\x12+.api.v1.services.user.ForgotPasswordRequest\x1a,.api.v1.services.user.ForgotPasswordResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/api/v1/auth/forgot-password\x12\x90\x01\n" +
-	"\rResetPassword\x12*.api.v1.services.user.ResetPasswordRequest\x1a+.api.v1.services.user.ResetPasswordResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/auth/reset-password\x12\x84\x01\n" +
+	"\x19RemoveHistoryItemResponse\"6\n" +
+	"\x18GetUserByUsernameRequest\x12\x1a\n" +
+	"\busername\x18\x01 \x01(\tR\busername\"L\n" +
+	"\x19GetUserByUsernameResponse\x12/\n" +
+	"\x04user\x18\x01 \x01(\v2\x1b.api.v1.services.types.UserR\x04user\"&\n" +
+	"\x14SubscribeUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"W\n" +
+	"\x15SubscribeUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12$\n" +
+	"\ris_subscribed\x18\x02 \x01(\bR\ris_subscribed\"(\n" +
+	"\x16UnsubscribeUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"Y\n" +
+	"\x17UnsubscribeUserResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12$\n" +
+	"\ris_subscribed\x18\x02 \x01(\bR\ris_subscribed\",\n" +
+	"\x1aGetUserSubscriptionRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"C\n" +
+	"\x1bGetUserSubscriptionResponse\x12$\n" +
+	"\ris_subscribed\x18\x01 \x01(\bR\ris_subscribed\"I\n" +
+	"\x15GetMyFollowersRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x9b\x01\n" +
+	"\x16GetMyFollowersResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x129\n" +
+	"\tfollowers\x18\x02 \x03(\v2\x1b.api.v1.services.types.UserR\tfollowers\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"H\n" +
+	"\x14GetMyChannelsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\tpage_size\"\x9b\x01\n" +
+	"\x15GetMyChannelsResponse\x12\x14\n" +
+	"\x05total\x18\x01 \x01(\x05R\x05total\x12:\n" +
+	"\bchannels\x18\x02 \x03(\v2\x1e.api.v1.services.types.ChannelR\bchannels\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"'\n" +
+	"\x15RemoveFavoriteRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
+	"\x16RemoveFavoriteResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\")\n" +
+	"\x13UpdateMySlugRequest\x12\x12\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"G\n" +
+	"\x14UpdateMySlugResponse\x12/\n" +
+	"\x04user\x18\x01 \x01(\v2\x1b.api.v1.services.types.UserR\x04user\"W\n" +
+	"\x13GetUserLikesRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x91\x01\n" +
+	"\x14GetUserLikesResponse\x121\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.api.v1.services.types.LikeR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"_\n" +
+	"\x1bGetUserSubscriptionsRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\tpage_size\"\x9c\x01\n" +
+	"\x1cGetUserSubscriptionsResponse\x124\n" +
+	"\x05items\x18\x01 \x03(\v2\x1e.api.v1.services.types.ChannelR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1c\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\tpage_size\"g\n" +
+	"\x15ChangePasswordRequest\x12*\n" +
+	"\x10current_password\x18\x01 \x01(\tR\x10current_password\x12\"\n" +
+	"\fnew_password\x18\x02 \x01(\tR\fnew_password\"2\n" +
+	"\x16ChangePasswordResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"-\n" +
+	"\x15ForgotPasswordRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"L\n" +
+	"\x16ForgotPasswordResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"P\n" +
+	"\x14ResetPasswordRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\"\n" +
+	"\fnew_password\x18\x02 \x01(\tR\fnew_password\"K\n" +
+	"\x15ResetPasswordResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xc0-\n" +
+	"\vUserService\x12p\n" +
+	"\x05Login\x12\".api.v1.services.user.LoginRequest\x1a#.api.v1.services.user.LoginResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/signin\x12t\n" +
+	"\x06Logout\x12#.api.v1.services.user.LogoutRequest\x1a$.api.v1.services.user.LogoutResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/signout\x12\x86\x01\n" +
+	"\fRefreshToken\x12).api.v1.services.user.RefreshTokenRequest\x1a*.api.v1.services.user.RefreshTokenResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/auth/refresh\x12y\n" +
+	"\bRegister\x12%.api.v1.services.user.RegisterRequest\x1a&.api.v1.services.user.RegisterResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/v1/auth/signup\x12\x84\x01\n" +
 	"\x0eGetCurrentUser\x12+.api.v1.services.user.GetCurrentUserRequest\x1a,.api.v1.services.user.GetCurrentUserResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/auth/me\x12d\n" +
 	"\x05GetMe\x12\".api.v1.services.user.GetMeRequest\x1a#.api.v1.services.user.GetMeResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/api/v1/me\x12p\n" +
@@ -3956,7 +5171,18 @@ const file_v1_user_user_service_proto_rawDesc = "" +
 	"\rListUserRoles\x12*.api.v1.services.user.ListUserRolesRequest\x1a+.api.v1.services.user.ListUserRolesResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/roles\x12\x87\x01\n" +
 	"\fGetUserStats\x12).api.v1.services.user.GetUserStatsRequest\x1a*.api.v1.services.user.GetUserStatsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/stats\x12\x97\x01\n" +
 	"\x10GetUserPlaylists\x12-.api.v1.services.user.GetUserPlaylistsRequest\x1a..api.v1.services.user.GetUserPlaylistsResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/users/{id}/playlists\x12\x97\x01\n" +
-	"\x10GetUserFollowers\x12-.api.v1.services.user.GetUserFollowersRequest\x1a..api.v1.services.user.GetUserFollowersResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/users/{id}/followersB\xd7\x01\n" +
+	"\x10GetUserFollowers\x12-.api.v1.services.user.GetUserFollowersRequest\x1a..api.v1.services.user.GetUserFollowersResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/users/{id}/followers\x12\x9a\x01\n" +
+	"\x11GetUserByUsername\x12..api.v1.services.user.GetUserByUsernameRequest\x1a/.api.v1.services.user.GetUserByUsernameResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/api/v1/usernames/{username}\x12\x91\x01\n" +
+	"\rSubscribeUser\x12*.api.v1.services.user.SubscribeUserRequest\x1a+.api.v1.services.user.SubscribeUserResponse\"'\x82\xd3\xe4\x93\x02!:\x01*\"\x1c/api/v1/users/{id}/subscribe\x12\x94\x01\n" +
+	"\x0fUnsubscribeUser\x12,.api.v1.services.user.UnsubscribeUserRequest\x1a-.api.v1.services.user.UnsubscribeUserResponse\"$\x82\xd3\xe4\x93\x02\x1e*\x1c/api/v1/users/{id}/subscribe\x12\xa3\x01\n" +
+	"\x13GetUserSubscription\x120.api.v1.services.user.GetUserSubscriptionRequest\x1a1.api.v1.services.user.GetUserSubscriptionResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/v1/users/{id}/subscription\x12\x89\x01\n" +
+	"\x0eGetMyFollowers\x12+.api.v1.services.user.GetMyFollowersRequest\x1a,.api.v1.services.user.GetMyFollowersResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/me/followers\x12\x85\x01\n" +
+	"\rGetMyChannels\x12*.api.v1.services.user.GetMyChannelsRequest\x1a+.api.v1.services.user.GetMyChannelsResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/me/channels\x12\x8e\x01\n" +
+	"\x0eRemoveFavorite\x12+.api.v1.services.user.RemoveFavoriteRequest\x1a,.api.v1.services.user.RemoveFavoriteResponse\"!\x82\xd3\xe4\x93\x02\x1b*\x19/api/v1/me/favorites/{id}\x12\x81\x01\n" +
+	"\fUpdateMySlug\x12).api.v1.services.user.UpdateMySlugRequest\x1a*.api.v1.services.user.UpdateMySlugResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\x1a\x0f/api/v1/me/slug\x12\x87\x01\n" +
+	"\fGetUserLikes\x12).api.v1.services.user.GetUserLikesRequest\x1a*.api.v1.services.user.GetUserLikesResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/users/{id}/likes\x12\xa7\x01\n" +
+	"\x14GetUserSubscriptions\x121.api.v1.services.user.GetUserSubscriptionsRequest\x1a2.api.v1.services.user.GetUserSubscriptionsResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /api/v1/users/{id}/subscriptions\x12\x8d\x01\n" +
+	"\x0eChangePassword\x12+.api.v1.services.user.ChangePasswordRequest\x1a,.api.v1.services.user.ChangePasswordResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/api/v1/auth/passwordB\xd7\x01\n" +
 	"\x18com.api.v1.services.userB\x10UserServiceProtoP\x01Z5origadmin/application/origstudio/api/gen/v1/user;user\xa2\x02\x04AVSU\xaa\x02\x14Api.V1.Services.User\xca\x02\x14Api\\V1\\Services\\User\xe2\x02 Api\\V1\\Services\\User\\GPBMetadata\xea\x02\x17Api::V1::Services::Userb\x06proto3"
 
 var (
@@ -3971,184 +5197,230 @@ func file_v1_user_user_service_proto_rawDescGZIP() []byte {
 	return file_v1_user_user_service_proto_rawDescData
 }
 
-var file_v1_user_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 66)
+var file_v1_user_user_service_proto_msgTypes = make([]protoimpl.MessageInfo, 88)
 var file_v1_user_user_service_proto_goTypes = []any{
-	(*LoginRequest)(nil),               // 0: api.v1.services.user.LoginRequest
-	(*LoginResponse)(nil),              // 1: api.v1.services.user.LoginResponse
-	(*LogoutRequest)(nil),              // 2: api.v1.services.user.LogoutRequest
-	(*LogoutResponse)(nil),             // 3: api.v1.services.user.LogoutResponse
-	(*RefreshTokenRequest)(nil),        // 4: api.v1.services.user.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),       // 5: api.v1.services.user.RefreshTokenResponse
-	(*RegisterRequest)(nil),            // 6: api.v1.services.user.RegisterRequest
-	(*RegisterResponse)(nil),           // 7: api.v1.services.user.RegisterResponse
-	(*ForgotPasswordRequest)(nil),      // 8: api.v1.services.user.ForgotPasswordRequest
-	(*ForgotPasswordResponse)(nil),     // 9: api.v1.services.user.ForgotPasswordResponse
-	(*ResetPasswordRequest)(nil),       // 10: api.v1.services.user.ResetPasswordRequest
-	(*ResetPasswordResponse)(nil),      // 11: api.v1.services.user.ResetPasswordResponse
-	(*GetCurrentUserRequest)(nil),      // 12: api.v1.services.user.GetCurrentUserRequest
-	(*GetCurrentUserResponse)(nil),     // 13: api.v1.services.user.GetCurrentUserResponse
-	(*GetMeRequest)(nil),               // 14: api.v1.services.user.GetMeRequest
-	(*GetMeResponse)(nil),              // 15: api.v1.services.user.GetMeResponse
-	(*UpdateMeRequest)(nil),            // 16: api.v1.services.user.UpdateMeRequest
-	(*UpdateMeResponse)(nil),           // 17: api.v1.services.user.UpdateMeResponse
-	(*UpdateMyPasswordRequest)(nil),    // 18: api.v1.services.user.UpdateMyPasswordRequest
-	(*UpdateMyPasswordResponse)(nil),   // 19: api.v1.services.user.UpdateMyPasswordResponse
-	(*GetMyPlaylistsRequest)(nil),      // 20: api.v1.services.user.GetMyPlaylistsRequest
-	(*GetMyPlaylistsResponse)(nil),     // 21: api.v1.services.user.GetMyPlaylistsResponse
-	(*GetMyFavoritesRequest)(nil),      // 22: api.v1.services.user.GetMyFavoritesRequest
-	(*GetMyFavoritesResponse)(nil),     // 23: api.v1.services.user.GetMyFavoritesResponse
-	(*GetMyLikesRequest)(nil),          // 24: api.v1.services.user.GetMyLikesRequest
-	(*GetMyLikesResponse)(nil),         // 25: api.v1.services.user.GetMyLikesResponse
-	(*GetMySubscriptionsRequest)(nil),  // 26: api.v1.services.user.GetMySubscriptionsRequest
-	(*GetMySubscriptionsResponse)(nil), // 27: api.v1.services.user.GetMySubscriptionsResponse
-	(*GetMyHistoryRequest)(nil),        // 28: api.v1.services.user.GetMyHistoryRequest
-	(*GetMyHistoryResponse)(nil),       // 29: api.v1.services.user.GetMyHistoryResponse
-	(*GetMyStatsRequest)(nil),          // 30: api.v1.services.user.GetMyStatsRequest
-	(*GetMyStatsResponse)(nil),         // 31: api.v1.services.user.GetMyStatsResponse
-	(*ListUsersRequest)(nil),           // 32: api.v1.services.user.ListUsersRequest
-	(*ListUsersResponse)(nil),          // 33: api.v1.services.user.ListUsersResponse
-	(*GetUserRequest)(nil),             // 34: api.v1.services.user.GetUserRequest
-	(*GetUserResponse)(nil),            // 35: api.v1.services.user.GetUserResponse
-	(*CreateUserRequest)(nil),          // 36: api.v1.services.user.CreateUserRequest
-	(*CreateUserResponse)(nil),         // 37: api.v1.services.user.CreateUserResponse
-	(*UpdateUserRequest)(nil),          // 38: api.v1.services.user.UpdateUserRequest
-	(*UpdateUserResponse)(nil),         // 39: api.v1.services.user.UpdateUserResponse
-	(*DeleteUserRequest)(nil),          // 40: api.v1.services.user.DeleteUserRequest
-	(*DeleteUserResponse)(nil),         // 41: api.v1.services.user.DeleteUserResponse
-	(*UpdateUserStatusRequest)(nil),    // 42: api.v1.services.user.UpdateUserStatusRequest
-	(*UpdateUserStatusResponse)(nil),   // 43: api.v1.services.user.UpdateUserStatusResponse
-	(*UpdateUserRolesRequest)(nil),     // 44: api.v1.services.user.UpdateUserRolesRequest
-	(*UpdateUserRolesResponse)(nil),    // 45: api.v1.services.user.UpdateUserRolesResponse
-	(*ChangeUserPasswordRequest)(nil),  // 46: api.v1.services.user.ChangeUserPasswordRequest
-	(*ChangeUserPasswordResponse)(nil), // 47: api.v1.services.user.ChangeUserPasswordResponse
-	(*VerifyPasswordRequest)(nil),      // 48: api.v1.services.user.VerifyPasswordRequest
-	(*VerifyPasswordResponse)(nil),     // 49: api.v1.services.user.VerifyPasswordResponse
-	(*ListUserRolesRequest)(nil),       // 50: api.v1.services.user.ListUserRolesRequest
-	(*ListUserRolesResponse)(nil),      // 51: api.v1.services.user.ListUserRolesResponse
-	(*GetUserStatsRequest)(nil),        // 52: api.v1.services.user.GetUserStatsRequest
-	(*GetUserStatsResponse)(nil),       // 53: api.v1.services.user.GetUserStatsResponse
-	(*GetUserPlaylistsRequest)(nil),    // 54: api.v1.services.user.GetUserPlaylistsRequest
-	(*GetUserPlaylistsResponse)(nil),   // 55: api.v1.services.user.GetUserPlaylistsResponse
-	(*GetUserFollowersRequest)(nil),    // 56: api.v1.services.user.GetUserFollowersRequest
-	(*GetUserFollowersResponse)(nil),   // 57: api.v1.services.user.GetUserFollowersResponse
-	(*UpsertHistoryRequest)(nil),       // 58: api.v1.services.user.UpsertHistoryRequest
-	(*UpsertHistoryResponse)(nil),      // 59: api.v1.services.user.UpsertHistoryResponse
-	(*SyncHistoryRequest)(nil),         // 60: api.v1.services.user.SyncHistoryRequest
-	(*SyncHistoryResponse)(nil),        // 61: api.v1.services.user.SyncHistoryResponse
-	(*ClearHistoryRequest)(nil),        // 62: api.v1.services.user.ClearHistoryRequest
-	(*ClearHistoryResponse)(nil),       // 63: api.v1.services.user.ClearHistoryResponse
-	(*RemoveHistoryItemRequest)(nil),   // 64: api.v1.services.user.RemoveHistoryItemRequest
-	(*RemoveHistoryItemResponse)(nil),  // 65: api.v1.services.user.RemoveHistoryItemResponse
-	(*types.User)(nil),                 // 66: api.v1.services.types.User
-	(*types.Playlist)(nil),             // 67: api.v1.services.types.Playlist
-	(*types.Media)(nil),                // 68: api.v1.services.types.Media
-	(*types.Like)(nil),                 // 69: api.v1.services.types.Like
-	(*types.Channel)(nil),              // 70: api.v1.services.types.Channel
-	(types.ContentType)(0),             // 71: api.v1.services.types.ContentType
-	(*types.HistoryItem)(nil),          // 72: api.v1.services.types.HistoryItem
-	(*fieldmaskpb.FieldMask)(nil),      // 73: google.protobuf.FieldMask
-	(*emptypb.Empty)(nil),              // 74: google.protobuf.Empty
-	(*types.Role)(nil),                 // 75: api.v1.services.types.Role
+	(*LoginRequest)(nil),                 // 0: api.v1.services.user.LoginRequest
+	(*LoginResponse)(nil),                // 1: api.v1.services.user.LoginResponse
+	(*LogoutRequest)(nil),                // 2: api.v1.services.user.LogoutRequest
+	(*LogoutResponse)(nil),               // 3: api.v1.services.user.LogoutResponse
+	(*RefreshTokenRequest)(nil),          // 4: api.v1.services.user.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),         // 5: api.v1.services.user.RefreshTokenResponse
+	(*RegisterRequest)(nil),              // 6: api.v1.services.user.RegisterRequest
+	(*RegisterResponse)(nil),             // 7: api.v1.services.user.RegisterResponse
+	(*GetCurrentUserRequest)(nil),        // 8: api.v1.services.user.GetCurrentUserRequest
+	(*GetCurrentUserResponse)(nil),       // 9: api.v1.services.user.GetCurrentUserResponse
+	(*GetMeRequest)(nil),                 // 10: api.v1.services.user.GetMeRequest
+	(*GetMeResponse)(nil),                // 11: api.v1.services.user.GetMeResponse
+	(*UpdateMeRequest)(nil),              // 12: api.v1.services.user.UpdateMeRequest
+	(*UpdateMeResponse)(nil),             // 13: api.v1.services.user.UpdateMeResponse
+	(*UpdateMyPasswordRequest)(nil),      // 14: api.v1.services.user.UpdateMyPasswordRequest
+	(*UpdateMyPasswordResponse)(nil),     // 15: api.v1.services.user.UpdateMyPasswordResponse
+	(*GetMyPlaylistsRequest)(nil),        // 16: api.v1.services.user.GetMyPlaylistsRequest
+	(*GetMyPlaylistsResponse)(nil),       // 17: api.v1.services.user.GetMyPlaylistsResponse
+	(*GetMyFavoritesRequest)(nil),        // 18: api.v1.services.user.GetMyFavoritesRequest
+	(*GetMyFavoritesResponse)(nil),       // 19: api.v1.services.user.GetMyFavoritesResponse
+	(*GetMyLikesRequest)(nil),            // 20: api.v1.services.user.GetMyLikesRequest
+	(*GetMyLikesResponse)(nil),           // 21: api.v1.services.user.GetMyLikesResponse
+	(*GetMySubscriptionsRequest)(nil),    // 22: api.v1.services.user.GetMySubscriptionsRequest
+	(*GetMySubscriptionsResponse)(nil),   // 23: api.v1.services.user.GetMySubscriptionsResponse
+	(*GetMyHistoryRequest)(nil),          // 24: api.v1.services.user.GetMyHistoryRequest
+	(*GetMyHistoryResponse)(nil),         // 25: api.v1.services.user.GetMyHistoryResponse
+	(*GetMyStatsRequest)(nil),            // 26: api.v1.services.user.GetMyStatsRequest
+	(*GetMyStatsResponse)(nil),           // 27: api.v1.services.user.GetMyStatsResponse
+	(*ListUsersRequest)(nil),             // 28: api.v1.services.user.ListUsersRequest
+	(*ListUsersResponse)(nil),            // 29: api.v1.services.user.ListUsersResponse
+	(*GetUserRequest)(nil),               // 30: api.v1.services.user.GetUserRequest
+	(*GetUserResponse)(nil),              // 31: api.v1.services.user.GetUserResponse
+	(*CreateUserRequest)(nil),            // 32: api.v1.services.user.CreateUserRequest
+	(*CreateUserResponse)(nil),           // 33: api.v1.services.user.CreateUserResponse
+	(*UpdateUserRequest)(nil),            // 34: api.v1.services.user.UpdateUserRequest
+	(*UpdateUserResponse)(nil),           // 35: api.v1.services.user.UpdateUserResponse
+	(*DeleteUserRequest)(nil),            // 36: api.v1.services.user.DeleteUserRequest
+	(*DeleteUserResponse)(nil),           // 37: api.v1.services.user.DeleteUserResponse
+	(*UpdateUserStatusRequest)(nil),      // 38: api.v1.services.user.UpdateUserStatusRequest
+	(*UpdateUserStatusResponse)(nil),     // 39: api.v1.services.user.UpdateUserStatusResponse
+	(*UpdateUserRolesRequest)(nil),       // 40: api.v1.services.user.UpdateUserRolesRequest
+	(*UpdateUserRolesResponse)(nil),      // 41: api.v1.services.user.UpdateUserRolesResponse
+	(*ChangeUserPasswordRequest)(nil),    // 42: api.v1.services.user.ChangeUserPasswordRequest
+	(*ChangeUserPasswordResponse)(nil),   // 43: api.v1.services.user.ChangeUserPasswordResponse
+	(*VerifyPasswordRequest)(nil),        // 44: api.v1.services.user.VerifyPasswordRequest
+	(*VerifyPasswordResponse)(nil),       // 45: api.v1.services.user.VerifyPasswordResponse
+	(*ListUserRolesRequest)(nil),         // 46: api.v1.services.user.ListUserRolesRequest
+	(*ListUserRolesResponse)(nil),        // 47: api.v1.services.user.ListUserRolesResponse
+	(*GetUserStatsRequest)(nil),          // 48: api.v1.services.user.GetUserStatsRequest
+	(*GetUserStatsResponse)(nil),         // 49: api.v1.services.user.GetUserStatsResponse
+	(*GetUserPlaylistsRequest)(nil),      // 50: api.v1.services.user.GetUserPlaylistsRequest
+	(*GetUserPlaylistsResponse)(nil),     // 51: api.v1.services.user.GetUserPlaylistsResponse
+	(*GetUserFollowersRequest)(nil),      // 52: api.v1.services.user.GetUserFollowersRequest
+	(*GetUserFollowersResponse)(nil),     // 53: api.v1.services.user.GetUserFollowersResponse
+	(*UpsertHistoryRequest)(nil),         // 54: api.v1.services.user.UpsertHistoryRequest
+	(*UpsertHistoryResponse)(nil),        // 55: api.v1.services.user.UpsertHistoryResponse
+	(*SyncHistoryRequest)(nil),           // 56: api.v1.services.user.SyncHistoryRequest
+	(*SyncHistoryResponse)(nil),          // 57: api.v1.services.user.SyncHistoryResponse
+	(*ClearHistoryRequest)(nil),          // 58: api.v1.services.user.ClearHistoryRequest
+	(*ClearHistoryResponse)(nil),         // 59: api.v1.services.user.ClearHistoryResponse
+	(*RemoveHistoryItemRequest)(nil),     // 60: api.v1.services.user.RemoveHistoryItemRequest
+	(*RemoveHistoryItemResponse)(nil),    // 61: api.v1.services.user.RemoveHistoryItemResponse
+	(*GetUserByUsernameRequest)(nil),     // 62: api.v1.services.user.GetUserByUsernameRequest
+	(*GetUserByUsernameResponse)(nil),    // 63: api.v1.services.user.GetUserByUsernameResponse
+	(*SubscribeUserRequest)(nil),         // 64: api.v1.services.user.SubscribeUserRequest
+	(*SubscribeUserResponse)(nil),        // 65: api.v1.services.user.SubscribeUserResponse
+	(*UnsubscribeUserRequest)(nil),       // 66: api.v1.services.user.UnsubscribeUserRequest
+	(*UnsubscribeUserResponse)(nil),      // 67: api.v1.services.user.UnsubscribeUserResponse
+	(*GetUserSubscriptionRequest)(nil),   // 68: api.v1.services.user.GetUserSubscriptionRequest
+	(*GetUserSubscriptionResponse)(nil),  // 69: api.v1.services.user.GetUserSubscriptionResponse
+	(*GetMyFollowersRequest)(nil),        // 70: api.v1.services.user.GetMyFollowersRequest
+	(*GetMyFollowersResponse)(nil),       // 71: api.v1.services.user.GetMyFollowersResponse
+	(*GetMyChannelsRequest)(nil),         // 72: api.v1.services.user.GetMyChannelsRequest
+	(*GetMyChannelsResponse)(nil),        // 73: api.v1.services.user.GetMyChannelsResponse
+	(*RemoveFavoriteRequest)(nil),        // 74: api.v1.services.user.RemoveFavoriteRequest
+	(*RemoveFavoriteResponse)(nil),       // 75: api.v1.services.user.RemoveFavoriteResponse
+	(*UpdateMySlugRequest)(nil),          // 76: api.v1.services.user.UpdateMySlugRequest
+	(*UpdateMySlugResponse)(nil),         // 77: api.v1.services.user.UpdateMySlugResponse
+	(*GetUserLikesRequest)(nil),          // 78: api.v1.services.user.GetUserLikesRequest
+	(*GetUserLikesResponse)(nil),         // 79: api.v1.services.user.GetUserLikesResponse
+	(*GetUserSubscriptionsRequest)(nil),  // 80: api.v1.services.user.GetUserSubscriptionsRequest
+	(*GetUserSubscriptionsResponse)(nil), // 81: api.v1.services.user.GetUserSubscriptionsResponse
+	(*ChangePasswordRequest)(nil),        // 82: api.v1.services.user.ChangePasswordRequest
+	(*ChangePasswordResponse)(nil),       // 83: api.v1.services.user.ChangePasswordResponse
+	(*ForgotPasswordRequest)(nil),        // 84: api.v1.services.user.ForgotPasswordRequest
+	(*ForgotPasswordResponse)(nil),       // 85: api.v1.services.user.ForgotPasswordResponse
+	(*ResetPasswordRequest)(nil),         // 86: api.v1.services.user.ResetPasswordRequest
+	(*ResetPasswordResponse)(nil),        // 87: api.v1.services.user.ResetPasswordResponse
+	(*types.User)(nil),                   // 88: api.v1.services.types.User
+	(*types.Playlist)(nil),               // 89: api.v1.services.types.Playlist
+	(*types.Media)(nil),                  // 90: api.v1.services.types.Media
+	(*types.Like)(nil),                   // 91: api.v1.services.types.Like
+	(*types.Channel)(nil),                // 92: api.v1.services.types.Channel
+	(types.ContentType)(0),               // 93: api.v1.services.types.ContentType
+	(*types.HistoryItem)(nil),            // 94: api.v1.services.types.HistoryItem
+	(*fieldmaskpb.FieldMask)(nil),        // 95: google.protobuf.FieldMask
+	(*emptypb.Empty)(nil),                // 96: google.protobuf.Empty
+	(*types.Role)(nil),                   // 97: api.v1.services.types.Role
 }
 var file_v1_user_user_service_proto_depIdxs = []int32{
-	66, // 0: api.v1.services.user.LoginResponse.user:type_name -> api.v1.services.types.User
-	66, // 1: api.v1.services.user.RegisterResponse.user:type_name -> api.v1.services.types.User
-	66, // 2: api.v1.services.user.GetCurrentUserResponse.user:type_name -> api.v1.services.types.User
-	66, // 3: api.v1.services.user.GetMeResponse.user:type_name -> api.v1.services.types.User
-	66, // 4: api.v1.services.user.UpdateMeResponse.user:type_name -> api.v1.services.types.User
-	67, // 5: api.v1.services.user.GetMyPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
-	68, // 6: api.v1.services.user.GetMyFavoritesResponse.items:type_name -> api.v1.services.types.Media
-	69, // 7: api.v1.services.user.GetMyLikesResponse.likes:type_name -> api.v1.services.types.Like
-	70, // 8: api.v1.services.user.GetMySubscriptionsResponse.items:type_name -> api.v1.services.types.Channel
-	71, // 9: api.v1.services.user.GetMyHistoryRequest.content_type:type_name -> api.v1.services.types.ContentType
-	72, // 10: api.v1.services.user.GetMyHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
-	66, // 11: api.v1.services.user.ListUsersResponse.items:type_name -> api.v1.services.types.User
-	66, // 12: api.v1.services.user.GetUserResponse.user:type_name -> api.v1.services.types.User
-	66, // 13: api.v1.services.user.CreateUserRequest.user:type_name -> api.v1.services.types.User
-	66, // 14: api.v1.services.user.CreateUserResponse.user:type_name -> api.v1.services.types.User
-	66, // 15: api.v1.services.user.UpdateUserRequest.user:type_name -> api.v1.services.types.User
-	73, // 16: api.v1.services.user.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
-	66, // 17: api.v1.services.user.UpdateUserResponse.user:type_name -> api.v1.services.types.User
-	74, // 18: api.v1.services.user.DeleteUserResponse.empty:type_name -> google.protobuf.Empty
-	66, // 19: api.v1.services.user.UpdateUserRolesResponse.user:type_name -> api.v1.services.types.User
-	75, // 20: api.v1.services.user.ListUserRolesResponse.items:type_name -> api.v1.services.types.Role
-	67, // 21: api.v1.services.user.GetUserPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
-	66, // 22: api.v1.services.user.GetUserFollowersResponse.followers:type_name -> api.v1.services.types.User
-	71, // 23: api.v1.services.user.UpsertHistoryRequest.content_type:type_name -> api.v1.services.types.ContentType
-	72, // 24: api.v1.services.user.UpsertHistoryResponse.item:type_name -> api.v1.services.types.HistoryItem
-	72, // 25: api.v1.services.user.SyncHistoryRequest.items:type_name -> api.v1.services.types.HistoryItem
-	72, // 26: api.v1.services.user.SyncHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
-	0,  // 27: api.v1.services.user.UserService.Login:input_type -> api.v1.services.user.LoginRequest
-	2,  // 28: api.v1.services.user.UserService.Logout:input_type -> api.v1.services.user.LogoutRequest
-	4,  // 29: api.v1.services.user.UserService.RefreshToken:input_type -> api.v1.services.user.RefreshTokenRequest
-	6,  // 30: api.v1.services.user.UserService.Register:input_type -> api.v1.services.user.RegisterRequest
-	8,  // 31: api.v1.services.user.UserService.ForgotPassword:input_type -> api.v1.services.user.ForgotPasswordRequest
-	10, // 32: api.v1.services.user.UserService.ResetPassword:input_type -> api.v1.services.user.ResetPasswordRequest
-	12, // 33: api.v1.services.user.UserService.GetCurrentUser:input_type -> api.v1.services.user.GetCurrentUserRequest
-	14, // 34: api.v1.services.user.UserService.GetMe:input_type -> api.v1.services.user.GetMeRequest
-	16, // 35: api.v1.services.user.UserService.UpdateMe:input_type -> api.v1.services.user.UpdateMeRequest
-	18, // 36: api.v1.services.user.UserService.UpdateMyPassword:input_type -> api.v1.services.user.UpdateMyPasswordRequest
-	20, // 37: api.v1.services.user.UserService.GetMyPlaylists:input_type -> api.v1.services.user.GetMyPlaylistsRequest
-	22, // 38: api.v1.services.user.UserService.GetMyFavorites:input_type -> api.v1.services.user.GetMyFavoritesRequest
-	24, // 39: api.v1.services.user.UserService.GetMyLikes:input_type -> api.v1.services.user.GetMyLikesRequest
-	26, // 40: api.v1.services.user.UserService.GetMySubscriptions:input_type -> api.v1.services.user.GetMySubscriptionsRequest
-	28, // 41: api.v1.services.user.UserService.GetMyHistory:input_type -> api.v1.services.user.GetMyHistoryRequest
-	58, // 42: api.v1.services.user.UserService.UpsertHistory:input_type -> api.v1.services.user.UpsertHistoryRequest
-	60, // 43: api.v1.services.user.UserService.SyncHistory:input_type -> api.v1.services.user.SyncHistoryRequest
-	62, // 44: api.v1.services.user.UserService.ClearHistory:input_type -> api.v1.services.user.ClearHistoryRequest
-	64, // 45: api.v1.services.user.UserService.RemoveHistoryItem:input_type -> api.v1.services.user.RemoveHistoryItemRequest
-	30, // 46: api.v1.services.user.UserService.GetMyStats:input_type -> api.v1.services.user.GetMyStatsRequest
-	32, // 47: api.v1.services.user.UserService.ListUsers:input_type -> api.v1.services.user.ListUsersRequest
-	34, // 48: api.v1.services.user.UserService.GetUser:input_type -> api.v1.services.user.GetUserRequest
-	36, // 49: api.v1.services.user.UserService.CreateUser:input_type -> api.v1.services.user.CreateUserRequest
-	38, // 50: api.v1.services.user.UserService.UpdateUser:input_type -> api.v1.services.user.UpdateUserRequest
-	40, // 51: api.v1.services.user.UserService.DeleteUser:input_type -> api.v1.services.user.DeleteUserRequest
-	42, // 52: api.v1.services.user.UserService.UpdateUserStatus:input_type -> api.v1.services.user.UpdateUserStatusRequest
-	44, // 53: api.v1.services.user.UserService.UpdateUserRoles:input_type -> api.v1.services.user.UpdateUserRolesRequest
-	46, // 54: api.v1.services.user.UserService.ChangeUserPassword:input_type -> api.v1.services.user.ChangeUserPasswordRequest
-	48, // 55: api.v1.services.user.UserService.VerifyPassword:input_type -> api.v1.services.user.VerifyPasswordRequest
-	50, // 56: api.v1.services.user.UserService.ListUserRoles:input_type -> api.v1.services.user.ListUserRolesRequest
-	52, // 57: api.v1.services.user.UserService.GetUserStats:input_type -> api.v1.services.user.GetUserStatsRequest
-	54, // 58: api.v1.services.user.UserService.GetUserPlaylists:input_type -> api.v1.services.user.GetUserPlaylistsRequest
-	56, // 59: api.v1.services.user.UserService.GetUserFollowers:input_type -> api.v1.services.user.GetUserFollowersRequest
-	1,  // 60: api.v1.services.user.UserService.Login:output_type -> api.v1.services.user.LoginResponse
-	3,  // 61: api.v1.services.user.UserService.Logout:output_type -> api.v1.services.user.LogoutResponse
-	5,  // 62: api.v1.services.user.UserService.RefreshToken:output_type -> api.v1.services.user.RefreshTokenResponse
-	7,  // 63: api.v1.services.user.UserService.Register:output_type -> api.v1.services.user.RegisterResponse
-	9,  // 64: api.v1.services.user.UserService.ForgotPassword:output_type -> api.v1.services.user.ForgotPasswordResponse
-	11, // 65: api.v1.services.user.UserService.ResetPassword:output_type -> api.v1.services.user.ResetPasswordResponse
-	13, // 66: api.v1.services.user.UserService.GetCurrentUser:output_type -> api.v1.services.user.GetCurrentUserResponse
-	15, // 67: api.v1.services.user.UserService.GetMe:output_type -> api.v1.services.user.GetMeResponse
-	17, // 68: api.v1.services.user.UserService.UpdateMe:output_type -> api.v1.services.user.UpdateMeResponse
-	19, // 69: api.v1.services.user.UserService.UpdateMyPassword:output_type -> api.v1.services.user.UpdateMyPasswordResponse
-	21, // 70: api.v1.services.user.UserService.GetMyPlaylists:output_type -> api.v1.services.user.GetMyPlaylistsResponse
-	23, // 71: api.v1.services.user.UserService.GetMyFavorites:output_type -> api.v1.services.user.GetMyFavoritesResponse
-	25, // 72: api.v1.services.user.UserService.GetMyLikes:output_type -> api.v1.services.user.GetMyLikesResponse
-	27, // 73: api.v1.services.user.UserService.GetMySubscriptions:output_type -> api.v1.services.user.GetMySubscriptionsResponse
-	29, // 74: api.v1.services.user.UserService.GetMyHistory:output_type -> api.v1.services.user.GetMyHistoryResponse
-	59, // 75: api.v1.services.user.UserService.UpsertHistory:output_type -> api.v1.services.user.UpsertHistoryResponse
-	61, // 76: api.v1.services.user.UserService.SyncHistory:output_type -> api.v1.services.user.SyncHistoryResponse
-	63, // 77: api.v1.services.user.UserService.ClearHistory:output_type -> api.v1.services.user.ClearHistoryResponse
-	65, // 78: api.v1.services.user.UserService.RemoveHistoryItem:output_type -> api.v1.services.user.RemoveHistoryItemResponse
-	31, // 79: api.v1.services.user.UserService.GetMyStats:output_type -> api.v1.services.user.GetMyStatsResponse
-	33, // 80: api.v1.services.user.UserService.ListUsers:output_type -> api.v1.services.user.ListUsersResponse
-	35, // 81: api.v1.services.user.UserService.GetUser:output_type -> api.v1.services.user.GetUserResponse
-	37, // 82: api.v1.services.user.UserService.CreateUser:output_type -> api.v1.services.user.CreateUserResponse
-	39, // 83: api.v1.services.user.UserService.UpdateUser:output_type -> api.v1.services.user.UpdateUserResponse
-	41, // 84: api.v1.services.user.UserService.DeleteUser:output_type -> api.v1.services.user.DeleteUserResponse
-	43, // 85: api.v1.services.user.UserService.UpdateUserStatus:output_type -> api.v1.services.user.UpdateUserStatusResponse
-	45, // 86: api.v1.services.user.UserService.UpdateUserRoles:output_type -> api.v1.services.user.UpdateUserRolesResponse
-	47, // 87: api.v1.services.user.UserService.ChangeUserPassword:output_type -> api.v1.services.user.ChangeUserPasswordResponse
-	49, // 88: api.v1.services.user.UserService.VerifyPassword:output_type -> api.v1.services.user.VerifyPasswordResponse
-	51, // 89: api.v1.services.user.UserService.ListUserRoles:output_type -> api.v1.services.user.ListUserRolesResponse
-	53, // 90: api.v1.services.user.UserService.GetUserStats:output_type -> api.v1.services.user.GetUserStatsResponse
-	55, // 91: api.v1.services.user.UserService.GetUserPlaylists:output_type -> api.v1.services.user.GetUserPlaylistsResponse
-	57, // 92: api.v1.services.user.UserService.GetUserFollowers:output_type -> api.v1.services.user.GetUserFollowersResponse
-	60, // [60:93] is the sub-list for method output_type
-	27, // [27:60] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	88, // 0: api.v1.services.user.LoginResponse.user:type_name -> api.v1.services.types.User
+	88, // 1: api.v1.services.user.RegisterResponse.user:type_name -> api.v1.services.types.User
+	88, // 2: api.v1.services.user.GetCurrentUserResponse.user:type_name -> api.v1.services.types.User
+	88, // 3: api.v1.services.user.GetMeResponse.user:type_name -> api.v1.services.types.User
+	88, // 4: api.v1.services.user.UpdateMeResponse.user:type_name -> api.v1.services.types.User
+	89, // 5: api.v1.services.user.GetMyPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
+	90, // 6: api.v1.services.user.GetMyFavoritesResponse.items:type_name -> api.v1.services.types.Media
+	91, // 7: api.v1.services.user.GetMyLikesResponse.likes:type_name -> api.v1.services.types.Like
+	92, // 8: api.v1.services.user.GetMySubscriptionsResponse.items:type_name -> api.v1.services.types.Channel
+	93, // 9: api.v1.services.user.GetMyHistoryRequest.content_type:type_name -> api.v1.services.types.ContentType
+	94, // 10: api.v1.services.user.GetMyHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
+	88, // 11: api.v1.services.user.ListUsersResponse.items:type_name -> api.v1.services.types.User
+	88, // 12: api.v1.services.user.GetUserResponse.user:type_name -> api.v1.services.types.User
+	88, // 13: api.v1.services.user.CreateUserRequest.user:type_name -> api.v1.services.types.User
+	88, // 14: api.v1.services.user.CreateUserResponse.user:type_name -> api.v1.services.types.User
+	88, // 15: api.v1.services.user.UpdateUserRequest.user:type_name -> api.v1.services.types.User
+	95, // 16: api.v1.services.user.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	88, // 17: api.v1.services.user.UpdateUserResponse.user:type_name -> api.v1.services.types.User
+	96, // 18: api.v1.services.user.DeleteUserResponse.empty:type_name -> google.protobuf.Empty
+	88, // 19: api.v1.services.user.UpdateUserRolesResponse.user:type_name -> api.v1.services.types.User
+	97, // 20: api.v1.services.user.ListUserRolesResponse.items:type_name -> api.v1.services.types.Role
+	89, // 21: api.v1.services.user.GetUserPlaylistsResponse.items:type_name -> api.v1.services.types.Playlist
+	88, // 22: api.v1.services.user.GetUserFollowersResponse.followers:type_name -> api.v1.services.types.User
+	93, // 23: api.v1.services.user.UpsertHistoryRequest.content_type:type_name -> api.v1.services.types.ContentType
+	94, // 24: api.v1.services.user.UpsertHistoryResponse.item:type_name -> api.v1.services.types.HistoryItem
+	94, // 25: api.v1.services.user.SyncHistoryRequest.items:type_name -> api.v1.services.types.HistoryItem
+	94, // 26: api.v1.services.user.SyncHistoryResponse.items:type_name -> api.v1.services.types.HistoryItem
+	88, // 27: api.v1.services.user.GetUserByUsernameResponse.user:type_name -> api.v1.services.types.User
+	88, // 28: api.v1.services.user.GetMyFollowersResponse.followers:type_name -> api.v1.services.types.User
+	92, // 29: api.v1.services.user.GetMyChannelsResponse.channels:type_name -> api.v1.services.types.Channel
+	88, // 30: api.v1.services.user.UpdateMySlugResponse.user:type_name -> api.v1.services.types.User
+	91, // 31: api.v1.services.user.GetUserLikesResponse.items:type_name -> api.v1.services.types.Like
+	92, // 32: api.v1.services.user.GetUserSubscriptionsResponse.items:type_name -> api.v1.services.types.Channel
+	0,  // 33: api.v1.services.user.UserService.Login:input_type -> api.v1.services.user.LoginRequest
+	2,  // 34: api.v1.services.user.UserService.Logout:input_type -> api.v1.services.user.LogoutRequest
+	4,  // 35: api.v1.services.user.UserService.RefreshToken:input_type -> api.v1.services.user.RefreshTokenRequest
+	6,  // 36: api.v1.services.user.UserService.Register:input_type -> api.v1.services.user.RegisterRequest
+	8,  // 37: api.v1.services.user.UserService.GetCurrentUser:input_type -> api.v1.services.user.GetCurrentUserRequest
+	10, // 38: api.v1.services.user.UserService.GetMe:input_type -> api.v1.services.user.GetMeRequest
+	12, // 39: api.v1.services.user.UserService.UpdateMe:input_type -> api.v1.services.user.UpdateMeRequest
+	14, // 40: api.v1.services.user.UserService.UpdateMyPassword:input_type -> api.v1.services.user.UpdateMyPasswordRequest
+	16, // 41: api.v1.services.user.UserService.GetMyPlaylists:input_type -> api.v1.services.user.GetMyPlaylistsRequest
+	18, // 42: api.v1.services.user.UserService.GetMyFavorites:input_type -> api.v1.services.user.GetMyFavoritesRequest
+	20, // 43: api.v1.services.user.UserService.GetMyLikes:input_type -> api.v1.services.user.GetMyLikesRequest
+	22, // 44: api.v1.services.user.UserService.GetMySubscriptions:input_type -> api.v1.services.user.GetMySubscriptionsRequest
+	24, // 45: api.v1.services.user.UserService.GetMyHistory:input_type -> api.v1.services.user.GetMyHistoryRequest
+	54, // 46: api.v1.services.user.UserService.UpsertHistory:input_type -> api.v1.services.user.UpsertHistoryRequest
+	56, // 47: api.v1.services.user.UserService.SyncHistory:input_type -> api.v1.services.user.SyncHistoryRequest
+	58, // 48: api.v1.services.user.UserService.ClearHistory:input_type -> api.v1.services.user.ClearHistoryRequest
+	60, // 49: api.v1.services.user.UserService.RemoveHistoryItem:input_type -> api.v1.services.user.RemoveHistoryItemRequest
+	26, // 50: api.v1.services.user.UserService.GetMyStats:input_type -> api.v1.services.user.GetMyStatsRequest
+	28, // 51: api.v1.services.user.UserService.ListUsers:input_type -> api.v1.services.user.ListUsersRequest
+	30, // 52: api.v1.services.user.UserService.GetUser:input_type -> api.v1.services.user.GetUserRequest
+	32, // 53: api.v1.services.user.UserService.CreateUser:input_type -> api.v1.services.user.CreateUserRequest
+	34, // 54: api.v1.services.user.UserService.UpdateUser:input_type -> api.v1.services.user.UpdateUserRequest
+	36, // 55: api.v1.services.user.UserService.DeleteUser:input_type -> api.v1.services.user.DeleteUserRequest
+	38, // 56: api.v1.services.user.UserService.UpdateUserStatus:input_type -> api.v1.services.user.UpdateUserStatusRequest
+	40, // 57: api.v1.services.user.UserService.UpdateUserRoles:input_type -> api.v1.services.user.UpdateUserRolesRequest
+	42, // 58: api.v1.services.user.UserService.ChangeUserPassword:input_type -> api.v1.services.user.ChangeUserPasswordRequest
+	44, // 59: api.v1.services.user.UserService.VerifyPassword:input_type -> api.v1.services.user.VerifyPasswordRequest
+	46, // 60: api.v1.services.user.UserService.ListUserRoles:input_type -> api.v1.services.user.ListUserRolesRequest
+	48, // 61: api.v1.services.user.UserService.GetUserStats:input_type -> api.v1.services.user.GetUserStatsRequest
+	50, // 62: api.v1.services.user.UserService.GetUserPlaylists:input_type -> api.v1.services.user.GetUserPlaylistsRequest
+	52, // 63: api.v1.services.user.UserService.GetUserFollowers:input_type -> api.v1.services.user.GetUserFollowersRequest
+	62, // 64: api.v1.services.user.UserService.GetUserByUsername:input_type -> api.v1.services.user.GetUserByUsernameRequest
+	64, // 65: api.v1.services.user.UserService.SubscribeUser:input_type -> api.v1.services.user.SubscribeUserRequest
+	66, // 66: api.v1.services.user.UserService.UnsubscribeUser:input_type -> api.v1.services.user.UnsubscribeUserRequest
+	68, // 67: api.v1.services.user.UserService.GetUserSubscription:input_type -> api.v1.services.user.GetUserSubscriptionRequest
+	70, // 68: api.v1.services.user.UserService.GetMyFollowers:input_type -> api.v1.services.user.GetMyFollowersRequest
+	72, // 69: api.v1.services.user.UserService.GetMyChannels:input_type -> api.v1.services.user.GetMyChannelsRequest
+	74, // 70: api.v1.services.user.UserService.RemoveFavorite:input_type -> api.v1.services.user.RemoveFavoriteRequest
+	76, // 71: api.v1.services.user.UserService.UpdateMySlug:input_type -> api.v1.services.user.UpdateMySlugRequest
+	78, // 72: api.v1.services.user.UserService.GetUserLikes:input_type -> api.v1.services.user.GetUserLikesRequest
+	80, // 73: api.v1.services.user.UserService.GetUserSubscriptions:input_type -> api.v1.services.user.GetUserSubscriptionsRequest
+	82, // 74: api.v1.services.user.UserService.ChangePassword:input_type -> api.v1.services.user.ChangePasswordRequest
+	1,  // 75: api.v1.services.user.UserService.Login:output_type -> api.v1.services.user.LoginResponse
+	3,  // 76: api.v1.services.user.UserService.Logout:output_type -> api.v1.services.user.LogoutResponse
+	5,  // 77: api.v1.services.user.UserService.RefreshToken:output_type -> api.v1.services.user.RefreshTokenResponse
+	7,  // 78: api.v1.services.user.UserService.Register:output_type -> api.v1.services.user.RegisterResponse
+	9,  // 79: api.v1.services.user.UserService.GetCurrentUser:output_type -> api.v1.services.user.GetCurrentUserResponse
+	11, // 80: api.v1.services.user.UserService.GetMe:output_type -> api.v1.services.user.GetMeResponse
+	13, // 81: api.v1.services.user.UserService.UpdateMe:output_type -> api.v1.services.user.UpdateMeResponse
+	15, // 82: api.v1.services.user.UserService.UpdateMyPassword:output_type -> api.v1.services.user.UpdateMyPasswordResponse
+	17, // 83: api.v1.services.user.UserService.GetMyPlaylists:output_type -> api.v1.services.user.GetMyPlaylistsResponse
+	19, // 84: api.v1.services.user.UserService.GetMyFavorites:output_type -> api.v1.services.user.GetMyFavoritesResponse
+	21, // 85: api.v1.services.user.UserService.GetMyLikes:output_type -> api.v1.services.user.GetMyLikesResponse
+	23, // 86: api.v1.services.user.UserService.GetMySubscriptions:output_type -> api.v1.services.user.GetMySubscriptionsResponse
+	25, // 87: api.v1.services.user.UserService.GetMyHistory:output_type -> api.v1.services.user.GetMyHistoryResponse
+	55, // 88: api.v1.services.user.UserService.UpsertHistory:output_type -> api.v1.services.user.UpsertHistoryResponse
+	57, // 89: api.v1.services.user.UserService.SyncHistory:output_type -> api.v1.services.user.SyncHistoryResponse
+	59, // 90: api.v1.services.user.UserService.ClearHistory:output_type -> api.v1.services.user.ClearHistoryResponse
+	61, // 91: api.v1.services.user.UserService.RemoveHistoryItem:output_type -> api.v1.services.user.RemoveHistoryItemResponse
+	27, // 92: api.v1.services.user.UserService.GetMyStats:output_type -> api.v1.services.user.GetMyStatsResponse
+	29, // 93: api.v1.services.user.UserService.ListUsers:output_type -> api.v1.services.user.ListUsersResponse
+	31, // 94: api.v1.services.user.UserService.GetUser:output_type -> api.v1.services.user.GetUserResponse
+	33, // 95: api.v1.services.user.UserService.CreateUser:output_type -> api.v1.services.user.CreateUserResponse
+	35, // 96: api.v1.services.user.UserService.UpdateUser:output_type -> api.v1.services.user.UpdateUserResponse
+	37, // 97: api.v1.services.user.UserService.DeleteUser:output_type -> api.v1.services.user.DeleteUserResponse
+	39, // 98: api.v1.services.user.UserService.UpdateUserStatus:output_type -> api.v1.services.user.UpdateUserStatusResponse
+	41, // 99: api.v1.services.user.UserService.UpdateUserRoles:output_type -> api.v1.services.user.UpdateUserRolesResponse
+	43, // 100: api.v1.services.user.UserService.ChangeUserPassword:output_type -> api.v1.services.user.ChangeUserPasswordResponse
+	45, // 101: api.v1.services.user.UserService.VerifyPassword:output_type -> api.v1.services.user.VerifyPasswordResponse
+	47, // 102: api.v1.services.user.UserService.ListUserRoles:output_type -> api.v1.services.user.ListUserRolesResponse
+	49, // 103: api.v1.services.user.UserService.GetUserStats:output_type -> api.v1.services.user.GetUserStatsResponse
+	51, // 104: api.v1.services.user.UserService.GetUserPlaylists:output_type -> api.v1.services.user.GetUserPlaylistsResponse
+	53, // 105: api.v1.services.user.UserService.GetUserFollowers:output_type -> api.v1.services.user.GetUserFollowersResponse
+	63, // 106: api.v1.services.user.UserService.GetUserByUsername:output_type -> api.v1.services.user.GetUserByUsernameResponse
+	65, // 107: api.v1.services.user.UserService.SubscribeUser:output_type -> api.v1.services.user.SubscribeUserResponse
+	67, // 108: api.v1.services.user.UserService.UnsubscribeUser:output_type -> api.v1.services.user.UnsubscribeUserResponse
+	69, // 109: api.v1.services.user.UserService.GetUserSubscription:output_type -> api.v1.services.user.GetUserSubscriptionResponse
+	71, // 110: api.v1.services.user.UserService.GetMyFollowers:output_type -> api.v1.services.user.GetMyFollowersResponse
+	73, // 111: api.v1.services.user.UserService.GetMyChannels:output_type -> api.v1.services.user.GetMyChannelsResponse
+	75, // 112: api.v1.services.user.UserService.RemoveFavorite:output_type -> api.v1.services.user.RemoveFavoriteResponse
+	77, // 113: api.v1.services.user.UserService.UpdateMySlug:output_type -> api.v1.services.user.UpdateMySlugResponse
+	79, // 114: api.v1.services.user.UserService.GetUserLikes:output_type -> api.v1.services.user.GetUserLikesResponse
+	81, // 115: api.v1.services.user.UserService.GetUserSubscriptions:output_type -> api.v1.services.user.GetUserSubscriptionsResponse
+	83, // 116: api.v1.services.user.UserService.ChangePassword:output_type -> api.v1.services.user.ChangePasswordResponse
+	75, // [75:117] is the sub-list for method output_type
+	33, // [33:75] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_v1_user_user_service_proto_init() }
@@ -4156,14 +5428,14 @@ func file_v1_user_user_service_proto_init() {
 	if File_v1_user_user_service_proto != nil {
 		return
 	}
-	file_v1_user_user_service_proto_msgTypes[32].OneofWrappers = []any{}
+	file_v1_user_user_service_proto_msgTypes[28].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_user_user_service_proto_rawDesc), len(file_v1_user_user_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   66,
+			NumMessages:   88,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
