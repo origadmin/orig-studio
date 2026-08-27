@@ -110,6 +110,10 @@ message InitiateMultipartUploadRequest {
   string description = 5 [json_name = "description"];
   // Category ID (optional)
   int64 category_id = 6 [json_name = "category_id"];
+  // Channel ID (optional)
+  string channel_id = 8 [json_name = "channel_id"];
+  // Thumbnail URL (optional)
+  string thumbnail = 9 [json_name = "thumbnail"];
   // Tags (optional)
   repeated string tags = 7 [json_name = "tags"];
 }
@@ -199,6 +203,10 @@ message UpdateMetadataRequest {
   optional string description = 3 [json_name = "description"];
   // Category ID (optional)
   optional int64 category_id = 4 [json_name = "category_id"];
+  // Channel ID (optional)
+  optional string channel_id = 6 [json_name = "channel_id"];
+  // Thumbnail URL (optional)
+  optional string thumbnail = 8 [json_name = "thumbnail"];
   // Tags (optional)
   repeated string tags = 5 [json_name = "tags"];
 }
@@ -275,6 +283,10 @@ message SimpleUploadRequest {
   string description = 5 [json_name = "description"];
   // Category ID (optional)
   int64 category_id = 6 [json_name = "category_id"];
+  // Channel ID (optional)
+  string channel_id = 8 [json_name = "channel_id"];
+  // Thumbnail URL (optional)
+  string thumbnail = 9 [json_name = "thumbnail"];
   // Tags (optional)
   repeated string tags = 7 [json_name = "tags"];
 }

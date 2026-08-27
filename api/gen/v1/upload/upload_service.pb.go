@@ -103,6 +103,10 @@ type InitiateMultipartUploadRequest struct {
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	// Category ID (optional)
 	CategoryId int64 `protobuf:"varint,6,opt,name=category_id,proto3" json:"category_id,omitempty"`
+	// Channel ID (optional)
+	ChannelId string `protobuf:"bytes,8,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	// Thumbnail URL (optional)
+	Thumbnail string `protobuf:"bytes,9,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
 	// Tags (optional)
 	Tags          []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -179,6 +183,20 @@ func (x *InitiateMultipartUploadRequest) GetCategoryId() int64 {
 		return x.CategoryId
 	}
 	return 0
+}
+
+func (x *InitiateMultipartUploadRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *InitiateMultipartUploadRequest) GetThumbnail() string {
+	if x != nil {
+		return x.Thumbnail
+	}
+	return ""
 }
 
 func (x *InitiateMultipartUploadRequest) GetTags() []string {
@@ -700,41 +718,41 @@ func (x *AbortMultipartUploadResponse) GetEmpty() *emptypb.Empty {
 	return nil
 }
 
-// UploadFileRequest is the request for uploading a small file.
-type UploadFileRequest struct {
+// UpdateMetadataRequest is the request for updating upload session metadata.
+type UpdateMetadataRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// File data
-	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
-	// Original filename
-	Filename string `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
-	// MIME type of the file
-	ContentType string `protobuf:"bytes,3,opt,name=content_type,proto3" json:"content_type,omitempty"`
+	// Upload session ID
+	UploadId string `protobuf:"bytes,1,opt,name=upload_id,proto3" json:"upload_id,omitempty"`
 	// Media title (optional)
-	Title string `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Title *string `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	// Media description (optional)
-	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Description *string `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	// Category ID (optional)
-	CategoryId int64 `protobuf:"varint,6,opt,name=category_id,proto3" json:"category_id,omitempty"`
+	CategoryId *int64 `protobuf:"varint,4,opt,name=category_id,proto3,oneof" json:"category_id,omitempty"`
+	// Channel ID (optional)
+	ChannelId *string `protobuf:"bytes,6,opt,name=channel_id,proto3,oneof" json:"channel_id,omitempty"`
+	// Thumbnail URL (optional)
+	Thumbnail *string `protobuf:"bytes,8,opt,name=thumbnail,proto3,oneof" json:"thumbnail,omitempty"`
 	// Tags (optional)
-	Tags          []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
+	Tags          []string `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UploadFileRequest) Reset() {
-	*x = UploadFileRequest{}
+func (x *UpdateMetadataRequest) Reset() {
+	*x = UpdateMetadataRequest{}
 	mi := &file_v1_upload_upload_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UploadFileRequest) String() string {
+func (x *UpdateMetadataRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UploadFileRequest) ProtoMessage() {}
+func (*UpdateMetadataRequest) ProtoMessage() {}
 
-func (x *UploadFileRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdateMetadataRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_upload_upload_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -746,83 +764,85 @@ func (x *UploadFileRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UploadFileRequest.ProtoReflect.Descriptor instead.
-func (*UploadFileRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateMetadataRequest.ProtoReflect.Descriptor instead.
+func (*UpdateMetadataRequest) Descriptor() ([]byte, []int) {
 	return file_v1_upload_upload_service_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *UploadFileRequest) GetData() []byte {
+func (x *UpdateMetadataRequest) GetUploadId() string {
 	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-func (x *UploadFileRequest) GetFilename() string {
-	if x != nil {
-		return x.Filename
+		return x.UploadId
 	}
 	return ""
 }
 
-func (x *UploadFileRequest) GetContentType() string {
-	if x != nil {
-		return x.ContentType
+func (x *UpdateMetadataRequest) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
 	}
 	return ""
 }
 
-func (x *UploadFileRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
+func (x *UpdateMetadataRequest) GetDescription() string {
+	if x != nil && x.Description != nil {
+		return *x.Description
 	}
 	return ""
 }
 
-func (x *UploadFileRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UploadFileRequest) GetCategoryId() int64 {
-	if x != nil {
-		return x.CategoryId
+func (x *UpdateMetadataRequest) GetCategoryId() int64 {
+	if x != nil && x.CategoryId != nil {
+		return *x.CategoryId
 	}
 	return 0
 }
 
-func (x *UploadFileRequest) GetTags() []string {
+func (x *UpdateMetadataRequest) GetChannelId() string {
+	if x != nil && x.ChannelId != nil {
+		return *x.ChannelId
+	}
+	return ""
+}
+
+func (x *UpdateMetadataRequest) GetThumbnail() string {
+	if x != nil && x.Thumbnail != nil {
+		return *x.Thumbnail
+	}
+	return ""
+}
+
+func (x *UpdateMetadataRequest) GetTags() []string {
 	if x != nil {
 		return x.Tags
 	}
 	return nil
 }
 
-// UploadFileResponse is the response for uploading a small file.
-type UploadFileResponse struct {
+// UpdateMetadataResponse is the response for updating upload session metadata.
+type UpdateMetadataResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Created media record
-	Media         *types.Media `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
+	// Upload session ID
+	UploadId string `protobuf:"bytes,1,opt,name=upload_id,proto3" json:"upload_id,omitempty"`
+	// Updated status
+	Status        string `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UploadFileResponse) Reset() {
-	*x = UploadFileResponse{}
+func (x *UpdateMetadataResponse) Reset() {
+	*x = UpdateMetadataResponse{}
 	mi := &file_v1_upload_upload_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UploadFileResponse) String() string {
+func (x *UpdateMetadataResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UploadFileResponse) ProtoMessage() {}
+func (*UpdateMetadataResponse) ProtoMessage() {}
 
-func (x *UploadFileResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdateMetadataResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_v1_upload_upload_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -834,16 +854,23 @@ func (x *UploadFileResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UploadFileResponse.ProtoReflect.Descriptor instead.
-func (*UploadFileResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateMetadataResponse.ProtoReflect.Descriptor instead.
+func (*UpdateMetadataResponse) Descriptor() ([]byte, []int) {
 	return file_v1_upload_upload_service_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *UploadFileResponse) GetMedia() *types.Media {
+func (x *UpdateMetadataResponse) GetUploadId() string {
 	if x != nil {
-		return x.Media
+		return x.UploadId
 	}
-	return nil
+	return ""
+}
+
+func (x *UpdateMetadataResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 // GetUploadSessionRequest is the request for getting upload session info.
@@ -1147,6 +1174,179 @@ func (x *ListUploadSessionsResponse) GetTotal() int32 {
 	return 0
 }
 
+// SimpleUploadRequest is the request for simple file upload.
+type SimpleUploadRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// File data
+	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	// Original filename
+	Filename string `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
+	// MIME type of the file
+	ContentType string `protobuf:"bytes,3,opt,name=content_type,proto3" json:"content_type,omitempty"`
+	// Media title (optional)
+	Title string `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	// Media description (optional)
+	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	// Category ID (optional)
+	CategoryId int64 `protobuf:"varint,6,opt,name=category_id,proto3" json:"category_id,omitempty"`
+	// Channel ID (optional)
+	ChannelId string `protobuf:"bytes,8,opt,name=channel_id,proto3" json:"channel_id,omitempty"`
+	// Thumbnail URL (optional)
+	Thumbnail string `protobuf:"bytes,9,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
+	// Tags (optional)
+	Tags          []string `protobuf:"bytes,7,rep,name=tags,proto3" json:"tags,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SimpleUploadRequest) Reset() {
+	*x = SimpleUploadRequest{}
+	mi := &file_v1_upload_upload_service_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SimpleUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SimpleUploadRequest) ProtoMessage() {}
+
+func (x *SimpleUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_upload_upload_service_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SimpleUploadRequest.ProtoReflect.Descriptor instead.
+func (*SimpleUploadRequest) Descriptor() ([]byte, []int) {
+	return file_v1_upload_upload_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SimpleUploadRequest) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *SimpleUploadRequest) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *SimpleUploadRequest) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *SimpleUploadRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *SimpleUploadRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *SimpleUploadRequest) GetCategoryId() int64 {
+	if x != nil {
+		return x.CategoryId
+	}
+	return 0
+}
+
+func (x *SimpleUploadRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *SimpleUploadRequest) GetThumbnail() string {
+	if x != nil {
+		return x.Thumbnail
+	}
+	return ""
+}
+
+func (x *SimpleUploadRequest) GetTags() []string {
+	if x != nil {
+		return x.Tags
+	}
+	return nil
+}
+
+// SimpleUploadResponse is the response for simple file upload.
+type SimpleUploadResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Created media record
+	Media *types.Media `protobuf:"bytes,1,opt,name=media,proto3" json:"media,omitempty"`
+	// Upload URL (pre-signed, if applicable)
+	UploadUrl     string `protobuf:"bytes,2,opt,name=upload_url,proto3" json:"upload_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SimpleUploadResponse) Reset() {
+	*x = SimpleUploadResponse{}
+	mi := &file_v1_upload_upload_service_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SimpleUploadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SimpleUploadResponse) ProtoMessage() {}
+
+func (x *SimpleUploadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_v1_upload_upload_service_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SimpleUploadResponse.ProtoReflect.Descriptor instead.
+func (*SimpleUploadResponse) Descriptor() ([]byte, []int) {
+	return file_v1_upload_upload_service_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *SimpleUploadResponse) GetMedia() *types.Media {
+	if x != nil {
+		return x.Media
+	}
+	return nil
+}
+
+func (x *SimpleUploadResponse) GetUploadUrl() string {
+	if x != nil {
+		return x.UploadUrl
+	}
+	return ""
+}
+
 var File_v1_upload_upload_service_proto protoreflect.FileDescriptor
 
 const file_v1_upload_upload_service_proto_rawDesc = "" +
@@ -1155,14 +1355,18 @@ const file_v1_upload_upload_service_proto_rawDesc = "" +
 	"\bPartInfo\x12 \n" +
 	"\vpart_number\x18\x01 \x01(\x05R\vpart_number\x12\x12\n" +
 	"\x04etag\x18\x02 \x01(\tR\x04etag\x12\x12\n" +
-	"\x04size\x18\x03 \x01(\x03R\x04size\"\xec\x01\n" +
+	"\x04size\x18\x03 \x01(\x03R\x04size\"\xaa\x02\n" +
 	"\x1eInitiateMultipartUploadRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x1c\n" +
 	"\tfile_size\x18\x02 \x01(\x03R\tfile_size\x12\"\n" +
 	"\fcontent_type\x18\x03 \x01(\tR\fcontent_type\x12\x14\n" +
 	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12 \n" +
-	"\vcategory_id\x18\x06 \x01(\x03R\vcategory_id\x12\x12\n" +
+	"\vcategory_id\x18\x06 \x01(\x03R\vcategory_id\x12\x1e\n" +
+	"\n" +
+	"channel_id\x18\b \x01(\tR\n" +
+	"channel_id\x12\x1c\n" +
+	"\tthumbnail\x18\t \x01(\tR\tthumbnail\x12\x12\n" +
 	"\x04tags\x18\a \x03(\tR\x04tags\"\x81\x01\n" +
 	"\x1fInitiateMultipartUploadResponse\x12\x1c\n" +
 	"\tupload_id\x18\x01 \x01(\tR\tupload_id\x12 \n" +
@@ -1196,17 +1400,26 @@ const file_v1_upload_upload_service_proto_rawDesc = "" +
 	"\x1bAbortMultipartUploadRequest\x12\x1c\n" +
 	"\tupload_id\x18\x01 \x01(\tR\tupload_id\"L\n" +
 	"\x1cAbortMultipartUploadResponse\x12,\n" +
-	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\xd5\x01\n" +
-	"\x11UploadFileRequest\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\x12\x1a\n" +
-	"\bfilename\x18\x02 \x01(\tR\bfilename\x12\"\n" +
-	"\fcontent_type\x18\x03 \x01(\tR\fcontent_type\x12\x14\n" +
-	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x05 \x01(\tR\vdescription\x12 \n" +
-	"\vcategory_id\x18\x06 \x01(\x03R\vcategory_id\x12\x12\n" +
-	"\x04tags\x18\a \x03(\tR\x04tags\"H\n" +
-	"\x12UploadFileResponse\x122\n" +
-	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\"7\n" +
+	"\x05empty\x18\x01 \x01(\v2\x16.google.protobuf.EmptyR\x05empty\"\xc1\x02\n" +
+	"\x15UpdateMetadataRequest\x12\x1c\n" +
+	"\tupload_id\x18\x01 \x01(\tR\tupload_id\x12\x19\n" +
+	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
+	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x12%\n" +
+	"\vcategory_id\x18\x04 \x01(\x03H\x02R\vcategory_id\x88\x01\x01\x12#\n" +
+	"\n" +
+	"channel_id\x18\x06 \x01(\tH\x03R\n" +
+	"channel_id\x88\x01\x01\x12!\n" +
+	"\tthumbnail\x18\b \x01(\tH\x04R\tthumbnail\x88\x01\x01\x12\x12\n" +
+	"\x04tags\x18\x05 \x03(\tR\x04tagsB\b\n" +
+	"\x06_titleB\x0e\n" +
+	"\f_descriptionB\x0e\n" +
+	"\f_category_idB\r\n" +
+	"\v_channel_idB\f\n" +
+	"\n" +
+	"_thumbnail\"N\n" +
+	"\x16UpdateMetadataResponse\x12\x1c\n" +
+	"\tupload_id\x18\x01 \x01(\tR\tupload_id\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"7\n" +
 	"\x17GetUploadSessionRequest\x12\x1c\n" +
 	"\tupload_id\x18\x01 \x01(\tR\tupload_id\"\x90\x03\n" +
 	"\x18GetUploadSessionResponse\x12\x1c\n" +
@@ -1233,19 +1446,35 @@ const file_v1_upload_upload_service_proto_rawDesc = "" +
 	"\a_status\"\x80\x01\n" +
 	"\x1aListUploadSessionsResponse\x12L\n" +
 	"\bsessions\x18\x01 \x03(\v20.api.v1.services.upload.GetUploadSessionResponseR\bsessions\x12\x14\n" +
-	"\x05total\x18\x02 \x01(\x05R\x05total2\x8e\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"\x95\x02\n" +
+	"\x13SimpleUploadRequest\x12\x12\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\x12\x1a\n" +
+	"\bfilename\x18\x02 \x01(\tR\bfilename\x12\"\n" +
+	"\fcontent_type\x18\x03 \x01(\tR\fcontent_type\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12 \n" +
+	"\vcategory_id\x18\x06 \x01(\x03R\vcategory_id\x12\x1e\n" +
 	"\n" +
+	"channel_id\x18\b \x01(\tR\n" +
+	"channel_id\x12\x1c\n" +
+	"\tthumbnail\x18\t \x01(\tR\tthumbnail\x12\x12\n" +
+	"\x04tags\x18\a \x03(\tR\x04tags\"j\n" +
+	"\x14SimpleUploadResponse\x122\n" +
+	"\x05media\x18\x01 \x01(\v2\x1c.api.v1.services.types.MediaR\x05media\x12\x1e\n" +
+	"\n" +
+	"upload_url\x18\x02 \x01(\tR\n" +
+	"upload_url2\xda\v\n" +
 	"\rUploadService\x12\xb0\x01\n" +
 	"\x17InitiateMultipartUpload\x126.api.v1.services.upload.InitiateMultipartUploadRequest\x1a7.api.v1.services.upload.InitiateMultipartUploadResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/api/v1/uploads/multipart\x12\x9f\x01\n" +
 	"\n" +
 	"UploadPart\x12).api.v1.services.upload.UploadPartRequest\x1a*.api.v1.services.upload.UploadPartResponse\":\x82\xd3\xe4\x93\x024:\x01*\"//api/v1/uploads/{upload_id}/parts/{part_number}\x12\x8b\x01\n" +
 	"\tListParts\x12(.api.v1.services.upload.ListPartsRequest\x1a).api.v1.services.upload.ListPartsResponse\")\x82\xd3\xe4\x93\x02#\x12!/api/v1/uploads/{upload_id}/parts\x12\xbb\x01\n" +
-	"\x17CompleteMultipartUpload\x126.api.v1.services.upload.CompleteMultipartUploadRequest\x1a7.api.v1.services.upload.CompleteMultipartUploadResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/uploads/{upload_id}/complete\x12\xa6\x01\n" +
-	"\x14AbortMultipartUpload\x123.api.v1.services.upload.AbortMultipartUploadRequest\x1a4.api.v1.services.upload.AbortMultipartUploadResponse\"#\x82\xd3\xe4\x93\x02\x1d*\x1b/api/v1/uploads/{upload_id}\x12\x7f\n" +
-	"\n" +
-	"UploadFile\x12).api.v1.services.upload.UploadFileRequest\x1a*.api.v1.services.upload.UploadFileResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/uploads\x12\x9a\x01\n" +
-	"\x10GetUploadSession\x12/.api.v1.services.upload.GetUploadSessionRequest\x1a0.api.v1.services.upload.GetUploadSessionResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/uploads/{upload_id}\x12\x94\x01\n" +
-	"\x12ListUploadSessions\x121.api.v1.services.upload.ListUploadSessionsRequest\x1a2.api.v1.services.upload.ListUploadSessionsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/uploadsB\xe7\x01\n" +
+	"\x17CompleteMultipartUpload\x126.api.v1.services.upload.CompleteMultipartUploadRequest\x1a7.api.v1.services.upload.CompleteMultipartUploadResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/uploads/{upload_id}/complete\x12\xaf\x01\n" +
+	"\x14AbortMultipartUpload\x123.api.v1.services.upload.AbortMultipartUploadRequest\x1a4.api.v1.services.upload.AbortMultipartUploadResponse\",\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/uploads/{upload_id}/abort\x12\xa0\x01\n" +
+	"\x0eUpdateMetadata\x12-.api.v1.services.upload.UpdateMetadataRequest\x1a..api.v1.services.upload.UpdateMetadataResponse\"/\x82\xd3\xe4\x93\x02):\x01*2$/api/v1/uploads/{upload_id}/metadata\x12\x9d\x01\n" +
+	"\x12ListUploadSessions\x121.api.v1.services.upload.ListUploadSessionsRequest\x1a2.api.v1.services.upload.ListUploadSessionsResponse\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/uploads/sessions\x12\xa3\x01\n" +
+	"\x10GetUploadSession\x12/.api.v1.services.upload.GetUploadSessionRequest\x1a0.api.v1.services.upload.GetUploadSessionResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/uploads/sessions/{upload_id}\x12\x8c\x01\n" +
+	"\fSimpleUpload\x12+.api.v1.services.upload.SimpleUploadRequest\x1a,.api.v1.services.upload.SimpleUploadResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/uploads/simpleB\xe7\x01\n" +
 	"\x1acom.api.v1.services.uploadB\x12UploadServiceProtoP\x01Z9origadmin/application/origstudio/api/gen/v1/upload;upload\xa2\x02\x04AVSU\xaa\x02\x16Api.V1.Services.Upload\xca\x02\x16Api\\V1\\Services\\Upload\xe2\x02\"Api\\V1\\Services\\Upload\\GPBMetadata\xea\x02\x19Api::V1::Services::Uploadb\x06proto3"
 
 var (
@@ -1260,7 +1489,7 @@ func file_v1_upload_upload_service_proto_rawDescGZIP() []byte {
 	return file_v1_upload_upload_service_proto_rawDescData
 }
 
-var file_v1_upload_upload_service_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_v1_upload_upload_service_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_v1_upload_upload_service_proto_goTypes = []any{
 	(*PartInfo)(nil),                        // 0: api.v1.services.upload.PartInfo
 	(*InitiateMultipartUploadRequest)(nil),  // 1: api.v1.services.upload.InitiateMultipartUploadRequest
@@ -1273,41 +1502,45 @@ var file_v1_upload_upload_service_proto_goTypes = []any{
 	(*CompleteMultipartUploadResponse)(nil), // 8: api.v1.services.upload.CompleteMultipartUploadResponse
 	(*AbortMultipartUploadRequest)(nil),     // 9: api.v1.services.upload.AbortMultipartUploadRequest
 	(*AbortMultipartUploadResponse)(nil),    // 10: api.v1.services.upload.AbortMultipartUploadResponse
-	(*UploadFileRequest)(nil),               // 11: api.v1.services.upload.UploadFileRequest
-	(*UploadFileResponse)(nil),              // 12: api.v1.services.upload.UploadFileResponse
+	(*UpdateMetadataRequest)(nil),           // 11: api.v1.services.upload.UpdateMetadataRequest
+	(*UpdateMetadataResponse)(nil),          // 12: api.v1.services.upload.UpdateMetadataResponse
 	(*GetUploadSessionRequest)(nil),         // 13: api.v1.services.upload.GetUploadSessionRequest
 	(*GetUploadSessionResponse)(nil),        // 14: api.v1.services.upload.GetUploadSessionResponse
 	(*ListUploadSessionsRequest)(nil),       // 15: api.v1.services.upload.ListUploadSessionsRequest
 	(*ListUploadSessionsResponse)(nil),      // 16: api.v1.services.upload.ListUploadSessionsResponse
-	(*types.Media)(nil),                     // 17: api.v1.services.types.Media
-	(*emptypb.Empty)(nil),                   // 18: google.protobuf.Empty
+	(*SimpleUploadRequest)(nil),             // 17: api.v1.services.upload.SimpleUploadRequest
+	(*SimpleUploadResponse)(nil),            // 18: api.v1.services.upload.SimpleUploadResponse
+	(*types.Media)(nil),                     // 19: api.v1.services.types.Media
+	(*emptypb.Empty)(nil),                   // 20: google.protobuf.Empty
 }
 var file_v1_upload_upload_service_proto_depIdxs = []int32{
 	0,  // 0: api.v1.services.upload.ListPartsResponse.parts:type_name -> api.v1.services.upload.PartInfo
 	0,  // 1: api.v1.services.upload.CompleteMultipartUploadRequest.parts:type_name -> api.v1.services.upload.PartInfo
-	17, // 2: api.v1.services.upload.CompleteMultipartUploadResponse.media:type_name -> api.v1.services.types.Media
-	18, // 3: api.v1.services.upload.AbortMultipartUploadResponse.empty:type_name -> google.protobuf.Empty
-	17, // 4: api.v1.services.upload.UploadFileResponse.media:type_name -> api.v1.services.types.Media
-	0,  // 5: api.v1.services.upload.GetUploadSessionResponse.parts:type_name -> api.v1.services.upload.PartInfo
-	14, // 6: api.v1.services.upload.ListUploadSessionsResponse.sessions:type_name -> api.v1.services.upload.GetUploadSessionResponse
+	19, // 2: api.v1.services.upload.CompleteMultipartUploadResponse.media:type_name -> api.v1.services.types.Media
+	20, // 3: api.v1.services.upload.AbortMultipartUploadResponse.empty:type_name -> google.protobuf.Empty
+	0,  // 4: api.v1.services.upload.GetUploadSessionResponse.parts:type_name -> api.v1.services.upload.PartInfo
+	14, // 5: api.v1.services.upload.ListUploadSessionsResponse.sessions:type_name -> api.v1.services.upload.GetUploadSessionResponse
+	19, // 6: api.v1.services.upload.SimpleUploadResponse.media:type_name -> api.v1.services.types.Media
 	1,  // 7: api.v1.services.upload.UploadService.InitiateMultipartUpload:input_type -> api.v1.services.upload.InitiateMultipartUploadRequest
 	3,  // 8: api.v1.services.upload.UploadService.UploadPart:input_type -> api.v1.services.upload.UploadPartRequest
 	5,  // 9: api.v1.services.upload.UploadService.ListParts:input_type -> api.v1.services.upload.ListPartsRequest
 	7,  // 10: api.v1.services.upload.UploadService.CompleteMultipartUpload:input_type -> api.v1.services.upload.CompleteMultipartUploadRequest
 	9,  // 11: api.v1.services.upload.UploadService.AbortMultipartUpload:input_type -> api.v1.services.upload.AbortMultipartUploadRequest
-	11, // 12: api.v1.services.upload.UploadService.UploadFile:input_type -> api.v1.services.upload.UploadFileRequest
-	13, // 13: api.v1.services.upload.UploadService.GetUploadSession:input_type -> api.v1.services.upload.GetUploadSessionRequest
-	15, // 14: api.v1.services.upload.UploadService.ListUploadSessions:input_type -> api.v1.services.upload.ListUploadSessionsRequest
-	2,  // 15: api.v1.services.upload.UploadService.InitiateMultipartUpload:output_type -> api.v1.services.upload.InitiateMultipartUploadResponse
-	4,  // 16: api.v1.services.upload.UploadService.UploadPart:output_type -> api.v1.services.upload.UploadPartResponse
-	6,  // 17: api.v1.services.upload.UploadService.ListParts:output_type -> api.v1.services.upload.ListPartsResponse
-	8,  // 18: api.v1.services.upload.UploadService.CompleteMultipartUpload:output_type -> api.v1.services.upload.CompleteMultipartUploadResponse
-	10, // 19: api.v1.services.upload.UploadService.AbortMultipartUpload:output_type -> api.v1.services.upload.AbortMultipartUploadResponse
-	12, // 20: api.v1.services.upload.UploadService.UploadFile:output_type -> api.v1.services.upload.UploadFileResponse
-	14, // 21: api.v1.services.upload.UploadService.GetUploadSession:output_type -> api.v1.services.upload.GetUploadSessionResponse
+	11, // 12: api.v1.services.upload.UploadService.UpdateMetadata:input_type -> api.v1.services.upload.UpdateMetadataRequest
+	15, // 13: api.v1.services.upload.UploadService.ListUploadSessions:input_type -> api.v1.services.upload.ListUploadSessionsRequest
+	13, // 14: api.v1.services.upload.UploadService.GetUploadSession:input_type -> api.v1.services.upload.GetUploadSessionRequest
+	17, // 15: api.v1.services.upload.UploadService.SimpleUpload:input_type -> api.v1.services.upload.SimpleUploadRequest
+	2,  // 16: api.v1.services.upload.UploadService.InitiateMultipartUpload:output_type -> api.v1.services.upload.InitiateMultipartUploadResponse
+	4,  // 17: api.v1.services.upload.UploadService.UploadPart:output_type -> api.v1.services.upload.UploadPartResponse
+	6,  // 18: api.v1.services.upload.UploadService.ListParts:output_type -> api.v1.services.upload.ListPartsResponse
+	8,  // 19: api.v1.services.upload.UploadService.CompleteMultipartUpload:output_type -> api.v1.services.upload.CompleteMultipartUploadResponse
+	10, // 20: api.v1.services.upload.UploadService.AbortMultipartUpload:output_type -> api.v1.services.upload.AbortMultipartUploadResponse
+	12, // 21: api.v1.services.upload.UploadService.UpdateMetadata:output_type -> api.v1.services.upload.UpdateMetadataResponse
 	16, // 22: api.v1.services.upload.UploadService.ListUploadSessions:output_type -> api.v1.services.upload.ListUploadSessionsResponse
-	15, // [15:23] is the sub-list for method output_type
-	7,  // [7:15] is the sub-list for method input_type
+	14, // 23: api.v1.services.upload.UploadService.GetUploadSession:output_type -> api.v1.services.upload.GetUploadSessionResponse
+	18, // 24: api.v1.services.upload.UploadService.SimpleUpload:output_type -> api.v1.services.upload.SimpleUploadResponse
+	16, // [16:25] is the sub-list for method output_type
+	7,  // [7:16] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -1318,6 +1551,7 @@ func file_v1_upload_upload_service_proto_init() {
 	if File_v1_upload_upload_service_proto != nil {
 		return
 	}
+	file_v1_upload_upload_service_proto_msgTypes[11].OneofWrappers = []any{}
 	file_v1_upload_upload_service_proto_msgTypes[15].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -1325,7 +1559,7 @@ func file_v1_upload_upload_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_upload_upload_service_proto_rawDesc), len(file_v1_upload_upload_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

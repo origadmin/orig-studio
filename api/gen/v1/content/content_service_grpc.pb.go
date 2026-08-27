@@ -19,24 +19,34 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ContentService_CreateComment_FullMethodName             = "/api.v1.services.content.ContentService/CreateComment"
-	ContentService_GetComment_FullMethodName                = "/api.v1.services.content.ContentService/GetComment"
-	ContentService_UpdateComment_FullMethodName             = "/api.v1.services.content.ContentService/UpdateComment"
-	ContentService_DeleteComment_FullMethodName             = "/api.v1.services.content.ContentService/DeleteComment"
-	ContentService_ListComments_FullMethodName              = "/api.v1.services.content.ContentService/ListComments"
-	ContentService_ToggleLike_FullMethodName                = "/api.v1.services.content.ContentService/ToggleLike"
-	ContentService_ListLikes_FullMethodName                 = "/api.v1.services.content.ContentService/ListLikes"
-	ContentService_ToggleFavorite_FullMethodName            = "/api.v1.services.content.ContentService/ToggleFavorite"
-	ContentService_ListFavorites_FullMethodName             = "/api.v1.services.content.ContentService/ListFavorites"
-	ContentService_ListNotifications_FullMethodName         = "/api.v1.services.content.ContentService/ListNotifications"
-	ContentService_MarkNotificationRead_FullMethodName      = "/api.v1.services.content.ContentService/MarkNotificationRead"
-	ContentService_MarkAllNotificationsRead_FullMethodName  = "/api.v1.services.content.ContentService/MarkAllNotificationsRead"
-	ContentService_GetFeed_FullMethodName                   = "/api.v1.services.content.ContentService/GetFeed"
-	ContentService_GetPortalHome_FullMethodName             = "/api.v1.services.content.ContentService/GetPortalHome"
-	ContentService_GetPortalTrending_FullMethodName         = "/api.v1.services.content.ContentService/GetPortalTrending"
-	ContentService_GetPortalSubscriptionFeed_FullMethodName = "/api.v1.services.content.ContentService/GetPortalSubscriptionFeed"
-	ContentService_ListCategories_FullMethodName            = "/api.v1.services.content.ContentService/ListCategories"
-	ContentService_ListTags_FullMethodName                  = "/api.v1.services.content.ContentService/ListTags"
+	ContentService_ListComments_FullMethodName                 = "/api.v1.services.content.ContentService/ListComments"
+	ContentService_GetComment_FullMethodName                   = "/api.v1.services.content.ContentService/GetComment"
+	ContentService_CreateComment_FullMethodName                = "/api.v1.services.content.ContentService/CreateComment"
+	ContentService_UpdateComment_FullMethodName                = "/api.v1.services.content.ContentService/UpdateComment"
+	ContentService_DeleteComment_FullMethodName                = "/api.v1.services.content.ContentService/DeleteComment"
+	ContentService_ListMediaComments_FullMethodName            = "/api.v1.services.content.ContentService/ListMediaComments"
+	ContentService_GetCommentLikes_FullMethodName              = "/api.v1.services.content.ContentService/GetCommentLikes"
+	ContentService_ToggleCommentLike_FullMethodName            = "/api.v1.services.content.ContentService/ToggleCommentLike"
+	ContentService_ToggleCommentDislike_FullMethodName         = "/api.v1.services.content.ContentService/ToggleCommentDislike"
+	ContentService_ToggleLike_FullMethodName                   = "/api.v1.services.content.ContentService/ToggleLike"
+	ContentService_ListLikes_FullMethodName                    = "/api.v1.services.content.ContentService/ListLikes"
+	ContentService_ToggleFavorite_FullMethodName               = "/api.v1.services.content.ContentService/ToggleFavorite"
+	ContentService_ListFavorites_FullMethodName                = "/api.v1.services.content.ContentService/ListFavorites"
+	ContentService_ListNotifications_FullMethodName            = "/api.v1.services.content.ContentService/ListNotifications"
+	ContentService_MarkNotificationRead_FullMethodName         = "/api.v1.services.content.ContentService/MarkNotificationRead"
+	ContentService_MarkAllNotificationsRead_FullMethodName     = "/api.v1.services.content.ContentService/MarkAllNotificationsRead"
+	ContentService_ListAllNotifications_FullMethodName         = "/api.v1.services.content.ContentService/ListAllNotifications"
+	ContentService_GetUnreadNotificationCount_FullMethodName   = "/api.v1.services.content.ContentService/GetUnreadNotificationCount"
+	ContentService_MarkNotificationReadPost_FullMethodName     = "/api.v1.services.content.ContentService/MarkNotificationReadPost"
+	ContentService_MarkAllNotificationsReadPost_FullMethodName = "/api.v1.services.content.ContentService/MarkAllNotificationsReadPost"
+	ContentService_DeleteNotification_FullMethodName           = "/api.v1.services.content.ContentService/DeleteNotification"
+	ContentService_GetExploreTrending_FullMethodName           = "/api.v1.services.content.ContentService/GetExploreTrending"
+	ContentService_GetFeed_FullMethodName                      = "/api.v1.services.content.ContentService/GetFeed"
+	ContentService_GetPortalHome_FullMethodName                = "/api.v1.services.content.ContentService/GetPortalHome"
+	ContentService_GetPortalTrending_FullMethodName            = "/api.v1.services.content.ContentService/GetPortalTrending"
+	ContentService_GetPortalSubscriptionFeed_FullMethodName    = "/api.v1.services.content.ContentService/GetPortalSubscriptionFeed"
+	ContentService_ListCategories_FullMethodName               = "/api.v1.services.content.ContentService/ListCategories"
+	ContentService_ListTags_FullMethodName                     = "/api.v1.services.content.ContentService/ListTags"
 )
 
 // ContentServiceClient is the client API for ContentService service.
@@ -45,12 +55,16 @@ const (
 //
 // ContentService handles content interactions: comments, likes, favorites, notifications, feeds.
 type ContentServiceClient interface {
-	// ========== Comments ==========
-	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error)
+	// ========== Comments (independent /comments routes) ==========
+	ListComments(ctx context.Context, in *ListCommentsRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error)
 	GetComment(ctx context.Context, in *GetCommentRequest, opts ...grpc.CallOption) (*GetCommentResponse, error)
+	CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error)
 	UpdateComment(ctx context.Context, in *UpdateCommentRequest, opts ...grpc.CallOption) (*UpdateCommentResponse, error)
 	DeleteComment(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*DeleteCommentResponse, error)
-	ListComments(ctx context.Context, in *ListCommentsRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error)
+	ListMediaComments(ctx context.Context, in *ListMediaCommentsRequest, opts ...grpc.CallOption) (*ListMediaCommentsResponse, error)
+	GetCommentLikes(ctx context.Context, in *GetCommentLikesRequest, opts ...grpc.CallOption) (*GetCommentLikesResponse, error)
+	ToggleCommentLike(ctx context.Context, in *ToggleCommentLikeRequest, opts ...grpc.CallOption) (*ToggleCommentLikeResponse, error)
+	ToggleCommentDislike(ctx context.Context, in *ToggleCommentDislikeRequest, opts ...grpc.CallOption) (*ToggleCommentDislikeResponse, error)
 	// ========== Likes ==========
 	ToggleLike(ctx context.Context, in *ToggleLikeRequest, opts ...grpc.CallOption) (*ToggleLikeResponse, error)
 	ListLikes(ctx context.Context, in *ListLikesRequest, opts ...grpc.CallOption) (*ListLikesResponse, error)
@@ -61,6 +75,14 @@ type ContentServiceClient interface {
 	ListNotifications(ctx context.Context, in *ListNotificationsRequest, opts ...grpc.CallOption) (*ListNotificationsResponse, error)
 	MarkNotificationRead(ctx context.Context, in *MarkNotificationReadRequest, opts ...grpc.CallOption) (*MarkNotificationReadResponse, error)
 	MarkAllNotificationsRead(ctx context.Context, in *MarkAllNotificationsReadRequest, opts ...grpc.CallOption) (*MarkAllNotificationsReadResponse, error)
+	// Additional notification routes
+	ListAllNotifications(ctx context.Context, in *ListAllNotificationsRequest, opts ...grpc.CallOption) (*ListAllNotificationsResponse, error)
+	GetUnreadNotificationCount(ctx context.Context, in *GetUnreadNotificationCountRequest, opts ...grpc.CallOption) (*GetUnreadNotificationCountResponse, error)
+	MarkNotificationReadPost(ctx context.Context, in *MarkNotificationReadPostRequest, opts ...grpc.CallOption) (*MarkNotificationReadPostResponse, error)
+	MarkAllNotificationsReadPost(ctx context.Context, in *MarkAllNotificationsReadPostRequest, opts ...grpc.CallOption) (*MarkAllNotificationsReadPostResponse, error)
+	DeleteNotification(ctx context.Context, in *DeleteNotificationRequest, opts ...grpc.CallOption) (*DeleteNotificationResponse, error)
+	// ========== Explore ==========
+	GetExploreTrending(ctx context.Context, in *GetExploreTrendingRequest, opts ...grpc.CallOption) (*GetExploreTrendingResponse, error)
 	// ========== Feed ==========
 	GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*GetFeedResponse, error)
 	// ========== Portal ==========
@@ -80,10 +102,10 @@ func NewContentServiceClient(cc grpc.ClientConnInterface) ContentServiceClient {
 	return &contentServiceClient{cc}
 }
 
-func (c *contentServiceClient) CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error) {
+func (c *contentServiceClient) ListComments(ctx context.Context, in *ListCommentsRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateCommentResponse)
-	err := c.cc.Invoke(ctx, ContentService_CreateComment_FullMethodName, in, out, cOpts...)
+	out := new(ListCommentsResponse)
+	err := c.cc.Invoke(ctx, ContentService_ListComments_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,6 +116,16 @@ func (c *contentServiceClient) GetComment(ctx context.Context, in *GetCommentReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetCommentResponse)
 	err := c.cc.Invoke(ctx, ContentService_GetComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) CreateComment(ctx context.Context, in *CreateCommentRequest, opts ...grpc.CallOption) (*CreateCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCommentResponse)
+	err := c.cc.Invoke(ctx, ContentService_CreateComment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -120,10 +152,40 @@ func (c *contentServiceClient) DeleteComment(ctx context.Context, in *DeleteComm
 	return out, nil
 }
 
-func (c *contentServiceClient) ListComments(ctx context.Context, in *ListCommentsRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error) {
+func (c *contentServiceClient) ListMediaComments(ctx context.Context, in *ListMediaCommentsRequest, opts ...grpc.CallOption) (*ListMediaCommentsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListCommentsResponse)
-	err := c.cc.Invoke(ctx, ContentService_ListComments_FullMethodName, in, out, cOpts...)
+	out := new(ListMediaCommentsResponse)
+	err := c.cc.Invoke(ctx, ContentService_ListMediaComments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) GetCommentLikes(ctx context.Context, in *GetCommentLikesRequest, opts ...grpc.CallOption) (*GetCommentLikesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCommentLikesResponse)
+	err := c.cc.Invoke(ctx, ContentService_GetCommentLikes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) ToggleCommentLike(ctx context.Context, in *ToggleCommentLikeRequest, opts ...grpc.CallOption) (*ToggleCommentLikeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ToggleCommentLikeResponse)
+	err := c.cc.Invoke(ctx, ContentService_ToggleCommentLike_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) ToggleCommentDislike(ctx context.Context, in *ToggleCommentDislikeRequest, opts ...grpc.CallOption) (*ToggleCommentDislikeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ToggleCommentDislikeResponse)
+	err := c.cc.Invoke(ctx, ContentService_ToggleCommentDislike_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -200,6 +262,66 @@ func (c *contentServiceClient) MarkAllNotificationsRead(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *contentServiceClient) ListAllNotifications(ctx context.Context, in *ListAllNotificationsRequest, opts ...grpc.CallOption) (*ListAllNotificationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAllNotificationsResponse)
+	err := c.cc.Invoke(ctx, ContentService_ListAllNotifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) GetUnreadNotificationCount(ctx context.Context, in *GetUnreadNotificationCountRequest, opts ...grpc.CallOption) (*GetUnreadNotificationCountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUnreadNotificationCountResponse)
+	err := c.cc.Invoke(ctx, ContentService_GetUnreadNotificationCount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) MarkNotificationReadPost(ctx context.Context, in *MarkNotificationReadPostRequest, opts ...grpc.CallOption) (*MarkNotificationReadPostResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MarkNotificationReadPostResponse)
+	err := c.cc.Invoke(ctx, ContentService_MarkNotificationReadPost_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) MarkAllNotificationsReadPost(ctx context.Context, in *MarkAllNotificationsReadPostRequest, opts ...grpc.CallOption) (*MarkAllNotificationsReadPostResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MarkAllNotificationsReadPostResponse)
+	err := c.cc.Invoke(ctx, ContentService_MarkAllNotificationsReadPost_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) DeleteNotification(ctx context.Context, in *DeleteNotificationRequest, opts ...grpc.CallOption) (*DeleteNotificationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteNotificationResponse)
+	err := c.cc.Invoke(ctx, ContentService_DeleteNotification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *contentServiceClient) GetExploreTrending(ctx context.Context, in *GetExploreTrendingRequest, opts ...grpc.CallOption) (*GetExploreTrendingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExploreTrendingResponse)
+	err := c.cc.Invoke(ctx, ContentService_GetExploreTrending_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *contentServiceClient) GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*GetFeedResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetFeedResponse)
@@ -266,12 +388,16 @@ func (c *contentServiceClient) ListTags(ctx context.Context, in *ListTagsRequest
 //
 // ContentService handles content interactions: comments, likes, favorites, notifications, feeds.
 type ContentServiceServer interface {
-	// ========== Comments ==========
-	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
+	// ========== Comments (independent /comments routes) ==========
+	ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error)
 	GetComment(context.Context, *GetCommentRequest) (*GetCommentResponse, error)
+	CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error)
 	UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error)
 	DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error)
-	ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error)
+	ListMediaComments(context.Context, *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error)
+	GetCommentLikes(context.Context, *GetCommentLikesRequest) (*GetCommentLikesResponse, error)
+	ToggleCommentLike(context.Context, *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error)
+	ToggleCommentDislike(context.Context, *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error)
 	// ========== Likes ==========
 	ToggleLike(context.Context, *ToggleLikeRequest) (*ToggleLikeResponse, error)
 	ListLikes(context.Context, *ListLikesRequest) (*ListLikesResponse, error)
@@ -282,6 +408,14 @@ type ContentServiceServer interface {
 	ListNotifications(context.Context, *ListNotificationsRequest) (*ListNotificationsResponse, error)
 	MarkNotificationRead(context.Context, *MarkNotificationReadRequest) (*MarkNotificationReadResponse, error)
 	MarkAllNotificationsRead(context.Context, *MarkAllNotificationsReadRequest) (*MarkAllNotificationsReadResponse, error)
+	// Additional notification routes
+	ListAllNotifications(context.Context, *ListAllNotificationsRequest) (*ListAllNotificationsResponse, error)
+	GetUnreadNotificationCount(context.Context, *GetUnreadNotificationCountRequest) (*GetUnreadNotificationCountResponse, error)
+	MarkNotificationReadPost(context.Context, *MarkNotificationReadPostRequest) (*MarkNotificationReadPostResponse, error)
+	MarkAllNotificationsReadPost(context.Context, *MarkAllNotificationsReadPostRequest) (*MarkAllNotificationsReadPostResponse, error)
+	DeleteNotification(context.Context, *DeleteNotificationRequest) (*DeleteNotificationResponse, error)
+	// ========== Explore ==========
+	GetExploreTrending(context.Context, *GetExploreTrendingRequest) (*GetExploreTrendingResponse, error)
 	// ========== Feed ==========
 	GetFeed(context.Context, *GetFeedRequest) (*GetFeedResponse, error)
 	// ========== Portal ==========
@@ -301,11 +435,14 @@ type ContentServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedContentServiceServer struct{}
 
-func (UnimplementedContentServiceServer) CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreateComment not implemented")
+func (UnimplementedContentServiceServer) ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListComments not implemented")
 }
 func (UnimplementedContentServiceServer) GetComment(context.Context, *GetCommentRequest) (*GetCommentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetComment not implemented")
+}
+func (UnimplementedContentServiceServer) CreateComment(context.Context, *CreateCommentRequest) (*CreateCommentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateComment not implemented")
 }
 func (UnimplementedContentServiceServer) UpdateComment(context.Context, *UpdateCommentRequest) (*UpdateCommentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateComment not implemented")
@@ -313,8 +450,17 @@ func (UnimplementedContentServiceServer) UpdateComment(context.Context, *UpdateC
 func (UnimplementedContentServiceServer) DeleteComment(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteComment not implemented")
 }
-func (UnimplementedContentServiceServer) ListComments(context.Context, *ListCommentsRequest) (*ListCommentsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListComments not implemented")
+func (UnimplementedContentServiceServer) ListMediaComments(context.Context, *ListMediaCommentsRequest) (*ListMediaCommentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMediaComments not implemented")
+}
+func (UnimplementedContentServiceServer) GetCommentLikes(context.Context, *GetCommentLikesRequest) (*GetCommentLikesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCommentLikes not implemented")
+}
+func (UnimplementedContentServiceServer) ToggleCommentLike(context.Context, *ToggleCommentLikeRequest) (*ToggleCommentLikeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ToggleCommentLike not implemented")
+}
+func (UnimplementedContentServiceServer) ToggleCommentDislike(context.Context, *ToggleCommentDislikeRequest) (*ToggleCommentDislikeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ToggleCommentDislike not implemented")
 }
 func (UnimplementedContentServiceServer) ToggleLike(context.Context, *ToggleLikeRequest) (*ToggleLikeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ToggleLike not implemented")
@@ -336,6 +482,24 @@ func (UnimplementedContentServiceServer) MarkNotificationRead(context.Context, *
 }
 func (UnimplementedContentServiceServer) MarkAllNotificationsRead(context.Context, *MarkAllNotificationsReadRequest) (*MarkAllNotificationsReadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method MarkAllNotificationsRead not implemented")
+}
+func (UnimplementedContentServiceServer) ListAllNotifications(context.Context, *ListAllNotificationsRequest) (*ListAllNotificationsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAllNotifications not implemented")
+}
+func (UnimplementedContentServiceServer) GetUnreadNotificationCount(context.Context, *GetUnreadNotificationCountRequest) (*GetUnreadNotificationCountResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUnreadNotificationCount not implemented")
+}
+func (UnimplementedContentServiceServer) MarkNotificationReadPost(context.Context, *MarkNotificationReadPostRequest) (*MarkNotificationReadPostResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MarkNotificationReadPost not implemented")
+}
+func (UnimplementedContentServiceServer) MarkAllNotificationsReadPost(context.Context, *MarkAllNotificationsReadPostRequest) (*MarkAllNotificationsReadPostResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MarkAllNotificationsReadPost not implemented")
+}
+func (UnimplementedContentServiceServer) DeleteNotification(context.Context, *DeleteNotificationRequest) (*DeleteNotificationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteNotification not implemented")
+}
+func (UnimplementedContentServiceServer) GetExploreTrending(context.Context, *GetExploreTrendingRequest) (*GetExploreTrendingResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetExploreTrending not implemented")
 }
 func (UnimplementedContentServiceServer) GetFeed(context.Context, *GetFeedRequest) (*GetFeedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetFeed not implemented")
@@ -376,20 +540,20 @@ func RegisterContentServiceServer(s grpc.ServiceRegistrar, srv ContentServiceSer
 	s.RegisterService(&ContentService_ServiceDesc, srv)
 }
 
-func _ContentService_CreateComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateCommentRequest)
+func _ContentService_ListComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListCommentsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ContentServiceServer).CreateComment(ctx, in)
+		return srv.(ContentServiceServer).ListComments(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ContentService_CreateComment_FullMethodName,
+		FullMethod: ContentService_ListComments_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ContentServiceServer).CreateComment(ctx, req.(*CreateCommentRequest))
+		return srv.(ContentServiceServer).ListComments(ctx, req.(*ListCommentsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -408,6 +572,24 @@ func _ContentService_GetComment_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ContentServiceServer).GetComment(ctx, req.(*GetCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_CreateComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).CreateComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_CreateComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).CreateComment(ctx, req.(*CreateCommentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -448,20 +630,74 @@ func _ContentService_DeleteComment_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ContentService_ListComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListCommentsRequest)
+func _ContentService_ListMediaComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMediaCommentsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ContentServiceServer).ListComments(ctx, in)
+		return srv.(ContentServiceServer).ListMediaComments(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ContentService_ListComments_FullMethodName,
+		FullMethod: ContentService_ListMediaComments_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ContentServiceServer).ListComments(ctx, req.(*ListCommentsRequest))
+		return srv.(ContentServiceServer).ListMediaComments(ctx, req.(*ListMediaCommentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_GetCommentLikes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCommentLikesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).GetCommentLikes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_GetCommentLikes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).GetCommentLikes(ctx, req.(*GetCommentLikesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_ToggleCommentLike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleCommentLikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).ToggleCommentLike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_ToggleCommentLike_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).ToggleCommentLike(ctx, req.(*ToggleCommentLikeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_ToggleCommentDislike_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleCommentDislikeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).ToggleCommentDislike(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_ToggleCommentDislike_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).ToggleCommentDislike(ctx, req.(*ToggleCommentDislikeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -592,6 +828,114 @@ func _ContentService_MarkAllNotificationsRead_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ContentService_ListAllNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAllNotificationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).ListAllNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_ListAllNotifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).ListAllNotifications(ctx, req.(*ListAllNotificationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_GetUnreadNotificationCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUnreadNotificationCountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).GetUnreadNotificationCount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_GetUnreadNotificationCount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).GetUnreadNotificationCount(ctx, req.(*GetUnreadNotificationCountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_MarkNotificationReadPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkNotificationReadPostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).MarkNotificationReadPost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_MarkNotificationReadPost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).MarkNotificationReadPost(ctx, req.(*MarkNotificationReadPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_MarkAllNotificationsReadPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkAllNotificationsReadPostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).MarkAllNotificationsReadPost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_MarkAllNotificationsReadPost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).MarkAllNotificationsReadPost(ctx, req.(*MarkAllNotificationsReadPostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_DeleteNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteNotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).DeleteNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_DeleteNotification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).DeleteNotification(ctx, req.(*DeleteNotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ContentService_GetExploreTrending_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExploreTrendingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContentServiceServer).GetExploreTrending(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ContentService_GetExploreTrending_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContentServiceServer).GetExploreTrending(ctx, req.(*GetExploreTrendingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ContentService_GetFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetFeedRequest)
 	if err := dec(in); err != nil {
@@ -708,12 +1052,16 @@ var ContentService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ContentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateComment",
-			Handler:    _ContentService_CreateComment_Handler,
+			MethodName: "ListComments",
+			Handler:    _ContentService_ListComments_Handler,
 		},
 		{
 			MethodName: "GetComment",
 			Handler:    _ContentService_GetComment_Handler,
+		},
+		{
+			MethodName: "CreateComment",
+			Handler:    _ContentService_CreateComment_Handler,
 		},
 		{
 			MethodName: "UpdateComment",
@@ -724,8 +1072,20 @@ var ContentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ContentService_DeleteComment_Handler,
 		},
 		{
-			MethodName: "ListComments",
-			Handler:    _ContentService_ListComments_Handler,
+			MethodName: "ListMediaComments",
+			Handler:    _ContentService_ListMediaComments_Handler,
+		},
+		{
+			MethodName: "GetCommentLikes",
+			Handler:    _ContentService_GetCommentLikes_Handler,
+		},
+		{
+			MethodName: "ToggleCommentLike",
+			Handler:    _ContentService_ToggleCommentLike_Handler,
+		},
+		{
+			MethodName: "ToggleCommentDislike",
+			Handler:    _ContentService_ToggleCommentDislike_Handler,
 		},
 		{
 			MethodName: "ToggleLike",
@@ -754,6 +1114,30 @@ var ContentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MarkAllNotificationsRead",
 			Handler:    _ContentService_MarkAllNotificationsRead_Handler,
+		},
+		{
+			MethodName: "ListAllNotifications",
+			Handler:    _ContentService_ListAllNotifications_Handler,
+		},
+		{
+			MethodName: "GetUnreadNotificationCount",
+			Handler:    _ContentService_GetUnreadNotificationCount_Handler,
+		},
+		{
+			MethodName: "MarkNotificationReadPost",
+			Handler:    _ContentService_MarkNotificationReadPost_Handler,
+		},
+		{
+			MethodName: "MarkAllNotificationsReadPost",
+			Handler:    _ContentService_MarkAllNotificationsReadPost_Handler,
+		},
+		{
+			MethodName: "DeleteNotification",
+			Handler:    _ContentService_DeleteNotification_Handler,
+		},
+		{
+			MethodName: "GetExploreTrending",
+			Handler:    _ContentService_GetExploreTrending_Handler,
 		},
 		{
 			MethodName: "GetFeed",

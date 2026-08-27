@@ -19,11 +19,11 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationUserServiceChangePassword = "/api.v1.services.user.UserService/ChangePassword"
 const OperationUserServiceChangeUserPassword = "/api.v1.services.user.UserService/ChangeUserPassword"
 const OperationUserServiceClearHistory = "/api.v1.services.user.UserService/ClearHistory"
 const OperationUserServiceCreateUser = "/api.v1.services.user.UserService/CreateUser"
 const OperationUserServiceDeleteUser = "/api.v1.services.user.UserService/DeleteUser"
-const OperationUserServiceForgotPassword = "/api.v1.services.user.UserService/ForgotPassword"
 const OperationUserServiceGetCurrentUser = "/api.v1.services.user.UserService/GetCurrentUser"
 const OperationUserServiceGetMe = "/api.v1.services.user.UserService/GetMe"
 const OperationUserServiceGetMyChannels = "/api.v1.services.user.UserService/GetMyChannels"
@@ -37,9 +37,11 @@ const OperationUserServiceGetMySubscriptions = "/api.v1.services.user.UserServic
 const OperationUserServiceGetUser = "/api.v1.services.user.UserService/GetUser"
 const OperationUserServiceGetUserByUsername = "/api.v1.services.user.UserService/GetUserByUsername"
 const OperationUserServiceGetUserFollowers = "/api.v1.services.user.UserService/GetUserFollowers"
+const OperationUserServiceGetUserLikes = "/api.v1.services.user.UserService/GetUserLikes"
 const OperationUserServiceGetUserPlaylists = "/api.v1.services.user.UserService/GetUserPlaylists"
 const OperationUserServiceGetUserStats = "/api.v1.services.user.UserService/GetUserStats"
 const OperationUserServiceGetUserSubscription = "/api.v1.services.user.UserService/GetUserSubscription"
+const OperationUserServiceGetUserSubscriptions = "/api.v1.services.user.UserService/GetUserSubscriptions"
 const OperationUserServiceListUserRoles = "/api.v1.services.user.UserService/ListUserRoles"
 const OperationUserServiceListUsers = "/api.v1.services.user.UserService/ListUsers"
 const OperationUserServiceLogin = "/api.v1.services.user.UserService/Login"
@@ -48,12 +50,12 @@ const OperationUserServiceRefreshToken = "/api.v1.services.user.UserService/Refr
 const OperationUserServiceRegister = "/api.v1.services.user.UserService/Register"
 const OperationUserServiceRemoveFavorite = "/api.v1.services.user.UserService/RemoveFavorite"
 const OperationUserServiceRemoveHistoryItem = "/api.v1.services.user.UserService/RemoveHistoryItem"
-const OperationUserServiceResetPassword = "/api.v1.services.user.UserService/ResetPassword"
 const OperationUserServiceSubscribeUser = "/api.v1.services.user.UserService/SubscribeUser"
 const OperationUserServiceSyncHistory = "/api.v1.services.user.UserService/SyncHistory"
 const OperationUserServiceUnsubscribeUser = "/api.v1.services.user.UserService/UnsubscribeUser"
 const OperationUserServiceUpdateMe = "/api.v1.services.user.UserService/UpdateMe"
 const OperationUserServiceUpdateMyPassword = "/api.v1.services.user.UserService/UpdateMyPassword"
+const OperationUserServiceUpdateMySlug = "/api.v1.services.user.UserService/UpdateMySlug"
 const OperationUserServiceUpdateUser = "/api.v1.services.user.UserService/UpdateUser"
 const OperationUserServiceUpdateUserRoles = "/api.v1.services.user.UserService/UpdateUserRoles"
 const OperationUserServiceUpdateUserStatus = "/api.v1.services.user.UserService/UpdateUserStatus"
@@ -61,6 +63,8 @@ const OperationUserServiceUpsertHistory = "/api.v1.services.user.UserService/Ups
 const OperationUserServiceVerifyPassword = "/api.v1.services.user.UserService/VerifyPassword"
 
 type UserServiceHTTPServer interface {
+	// ChangePassword ChangePassword changes the current user's password (auth endpoint).
+	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	// ChangeUserPassword ChangeUserPassword changes a user's password.
 	ChangeUserPassword(context.Context, *ChangeUserPasswordRequest) (*ChangeUserPasswordResponse, error)
 	// ClearHistory ClearHistory clears all watch history for the current user.
@@ -69,10 +73,7 @@ type UserServiceHTTPServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	// DeleteUser DeleteUser deletes a user.
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
-	// ForgotPassword ForgotPassword initiates password reset process.
-	ForgotPassword(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
-	// GetCurrentUser GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
-	// This is kept for backward compatibility, use MeService for new code.
+	// GetCurrentUser GetCurrentUser returns the current authenticated user.
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
 	// GetMe GetMe returns the current user's information.
 	GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error)
@@ -92,18 +93,22 @@ type UserServiceHTTPServer interface {
 	GetMyStats(context.Context, *GetMyStatsRequest) (*GetMyStatsResponse, error)
 	// GetMySubscriptions GetMySubscriptions returns the current user's channel subscriptions.
 	GetMySubscriptions(context.Context, *GetMySubscriptionsRequest) (*GetMySubscriptionsResponse, error)
-	// GetUser GetUser returns a user by ID.
+	// GetUser GetUser returns a user by slug (portal) or ID (admin).
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// GetUserByUsername GetUserByUsername returns a user by username.
 	GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*GetUserByUsernameResponse, error)
 	// GetUserFollowers GetUserFollowers returns followers for a user.
 	GetUserFollowers(context.Context, *GetUserFollowersRequest) (*GetUserFollowersResponse, error)
+	// GetUserLikes GetUserLikes returns likes for a user.
+	GetUserLikes(context.Context, *GetUserLikesRequest) (*GetUserLikesResponse, error)
 	// GetUserPlaylists GetUserPlaylists returns public playlists for a user.
 	GetUserPlaylists(context.Context, *GetUserPlaylistsRequest) (*GetUserPlaylistsResponse, error)
 	// GetUserStats GetUserStats returns statistics for a user.
 	GetUserStats(context.Context, *GetUserStatsRequest) (*GetUserStatsResponse, error)
 	// GetUserSubscription GetUserSubscription returns subscription status for a user.
 	GetUserSubscription(context.Context, *GetUserSubscriptionRequest) (*GetUserSubscriptionResponse, error)
+	// GetUserSubscriptions GetUserSubscriptions returns subscriptions for a user.
+	GetUserSubscriptions(context.Context, *GetUserSubscriptionsRequest) (*GetUserSubscriptionsResponse, error)
 	// ListUserRoles ListUserRoles returns roles assigned to a user.
 	ListUserRoles(context.Context, *ListUserRolesRequest) (*ListUserRolesResponse, error)
 	// ListUsers ListUsers returns a list of users.
@@ -120,8 +125,6 @@ type UserServiceHTTPServer interface {
 	RemoveFavorite(context.Context, *RemoveFavoriteRequest) (*RemoveFavoriteResponse, error)
 	// RemoveHistoryItem RemoveHistoryItem removes a single history record.
 	RemoveHistoryItem(context.Context, *RemoveHistoryItemRequest) (*RemoveHistoryItemResponse, error)
-	// ResetPassword ResetPassword resets user password with token.
-	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
 	// SubscribeUser SubscribeUser subscribes to a user.
 	SubscribeUser(context.Context, *SubscribeUserRequest) (*SubscribeUserResponse, error)
 	// SyncHistory SyncHistory batch-syncs history records (login merge).
@@ -132,6 +135,8 @@ type UserServiceHTTPServer interface {
 	UpdateMe(context.Context, *UpdateMeRequest) (*UpdateMeResponse, error)
 	// UpdateMyPassword UpdateMyPassword updates the current user's password.
 	UpdateMyPassword(context.Context, *UpdateMyPasswordRequest) (*UpdateMyPasswordResponse, error)
+	// UpdateMySlug UpdateMySlug updates the current user's slug.
+	UpdateMySlug(context.Context, *UpdateMySlugRequest) (*UpdateMySlugResponse, error)
 	// UpdateUser UpdateUser updates an existing user.
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 	// UpdateUserRoles UpdateUserRoles updates a user's roles.
@@ -150,8 +155,6 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r.POST("/api/v1/auth/signout", _UserService_Logout0_HTTP_Handler(srv))
 	r.POST("/api/v1/auth/refresh", _UserService_RefreshToken0_HTTP_Handler(srv))
 	r.POST("/api/v1/auth/signup", _UserService_Register0_HTTP_Handler(srv))
-	r.POST("/api/v1/auth/forgot-password", _UserService_ForgotPassword0_HTTP_Handler(srv))
-	r.POST("/api/v1/auth/reset-password", _UserService_ResetPassword0_HTTP_Handler(srv))
 	r.GET("/api/v1/auth/me", _UserService_GetCurrentUser0_HTTP_Handler(srv))
 	r.GET("/api/v1/me", _UserService_GetMe0_HTTP_Handler(srv))
 	r.PUT("/api/v1/me", _UserService_UpdateMe0_HTTP_Handler(srv))
@@ -179,13 +182,17 @@ func RegisterUserServiceHTTPServer(s *http.Server, srv UserServiceHTTPServer) {
 	r.GET("/api/v1/users/{id}/stats", _UserService_GetUserStats0_HTTP_Handler(srv))
 	r.GET("/api/v1/users/{id}/playlists", _UserService_GetUserPlaylists0_HTTP_Handler(srv))
 	r.GET("/api/v1/users/{id}/followers", _UserService_GetUserFollowers0_HTTP_Handler(srv))
-	r.GET("/api/v1/users/username/{username}", _UserService_GetUserByUsername0_HTTP_Handler(srv))
+	r.GET("/api/v1/usernames/{username}", _UserService_GetUserByUsername0_HTTP_Handler(srv))
 	r.POST("/api/v1/users/{id}/subscribe", _UserService_SubscribeUser0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/users/{id}/subscribe", _UserService_UnsubscribeUser0_HTTP_Handler(srv))
 	r.GET("/api/v1/users/{id}/subscription", _UserService_GetUserSubscription0_HTTP_Handler(srv))
 	r.GET("/api/v1/me/followers", _UserService_GetMyFollowers0_HTTP_Handler(srv))
 	r.GET("/api/v1/me/channels", _UserService_GetMyChannels0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/me/favorites/{id}", _UserService_RemoveFavorite0_HTTP_Handler(srv))
+	r.PUT("/api/v1/me/slug", _UserService_UpdateMySlug0_HTTP_Handler(srv))
+	r.GET("/api/v1/users/{id}/likes", _UserService_GetUserLikes0_HTTP_Handler(srv))
+	r.GET("/api/v1/users/{id}/subscriptions", _UserService_GetUserSubscriptions0_HTTP_Handler(srv))
+	r.PUT("/api/v1/auth/password", _UserService_ChangePassword0_HTTP_Handler(srv))
 }
 
 func _UserService_Login0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
@@ -272,50 +279,6 @@ func _UserService_Register0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx htt
 			return err
 		}
 		reply := out.(*RegisterResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _UserService_ForgotPassword0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ForgotPasswordRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserServiceForgotPassword)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ForgotPassword(ctx, req.(*ForgotPasswordRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ForgotPasswordResponse)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _UserService_ResetPassword0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ResetPasswordRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUserServiceResetPassword)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ResetPassword(ctx, req.(*ResetPasswordRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*ResetPasswordResponse)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1047,7 +1010,97 @@ func _UserService_RemoveFavorite0_HTTP_Handler(srv UserServiceHTTPServer) func(c
 	}
 }
 
+func _UserService_UpdateMySlug0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateMySlugRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceUpdateMySlug)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateMySlug(ctx, req.(*UpdateMySlugRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateMySlugResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_GetUserLikes0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserLikesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceGetUserLikes)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserLikes(ctx, req.(*GetUserLikesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserLikesResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_GetUserSubscriptions0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserSubscriptionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceGetUserSubscriptions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserSubscriptions(ctx, req.(*GetUserSubscriptionsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserSubscriptionsResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _UserService_ChangePassword0_HTTP_Handler(srv UserServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ChangePasswordRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserServiceChangePassword)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ChangePassword(ctx, req.(*ChangePasswordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ChangePasswordResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserServiceHTTPClient interface {
+	// ChangePassword ChangePassword changes the current user's password (auth endpoint).
+	ChangePassword(ctx context.Context, req *ChangePasswordRequest, opts ...http.CallOption) (rsp *ChangePasswordResponse, err error)
 	// ChangeUserPassword ChangeUserPassword changes a user's password.
 	ChangeUserPassword(ctx context.Context, req *ChangeUserPasswordRequest, opts ...http.CallOption) (rsp *ChangeUserPasswordResponse, err error)
 	// ClearHistory ClearHistory clears all watch history for the current user.
@@ -1056,10 +1109,7 @@ type UserServiceHTTPClient interface {
 	CreateUser(ctx context.Context, req *CreateUserRequest, opts ...http.CallOption) (rsp *CreateUserResponse, err error)
 	// DeleteUser DeleteUser deletes a user.
 	DeleteUser(ctx context.Context, req *DeleteUserRequest, opts ...http.CallOption) (rsp *DeleteUserResponse, err error)
-	// ForgotPassword ForgotPassword initiates password reset process.
-	ForgotPassword(ctx context.Context, req *ForgotPasswordRequest, opts ...http.CallOption) (rsp *ForgotPasswordResponse, err error)
-	// GetCurrentUser GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
-	// This is kept for backward compatibility, use MeService for new code.
+	// GetCurrentUser GetCurrentUser returns the current authenticated user.
 	GetCurrentUser(ctx context.Context, req *GetCurrentUserRequest, opts ...http.CallOption) (rsp *GetCurrentUserResponse, err error)
 	// GetMe GetMe returns the current user's information.
 	GetMe(ctx context.Context, req *GetMeRequest, opts ...http.CallOption) (rsp *GetMeResponse, err error)
@@ -1079,18 +1129,22 @@ type UserServiceHTTPClient interface {
 	GetMyStats(ctx context.Context, req *GetMyStatsRequest, opts ...http.CallOption) (rsp *GetMyStatsResponse, err error)
 	// GetMySubscriptions GetMySubscriptions returns the current user's channel subscriptions.
 	GetMySubscriptions(ctx context.Context, req *GetMySubscriptionsRequest, opts ...http.CallOption) (rsp *GetMySubscriptionsResponse, err error)
-	// GetUser GetUser returns a user by ID.
+	// GetUser GetUser returns a user by slug (portal) or ID (admin).
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserResponse, err error)
 	// GetUserByUsername GetUserByUsername returns a user by username.
 	GetUserByUsername(ctx context.Context, req *GetUserByUsernameRequest, opts ...http.CallOption) (rsp *GetUserByUsernameResponse, err error)
 	// GetUserFollowers GetUserFollowers returns followers for a user.
 	GetUserFollowers(ctx context.Context, req *GetUserFollowersRequest, opts ...http.CallOption) (rsp *GetUserFollowersResponse, err error)
+	// GetUserLikes GetUserLikes returns likes for a user.
+	GetUserLikes(ctx context.Context, req *GetUserLikesRequest, opts ...http.CallOption) (rsp *GetUserLikesResponse, err error)
 	// GetUserPlaylists GetUserPlaylists returns public playlists for a user.
 	GetUserPlaylists(ctx context.Context, req *GetUserPlaylistsRequest, opts ...http.CallOption) (rsp *GetUserPlaylistsResponse, err error)
 	// GetUserStats GetUserStats returns statistics for a user.
 	GetUserStats(ctx context.Context, req *GetUserStatsRequest, opts ...http.CallOption) (rsp *GetUserStatsResponse, err error)
 	// GetUserSubscription GetUserSubscription returns subscription status for a user.
 	GetUserSubscription(ctx context.Context, req *GetUserSubscriptionRequest, opts ...http.CallOption) (rsp *GetUserSubscriptionResponse, err error)
+	// GetUserSubscriptions GetUserSubscriptions returns subscriptions for a user.
+	GetUserSubscriptions(ctx context.Context, req *GetUserSubscriptionsRequest, opts ...http.CallOption) (rsp *GetUserSubscriptionsResponse, err error)
 	// ListUserRoles ListUserRoles returns roles assigned to a user.
 	ListUserRoles(ctx context.Context, req *ListUserRolesRequest, opts ...http.CallOption) (rsp *ListUserRolesResponse, err error)
 	// ListUsers ListUsers returns a list of users.
@@ -1107,8 +1161,6 @@ type UserServiceHTTPClient interface {
 	RemoveFavorite(ctx context.Context, req *RemoveFavoriteRequest, opts ...http.CallOption) (rsp *RemoveFavoriteResponse, err error)
 	// RemoveHistoryItem RemoveHistoryItem removes a single history record.
 	RemoveHistoryItem(ctx context.Context, req *RemoveHistoryItemRequest, opts ...http.CallOption) (rsp *RemoveHistoryItemResponse, err error)
-	// ResetPassword ResetPassword resets user password with token.
-	ResetPassword(ctx context.Context, req *ResetPasswordRequest, opts ...http.CallOption) (rsp *ResetPasswordResponse, err error)
 	// SubscribeUser SubscribeUser subscribes to a user.
 	SubscribeUser(ctx context.Context, req *SubscribeUserRequest, opts ...http.CallOption) (rsp *SubscribeUserResponse, err error)
 	// SyncHistory SyncHistory batch-syncs history records (login merge).
@@ -1119,6 +1171,8 @@ type UserServiceHTTPClient interface {
 	UpdateMe(ctx context.Context, req *UpdateMeRequest, opts ...http.CallOption) (rsp *UpdateMeResponse, err error)
 	// UpdateMyPassword UpdateMyPassword updates the current user's password.
 	UpdateMyPassword(ctx context.Context, req *UpdateMyPasswordRequest, opts ...http.CallOption) (rsp *UpdateMyPasswordResponse, err error)
+	// UpdateMySlug UpdateMySlug updates the current user's slug.
+	UpdateMySlug(ctx context.Context, req *UpdateMySlugRequest, opts ...http.CallOption) (rsp *UpdateMySlugResponse, err error)
 	// UpdateUser UpdateUser updates an existing user.
 	UpdateUser(ctx context.Context, req *UpdateUserRequest, opts ...http.CallOption) (rsp *UpdateUserResponse, err error)
 	// UpdateUserRoles UpdateUserRoles updates a user's roles.
@@ -1137,6 +1191,20 @@ type UserServiceHTTPClientImpl struct {
 
 func NewUserServiceHTTPClient(client *http.Client) UserServiceHTTPClient {
 	return &UserServiceHTTPClientImpl{client}
+}
+
+// ChangePassword ChangePassword changes the current user's password (auth endpoint).
+func (c *UserServiceHTTPClientImpl) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...http.CallOption) (*ChangePasswordResponse, error) {
+	var out ChangePasswordResponse
+	pattern := "/api/v1/auth/password"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserServiceChangePassword))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // ChangeUserPassword ChangeUserPassword changes a user's password.
@@ -1195,22 +1263,7 @@ func (c *UserServiceHTTPClientImpl) DeleteUser(ctx context.Context, in *DeleteUs
 	return &out, nil
 }
 
-// ForgotPassword ForgotPassword initiates password reset process.
-func (c *UserServiceHTTPClientImpl) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...http.CallOption) (*ForgotPasswordResponse, error) {
-	var out ForgotPasswordResponse
-	pattern := "/api/v1/auth/forgot-password"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationUserServiceForgotPassword))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// GetCurrentUser GetCurrentUser returns the current authenticated user (moved from /auth/me to /me).
-// This is kept for backward compatibility, use MeService for new code.
+// GetCurrentUser GetCurrentUser returns the current authenticated user.
 func (c *UserServiceHTTPClientImpl) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...http.CallOption) (*GetCurrentUserResponse, error) {
 	var out GetCurrentUserResponse
 	pattern := "/api/v1/auth/me"
@@ -1350,7 +1403,7 @@ func (c *UserServiceHTTPClientImpl) GetMySubscriptions(ctx context.Context, in *
 	return &out, nil
 }
 
-// GetUser GetUser returns a user by ID.
+// GetUser GetUser returns a user by slug (portal) or ID (admin).
 func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, opts ...http.CallOption) (*GetUserResponse, error) {
 	var out GetUserResponse
 	pattern := "/api/v1/users/{id}"
@@ -1367,7 +1420,7 @@ func (c *UserServiceHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequ
 // GetUserByUsername GetUserByUsername returns a user by username.
 func (c *UserServiceHTTPClientImpl) GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...http.CallOption) (*GetUserByUsernameResponse, error) {
 	var out GetUserByUsernameResponse
-	pattern := "/api/v1/users/username/{username}"
+	pattern := "/api/v1/usernames/{username}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceGetUserByUsername))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -1384,6 +1437,20 @@ func (c *UserServiceHTTPClientImpl) GetUserFollowers(ctx context.Context, in *Ge
 	pattern := "/api/v1/users/{id}/followers"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceGetUserFollowers))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetUserLikes GetUserLikes returns likes for a user.
+func (c *UserServiceHTTPClientImpl) GetUserLikes(ctx context.Context, in *GetUserLikesRequest, opts ...http.CallOption) (*GetUserLikesResponse, error) {
+	var out GetUserLikesResponse
+	pattern := "/api/v1/users/{id}/likes"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserServiceGetUserLikes))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1426,6 +1493,20 @@ func (c *UserServiceHTTPClientImpl) GetUserSubscription(ctx context.Context, in 
 	pattern := "/api/v1/users/{id}/subscription"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserServiceGetUserSubscription))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetUserSubscriptions GetUserSubscriptions returns subscriptions for a user.
+func (c *UserServiceHTTPClientImpl) GetUserSubscriptions(ctx context.Context, in *GetUserSubscriptionsRequest, opts ...http.CallOption) (*GetUserSubscriptionsResponse, error) {
+	var out GetUserSubscriptionsResponse
+	pattern := "/api/v1/users/{id}/subscriptions"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserServiceGetUserSubscriptions))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -1546,20 +1627,6 @@ func (c *UserServiceHTTPClientImpl) RemoveHistoryItem(ctx context.Context, in *R
 	return &out, nil
 }
 
-// ResetPassword ResetPassword resets user password with token.
-func (c *UserServiceHTTPClientImpl) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...http.CallOption) (*ResetPasswordResponse, error) {
-	var out ResetPasswordResponse
-	pattern := "/api/v1/auth/reset-password"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationUserServiceResetPassword))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // SubscribeUser SubscribeUser subscribes to a user.
 func (c *UserServiceHTTPClientImpl) SubscribeUser(ctx context.Context, in *SubscribeUserRequest, opts ...http.CallOption) (*SubscribeUserResponse, error) {
 	var out SubscribeUserResponse
@@ -1622,6 +1689,20 @@ func (c *UserServiceHTTPClientImpl) UpdateMyPassword(ctx context.Context, in *Up
 	pattern := "/api/v1/me/password"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserServiceUpdateMyPassword))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateMySlug UpdateMySlug updates the current user's slug.
+func (c *UserServiceHTTPClientImpl) UpdateMySlug(ctx context.Context, in *UpdateMySlugRequest, opts ...http.CallOption) (*UpdateMySlugResponse, error) {
+	var out UpdateMySlugResponse
+	pattern := "/api/v1/me/slug"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserServiceUpdateMySlug))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {

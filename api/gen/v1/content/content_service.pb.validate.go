@@ -1462,6 +1462,256 @@ var _ interface {
 	ErrorName() string
 } = ListCommentsResponseValidationError{}
 
+// Validate checks the field values on ListMediaCommentsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListMediaCommentsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListMediaCommentsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListMediaCommentsRequestMultiError, or nil if none found.
+func (m *ListMediaCommentsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListMediaCommentsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Page
+
+	// no validation rules for PageSize
+
+	if len(errors) > 0 {
+		return ListMediaCommentsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListMediaCommentsRequestMultiError is an error wrapping multiple validation
+// errors returned by ListMediaCommentsRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ListMediaCommentsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListMediaCommentsRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListMediaCommentsRequestMultiError) AllErrors() []error { return m }
+
+// ListMediaCommentsRequestValidationError is the validation error returned by
+// ListMediaCommentsRequest.Validate if the designated constraints aren't met.
+type ListMediaCommentsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListMediaCommentsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListMediaCommentsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListMediaCommentsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListMediaCommentsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListMediaCommentsRequestValidationError) ErrorName() string {
+	return "ListMediaCommentsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListMediaCommentsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListMediaCommentsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListMediaCommentsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListMediaCommentsRequestValidationError{}
+
+// Validate checks the field values on ListMediaCommentsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ListMediaCommentsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ListMediaCommentsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ListMediaCommentsResponseMultiError, or nil if none found.
+func (m *ListMediaCommentsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ListMediaCommentsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Total
+
+	for idx, item := range m.GetComments() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ListMediaCommentsResponseValidationError{
+						field:  fmt.Sprintf("Comments[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ListMediaCommentsResponseValidationError{
+						field:  fmt.Sprintf("Comments[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ListMediaCommentsResponseValidationError{
+					field:  fmt.Sprintf("Comments[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Page
+
+	// no validation rules for PageSize
+
+	if len(errors) > 0 {
+		return ListMediaCommentsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ListMediaCommentsResponseMultiError is an error wrapping multiple validation
+// errors returned by ListMediaCommentsResponse.ValidateAll() if the
+// designated constraints aren't met.
+type ListMediaCommentsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ListMediaCommentsResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ListMediaCommentsResponseMultiError) AllErrors() []error { return m }
+
+// ListMediaCommentsResponseValidationError is the validation error returned by
+// ListMediaCommentsResponse.Validate if the designated constraints aren't met.
+type ListMediaCommentsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ListMediaCommentsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ListMediaCommentsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ListMediaCommentsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ListMediaCommentsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ListMediaCommentsResponseValidationError) ErrorName() string {
+	return "ListMediaCommentsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ListMediaCommentsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sListMediaCommentsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ListMediaCommentsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ListMediaCommentsResponseValidationError{}
+
 // Validate checks the field values on ToggleLikeRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -6293,3 +6543,639 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetExploreTrendingResponseValidationError{}
+
+// Validate checks the field values on GetCommentLikesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetCommentLikesRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetCommentLikesRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetCommentLikesRequestMultiError, or nil if none found.
+func (m *GetCommentLikesRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetCommentLikesRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return GetCommentLikesRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetCommentLikesRequestMultiError is an error wrapping multiple validation
+// errors returned by GetCommentLikesRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetCommentLikesRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetCommentLikesRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetCommentLikesRequestMultiError) AllErrors() []error { return m }
+
+// GetCommentLikesRequestValidationError is the validation error returned by
+// GetCommentLikesRequest.Validate if the designated constraints aren't met.
+type GetCommentLikesRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetCommentLikesRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetCommentLikesRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetCommentLikesRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetCommentLikesRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetCommentLikesRequestValidationError) ErrorName() string {
+	return "GetCommentLikesRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetCommentLikesRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetCommentLikesRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetCommentLikesRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetCommentLikesRequestValidationError{}
+
+// Validate checks the field values on GetCommentLikesResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetCommentLikesResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetCommentLikesResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetCommentLikesResponseMultiError, or nil if none found.
+func (m *GetCommentLikesResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetCommentLikesResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for LikeCount
+
+	// no validation rules for DislikeCount
+
+	// no validation rules for IsLiked
+
+	// no validation rules for IsDisliked
+
+	if len(errors) > 0 {
+		return GetCommentLikesResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetCommentLikesResponseMultiError is an error wrapping multiple validation
+// errors returned by GetCommentLikesResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GetCommentLikesResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetCommentLikesResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetCommentLikesResponseMultiError) AllErrors() []error { return m }
+
+// GetCommentLikesResponseValidationError is the validation error returned by
+// GetCommentLikesResponse.Validate if the designated constraints aren't met.
+type GetCommentLikesResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetCommentLikesResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetCommentLikesResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetCommentLikesResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetCommentLikesResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetCommentLikesResponseValidationError) ErrorName() string {
+	return "GetCommentLikesResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetCommentLikesResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetCommentLikesResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetCommentLikesResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetCommentLikesResponseValidationError{}
+
+// Validate checks the field values on ToggleCommentLikeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ToggleCommentLikeRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ToggleCommentLikeRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ToggleCommentLikeRequestMultiError, or nil if none found.
+func (m *ToggleCommentLikeRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ToggleCommentLikeRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ToggleCommentLikeRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ToggleCommentLikeRequestMultiError is an error wrapping multiple validation
+// errors returned by ToggleCommentLikeRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ToggleCommentLikeRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ToggleCommentLikeRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ToggleCommentLikeRequestMultiError) AllErrors() []error { return m }
+
+// ToggleCommentLikeRequestValidationError is the validation error returned by
+// ToggleCommentLikeRequest.Validate if the designated constraints aren't met.
+type ToggleCommentLikeRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ToggleCommentLikeRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ToggleCommentLikeRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ToggleCommentLikeRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ToggleCommentLikeRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ToggleCommentLikeRequestValidationError) ErrorName() string {
+	return "ToggleCommentLikeRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ToggleCommentLikeRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sToggleCommentLikeRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ToggleCommentLikeRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ToggleCommentLikeRequestValidationError{}
+
+// Validate checks the field values on ToggleCommentLikeResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ToggleCommentLikeResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ToggleCommentLikeResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ToggleCommentLikeResponseMultiError, or nil if none found.
+func (m *ToggleCommentLikeResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ToggleCommentLikeResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Liked
+
+	// no validation rules for LikeCount
+
+	if len(errors) > 0 {
+		return ToggleCommentLikeResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ToggleCommentLikeResponseMultiError is an error wrapping multiple validation
+// errors returned by ToggleCommentLikeResponse.ValidateAll() if the
+// designated constraints aren't met.
+type ToggleCommentLikeResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ToggleCommentLikeResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ToggleCommentLikeResponseMultiError) AllErrors() []error { return m }
+
+// ToggleCommentLikeResponseValidationError is the validation error returned by
+// ToggleCommentLikeResponse.Validate if the designated constraints aren't met.
+type ToggleCommentLikeResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ToggleCommentLikeResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ToggleCommentLikeResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ToggleCommentLikeResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ToggleCommentLikeResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ToggleCommentLikeResponseValidationError) ErrorName() string {
+	return "ToggleCommentLikeResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ToggleCommentLikeResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sToggleCommentLikeResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ToggleCommentLikeResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ToggleCommentLikeResponseValidationError{}
+
+// Validate checks the field values on ToggleCommentDislikeRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ToggleCommentDislikeRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ToggleCommentDislikeRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ToggleCommentDislikeRequestMultiError, or nil if none found.
+func (m *ToggleCommentDislikeRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ToggleCommentDislikeRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return ToggleCommentDislikeRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ToggleCommentDislikeRequestMultiError is an error wrapping multiple
+// validation errors returned by ToggleCommentDislikeRequest.ValidateAll() if
+// the designated constraints aren't met.
+type ToggleCommentDislikeRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ToggleCommentDislikeRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ToggleCommentDislikeRequestMultiError) AllErrors() []error { return m }
+
+// ToggleCommentDislikeRequestValidationError is the validation error returned
+// by ToggleCommentDislikeRequest.Validate if the designated constraints
+// aren't met.
+type ToggleCommentDislikeRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ToggleCommentDislikeRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ToggleCommentDislikeRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ToggleCommentDislikeRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ToggleCommentDislikeRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ToggleCommentDislikeRequestValidationError) ErrorName() string {
+	return "ToggleCommentDislikeRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ToggleCommentDislikeRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sToggleCommentDislikeRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ToggleCommentDislikeRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ToggleCommentDislikeRequestValidationError{}
+
+// Validate checks the field values on ToggleCommentDislikeResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ToggleCommentDislikeResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ToggleCommentDislikeResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ToggleCommentDislikeResponseMultiError, or nil if none found.
+func (m *ToggleCommentDislikeResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ToggleCommentDislikeResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Disliked
+
+	// no validation rules for DislikeCount
+
+	if len(errors) > 0 {
+		return ToggleCommentDislikeResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ToggleCommentDislikeResponseMultiError is an error wrapping multiple
+// validation errors returned by ToggleCommentDislikeResponse.ValidateAll() if
+// the designated constraints aren't met.
+type ToggleCommentDislikeResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ToggleCommentDislikeResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ToggleCommentDislikeResponseMultiError) AllErrors() []error { return m }
+
+// ToggleCommentDislikeResponseValidationError is the validation error returned
+// by ToggleCommentDislikeResponse.Validate if the designated constraints
+// aren't met.
+type ToggleCommentDislikeResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ToggleCommentDislikeResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ToggleCommentDislikeResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ToggleCommentDislikeResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ToggleCommentDislikeResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ToggleCommentDislikeResponseValidationError) ErrorName() string {
+	return "ToggleCommentDislikeResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ToggleCommentDislikeResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sToggleCommentDislikeResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ToggleCommentDislikeResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ToggleCommentDislikeResponseValidationError{}

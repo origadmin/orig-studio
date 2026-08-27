@@ -24,6 +24,25 @@ plugins:
     opt:
       - paths=source_relative
 
+  # Kratos HTTP handler 代码生成
+  - local: protoc-gen-go-http
+    out: gen
+    opt:
+      - paths=source_relative
+
+  # Protovalidate 校验代码生成
+  - local: protoc-gen-validate
+    out: gen
+    opt:
+      - paths=source_relative
+      - lang=go
+
+  # OrigAdmin bridge 代码生成
+  - local: protoc-gen-go-bridge
+    out: gen
+    opt:
+      - paths=source_relative
+
   # gRPC-Gateway HTTP 反向代理生成
   - remote: buf.build/grpc-ecosystem/gateway:v2.26.3
     out: gen

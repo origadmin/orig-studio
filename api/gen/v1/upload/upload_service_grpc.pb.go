@@ -24,9 +24,10 @@ const (
 	UploadService_ListParts_FullMethodName               = "/api.v1.services.upload.UploadService/ListParts"
 	UploadService_CompleteMultipartUpload_FullMethodName = "/api.v1.services.upload.UploadService/CompleteMultipartUpload"
 	UploadService_AbortMultipartUpload_FullMethodName    = "/api.v1.services.upload.UploadService/AbortMultipartUpload"
-	UploadService_UploadFile_FullMethodName              = "/api.v1.services.upload.UploadService/UploadFile"
-	UploadService_GetUploadSession_FullMethodName        = "/api.v1.services.upload.UploadService/GetUploadSession"
+	UploadService_UpdateMetadata_FullMethodName          = "/api.v1.services.upload.UploadService/UpdateMetadata"
 	UploadService_ListUploadSessions_FullMethodName      = "/api.v1.services.upload.UploadService/ListUploadSessions"
+	UploadService_GetUploadSession_FullMethodName        = "/api.v1.services.upload.UploadService/GetUploadSession"
+	UploadService_SimpleUpload_FullMethodName            = "/api.v1.services.upload.UploadService/SimpleUpload"
 )
 
 // UploadServiceClient is the client API for UploadService service.
@@ -51,15 +52,16 @@ type UploadServiceClient interface {
 	// The server will merge all parts and create the final media record.
 	CompleteMultipartUpload(ctx context.Context, in *CompleteMultipartUploadRequest, opts ...grpc.CallOption) (*CompleteMultipartUploadResponse, error)
 	// AbortMultipartUpload cancels an in-progress multipart upload.
-	// All uploaded parts will be deleted.
 	AbortMultipartUpload(ctx context.Context, in *AbortMultipartUploadRequest, opts ...grpc.CallOption) (*AbortMultipartUploadResponse, error)
-	// UploadFile uploads a small file in a single request.
-	// For files larger than 2MB, use multipart upload instead.
-	UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error)
-	// GetUploadSession returns the current state of an upload session.
-	GetUploadSession(ctx context.Context, in *GetUploadSessionRequest, opts ...grpc.CallOption) (*GetUploadSessionResponse, error)
+	// UpdateMetadata updates upload session metadata.
+	UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest, opts ...grpc.CallOption) (*UpdateMetadataResponse, error)
 	// ListUploadSessions returns all upload sessions for the current user.
 	ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest, opts ...grpc.CallOption) (*ListUploadSessionsResponse, error)
+	// GetUploadSession returns the current state of an upload session.
+	GetUploadSession(ctx context.Context, in *GetUploadSessionRequest, opts ...grpc.CallOption) (*GetUploadSessionResponse, error)
+	// NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
+	// SimpleUpload uploads a file with a simple single-request approach.
+	SimpleUpload(ctx context.Context, in *SimpleUploadRequest, opts ...grpc.CallOption) (*SimpleUploadResponse, error)
 }
 
 type uploadServiceClient struct {
@@ -120,10 +122,20 @@ func (c *uploadServiceClient) AbortMultipartUpload(ctx context.Context, in *Abor
 	return out, nil
 }
 
-func (c *uploadServiceClient) UploadFile(ctx context.Context, in *UploadFileRequest, opts ...grpc.CallOption) (*UploadFileResponse, error) {
+func (c *uploadServiceClient) UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest, opts ...grpc.CallOption) (*UpdateMetadataResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UploadFileResponse)
-	err := c.cc.Invoke(ctx, UploadService_UploadFile_FullMethodName, in, out, cOpts...)
+	out := new(UpdateMetadataResponse)
+	err := c.cc.Invoke(ctx, UploadService_UpdateMetadata_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *uploadServiceClient) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest, opts ...grpc.CallOption) (*ListUploadSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUploadSessionsResponse)
+	err := c.cc.Invoke(ctx, UploadService_ListUploadSessions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -140,10 +152,10 @@ func (c *uploadServiceClient) GetUploadSession(ctx context.Context, in *GetUploa
 	return out, nil
 }
 
-func (c *uploadServiceClient) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest, opts ...grpc.CallOption) (*ListUploadSessionsResponse, error) {
+func (c *uploadServiceClient) SimpleUpload(ctx context.Context, in *SimpleUploadRequest, opts ...grpc.CallOption) (*SimpleUploadResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListUploadSessionsResponse)
-	err := c.cc.Invoke(ctx, UploadService_ListUploadSessions_FullMethodName, in, out, cOpts...)
+	out := new(SimpleUploadResponse)
+	err := c.cc.Invoke(ctx, UploadService_SimpleUpload_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -172,15 +184,16 @@ type UploadServiceServer interface {
 	// The server will merge all parts and create the final media record.
 	CompleteMultipartUpload(context.Context, *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error)
 	// AbortMultipartUpload cancels an in-progress multipart upload.
-	// All uploaded parts will be deleted.
 	AbortMultipartUpload(context.Context, *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error)
-	// UploadFile uploads a small file in a single request.
-	// For files larger than 2MB, use multipart upload instead.
-	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
-	// GetUploadSession returns the current state of an upload session.
-	GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error)
+	// UpdateMetadata updates upload session metadata.
+	UpdateMetadata(context.Context, *UpdateMetadataRequest) (*UpdateMetadataResponse, error)
 	// ListUploadSessions returns all upload sessions for the current user.
 	ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error)
+	// GetUploadSession returns the current state of an upload session.
+	GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error)
+	// NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
+	// SimpleUpload uploads a file with a simple single-request approach.
+	SimpleUpload(context.Context, *SimpleUploadRequest) (*SimpleUploadResponse, error)
 	mustEmbedUnimplementedUploadServiceServer()
 }
 
@@ -206,14 +219,17 @@ func (UnimplementedUploadServiceServer) CompleteMultipartUpload(context.Context,
 func (UnimplementedUploadServiceServer) AbortMultipartUpload(context.Context, *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AbortMultipartUpload not implemented")
 }
-func (UnimplementedUploadServiceServer) UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UploadFile not implemented")
+func (UnimplementedUploadServiceServer) UpdateMetadata(context.Context, *UpdateMetadataRequest) (*UpdateMetadataResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMetadata not implemented")
+}
+func (UnimplementedUploadServiceServer) ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListUploadSessions not implemented")
 }
 func (UnimplementedUploadServiceServer) GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUploadSession not implemented")
 }
-func (UnimplementedUploadServiceServer) ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListUploadSessions not implemented")
+func (UnimplementedUploadServiceServer) SimpleUpload(context.Context, *SimpleUploadRequest) (*SimpleUploadResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SimpleUpload not implemented")
 }
 func (UnimplementedUploadServiceServer) mustEmbedUnimplementedUploadServiceServer() {}
 func (UnimplementedUploadServiceServer) testEmbeddedByValue()                       {}
@@ -326,20 +342,38 @@ func _UploadService_AbortMultipartUpload_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UploadService_UploadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadFileRequest)
+func _UploadService_UpdateMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMetadataRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UploadServiceServer).UploadFile(ctx, in)
+		return srv.(UploadServiceServer).UpdateMetadata(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UploadService_UploadFile_FullMethodName,
+		FullMethod: UploadService_UpdateMetadata_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UploadServiceServer).UploadFile(ctx, req.(*UploadFileRequest))
+		return srv.(UploadServiceServer).UpdateMetadata(ctx, req.(*UpdateMetadataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UploadService_ListUploadSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUploadSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UploadServiceServer).ListUploadSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UploadService_ListUploadSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UploadServiceServer).ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -362,20 +396,20 @@ func _UploadService_GetUploadSession_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UploadService_ListUploadSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListUploadSessionsRequest)
+func _UploadService_SimpleUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SimpleUploadRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UploadServiceServer).ListUploadSessions(ctx, in)
+		return srv.(UploadServiceServer).SimpleUpload(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UploadService_ListUploadSessions_FullMethodName,
+		FullMethod: UploadService_SimpleUpload_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UploadServiceServer).ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
+		return srv.(UploadServiceServer).SimpleUpload(ctx, req.(*SimpleUploadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -408,16 +442,20 @@ var UploadService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UploadService_AbortMultipartUpload_Handler,
 		},
 		{
-			MethodName: "UploadFile",
-			Handler:    _UploadService_UploadFile_Handler,
+			MethodName: "UpdateMetadata",
+			Handler:    _UploadService_UpdateMetadata_Handler,
+		},
+		{
+			MethodName: "ListUploadSessions",
+			Handler:    _UploadService_ListUploadSessions_Handler,
 		},
 		{
 			MethodName: "GetUploadSession",
 			Handler:    _UploadService_GetUploadSession_Handler,
 		},
 		{
-			MethodName: "ListUploadSessions",
-			Handler:    _UploadService_ListUploadSessions_Handler,
+			MethodName: "SimpleUpload",
+			Handler:    _UploadService_SimpleUpload_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

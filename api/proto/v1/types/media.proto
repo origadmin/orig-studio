@@ -66,7 +66,6 @@ message Media {
   repeated string tags = 25 [json_name = "tags"];
   string hls_file = 26 [json_name = "hls_file"];
   string encoding_status = 27 [json_name = "encoding_status"];
-  string uuid = 28 [json_name = "uuid"];
   string preview_file_path = 29 [json_name = "preview_file_path"];
   string short_token = 43 [json_name = "short_token"];
   google.protobuf.Timestamp published_at = 32 [json_name = "published_at"];
@@ -75,7 +74,7 @@ message Media {
   bool featured = 35 [json_name = "featured"];
   int32 reported_times = 37 [json_name = "reported_times"];
   string extension = 38 [json_name = "extension"];
-  string md5sum = 39 [json_name = "md5sum"];
+  string sha256 = 39 [json_name = "sha256"];
   string poster = 40 [json_name = "poster"];
   string review_status = 41 [json_name = "review_status"];
   bool listable = 42 [json_name = "listable"];

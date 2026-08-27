@@ -431,7 +431,6 @@ type Media struct {
 	Tags            []string               `protobuf:"bytes,25,rep,name=tags,proto3" json:"tags,omitempty"`
 	HlsFile         string                 `protobuf:"bytes,26,opt,name=hls_file,proto3" json:"hls_file,omitempty"`
 	EncodingStatus  string                 `protobuf:"bytes,27,opt,name=encoding_status,proto3" json:"encoding_status,omitempty"`
-	Uuid            string                 `protobuf:"bytes,28,opt,name=uuid,proto3" json:"uuid,omitempty"`
 	PreviewFilePath string                 `protobuf:"bytes,29,opt,name=preview_file_path,proto3" json:"preview_file_path,omitempty"`
 	ShortToken      string                 `protobuf:"bytes,43,opt,name=short_token,proto3" json:"short_token,omitempty"`
 	PublishedAt     *timestamppb.Timestamp `protobuf:"bytes,32,opt,name=published_at,proto3" json:"published_at,omitempty"`
@@ -440,7 +439,7 @@ type Media struct {
 	Featured        bool                   `protobuf:"varint,35,opt,name=featured,proto3" json:"featured,omitempty"`
 	ReportedTimes   int32                  `protobuf:"varint,37,opt,name=reported_times,proto3" json:"reported_times,omitempty"`
 	Extension       string                 `protobuf:"bytes,38,opt,name=extension,proto3" json:"extension,omitempty"`
-	Md5Sum          string                 `protobuf:"bytes,39,opt,name=md5sum,proto3" json:"md5sum,omitempty"`
+	Sha256          string                 `protobuf:"bytes,39,opt,name=sha256,proto3" json:"sha256,omitempty"`
 	Poster          string                 `protobuf:"bytes,40,opt,name=poster,proto3" json:"poster,omitempty"`
 	ReviewStatus    string                 `protobuf:"bytes,41,opt,name=review_status,proto3" json:"review_status,omitempty"`
 	Listable        bool                   `protobuf:"varint,42,opt,name=listable,proto3" json:"listable,omitempty"`
@@ -677,13 +676,6 @@ func (x *Media) GetEncodingStatus() string {
 	return ""
 }
 
-func (x *Media) GetUuid() string {
-	if x != nil {
-		return x.Uuid
-	}
-	return ""
-}
-
 func (x *Media) GetPreviewFilePath() string {
 	if x != nil {
 		return x.PreviewFilePath
@@ -740,9 +732,9 @@ func (x *Media) GetExtension() string {
 	return ""
 }
 
-func (x *Media) GetMd5Sum() string {
+func (x *Media) GetSha256() string {
 	if x != nil {
-		return x.Md5Sum
+		return x.Sha256
 	}
 	return ""
 }
@@ -1283,7 +1275,7 @@ type Tag struct {
 	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	CreateTime        *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	UpdateTime        *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	Name              string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Title             string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
 	Slug              string                 `protobuf:"bytes,5,opt,name=slug,proto3" json:"slug,omitempty"`
 	Description       string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	Color             string                 `protobuf:"bytes,7,opt,name=color,proto3" json:"color,omitempty"`
@@ -1345,9 +1337,9 @@ func (x *Tag) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Tag) GetName() string {
+func (x *Tag) GetTitle() string {
 	if x != nil {
-		return x.Name
+		return x.Title
 	}
 	return ""
 }
@@ -1400,7 +1392,7 @@ type Comment struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=update_time,proto3" json:"update_time,omitempty"`
-	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	Text          string                 `protobuf:"bytes,4,opt,name=text,proto3" json:"text,omitempty"`
 	UserId        string                 `protobuf:"bytes,5,opt,name=user_id,proto3" json:"user_id,omitempty"`
 	MediaId       string                 `protobuf:"bytes,6,opt,name=media_id,proto3" json:"media_id,omitempty"`
 	ParentId      string                 `protobuf:"bytes,7,opt,name=parent_id,proto3" json:"parent_id,omitempty"`
@@ -1465,9 +1457,9 @@ func (x *Comment) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Comment) GetContent() string {
+func (x *Comment) GetText() string {
 	if x != nil {
-		return x.Content
+		return x.Text
 	}
 	return ""
 }
@@ -1542,7 +1534,7 @@ type Like struct {
 	CreateTime    *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,proto3" json:"create_time,omitempty"`
 	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,proto3" json:"user_id,omitempty"`
 	MediaId       string                 `protobuf:"bytes,4,opt,name=media_id,proto3" json:"media_id,omitempty"`
-	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	LikeType      string                 `protobuf:"bytes,5,opt,name=like_type,proto3" json:"like_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1605,9 +1597,9 @@ func (x *Like) GetMediaId() string {
 	return ""
 }
 
-func (x *Like) GetType() string {
+func (x *Like) GetLikeType() string {
 	if x != nil {
-		return x.Type
+		return x.LikeType
 	}
 	return ""
 }
@@ -2906,7 +2898,7 @@ var File_v1_types_media_proto protoreflect.FileDescriptor
 
 const file_v1_types_media_proto_rawDesc = "" +
 	"\n" +
-	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13v1/types/user.proto\"\xd9\r\n" +
+	"\x14v1/types/media.proto\x12\x15api.v1.services.types\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x13v1/types/user.proto\"\xc5\r\n" +
 	"\x05Media\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
@@ -2939,8 +2931,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\vcategory_id\x18\x18 \x01(\x03R\vcategory_id\x12\x12\n" +
 	"\x04tags\x18\x19 \x03(\tR\x04tags\x12\x1a\n" +
 	"\bhls_file\x18\x1a \x01(\tR\bhls_file\x12(\n" +
-	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\x12\x12\n" +
-	"\x04uuid\x18\x1c \x01(\tR\x04uuid\x12,\n" +
+	"\x0fencoding_status\x18\x1b \x01(\tR\x0fencoding_status\x12,\n" +
 	"\x11preview_file_path\x18\x1d \x01(\tR\x11preview_file_path\x12 \n" +
 	"\vshort_token\x18+ \x01(\tR\vshort_token\x12>\n" +
 	"\fpublished_at\x18  \x01(\v2\x1a.google.protobuf.TimestampR\fpublished_at\x12&\n" +
@@ -2949,7 +2940,7 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\bfeatured\x18# \x01(\bR\bfeatured\x12&\n" +
 	"\x0ereported_times\x18% \x01(\x05R\x0ereported_times\x12\x1c\n" +
 	"\textension\x18& \x01(\tR\textension\x12\x16\n" +
-	"\x06md5sum\x18' \x01(\tR\x06md5sum\x12\x16\n" +
+	"\x06sha256\x18' \x01(\tR\x06sha256\x12\x16\n" +
 	"\x06poster\x18( \x01(\tR\x06poster\x12$\n" +
 	"\rreview_status\x18) \x01(\tR\rreview_status\x12\x1a\n" +
 	"\blistable\x18* \x01(\bR\blistable\x12\x1e\n" +
@@ -3015,24 +3006,24 @@ const file_v1_types_media_proto_rawDesc = "" +
 	"\tis_global\x18\x0f \x01(\bR\tis_global\x12*\n" +
 	"\x10is_rbac_category\x18\x10 \x01(\bR\x10is_rbac_category\x12,\n" +
 	"\x11identity_provider\x18\x11 \x01(\tR\x11identity_provider\x12\x18\n" +
-	"\auser_id\x18\x12 \x01(\tR\auser_id\"\xfd\x02\n" +
+	"\auser_id\x18\x12 \x01(\tR\auser_id\"\xff\x02\n" +
 	"\x03Tag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
-	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x12\n" +
+	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12\x12\n" +
 	"\x04slug\x18\x05 \x01(\tR\x04slug\x12 \n" +
 	"\vdescription\x18\x06 \x01(\tR\vdescription\x12\x14\n" +
 	"\x05color\x18\a \x01(\tR\x05color\x128\n" +
 	"\x06status\x18\b \x01(\x0e2 .api.v1.services.types.TagStatusR\x06status\x12 \n" +
 	"\vmedia_count\x18\t \x01(\x03R\vmedia_count\x12.\n" +
 	"\x12listings_thumbnail\x18\n" +
-	" \x01(\tR\x12listings_thumbnail\"\xfb\x03\n" +
+	" \x01(\tR\x12listings_thumbnail\"\xf5\x03\n" +
 	"\aComment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12<\n" +
-	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x18\n" +
-	"\acontent\x18\x04 \x01(\tR\acontent\x12\x18\n" +
+	"\vupdate_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vupdate_time\x12\x12\n" +
+	"\x04text\x18\x04 \x01(\tR\x04text\x12\x18\n" +
 	"\auser_id\x18\x05 \x01(\tR\auser_id\x12\x1a\n" +
 	"\bmedia_id\x18\x06 \x01(\tR\bmedia_id\x12\x1c\n" +
 	"\tparent_id\x18\a \x01(\tR\tparent_id\x12\x1e\n" +
@@ -3044,13 +3035,13 @@ const file_v1_types_media_proto_rawDesc = "" +
 	" \x01(\x05R\freport_count\x12\"\n" +
 	"\fmoderated_by\x18\v \x01(\tR\fmoderated_by\x12>\n" +
 	"\fmoderated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\fmoderated_at\x126\n" +
-	"\badd_date\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\x9e\x01\n" +
+	"\badd_date\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\badd_date\"\xa8\x01\n" +
 	"\x04Like\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x18\n" +
 	"\auser_id\x18\x03 \x01(\tR\auser_id\x12\x1a\n" +
-	"\bmedia_id\x18\x04 \x01(\tR\bmedia_id\x12\x12\n" +
-	"\x04type\x18\x05 \x01(\tR\x04type\"\xb0\x01\n" +
+	"\bmedia_id\x18\x04 \x01(\tR\bmedia_id\x12\x1c\n" +
+	"\tlike_type\x18\x05 \x01(\tR\tlike_type\"\xb0\x01\n" +
 	"\bFavorite\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vcreate_time\x12\x18\n" +

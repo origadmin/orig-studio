@@ -162,8 +162,6 @@ func (m *Media) validate(all bool) error {
 
 	// no validation rules for EncodingStatus
 
-	// no validation rules for Uuid
-
 	// no validation rules for PreviewFilePath
 
 	// no validation rules for ShortToken
@@ -207,7 +205,7 @@ func (m *Media) validate(all bool) error {
 
 	// no validation rules for Extension
 
-	// no validation rules for Md5Sum
+	// no validation rules for Sha256
 
 	// no validation rules for Poster
 

@@ -33,9 +33,9 @@ const UploadServiceUploadPartBridgeOperation = "/api.v1.services.upload.UploadSe
 const UploadServiceListPartsBridgeOperation = "/api.v1.services.upload.UploadService/ListParts"
 const UploadServiceCompleteMultipartUploadBridgeOperation = "/api.v1.services.upload.UploadService/CompleteMultipartUpload"
 const UploadServiceAbortMultipartUploadBridgeOperation = "/api.v1.services.upload.UploadService/AbortMultipartUpload"
-const UploadServiceUploadFileBridgeOperation = "/api.v1.services.upload.UploadService/UploadFile"
-const UploadServiceGetUploadSessionBridgeOperation = "/api.v1.services.upload.UploadService/GetUploadSession"
+const UploadServiceUpdateMetadataBridgeOperation = "/api.v1.services.upload.UploadService/UpdateMetadata"
 const UploadServiceListUploadSessionsBridgeOperation = "/api.v1.services.upload.UploadService/ListUploadSessions"
+const UploadServiceGetUploadSessionBridgeOperation = "/api.v1.services.upload.UploadService/GetUploadSession"
 const UploadServiceSimpleUploadBridgeOperation = "/api.v1.services.upload.UploadService/SimpleUpload"
 
 type UploadServiceBridgeServer interface {
@@ -54,15 +54,14 @@ type UploadServiceBridgeServer interface {
 	// The server will merge all parts and create the final media record.
 	CompleteMultipartUpload(context.Context, *CompleteMultipartUploadRequest) (*CompleteMultipartUploadResponse, error)
 	// AbortMultipartUpload cancels an in-progress multipart upload.
-	// All uploaded parts will be deleted.
 	AbortMultipartUpload(context.Context, *AbortMultipartUploadRequest) (*AbortMultipartUploadResponse, error)
-	// UploadFile uploads a small file in a single request.
-	// For files larger than 2MB, use multipart upload instead.
-	UploadFile(context.Context, *UploadFileRequest) (*UploadFileResponse, error)
-	// GetUploadSession returns the current state of an upload session.
-	GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error)
+	// UpdateMetadata updates upload session metadata.
+	UpdateMetadata(context.Context, *UpdateMetadataRequest) (*UpdateMetadataResponse, error)
 	// ListUploadSessions returns all upload sessions for the current user.
 	ListUploadSessions(context.Context, *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error)
+	// GetUploadSession returns the current state of an upload session.
+	GetUploadSession(context.Context, *GetUploadSessionRequest) (*GetUploadSessionResponse, error)
+	// NON-PROTO-SPECIAL: multipart/form-data upload. Requires adapter-level handling; proto gateway body:"*" assumes JSON.
 	// SimpleUpload uploads a file with a simple single-request approach.
 	SimpleUpload(context.Context, *SimpleUploadRequest) (*SimpleUploadResponse, error)
 }
@@ -73,9 +72,9 @@ type UploadServiceHooker interface {
 	UploadServiceListPartsHooker
 	UploadServiceCompleteMultipartUploadHooker
 	UploadServiceAbortMultipartUploadHooker
-	UploadServiceUploadFileHooker
-	UploadServiceGetUploadSessionHooker
+	UploadServiceUpdateMetadataHooker
 	UploadServiceListUploadSessionsHooker
+	UploadServiceGetUploadSessionHooker
 	UploadServiceSimpleUploadHooker
 }
 
@@ -103,17 +102,17 @@ type UploadServiceAbortMultipartUploadHooker interface {
 	PrepareAbortMultipartUpload(http.Context, *AbortMultipartUploadRequest) (context.Context, error)
 	CompleteAbortMultipartUpload(http.Context, *AbortMultipartUploadRequest, *AbortMultipartUploadResponse) error
 }
-type UploadServiceUploadFileHooker interface {
-	PrepareUploadFile(http.Context, *UploadFileRequest) (context.Context, error)
-	CompleteUploadFile(http.Context, *UploadFileRequest, *UploadFileResponse) error
-}
-type UploadServiceGetUploadSessionHooker interface {
-	PrepareGetUploadSession(http.Context, *GetUploadSessionRequest) (context.Context, error)
-	CompleteGetUploadSession(http.Context, *GetUploadSessionRequest, *GetUploadSessionResponse) error
+type UploadServiceUpdateMetadataHooker interface {
+	PrepareUpdateMetadata(http.Context, *UpdateMetadataRequest) (context.Context, error)
+	CompleteUpdateMetadata(http.Context, *UpdateMetadataRequest, *UpdateMetadataResponse) error
 }
 type UploadServiceListUploadSessionsHooker interface {
 	PrepareListUploadSessions(http.Context, *ListUploadSessionsRequest) (context.Context, error)
 	CompleteListUploadSessions(http.Context, *ListUploadSessionsRequest, *ListUploadSessionsResponse) error
+}
+type UploadServiceGetUploadSessionHooker interface {
+	PrepareGetUploadSession(http.Context, *GetUploadSessionRequest) (context.Context, error)
+	CompleteGetUploadSession(http.Context, *GetUploadSessionRequest, *GetUploadSessionResponse) error
 }
 type UploadServiceSimpleUploadHooker interface {
 	PrepareSimpleUpload(http.Context, *SimpleUploadRequest) (context.Context, error)
@@ -126,10 +125,10 @@ func RegisterUploadServiceBridgeServer(s *http.Server, srv UploadServiceHookedBr
 	r.POST("/api/v1/uploads/:upload_id/parts/:part_number", _UploadService_UploadPart0_Bridge_Handler(srv))
 	r.GET("/api/v1/uploads/:upload_id/parts", _UploadService_ListParts0_Bridge_Handler(srv))
 	r.POST("/api/v1/uploads/:upload_id/complete", _UploadService_CompleteMultipartUpload0_Bridge_Handler(srv))
-	r.DELETE("/api/v1/uploads/:upload_id", _UploadService_AbortMultipartUpload0_Bridge_Handler(srv))
-	r.POST("/api/v1/uploads", _UploadService_UploadFile0_Bridge_Handler(srv))
-	r.GET("/api/v1/uploads/:upload_id", _UploadService_GetUploadSession0_Bridge_Handler(srv))
-	r.GET("/api/v1/uploads", _UploadService_ListUploadSessions0_Bridge_Handler(srv))
+	r.POST("/api/v1/uploads/:upload_id/abort", _UploadService_AbortMultipartUpload0_Bridge_Handler(srv))
+	r.PATCH("/api/v1/uploads/:upload_id/metadata", _UploadService_UpdateMetadata0_Bridge_Handler(srv))
+	r.GET("/api/v1/uploads/sessions", _UploadService_ListUploadSessions0_Bridge_Handler(srv))
+	r.GET("/api/v1/uploads/sessions/:upload_id", _UploadService_GetUploadSession0_Bridge_Handler(srv))
 	r.POST("/api/v1/uploads/simple", _UploadService_SimpleUpload0_Bridge_Handler(srv))
 }
 
@@ -246,6 +245,9 @@ func _UploadService_CompleteMultipartUpload0_Bridge_Handler(srv UploadServiceHoo
 func _UploadService_AbortMultipartUpload0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in AbortMultipartUploadRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -269,21 +271,24 @@ func _UploadService_AbortMultipartUpload0_Bridge_Handler(srv UploadServiceHooked
 	}
 }
 
-func _UploadService_UploadFile0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+func _UploadService_UpdateMetadata0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in UploadFileRequest
+		var in UpdateMetadataRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationUploadServiceUploadFile)
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceUpdateMetadata)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.UploadFile(ctx, req.(*UploadFileRequest))
+			return srv.UpdateMetadata(ctx, req.(*UpdateMetadataRequest))
 		})
 
-		newctx, err := srv.PrepareUploadFile(ctx, &in)
+		newctx, err := srv.PrepareUpdateMetadata(ctx, &in)
 		if err != nil {
 			return err
 		}
@@ -291,7 +296,30 @@ func _UploadService_UploadFile0_Bridge_Handler(srv UploadServiceHookedBridger) f
 		if err != nil {
 			return err
 		}
-		return srv.CompleteUploadFile(ctx, &in, out.(*UploadFileResponse))
+		return srv.CompleteUpdateMetadata(ctx, &in, out.(*UpdateMetadataResponse))
+	}
+}
+
+func _UploadService_ListUploadSessions0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListUploadSessionsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUploadServiceListUploadSessions)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
+		})
+
+		newctx, err := srv.PrepareListUploadSessions(ctx, &in)
+		if err != nil {
+			return err
+		}
+		out, err := h(newctx, &in)
+		if err != nil {
+			return err
+		}
+		return srv.CompleteListUploadSessions(ctx, &in, out.(*ListUploadSessionsResponse))
 	}
 }
 
@@ -318,29 +346,6 @@ func _UploadService_GetUploadSession0_Bridge_Handler(srv UploadServiceHookedBrid
 			return err
 		}
 		return srv.CompleteGetUploadSession(ctx, &in, out.(*GetUploadSessionResponse))
-	}
-}
-
-func _UploadService_ListUploadSessions0_Bridge_Handler(srv UploadServiceHookedBridger) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ListUploadSessionsRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationUploadServiceListUploadSessions)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ListUploadSessions(ctx, req.(*ListUploadSessionsRequest))
-		})
-
-		newctx, err := srv.PrepareListUploadSessions(ctx, &in)
-		if err != nil {
-			return err
-		}
-		out, err := h(newctx, &in)
-		if err != nil {
-			return err
-		}
-		return srv.CompleteListUploadSessions(ctx, &in, out.(*ListUploadSessionsResponse))
 	}
 }
 
@@ -417,19 +422,11 @@ func (UnimplementedUploadServiceHooked) CompleteAbortMultipartUpload(ctx http.Co
 	return ctx.Result(200, out)
 }
 
-func (UnimplementedUploadServiceHooked) PrepareUploadFile(ctx http.Context, in *UploadFileRequest) (context.Context, error) {
+func (UnimplementedUploadServiceHooked) PrepareUpdateMetadata(ctx http.Context, in *UpdateMetadataRequest) (context.Context, error) {
 	return ctx, nil
 }
 
-func (UnimplementedUploadServiceHooked) CompleteUploadFile(ctx http.Context, in *UploadFileRequest, out *UploadFileResponse) error {
-	return ctx.Result(200, out)
-}
-
-func (UnimplementedUploadServiceHooked) PrepareGetUploadSession(ctx http.Context, in *GetUploadSessionRequest) (context.Context, error) {
-	return ctx, nil
-}
-
-func (UnimplementedUploadServiceHooked) CompleteGetUploadSession(ctx http.Context, in *GetUploadSessionRequest, out *GetUploadSessionResponse) error {
+func (UnimplementedUploadServiceHooked) CompleteUpdateMetadata(ctx http.Context, in *UpdateMetadataRequest, out *UpdateMetadataResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -438,6 +435,14 @@ func (UnimplementedUploadServiceHooked) PrepareListUploadSessions(ctx http.Conte
 }
 
 func (UnimplementedUploadServiceHooked) CompleteListUploadSessions(ctx http.Context, in *ListUploadSessionsRequest, out *ListUploadSessionsResponse) error {
+	return ctx.Result(200, out)
+}
+
+func (UnimplementedUploadServiceHooked) PrepareGetUploadSession(ctx http.Context, in *GetUploadSessionRequest) (context.Context, error) {
+	return ctx, nil
+}
+
+func (UnimplementedUploadServiceHooked) CompleteGetUploadSession(ctx http.Context, in *GetUploadSessionRequest, out *GetUploadSessionResponse) error {
 	return ctx.Result(200, out)
 }
 
@@ -491,16 +496,16 @@ func (c *UploadServiceHTTPBridgeImpl) AbortMultipartUpload(ctx context.Context, 
 	return c.client.AbortMultipartUpload(ctx, in)
 }
 
-func (c *UploadServiceHTTPBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
-	return c.client.UploadFile(ctx, in)
-}
-
-func (c *UploadServiceHTTPBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
-	return c.client.GetUploadSession(ctx, in)
+func (c *UploadServiceHTTPBridgeImpl) UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest) (*UpdateMetadataResponse, error) {
+	return c.client.UpdateMetadata(ctx, in)
 }
 
 func (c *UploadServiceHTTPBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
 	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceHTTPBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
 }
 
 func (c *UploadServiceHTTPBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
@@ -535,16 +540,16 @@ func (c *UploadServiceBridgeImpl) AbortMultipartUpload(ctx context.Context, in *
 	return c.client.AbortMultipartUpload(ctx, in)
 }
 
-func (c *UploadServiceBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
-	return c.client.UploadFile(ctx, in)
-}
-
-func (c *UploadServiceBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
-	return c.client.GetUploadSession(ctx, in)
+func (c *UploadServiceBridgeImpl) UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest) (*UpdateMetadataResponse, error) {
+	return c.client.UpdateMetadata(ctx, in)
 }
 
 func (c *UploadServiceBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
 	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
 }
 
 func (c *UploadServiceBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
@@ -581,16 +586,16 @@ func (c *UploadServiceGRPC2HTTPBridgeImpl) AbortMultipartUpload(ctx context.Cont
 	return c.client.AbortMultipartUpload(ctx, in)
 }
 
-func (c *UploadServiceGRPC2HTTPBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
-	return c.client.UploadFile(ctx, in)
-}
-
-func (c *UploadServiceGRPC2HTTPBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
-	return c.client.GetUploadSession(ctx, in)
+func (c *UploadServiceGRPC2HTTPBridgeImpl) UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest) (*UpdateMetadataResponse, error) {
+	return c.client.UpdateMetadata(ctx, in)
 }
 
 func (c *UploadServiceGRPC2HTTPBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
 	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceGRPC2HTTPBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
 }
 
 func (c *UploadServiceGRPC2HTTPBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
@@ -625,16 +630,16 @@ func (c *UploadServiceHTTP2GRPCBridgeImpl) AbortMultipartUpload(ctx context.Cont
 	return c.client.AbortMultipartUpload(ctx, in)
 }
 
-func (c *UploadServiceHTTP2GRPCBridgeImpl) UploadFile(ctx context.Context, in *UploadFileRequest) (*UploadFileResponse, error) {
-	return c.client.UploadFile(ctx, in)
-}
-
-func (c *UploadServiceHTTP2GRPCBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
-	return c.client.GetUploadSession(ctx, in)
+func (c *UploadServiceHTTP2GRPCBridgeImpl) UpdateMetadata(ctx context.Context, in *UpdateMetadataRequest) (*UpdateMetadataResponse, error) {
+	return c.client.UpdateMetadata(ctx, in)
 }
 
 func (c *UploadServiceHTTP2GRPCBridgeImpl) ListUploadSessions(ctx context.Context, in *ListUploadSessionsRequest) (*ListUploadSessionsResponse, error) {
 	return c.client.ListUploadSessions(ctx, in)
+}
+
+func (c *UploadServiceHTTP2GRPCBridgeImpl) GetUploadSession(ctx context.Context, in *GetUploadSessionRequest) (*GetUploadSessionResponse, error) {
+	return c.client.GetUploadSession(ctx, in)
 }
 
 func (c *UploadServiceHTTP2GRPCBridgeImpl) SimpleUpload(ctx context.Context, in *SimpleUploadRequest) (*SimpleUploadResponse, error) {
