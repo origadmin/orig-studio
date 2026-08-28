@@ -15,9 +15,9 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/mediatag"
-	"origadmin/application/origstudio/internal/dal/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/mediatag"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 	"origadmin/application/origstudio/internal/pkg/hashtag"
 )
 

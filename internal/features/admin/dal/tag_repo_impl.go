@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 	"origadmin/application/origstudio/internal/features/admin/dto"
 	"origadmin/application/origstudio/internal/pkg/hashtag"
 )

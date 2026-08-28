@@ -6,7 +6,7 @@ import (
 	"github.com/origadmin/runtime/log"
 
 	config "origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 )
 
 // DatabaseBundle bundles the ent client and the raw *sql.DB handle so that

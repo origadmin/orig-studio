@@ -12,7 +12,7 @@ package mock
 import (
 	context "context"
 	io "io"
-	enums "origadmin/application/origstudio/internal/dal/enums"
+	enums "origadmin/application/origstudio/internal/data/enums"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"

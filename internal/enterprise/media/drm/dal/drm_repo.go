@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/drmkey"
-	"origadmin/application/origstudio/internal/dal/entity/drmpolicy"
-	"origadmin/application/origstudio/internal/dal/entity/drmlicense"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/drmkey"
+	"origadmin/application/origstudio/internal/data/entity/drmpolicy"
+	"origadmin/application/origstudio/internal/data/entity/drmlicense"
 	"origadmin/application/origstudio/internal/enterprise/media/drm/biz"
 	"origadmin/application/origstudio/internal/enterprise/media/drm/dto"
 )

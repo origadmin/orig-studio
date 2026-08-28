@@ -24,7 +24,7 @@ import (
 	pb "origadmin/application/origstudio/api/gen/v1/upload"
 	"origadmin/application/origstudio/internal/conf"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	contentdal "origadmin/application/origstudio/internal/features/content/dal"
 	"origadmin/application/origstudio/internal/features/media/biz"

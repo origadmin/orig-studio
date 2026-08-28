@@ -7,12 +7,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/order"
-	entityPayment "origadmin/application/origstudio/internal/dal/entity/payment"
-	"origadmin/application/origstudio/internal/dal/entity/subscriptionplan"
-	"origadmin/application/origstudio/internal/dal/entity/wallet"
-	"origadmin/application/origstudio/internal/dal/entity/wallettransaction"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/order"
+	entityPayment "origadmin/application/origstudio/internal/data/entity/payment"
+	"origadmin/application/origstudio/internal/data/entity/subscriptionplan"
+	"origadmin/application/origstudio/internal/data/entity/wallet"
+	"origadmin/application/origstudio/internal/data/entity/wallettransaction"
 	"origadmin/application/origstudio/internal/enterprise/billing/payment/dto"
 )
 

@@ -18,9 +18,9 @@ import (
 
 	media "origadmin/application/origstudio/api/gen/v1/media"
 	types "origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/dal/entity"
-	emedia "origadmin/application/origstudio/internal/dal/entity/media"
-	"origadmin/application/origstudio/internal/dal/entity/order"
+	"origadmin/application/origstudio/internal/data/entity"
+	emedia "origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/order"
 	"origadmin/application/origstudio/internal/features/system/dal"
 )
 

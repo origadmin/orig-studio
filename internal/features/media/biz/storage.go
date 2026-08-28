@@ -9,7 +9,7 @@ import (
 	"io"
 	"time"
 
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 // Storage defines the interface for media storage operations.

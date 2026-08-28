@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/media"
 	"origadmin/application/origstudio/internal/pkg/idutil"
 
 	"entgo.io/ent/dialect/sql"

@@ -16,7 +16,7 @@ import (
 
 	"github.com/origadmin/runtime/log"
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/frontend"
 	"origadmin/application/origstudio/internal/infra/auth"
 	http2 "origadmin/application/origstudio/internal/pkg/http"

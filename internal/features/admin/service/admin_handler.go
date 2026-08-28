@@ -22,7 +22,7 @@ import (
 	types "origadmin/application/origstudio/api/gen/v1/types"
 	http2 "origadmin/application/origstudio/internal/pkg/http"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/server"

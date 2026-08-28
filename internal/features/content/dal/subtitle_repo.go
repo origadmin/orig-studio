@@ -3,8 +3,8 @@ package dal
 import (
 	"context"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/subtitle"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/subtitle"
 )
 
 // SubtitleItem is the DAL-level subtitle record (mirrors the ent entity).

@@ -24,7 +24,7 @@ import (
 
 	mediav1 "origadmin/application/origstudio/api/gen/v1/media"
 	types "origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/infra/auth"
 	systembiz "origadmin/application/origstudio/internal/features/system/biz"

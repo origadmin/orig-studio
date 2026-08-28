@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/setting"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/setting"
 	systemdto "origadmin/application/origstudio/internal/features/system/dto"
 )
 

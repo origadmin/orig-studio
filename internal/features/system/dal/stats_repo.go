@@ -11,17 +11,17 @@ import (
 	"strconv"
 	"time"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/category"
-	"origadmin/application/origstudio/internal/dal/entity/channel"
-	"origadmin/application/origstudio/internal/dal/entity/comment"
-	"origadmin/application/origstudio/internal/dal/entity/encodingtask"
-	"origadmin/application/origstudio/internal/dal/entity/media"
-	"origadmin/application/origstudio/internal/dal/entity/order"
-	"origadmin/application/origstudio/internal/dal/entity/playlist"
-	"origadmin/application/origstudio/internal/dal/entity/subscription"
-	"origadmin/application/origstudio/internal/dal/entity/tag"
-	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/category"
+	"origadmin/application/origstudio/internal/data/entity/channel"
+	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/data/entity/encodingtask"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/order"
+	"origadmin/application/origstudio/internal/data/entity/playlist"
+	"origadmin/application/origstudio/internal/data/entity/subscription"
+	"origadmin/application/origstudio/internal/data/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity/user"
 )
 
 // StatsRepo provides statistics for dashboard and system

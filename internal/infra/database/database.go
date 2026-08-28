@@ -16,8 +16,8 @@ import (
 	"github.com/origadmin/runtime/log"
 
 	config "origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/migrate"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/migrate"
 	repotypes "origadmin/application/origstudio/internal/domain/types"
 	contentdal "origadmin/application/origstudio/internal/features/content/dal"
 	mediadal "origadmin/application/origstudio/internal/features/media/dal"

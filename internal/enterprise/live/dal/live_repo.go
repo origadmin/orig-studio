@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/liveroom"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/liveroom"
 	"origadmin/application/origstudio/internal/enterprise/live/biz"
 	"origadmin/application/origstudio/internal/enterprise/live/dto"
 )

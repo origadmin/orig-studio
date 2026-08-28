@@ -3,8 +3,8 @@ package dal
 import (
 	"context"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/media"
 )
 
 // MediaByToken resolves a media row by short_token (subtitle owner/id checks, BUG-186).

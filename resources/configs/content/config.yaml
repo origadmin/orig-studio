@@ -1,0 +1,46 @@
+name: origadmin.service.v1.content
+version: v1.0.0
+
+metadata:
+  id: content-001
+  env: dev
+
+data:
+  databases:
+    default:
+      name: "${DATABASE_NAME:origcms}"
+      dialect: "${DATABASE_DIALECT:sqlite3}"
+      source: "${DATABASE_SOURCE:data/origstudio.db?_fk=1}"
+  caches:
+    default:
+      driver: noop
+
+servers:
+  configs:
+    - name: content
+      protocol: http
+      http:
+        addr: "${CONTENT_HTTP_ADDR::8003}"
+        timeout:
+          seconds: 10
+    - name: content
+      protocol: grpc
+      grpc:
+        addr: "${CONTENT_GRPC_ADDR::9003}"
+        timeout:
+          seconds: 10
+
+# JWT configuration — MUST match the gateway and other microservices.
+# Uses conf.Config YAML structure (same as resources/configs/server/bootstrap.yaml).
+security:
+  authn:
+    configs:
+      - type: jwt
+        jwt:
+          signing_key: "${JWT_SIGNING_KEY:origstudio-secret-key-change-in-production}"
+          signing_method: "${JWT_SIGNING_METHOD:HS256}"
+          access_token_ttl: "${JWT_ACCESS_TOKEN_TTL:3600s}"
+          refresh_token_ttl: "${JWT_REFRESH_TOKEN_TTL:7200s}"
+
+logger:
+  level: "${LOG_LEVEL:debug}"

@@ -12,7 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/enterprise"
 	biz5 "origadmin/application/origstudio/internal/features/admin/biz"
 	dal5 "origadmin/application/origstudio/internal/features/admin/dal"

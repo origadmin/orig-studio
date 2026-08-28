@@ -11,7 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/oklog/ulid/v2"
 
-	"origadmin/application/origstudio/internal/dal/entity/schema"
+	"origadmin/application/origstudio/internal/data/entity/schema"
 	"origadmin/application/origstudio/internal/enterprise/audit/dto"
 )
 

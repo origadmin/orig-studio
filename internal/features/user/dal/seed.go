@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"origadmin/application/origstudio/internal/pkg/idutil"
 
 	"github.com/origadmin/runtime/log"

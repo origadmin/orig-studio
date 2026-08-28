@@ -1,0 +1,5 @@
+sources:
+  - file:
+      path: config.yaml
+    type: file
+  - type: env

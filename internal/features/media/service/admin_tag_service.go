@@ -10,8 +10,8 @@ import (
 	media "origadmin/application/origstudio/api/gen/v1/media"
 	"origadmin/application/origstudio/api/gen/v1/types"
 	repotypes "origadmin/application/origstudio/internal/domain/types"
-	"origadmin/application/origstudio/internal/dal/convpb"
-	"origadmin/application/origstudio/internal/dal/entity/tag"
+	"origadmin/application/origstudio/internal/data/convpb"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )

@@ -9,11 +9,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/groupmember"
-	"origadmin/application/origstudio/internal/dal/entity/notification"
-	"origadmin/application/origstudio/internal/dal/entity/permissiongroup"
-	"origadmin/application/origstudio/internal/dal/entity/user"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/groupmember"
+	"origadmin/application/origstudio/internal/data/entity/notification"
+	"origadmin/application/origstudio/internal/data/entity/permissiongroup"
+	"origadmin/application/origstudio/internal/data/entity/user"
 	"origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/features/content/biz"
 )

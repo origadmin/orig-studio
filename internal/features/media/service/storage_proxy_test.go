@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/require"

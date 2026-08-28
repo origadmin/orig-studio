@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	uploadv1 "origadmin/application/origstudio/api/gen/v1/upload"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/infra/auth"
 	"origadmin/application/origstudio/internal/pkg/hashtag"

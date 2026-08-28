@@ -14,7 +14,7 @@ import (
 
 	pb "origadmin/application/origstudio/api/gen/v1/media"
 	"origadmin/application/origstudio/internal/infra/auth"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	"origadmin/application/origstudio/internal/features/media/biz"
 	"origadmin/application/origstudio/internal/pkg/hashtag"
 	"origadmin/application/origstudio/internal/domain/types"

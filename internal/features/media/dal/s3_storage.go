@@ -22,7 +22,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 )
 
 var s3PublicURL = func() string {

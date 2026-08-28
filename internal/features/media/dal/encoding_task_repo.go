@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/encodingtask"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/encodingtask"
+	"origadmin/application/origstudio/internal/data/enums"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

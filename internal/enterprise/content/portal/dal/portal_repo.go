@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/media"
-	"origadmin/application/origstudio/internal/dal/entity/portalbanner"
-	"origadmin/application/origstudio/internal/dal/entity/portalcustompage"
-	"origadmin/application/origstudio/internal/dal/entity/portalnavitem"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/media"
+	"origadmin/application/origstudio/internal/data/entity/portalbanner"
+	"origadmin/application/origstudio/internal/data/entity/portalcustompage"
+	"origadmin/application/origstudio/internal/data/entity/portalnavitem"
 	"origadmin/application/origstudio/internal/enterprise/content/portal/biz"
 	"origadmin/application/origstudio/internal/enterprise/content/portal/dto"
 )

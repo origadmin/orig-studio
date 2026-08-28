@@ -4,9 +4,9 @@ import (
 	"context"
 	"log/slog"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/category"
-	"origadmin/application/origstudio/internal/dal/entity/tag"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/category"
+	"origadmin/application/origstudio/internal/data/entity/tag"
 )
 
 // catSpec describes a category to seed: a module root (ParentID nil) or a

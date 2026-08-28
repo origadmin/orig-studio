@@ -7,11 +7,11 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/ad"
-	"origadmin/application/origstudio/internal/dal/entity/adclicklog"
-	"origadmin/application/origstudio/internal/dal/entity/adcreative"
-	"origadmin/application/origstudio/internal/dal/entity/adplacement"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/ad"
+	"origadmin/application/origstudio/internal/data/entity/adclicklog"
+	"origadmin/application/origstudio/internal/data/entity/adcreative"
+	"origadmin/application/origstudio/internal/data/entity/adplacement"
 	"origadmin/application/origstudio/internal/enterprise/media/ad/biz"
 	"origadmin/application/origstudio/internal/enterprise/media/ad/dto"
 )

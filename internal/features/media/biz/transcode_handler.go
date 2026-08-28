@@ -20,7 +20,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 	"origadmin/application/origstudio/internal/infra/pubsub"

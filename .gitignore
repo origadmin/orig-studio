@@ -160,3 +160,6 @@ criptssafe_rm_aliases.ps1
 server
 server.log
 data/
+
+# editor/backup artifacts
+*~

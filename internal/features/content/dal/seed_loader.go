@@ -5,16 +5,12 @@
 package dal
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
 	"regexp"
 
 	"github.com/goccy/go-yaml"
 )
-
-//go:embed seeddata/taxonomy.yaml
-var defaultTaxonomyYAML []byte
 
 // taxonomySpec is the top-level taxonomy.yaml document.
 type taxonomySpec struct {
@@ -48,15 +44,21 @@ type tagSpec struct {
 // (^[a-z0-9_-]+$). A non-ASCII slug fails at startup, not at runtime.
 var slugRe = regexp.MustCompile(`^[a-z0-9_-]+$`)
 
-// loadTaxonomy reads the runtime override resources/configs/content/taxonomy.yaml
-// when present (Dockerfile.runtime copies resources/ to /app/resources/, cwd=/app),
-// else falls back to the embedded default (§3.2).
+// loadTaxonomy reads the project-level taxonomy source
+// resources/configs/content/taxonomy.yaml. It is the ONLY copy of this data
+// in the tree — there is deliberately no embedded duplicate in the source
+// (a second copy would be a second source of truth). Deployments receive it
+// via resources/ (Dockerfile.runtime copies resources/ to /app/resources/,
+// cwd=/app); operators may edit or replace the file in a deployment to apply
+// their own taxonomy. Fail fast when missing: seeding is a startup
+// requirement, not an optional feature.
 func loadTaxonomy() ([]byte, error) {
-	const runtimePath = "resources/configs/content/taxonomy.yaml"
-	if b, err := os.ReadFile(runtimePath); err == nil {
-		return b, nil
+	const sourcePath = "resources/configs/content/taxonomy.yaml"
+	b, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return nil, fmt.Errorf("taxonomy source %s not found (run from repo root, or deploy with resources/ shipped): %w", sourcePath, err)
 	}
-	return defaultTaxonomyYAML, nil
+	return b, nil
 }
 
 // parseTaxonomy validates and parses taxonomy YAML into specs.

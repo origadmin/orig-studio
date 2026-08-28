@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/comment"
-	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/comment"
+	"origadmin/application/origstudio/internal/data/entity/media"
 	"origadmin/application/origstudio/internal/features/content/dto"
 )
 

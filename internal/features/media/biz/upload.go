@@ -30,7 +30,7 @@ import (
 
 	"origadmin/application/origstudio/api/gen/v1/types"
 	"origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 	"origadmin/application/origstudio/internal/infra/pubsub"
 	"origadmin/application/origstudio/internal/features/media/dto"

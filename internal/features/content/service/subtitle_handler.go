@@ -11,7 +11,7 @@ import (
 	"origadmin/application/origstudio/internal/conf"
 	contentbiz "origadmin/application/origstudio/internal/features/content/biz"
 	contentdal "origadmin/application/origstudio/internal/features/content/dal"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	mediadal "origadmin/application/origstudio/internal/features/media/dal"
 	"origadmin/application/origstudio/internal/infra/auth"
 	http2 "origadmin/application/origstudio/internal/pkg/http"

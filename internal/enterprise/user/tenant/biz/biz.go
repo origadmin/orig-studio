@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	tenantpred "origadmin/application/origstudio/internal/dal/entity/tenant"
+	"origadmin/application/origstudio/internal/data/entity"
+	tenantpred "origadmin/application/origstudio/internal/data/entity/tenant"
 	tenantctx "origadmin/application/origstudio/internal/infra/tenant"
 	"origadmin/application/origstudio/internal/enterprise/user/tenant/dto"
 )

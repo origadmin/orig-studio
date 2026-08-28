@@ -11,7 +11,7 @@ package mock
 
 import (
 	context "context"
-	enums "origadmin/application/origstudio/internal/dal/enums"
+	enums "origadmin/application/origstudio/internal/data/enums"
 	dto "origadmin/application/origstudio/internal/features/media/dto"
 	reflect "reflect"
 	time "time"

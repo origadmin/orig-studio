@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"origadmin/application/origstudio/api/gen/v1/types"
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

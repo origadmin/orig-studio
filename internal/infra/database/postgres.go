@@ -13,7 +13,7 @@ import (
 	atlasmigrate "ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect"
 	dbschema "entgo.io/ent/dialect/sql/schema"
-	"origadmin/application/origstudio/internal/dal/entity/migrate"
+	"origadmin/application/origstudio/internal/data/entity/migrate"
 
 	"github.com/origadmin/runtime/log"
 )

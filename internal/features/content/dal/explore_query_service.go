@@ -9,8 +9,8 @@ import (
 	"context"
 	"fmt"
 
-	"origadmin/application/origstudio/internal/dal/entity"
-	"origadmin/application/origstudio/internal/dal/entity/media"
+	"origadmin/application/origstudio/internal/data/entity"
+	"origadmin/application/origstudio/internal/data/entity/media"
 	"origadmin/application/origstudio/internal/features/media/dto"
 )
 

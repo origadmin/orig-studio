@@ -12,7 +12,7 @@ import (
 	"github.com/origadmin/runtime/log"
 
 	config "origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	"origadmin/application/origstudio/internal/infra/database"
 )
 

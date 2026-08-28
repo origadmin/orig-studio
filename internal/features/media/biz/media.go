@@ -19,7 +19,7 @@ import (
 	"github.com/origadmin/runtime/errors"
 
 	"origadmin/application/origstudio/api/gen/v1/types" // Import the generated Media type
-	"origadmin/application/origstudio/internal/dal/enums"
+	"origadmin/application/origstudio/internal/data/enums"
 	"origadmin/application/origstudio/internal/features/media/ffmpeg"
 	repotypes "origadmin/application/origstudio/internal/domain/types"
 	"origadmin/application/origstudio/internal/infra/pubsub"

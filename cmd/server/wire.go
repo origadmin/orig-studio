@@ -12,7 +12,7 @@ import (
 	_ "github.com/sqlite3ent/sqlite3"
 
 	config "origadmin/application/origstudio/internal/conf"
-	"origadmin/application/origstudio/internal/dal/entity"
+	"origadmin/application/origstudio/internal/data/entity"
 	adminservice "origadmin/application/origstudio/internal/features/admin/service"
 	authservice "origadmin/application/origstudio/internal/features/auth/service"
 	contentservice "origadmin/application/origstudio/internal/features/content/service"
