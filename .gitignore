@@ -163,3 +163,7 @@ data/
 
 # editor/backup artifacts
 *~
+
+
+# git-filter-repo temporary working directory (transient, never commit)
+.git-rewrite/
