@@ -241,13 +241,11 @@ func (h *AdminHandler) RegisterRoutes(r http2.Router) {
 		}
 
 		// ================================
-		// 9. Notification Management (Admin)
+		// 9. Notification Management (Admin) — REMOVED. NotificationHandler
+		// (content) owns /admin/notifications (gateway proxies it to content;
+		// frontend notification.ts matches its routes). Duplicate registration
+		// panicked the monolith (cmd/server).
 		// ================================
-		notifications := admin.Group("/notifications")
-		{
-			notifications.GET("", server.WithAdminCtx(h.jwt, h.adminListNotifications()))
-			notifications.POST("/batch", server.WithAdminAndPermCtx(h.jwt, h.permChecker, "system:config", h.adminBatchCreateNotifications()))
-		}
 	}
 }
 
@@ -1627,62 +1625,9 @@ func (h *AdminHandler) adminUpdateUserStatus() http2.HandlerFunc {
 	}
 }
 
-// --- Admin Notification Handlers ---
-
-func (h *AdminHandler) adminListNotifications() http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		if h.notificationUC == nil {
-			return server.FailCtx(ctx, server.ErrInternal, "notification service not available")
-		}
-
-		page, _ := strconv.Atoi(ctx.QueryVarDefault("page", "1"))
-		pageSize, _ := strconv.Atoi(ctx.QueryVarDefault("page_size", "20"))
-		page, pageSize = repotypes.NormalizeHTTPPagination(page, pageSize)
-
-		items, total, err := h.notificationUC.ListAllNotifications(ctx, page, pageSize)
-		if err != nil {
-			return server.FailCtx(ctx, server.ErrInternal, err.Error())
-		}
-
-		server.PageCtx(ctx, items, int64(total), page, pageSize)
-		return nil
-	}
-}
-
-func (h *AdminHandler) adminBatchCreateNotifications() http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		if h.notificationUC == nil {
-			return server.FailCtx(ctx, server.ErrInternal, "notification service not available")
-		}
-
-		var input struct {
-			UserIDs []string `json:"user_ids" binding:"required,min=1"`
-			Action  string   `json:"action" binding:"required,max=30"`
-			Notify  bool     `json:"notify"`
-			Method  string   `json:"method"`
-			Title   string   `json:"title" binding:"required,max=200"`
-			Body    string   `json:"body" binding:"required"`
-		}
-		if err := ctx.BindJSON(&input); err != nil {
-			return server.FailCtx(ctx, server.ErrBadRequest, err.Error())
-		}
-
-		n := &contentbiz.Notification{
-			Action: input.Action,
-			Notify: input.Notify,
-			Method: input.Method,
-			Title:  input.Title,
-			Body:   input.Body,
-		}
-
-		created, err := h.notificationUC.BatchCreateNotifications(ctx, input.UserIDs, n)
-		if err != nil {
-			return server.FailCtx(ctx, server.ErrInternal, err.Error())
-		}
-
-		return server.OKCtx(ctx, map[string]any{"created": len(created), "total": len(input.UserIDs)})
-	}
-}
+// --- Admin Notification Handlers removed — NotificationHandler (content)
+// owns /admin/notifications; these AdminHandler duplicates caused a route
+// collision panic in the monolith (cmd/server). ---
 
 // formatDuration formats a time.Duration into a human-readable string.
 func formatDuration(d time.Duration) string {

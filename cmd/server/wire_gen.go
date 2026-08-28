@@ -157,6 +157,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, func(), err
 	adminTagHandler := service4.NewAdminTagHandler(tagService, manager)
 	stubHandler := enterprise.NewStubHandler(manager, mediaUseCase, storagePaths, logger)
 	spriteHandler := enterprise.NewSpriteHandler(mediaUseCase, storagePaths, manager, logger)
+	subtitleHandler := service3.NewSubtitleHandler(manager, data, storagePaths, logger)
 	emailUseCase := biz.NewEmailUseCase(settingUseCase)
 	systemHandler := service5.NewSystemHandler(manager, statsRepo, settingUseCase, emailUseCase)
 	featureFlagHandler := service5.NewFeatureFlagHandler(featureFlagUseCase)
@@ -193,6 +194,7 @@ func wireApp(cfg *conf.Config, logger log.Logger) (*AppDependencies, func(), err
 		AdminTagHandler:          adminTagHandler,
 		StubHandler:              stubHandler,
 		SpriteHandler:            spriteHandler,
+		SubtitleHandler:          subtitleHandler,
 		SystemHandler:            systemHandler,
 		FeatureFlagHandler:       featureFlagHandler,
 		RateLimiter:              rateLimiter,
@@ -241,6 +243,7 @@ type AppDependencies struct {
 	AdminTagHandler          *service4.AdminTagHandler
 	StubHandler              *service3.StubHandler
 	SpriteHandler            *service2.SpriteHandler
+	SubtitleHandler          *service3.SubtitleHandler
 	SystemHandler            *service5.SystemHandler
 	FeatureFlagHandler       *service5.FeatureFlagHandler
 	RateLimiter              *middleware.RateLimiter

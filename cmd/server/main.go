@@ -17,7 +17,7 @@ var deps *AppDependencies
 
 var (
 	Name    = "origcms.server"
-	Version = "v1.1.2"
+Version = "v1.1.2"
 	envName = ".server"
 	flagconf string
 )
@@ -99,6 +99,7 @@ func main() {
 			deps.AdminTagHandler,
 			deps.StubHandler,
 			deps.SpriteHandler,
+			deps.SubtitleHandler,
 			deps.SystemHandler,
 			deps.FeatureFlagHandler,
 		},

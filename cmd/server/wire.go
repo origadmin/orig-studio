@@ -65,6 +65,7 @@ type AppDependencies struct {
 	AdminTagHandler          *adminservice.AdminTagHandler
 	StubHandler              *contentservice.StubHandler
 	SpriteHandler            *mediaservice.SpriteHandler
+	SubtitleHandler          *contentservice.SubtitleHandler
 	SystemHandler            *systemservice.SystemHandler
 	FeatureFlagHandler       *systemservice.FeatureFlagHandler
 	RateLimiter              *middleware.RateLimiter
