@@ -8,11 +8,14 @@
       1. subject must be English (no CJK)
       2. subject must match <type>(<scope>): <subject>
       3. subject length <= 100
-      4. body must be English too -- CJK is only tolerated inside a file path,
-         because paths must keep pointing at the real file on disk
+      4. body must be English too -- no CJK anywhere, no exceptions
 
     Why rule 4 exists: the previous version only inspected the first line,
     which let 43 commits accumulate Chinese inside their bodies.
+
+    A file-path exemption used to exist here because some docs still had
+    Chinese names. Those were renamed (see path-map.json), so the exemption
+    is gone: Chinese file names are treated as a defect, not a tolerated case.
 #>
 param(
     [Parameter(Mandatory = $true)]
@@ -26,8 +29,6 @@ if ($null -eq $commitMessage) { $commitMessage = "" }
 
 # CJK ranges: Han, extension A, compatibility, kana, hangul
 $Cjk = '[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]'
-# A file path may legitimately contain Chinese; translating it breaks the link.
-$Path = '(?:[\w\u4e00-\u9fff.\-]+/)*[\w\u4e00-\u9fff.\-]+\.(?:md|ts|tsx|js|jsx|go|json|yml|yaml|proto|sql|sh|ps1|html|css)'
 $Conventional = '^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([a-z0-9_.\/-]+\))?: .+'
 $Revert = '^Revert ".+"'
 
@@ -62,11 +63,10 @@ for ($i = 1; $i -lt $lines.Count; $i++) {
     $line = $lines[$i]
     # Skip comment lines; git strips them before the commit is stored.
     if ($line.StartsWith("#")) { continue }
-    $stripped = $line -replace $Path, ''
-    if ($stripped -match $Cjk) {
+    if ($line -match $Cjk) {
         $preview = $line.Trim()
         if ($preview.Length -gt 90) { $preview = $preview.Substring(0, 90) + "..." }
-        $errors += "BODY MUST BE ENGLISH: CJK outside a file path on line $($i + 1).`n   Found: `"$preview`"`n   Chinese is tolerated only inside file paths, which must keep their real names."
+        $errors += "BODY MUST BE ENGLISH: CJK characters on line $($i + 1).`n   Found: `"$preview`"`n   No exceptions: rename any Chinese-named file instead of quoting it in Chinese."
         break
     }
 }
