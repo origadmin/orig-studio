@@ -129,14 +129,10 @@ func (h *ChannelHandler) RegisterRoutes(r http2.Router) {
 	}
 
 	// ================================
-	// Admin channel list — BUG-237: media-edit channel selector needs a real
-	// data source (media service AdminChannelService was an empty stub).
+	// Admin channel list: REMOVED. BUG-237 stopgap — AdminHandler now owns
+	// GET /admin/channels (full CRUD); duplicate registration panicked the
+	// monolith (cmd/server) with "handlers are already registered".
 	// ================================
-	adminChannels := r.Group("/admin/channels")
-	adminChannels.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
-	{
-		adminChannels.GET("", h.AdminListChannels())
-	}
 
 	// ================================
 	// Subscription feed routes (top-level, NOT under /channels)
@@ -235,37 +231,8 @@ func (h *ChannelHandler) ListChannels() http2.HandlerFunc {
 	}
 }
 
-// AdminListChannels — BUG-237: admin-facing channel list for the media-edit
-// channel selector. Admin-only (middleware), reads real channel data (same
-// use case as the portal /channels endpoint), supports page/page_size/limit.
-func (h *ChannelHandler) AdminListChannels() http2.HandlerFunc {
-	return func(ctx http2.Context) error {
-		page, _ := strconv.Atoi(ctx.QueryVar("page"))
-		if page == 0 {
-			page = 1
-		}
-		limit, _ := strconv.Atoi(ctx.QueryVar("page_size"))
-		if limit == 0 {
-			limit, _ = strconv.Atoi(ctx.QueryVar("limit"))
-		}
-		if limit == 0 {
-			limit = 100
-		}
-		page, limit = repotypes.NormalizeHTTPPagination(page, limit)
-
-		items, total, err := h.uc.ListChannels(ctx.Request().Context(), page, limit)
-		if err != nil {
-			return server.FailCtx(ctx, server.ErrInternal, err.Error())
-		}
-		pbChannels := bizChannelsToProto(items)
-		return server.OKCtx(ctx, &pb.ListChannelsResponse{
-			Items:    pbChannels,
-			Total:    int32(total),
-			Page:     int32(page),
-			PageSize: int32(limit),
-		})
-	}
-}
+// AdminListChannels removed — dead code after the duplicate /admin/channels
+// registration was removed (AdminHandler owns that route; see RegisterRoutes).
 
 // CreateChannel creates a new channel for the authenticated user.
 func (h *ChannelHandler) CreateChannel() http2.HandlerFunc {

@@ -33,7 +33,10 @@ func (h *NotificationHandler) RegisterRoutes(r http2.Router) {
 	}
 
 	// Permission groups: content service owns the group data; the gateway proxies
-	// this path to content (the user-service PermissionService is a stub).
+	// this path to content (the user-service PermissionService is a stub, and
+	// auth's PermissionHandler is not wired into any deployment yet — its full
+	// CRUD is a future task). Keep this GET; it is the live implementation in
+	// BOTH microservice and monolith forms.
 	pgGroup := r.Group("/admin/permission-groups")
 	pgGroup.Use(server.JWTMiddlewareCtx(h.jwt), server.AdminMiddlewareCtx(h.jwt))
 	{

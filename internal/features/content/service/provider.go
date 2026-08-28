@@ -23,6 +23,7 @@ var ProviderSet = wire.NewSet(
 	NewExploreHandler,
 	NewPortalHandler,
 	NewAdHandler,
+	NewSubtitleHandler,
 )
 
 var MicroserviceProviderSet = wire.NewSet(

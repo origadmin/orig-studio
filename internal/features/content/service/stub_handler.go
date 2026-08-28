@@ -95,8 +95,9 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 		medias.GET("/:token/metadata/text-content", h.stubMediaMetadataTextContent())
 		medias.GET("/:token/metadata/scene-changes", h.stubMediaMetadataSceneChanges())
 
-		medias.GET("/:token/subtitles", h.subtitle.handleSubtitleList)
-		medias.POST("/:token/subtitles", server.WithJWTCtx(h.jwt, h.subtitle.handleSubtitleCreate))
+		// Subtitle routes removed — SubtitleHandler now registers them itself
+		// (it is wired into the monolith module list); duplicate registration
+		// panicked cmd/server with "handlers are already registered".
 
 		medias.GET("/:token/download", h.stubMediaDownload())
 		medias.GET("/:token/stream", h.stubMediaStream())
@@ -112,13 +113,8 @@ func (h *StubHandler) RegisterRoutes(r http2.Router) {
 	}
 
 	// ================================
-	// 7. Subtitle (root level) — BUG-186 real endpoints.
+	// 7. Subtitle (root level) — moved to SubtitleHandler.RegisterRoutes.
 	// ================================
-	subtitles := r.Group("/subtitles")
-	{
-		subtitles.DELETE("/:id", server.WithJWTCtx(h.jwt, h.subtitle.handleSubtitleDelete))
-		subtitles.GET("/languages", h.subtitle.handleSubtitleLanguages)
-	}
 
 	// ================================
 	// 8. Admin Sprite/Thumbnail regeneration (replaced by SpriteHandler)

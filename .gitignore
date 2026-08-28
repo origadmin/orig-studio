@@ -155,3 +155,8 @@ start-all.bat
 commit-msg-portal.txt
 rewrite-commits.py
 criptssafe_rm_aliases.ps1
+
+# build artifacts
+server
+server.log
+data/

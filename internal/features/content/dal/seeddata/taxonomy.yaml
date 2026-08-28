@@ -290,12 +290,12 @@ categories:
             color: "#E67E22"
             sequence: 2
             description: 搞笑 - Comedy
-          - name: 音乐
+          - name: 音乐节目
             slug: ent-music
             icon: sparkles
             color: "#E67E22"
             sequence: 3
-            description: 音乐 - Music
+            description: 音乐节目 - Music Programs (renamed from 音乐 to avoid UNIQUE(name) clash with the music module root)
       - name: 科技
         slug: tech
         icon: cpu
